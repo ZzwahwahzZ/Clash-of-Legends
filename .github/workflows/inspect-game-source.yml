@@ -1,0 +1,43 @@
+
+name: Inspect and Recover Clash of Legends
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Access repository
+        uses: actions/checkout@v4
+
+      - name: Inspect game files
+        shell: bash
+        run: |
+          echo "## Clash of Legends Repository Inspection" >> "$GITHUB_STEP_SUMMARY"
+
+          echo "### Repository files" >> "$GITHUB_STEP_SUMMARY"
+          find . -type f \
+            -not -path './.git/*' \
+            | sort >> "$GITHUB_STEP_SUMMARY"
+
+          COUNT=$(find . -type f -not -path './.git/*' | wc -l)
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Total files: $COUNT" >> "$GITHUB_STEP_SUMMARY"
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f "project.godot" ]; then
+            echo "Godot project root: FOUND" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Godot project root: NOT FOUND" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Recovery readiness" >> "$GITHUB_STEP_SUMMARY"
+          echo "Checking for available original project files and repository integration." >> "$GITHUB_STEP_SUMMARY"
+
+          echo "Inspection completed."
