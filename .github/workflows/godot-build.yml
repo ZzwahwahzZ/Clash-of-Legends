@@ -1,0 +1,77 @@
+
+name: Clash of Legends - Build and Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  godot-validation:
+    name: Godot 4.3 Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Godot
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.3.0
+          use-dotnet: false
+          include-templates: false
+
+      - name: Verify Godot
+        run: godot --version
+
+      - name: Import project
+        run: |
+          mkdir -p ci-logs
+          set -o pipefail
+          godot --headless --editor --path . --quit 2>&1 | tee ci-logs/import.log
+
+      - name: Run gameplay tests
+        run: |
+          set -o pipefail
+          godot --headless --path . --scene res://scenes/core/TestRunnerScene.tscn --quit-after 2 2>&1 | tee ci-logs/gameplay-tests.log
+          grep -Eq 'TEST RESULTS SUMMARY: .* \| 0 FAILED' ci-logs/gameplay-tests.log
+
+      - name: Run visual audit
+        run: |
+          set -o pipefail
+          godot --headless --path . --scene res://scenes/core/VisualAuditScene.tscn 2>&1 | tee ci-logs/visual-audit.log
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-validation-logs
+          path: ci-logs/
+          if-no-files-found: warn
+
+  studio-build:
+    name: React Studio Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Build studio
+        run: npm run build
