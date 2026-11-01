@@ -1,4 +1,3 @@
-
 name: TRELLIS Asset Pipeline
 
 on:
@@ -39,17 +38,22 @@ jobs:
       - name: Generate GLB and transfer to Hugging Face and GitHub
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HF_DATASET: ZzwahwahzZ/clash-of-legends-assets
           HF_SPACE_URL: https://microsoft-trellis-2.hf.space
           IMAGE_URL: https://images.99.com/conquer91e/2008/06/16/twcity2h6WqPRx15.jpg
           ASSET_NAME: ${{ inputs.asset_name }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_REF_NAME: ${{ github.ref_name }}
         run: |
           cat > pipeline.py <<'PY'
-          import os, json, uuid, time, re, pathlib, requests
+          import os
+          import json
+          import uuid
+          import re
+          import pathlib
+          import requests
+
           from huggingface_hub import HfApi
+          from PIL import Image
 
           BASE = os.environ["HF_SPACE_URL"].rstrip("/")
           TOKEN = os.environ["HF_TOKEN"]
@@ -62,75 +66,113 @@ jobs:
           S.headers.update(HEADERS)
           TIMEOUT = 1800
 
-          def check_response(r, label):
-              print(f"{label}: HTTP {r.status_code}")
-              r.raise_for_status()
-              return r
+          def check_response(response, label):
+              print(f"{label}: HTTP {response.status_code}")
+              response.raise_for_status()
+              return response
 
-          
+          def describe(value):
+              if value is None:
+                  return {"type": "NoneType", "is_none": True}
+              if isinstance(value, dict):
+                  return {
+                      "type": "dict",
+                      "keys": list(value.keys())[:30],
+                      "path_present": bool(value.get("path")),
+                      "url_present": bool(value.get("url")),
+                      "mime_type": value.get("mime_type"),
+                      "meta": value.get("meta")
+                  }
+              if isinstance(value, list):
+                  return {
+                      "type": "list",
+                      "length": len(value),
+                      "first_item": describe(value[0]) if value else None
+                  }
+              if isinstance(value, str):
+                  return {
+                      "type": "str",
+                      "length": len(value),
+                      "preview": value[:160]
+                  }
+              return {"type": type(value).__name__}
+
           def queue_call(fn_index, data, label):
-              request_payload = {
+              payload = {
                   "data": data,
                   "fn_index": fn_index,
                   "session_hash": SESSION
               }
               joined = S.post(
                   f"{BASE}/gradio_api/queue/join",
-                  json=request_payload,
+                  json=payload,
                   timeout=120
               )
               check_response(joined, f"Queue {label}")
+
               try:
                   join_info = joined.json()
               except ValueError:
                   join_info = {}
-              event_id = join_info.get("event_id")
-              print(f"Queued {label}; event_id={event_id or 'not returned'}; waiting for result...")
 
-              stream_params = {"session_hash": SESSION}
+              event_id = join_info.get("event_id")
+              print(f"Queued {label}; event_id={event_id or 'not returned'}")
+
+              params = {"session_hash": SESSION}
               if event_id:
-                  stream_params["event_id"] = event_id
+                  params["event_id"] = event_id
 
               response = S.get(
                   f"{BASE}/gradio_api/queue/data",
-                  params=stream_params,
+                  params=params,
                   stream=True,
                   timeout=(30, TIMEOUT)
               )
               check_response(response, f"Stream {label}")
 
-              sse_event = None
+              event_name = None
               data_lines = []
               recent_messages = []
 
-              def handle_message(event_name, message):
+              def handle_message(name, message):
                   msg_type = message.get("msg") if isinstance(message, dict) else None
                   recent_messages.append({
-                      "event": event_name,
+                      "event": name,
                       "msg": msg_type,
-                      "keys": list(message.keys()) if isinstance(message, dict) else type(message).__name__
+                      "keys": list(message.keys())[:20]
+                      if isinstance(message, dict)
+                      else type(message).__name__
                   })
-                  if len(recent_messages) > 8:
-                      del recent_messages[0]
+                  if len(recent_messages) > 10:
+                      recent_messages.pop(0)
 
-                  if event_name == "heartbeat" or msg_type == "heartbeat":
+                  if name == "heartbeat" or msg_type == "heartbeat":
                       return None
-                  if event_name in ("generating", "streaming") or msg_type in (
+
+                  if name in ("generating", "streaming") or msg_type in (
                       "process_starts", "process_generating", "process_streaming"
                   ):
-                      print(f"{label}: processing ({msg_type or event_name})...")
+                      print(f"{label}: processing...")
                       return None
 
                   failed = (
-                      event_name in ("error", "process_failed")
-                      or msg_type in ("process_failed", "unexpected_error", "server_stopped")
-                      or (msg_type == "process_completed" and message.get("success") is False)
+                      name in ("error", "process_failed")
+                      or msg_type in (
+                          "process_failed", "unexpected_error", "server_stopped"
+                      )
+                      or (
+                          msg_type == "process_completed"
+                          and message.get("success") is False
+                      )
                   )
                   if failed:
-                      raise RuntimeError(f"{label} failed: {json.dumps(message, default=str)[:4000]}")
+                      raise RuntimeError(
+                          f"{label} failed: "
+                          + json.dumps(message, default=str)[:4000]
+                      )
 
                   completed = (
-                      event_name in ("complete", "process_completed")
+                      name in ("complete", "process_completed")
                       or msg_type == "process_completed"
                   )
                   if completed:
@@ -140,8 +182,8 @@ jobs:
                           result = message["data"]
                       if result is None:
                           raise RuntimeError(
-                              f"{label}: completion received but output data is missing: "
-                              + json.dumps(message, default=str)[:4000]
+                              f"{label}: completion received without output data: "
+                              + json.dumps(message, default=str)[:3000]
                           )
                       print(f"{label}: completed")
                       return result
@@ -159,57 +201,63 @@ jobs:
                                   message = json.loads(raw_data)
                               except ValueError:
                                   recent_messages.append({
-                                      "event": sse_event,
-                                      "raw": raw_data[:500]
+                                      "event": event_name,
+                                      "invalid_json": raw_data[:300]
                                   })
+                                  event_name = None
                                   continue
-                              result = handle_message(sse_event, message)
+                              result = handle_message(event_name, message)
                               if result is not None:
                                   return result
-                          sse_event = None
+                          event_name = None
                           continue
-
                       if raw.startswith(":"):
                           continue
                       if raw.startswith("event:"):
-                          sse_event = raw[6:].strip()
+                          event_name = raw[6:].strip()
                       elif raw.startswith("data:"):
                           data_lines.append(raw[5:].lstrip())
 
                   if data_lines:
                       message = json.loads("\n".join(data_lines).strip())
-                      result = handle_message(sse_event, message)
+                      result = handle_message(event_name, message)
                       if result is not None:
                           return result
               finally:
                   response.close()
 
               raise RuntimeError(
-                  f"{label}: Gradio SSE stream closed before a recognized completion event. "
-                  f"Last messages: {json.dumps(recent_messages, default=str)}"
-            )
+                  f"{label}: stream closed before a recognized completion event. "
+                  f"Recent messages: {json.dumps(recent_messages, default=str)}"
+              )
+
           def find_glb(obj):
               found = []
-              def walk(x):
-                  if isinstance(x, dict):
-                      text = " ".join(str(x.get(k, "")) for k in
-                                      ("path", "url", "orig_name", "name"))
-                      if ".glb" in text.lower():
-                          found.append(x)
-                      for v in x.values():
-                          walk(v)
-                  elif isinstance(x, list):
-                      for v in x:
-                          walk(v)
-                  elif isinstance(x, str) and ".glb" in x.lower():
-                      found.append(x)
+
+              def walk(value):
+                  if isinstance(value, dict):
+                      text_value = " ".join(
+                          str(value.get(key, ""))
+                          for key in ("path", "url", "orig_name", "name")
+                      )
+                      if ".glb" in text_value.lower():
+                          found.append(value)
+                      for child in value.values():
+                          walk(child)
+                  elif isinstance(value, list):
+                      for child in value:
+                          walk(child)
+                  elif isinstance(value, str) and ".glb" in value.lower():
+                      found.append(value)
+
               walk(obj)
               return found
 
           def download_glb(candidate, destination):
               if isinstance(candidate, str):
-                  url = candidate if candidate.startswith("http") else (
-                      BASE + "/gradio_api/file=" + candidate.lstrip("/")
+                  url = (
+                      candidate if candidate.startswith("http")
+                      else BASE + "/gradio_api/file=" + candidate.lstrip("/")
                   )
               else:
                   url = candidate.get("url")
@@ -218,71 +266,70 @@ jobs:
                       url = BASE + url
                   if not url and path:
                       url = BASE + "/gradio_api/file=" + path.lstrip("/")
+
               if not url:
-                  raise RuntimeError(f"No downloadable URL in {candidate}")
-              r = requests.get(url, headers=HEADERS, timeout=300)
-              check_response(r, "Download GLB")
-              pathlib.Path(destination).write_bytes(r.content)
-              if len(r.content) < 12 or r.content[:4] != b"glTF":
                   raise RuntimeError(
-                      "Downloaded file is not a valid binary GLB (glTF magic missing)"
+                      "No downloadable URL in GLB output: "
+                      + json.dumps(describe(candidate), default=str)
                   )
-              print(f"GLB validated: {len(r.content)} bytes")
+
+              response = requests.get(url, headers=HEADERS, timeout=300)
+              check_response(response, "Download GLB")
+              pathlib.Path(destination).write_bytes(response.content)
+
+              if len(response.content) < 12 or response.content[:4] != b"glTF":
+                  raise RuntimeError("Downloaded file is not a valid binary GLB.")
+
+              print(f"GLB validated: {len(response.content)} bytes")
               return destination
 
           if not TOKEN:
-              raise RuntimeError("HF_TOKEN secret is missing")
+              raise RuntimeError("HF_TOKEN secret is missing.")
 
           print("Starting TRELLIS.2 asset pipeline")
           print("Session:", SESSION)
           print("Asset:", NAME)
 
-          # Start a single Gradio session.
           queue_call(2, [], "start_session")
 
-          # Download the selected Conquer Online reference image.
           image_response = requests.get(IMAGE_URL, timeout=90)
           check_response(image_response, "Reference image download")
           image_path = pathlib.Path("twin-city-reference.jpg")
           image_path.write_bytes(image_response.content)
 
-          from PIL import Image
-          with Image.open(image_path) as im:
-              im.verify()
+          with Image.open(image_path) as image:
+              image.verify()
 
-          # Upload the image to the TRELLIS Gradio session.
-          with image_path.open("rb") as f:
-              up = S.post(
+          with image_path.open("rb") as file:
+              upload_response = S.post(
                   f"{BASE}/gradio_api/upload",
-                  files=[("files", (image_path.name, f, "image/jpeg"))],
+                  files=[("files", (image_path.name, file, "image/jpeg"))],
                   timeout=180
               )
-          check_response(up, "TRELLIS image upload")
-          uploaded = up.json()
+          check_response(upload_response, "TRELLIS image upload")
+
+          uploaded = upload_response.json()
           if not uploaded:
-              raise RuntimeError("TRELLIS upload returned no file path")
-          image_file = uploaded[0]
+              raise RuntimeError("TRELLIS upload returned no file path.")
+
           image_data = {
-              "path": image_file,
+              "path": uploaded[0],
               "orig_name": image_path.name,
               "mime_type": "image/jpeg",
               "meta": {"_type": "gradio.FileData"}
           }
 
-          # Run the same preprocessing stage used by the Space UI.
           preprocessed = queue_call(4, [image_data], "preprocess_image")
           if not preprocessed or preprocessed[0] is None:
-              raise RuntimeError("Image preprocessing returned no image")
+              raise RuntimeError("Image preprocessing returned no image.")
           processed_image = preprocessed[0]
 
-          # Match the Space's random-seed helper and generation chain.
           seed_result = queue_call(5, [True, 0], "get_seed")
           if not seed_result:
-              raise RuntimeError("Seed helper returned no result")
+              raise RuntimeError("Seed helper returned no result.")
           seed = seed_result[0]
           queue_call(6, [], "generation preparation")
 
-          # /image_to_3d: exact input order from the inspected Space config.
           generation_data = [
               processed_image,
               seed,
@@ -291,32 +338,67 @@ jobs:
               7.5, 0.5, 12, 3.0,
               1.0, 0.0, 12, 3.0
           ]
-          generated = queue_call(7, generation_data, "image_to_3d")
-          if len(generated) < 1 or generated[0] is None:
-              raise RuntimeError("image_to_3d did not return model state")
-          model_state = generated[0]
-          print("Received generated model state from component 45")
 
-          # Run the UI's extraction preparation callback in the same session.
+          generated = queue_call(7, generation_data, "image_to_3d")
+
+          print("Generation output count:", len(generated))
+          for index, item in enumerate(generated):
+              print(
+                  f"Generation output[{index}]: "
+                  + json.dumps(describe(item), default=str)
+              )
+
+          # Inspector confirmed outputs [45, 37]:
+          # component 45 is model state; component 37 is preview.
+          if len(generated) < 2:
+              raise RuntimeError(
+                  "Unexpected image_to_3d output count. "
+                  f"Expected 2 outputs; received {len(generated)}."
+              )
+
+          model_state = generated[0]
+          if model_state is None:
+              raise RuntimeError(
+                  "image_to_3d completed but model state (component 45) "
+                  "is None. Preview summary: "
+                  + json.dumps(describe(generated[1]), default=str)
+                  + ". Extraction stopped safely; nothing was uploaded."
+              )
+
+          print(
+              "Model state received: "
+              + json.dumps(describe(model_state), default=str)
+          )
+
           queue_call(8, [], "GLB extraction preparation")
 
-          # /extract_glb: [state component 45, decimation, texture size].
           extracted = queue_call(
-              9, [model_state, 300000, 2048], "extract_glb"
+              9,
+              [model_state, 300000, 2048],
+              "extract_glb"
           )
+
+          print("Extraction output count:", len(extracted))
+          for index, item in enumerate(extracted):
+              print(
+                  f"Extraction output[{index}]: "
+                  + json.dumps(describe(item), default=str)
+              )
 
           candidates = find_glb(extracted)
           if not candidates:
               raise RuntimeError(
-                  "No .glb file was found in extract_glb outputs: "
-                  + json.dumps(extracted, default=str)[:4000]
+                  "No .glb file found in extract_glb outputs. "
+                  + json.dumps(
+                      [describe(item) for item in extracted],
+                      default=str
+                  )
               )
 
-          os.makedirs("generated-assets", exist_ok=True)
+          pathlib.Path("generated-assets").mkdir(exist_ok=True)
           glb_path = f"generated-assets/{NAME}.glb"
           download_glb(candidates[-1], glb_path)
 
-          # Upload the verified GLB to the Hugging Face Dataset.
           api = HfApi(token=TOKEN)
           api.upload_file(
               path_or_fileobj=glb_path,
@@ -327,13 +409,12 @@ jobs:
           )
           print("Uploaded GLB to Hugging Face Dataset:", DATASET)
 
-          # Copy the same verified file into the game repository.
           game_asset = pathlib.Path("assets/3d/trellis") / f"{NAME}.glb"
           game_asset.parent.mkdir(parents=True, exist_ok=True)
           game_asset.write_bytes(pathlib.Path(glb_path).read_bytes())
 
           if game_asset.read_bytes()[:4] != b"glTF":
-              raise RuntimeError("Repository copy failed GLB validation")
+              raise RuntimeError("Repository copy failed GLB validation.")
 
           print("Prepared game asset:", game_asset)
           PY
