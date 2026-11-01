@@ -1,0 +1,282 @@
+
+name: TRELLIS Asset Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      asset_name:
+        description: "Asset name"
+        required: true
+        default: "twin-city-reference"
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: trellis-asset-pipeline
+  cancel-in-progress: false
+
+jobs:
+  generate-and-transfer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout game repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests pillow huggingface_hub
+
+      - name: Generate GLB and transfer to Hugging Face and GitHub
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HF_DATASET: ZzwahwahzZ/clash-of-legends-assets
+          HF_SPACE_URL: https://microsoft-trellis-2.hf.space
+          IMAGE_URL: https://images.99.com/conquer91e/2008/06/16/twcity2h6WqPRx15.jpg
+          ASSET_NAME: ${{ inputs.asset_name }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+        run: |
+          cat > pipeline.py <<'PY'
+          import os, json, uuid, time, re, pathlib, requests
+          from huggingface_hub import HfApi
+
+          BASE = os.environ["HF_SPACE_URL"].rstrip("/")
+          TOKEN = os.environ["HF_TOKEN"]
+          DATASET = os.environ["HF_DATASET"]
+          IMAGE_URL = os.environ["IMAGE_URL"]
+          NAME = re.sub(r"[^a-zA-Z0-9_-]", "-", os.environ["ASSET_NAME"])
+          SESSION = str(uuid.uuid4())
+          HEADERS = {"Authorization": f"Bearer {TOKEN}"}
+          S = requests.Session()
+          S.headers.update(HEADERS)
+          TIMEOUT = 1800
+
+          def check_response(r, label):
+              print(f"{label}: HTTP {r.status_code}")
+              r.raise_for_status()
+              return r
+
+          def queue_call(fn_index, data, label):
+              payload = {
+                  "data": data,
+                  "fn_index": fn_index,
+                  "session_hash": SESSION
+              }
+              r = S.post(
+                  f"{BASE}/gradio_api/queue/join",
+                  json=payload,
+                  timeout=120
+              )
+              check_response(r, f"Queue {label}")
+              print(f"Queued {label}; waiting for result...")
+
+              r = S.get(
+                  f"{BASE}/gradio_api/queue/data",
+                  params={"session_hash": SESSION},
+                  stream=True,
+                  timeout=TIMEOUT
+              )
+              check_response(r, f"Stream {label}")
+
+              event = None
+              for raw in r.iter_lines(decode_unicode=True):
+                  if not raw:
+                      continue
+                  if raw.startswith("event:"):
+                      event = raw[6:].strip()
+                  elif raw.startswith("data:"):
+                      payload = json.loads(raw[5:].strip())
+                      if event == "heartbeat":
+                          continue
+                      if event == "generating":
+                          print(f"{label}: processing...")
+                      if event in ("complete", "error"):
+                          r.close()
+                          if event == "error":
+                              raise RuntimeError(
+                                  f"{label} failed: {payload}"
+                              )
+                          output = payload.get("output", {})
+                          result = output.get("data")
+                          if result is None:
+                              raise RuntimeError(
+                                  f"{label}: missing output data: {payload}"
+                              )
+                          print(f"{label}: completed")
+                          return result
+              raise RuntimeError(f"{label}: stream ended without completion")
+
+          def find_glb(obj):
+              found = []
+              def walk(x):
+                  if isinstance(x, dict):
+                      text = " ".join(str(x.get(k, "")) for k in
+                                      ("path", "url", "orig_name", "name"))
+                      if ".glb" in text.lower():
+                          found.append(x)
+                      for v in x.values():
+                          walk(v)
+                  elif isinstance(x, list):
+                      for v in x:
+                          walk(v)
+                  elif isinstance(x, str) and ".glb" in x.lower():
+                      found.append(x)
+              walk(obj)
+              return found
+
+          def download_glb(candidate, destination):
+              if isinstance(candidate, str):
+                  url = candidate if candidate.startswith("http") else (
+                      BASE + "/gradio_api/file=" + candidate.lstrip("/")
+                  )
+              else:
+                  url = candidate.get("url")
+                  path = candidate.get("path")
+                  if url and not url.startswith("http"):
+                      url = BASE + url
+                  if not url and path:
+                      url = BASE + "/gradio_api/file=" + path.lstrip("/")
+              if not url:
+                  raise RuntimeError(f"No downloadable URL in {candidate}")
+              r = requests.get(url, headers=HEADERS, timeout=300)
+              check_response(r, "Download GLB")
+              pathlib.Path(destination).write_bytes(r.content)
+              if len(r.content) < 12 or r.content[:4] != b"glTF":
+                  raise RuntimeError(
+                      "Downloaded file is not a valid binary GLB (glTF magic missing)"
+                  )
+              print(f"GLB validated: {len(r.content)} bytes")
+              return destination
+
+          if not TOKEN:
+              raise RuntimeError("HF_TOKEN secret is missing")
+
+          print("Starting TRELLIS.2 asset pipeline")
+          print("Session:", SESSION)
+          print("Asset:", NAME)
+
+          # Start a single Gradio session.
+          queue_call(2, [], "start_session")
+
+          # Download the selected Conquer Online reference image.
+          image_response = requests.get(IMAGE_URL, timeout=90)
+          check_response(image_response, "Reference image download")
+          image_path = pathlib.Path("twin-city-reference.jpg")
+          image_path.write_bytes(image_response.content)
+
+          from PIL import Image
+          with Image.open(image_path) as im:
+              im.verify()
+
+          # Upload the image to the TRELLIS Gradio session.
+          with image_path.open("rb") as f:
+              up = S.post(
+                  f"{BASE}/gradio_api/upload",
+                  files=[("files", (image_path.name, f, "image/jpeg"))],
+                  timeout=180
+              )
+          check_response(up, "TRELLIS image upload")
+          uploaded = up.json()
+          if not uploaded:
+              raise RuntimeError("TRELLIS upload returned no file path")
+          image_file = uploaded[0]
+          image_data = {
+              "path": image_file,
+              "orig_name": image_path.name,
+              "mime_type": "image/jpeg",
+              "meta": {"_type": "gradio.FileData"}
+          }
+
+          # Run the same preprocessing stage used by the Space UI.
+          preprocessed = queue_call(4, [image_data], "preprocess_image")
+          if not preprocessed or preprocessed[0] is None:
+              raise RuntimeError("Image preprocessing returned no image")
+          processed_image = preprocessed[0]
+
+          # Match the Space's random-seed helper and generation chain.
+          seed_result = queue_call(5, [True, 0], "get_seed")
+          if not seed_result:
+              raise RuntimeError("Seed helper returned no result")
+          seed = seed_result[0]
+          queue_call(6, [], "generation preparation")
+
+          # /image_to_3d: exact input order from the inspected Space config.
+          generation_data = [
+              processed_image,
+              seed,
+              "1024",
+              7.5, 0.7, 12, 5.0,
+              7.5, 0.5, 12, 3.0,
+              1.0, 0.0, 12, 3.0
+          ]
+          generated = queue_call(7, generation_data, "image_to_3d")
+          if len(generated) < 1 or generated[0] is None:
+              raise RuntimeError("image_to_3d did not return model state")
+          model_state = generated[0]
+          print("Received generated model state from component 45")
+
+          # Run the UI's extraction preparation callback in the same session.
+          queue_call(8, [], "GLB extraction preparation")
+
+          # /extract_glb: [state component 45, decimation, texture size].
+          extracted = queue_call(
+              9, [model_state, 300000, 2048], "extract_glb"
+          )
+
+          candidates = find_glb(extracted)
+          if not candidates:
+              raise RuntimeError(
+                  "No .glb file was found in extract_glb outputs: "
+                  + json.dumps(extracted, default=str)[:4000]
+              )
+
+          os.makedirs("generated-assets", exist_ok=True)
+          glb_path = f"generated-assets/{NAME}.glb"
+          download_glb(candidates[-1], glb_path)
+
+          # Upload the verified GLB to the Hugging Face Dataset.
+          api = HfApi(token=TOKEN)
+          api.upload_file(
+              path_or_fileobj=glb_path,
+              path_in_repo=f"assets/3d/{NAME}.glb",
+              repo_id=DATASET,
+              repo_type="dataset",
+              commit_message=f"Add generated 3D asset: {NAME}"
+          )
+          print("Uploaded GLB to Hugging Face Dataset:", DATASET)
+
+          # Copy the same verified file into the game repository.
+          game_asset = pathlib.Path("assets/3d/trellis") / f"{NAME}.glb"
+          game_asset.parent.mkdir(parents=True, exist_ok=True)
+          game_asset.write_bytes(pathlib.Path(glb_path).read_bytes())
+
+          if game_asset.read_bytes()[:4] != b"glTF":
+              raise RuntimeError("Repository copy failed GLB validation")
+
+          print("Prepared game asset:", game_asset)
+          PY
+
+          python pipeline.py
+
+      - name: Commit generated asset to game repository
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/3d/trellis/
+          if git diff --cached --quiet; then
+            echo "No generated asset changes to commit."
+            exit 1
+          fi
+          git commit -m "Add TRELLIS generated Twin City 3D asset"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
