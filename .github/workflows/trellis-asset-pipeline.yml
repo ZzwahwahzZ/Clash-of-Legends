@@ -356,19 +356,21 @@ jobs:
                   f"Expected 2 outputs; received {len(generated)}."
               )
 
+          # Gradio State outputs are session-backed. The queue response may
+          # serialize component 45 as null even though the server retains the
+          # actual state for this SESSION. Keep this exact SESSION for fn 9
+          # and send None as the State placeholder; Gradio resolves it server-side.
           model_state = generated[0]
           if model_state is None:
-              raise RuntimeError(
-                  "image_to_3d completed but model state (component 45) "
-                  "is None. Preview summary: "
-                  + json.dumps(describe(generated[1]), default=str)
-                  + ". Extraction stopped safely; nothing was uploaded."
+              print(
+                  "Generation returned null for gr.State component 45; "
+                  "using the same-session State placeholder for extraction."
               )
-
-          print(
-              "Model state received: "
-              + json.dumps(describe(model_state), default=str)
-          )
+          else:
+              print(
+                  "Model state was serialized in the response: "
+                  + json.dumps(describe(model_state), default=str)
+              )
 
           queue_call(8, [], "GLB extraction preparation")
 
