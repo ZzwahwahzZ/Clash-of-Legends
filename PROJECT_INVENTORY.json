@@ -1,0 +1,346 @@
+{
+  "total_files": 68,
+  "total_uncompressed_bytes": 451794,
+  "files": [
+    {
+      "path": ".env.example",
+      "size_bytes": 445,
+      "sha256": "b6d12c728de0aac8b0bc6239e53aa8088c1431bcb4f9a3d61e5e8a2df1c7c400"
+    },
+    {
+      "path": ".gitignore",
+      "size_bytes": 87,
+      "sha256": "4d891ddfed6754e70280e6780731173ea7aefba8f49a8c7d2e01e1504eda5b12"
+    },
+    {
+      "path": "DEVELOPMENT_LOG.md",
+      "size_bytes": 4130,
+      "sha256": "19fbfdfd51abdfb4e38330a18315501d1247c5ff1dde5b221e1e654246aad010"
+    },
+    {
+      "path": "GODOT_4_3_COMPATIBILITY_REPORT.md",
+      "size_bytes": 4063,
+      "sha256": "102383a533c2fe07c3dee60432c7d1ab84a8604689f96291c2bd177c2de2e111"
+    },
+    {
+      "path": "PROJECT_AUDIT.md",
+      "size_bytes": 6054,
+      "sha256": "0c8e7479eda746d102acdd96d6f814e4e6342f11aa4c34ccc2312faabb335f43"
+    },
+    {
+      "path": "PROJECT_INVENTORY.json",
+      "size_bytes": 11368,
+      "sha256": "6d89d52351ae103c069c3f988748820f1bdfdbdc8532dbf1b75e9ba02bcab02d"
+    },
+    {
+      "path": "PROJECT_INVENTORY.md",
+      "size_bytes": 8042,
+      "sha256": "ec07f0333740c3423eba8154e72e9acd420dab1b7467b890f626c9dcb1c07fd4"
+    },
+    {
+      "path": "REFERENCE_RESEARCH_SPECIFICATION.md",
+      "size_bytes": 4782,
+      "sha256": "27b208d8486e577e213ee1eaabfb0947b01fcf92e2a02577a62ffa20241cf77a"
+    },
+    {
+      "path": "RESOURCE_MANIFEST",
+      "size_bytes": 2773,
+      "sha256": "6e2c58bc4eda1e9eb9a1fdda78c200c68189b319c5b335727b5e75080b0c56d9"
+    },
+    {
+      "path": "RESOURCE_RECONCILIATION_REPORT.md",
+      "size_bytes": 3485,
+      "sha256": "0e43b997d2d2b6bbfd775cea38834c2852c593376c8b92cdb6d790a87faf232d"
+    },
+    {
+      "path": "SYSTEM_INTEGRATION_MATRIX.md",
+      "size_bytes": 3633,
+      "sha256": "aece8d9a0434bc4a7c75d89225a380788fdb3cc7c33d8c097a16501ba610495f"
+    },
+    {
+      "path": "TESTING_ACCEPTANCE_REPORT.md",
+      "size_bytes": 6474,
+      "sha256": "22bbd12d07bc986547f3d85d5b8dd0c358a121eb377d280acb4ac00141e641f8"
+    },
+    {
+      "path": "VISUAL_ACCEPTANCE_REPORT.md",
+      "size_bytes": 4725,
+      "sha256": "5d5c071e2952f66cd8a059e5e20113486a02b9203c9f7f874ca0665f8b7898ea"
+    },
+    {
+      "path": "assets/shaders/weapon_glow.gdshader",
+      "size_bytes": 832,
+      "sha256": "8ff59e5b203064f1d21e4fb35614168a5cbc013151105c9a01acd9cc29bf34e1"
+    },
+    {
+      "path": "bun.lock",
+      "size_bytes": 72805,
+      "sha256": "a58d7e264a8a011a62980774acc1fde984f443e1cb892025b8bca3e67466e65c"
+    },
+    {
+      "path": "export_presets.cfg",
+      "size_bytes": 1235,
+      "sha256": "9dfa1ee669547d44238e8bbab8391743c9ae96f0c80dc59791a790bf44963915"
+    },
+    {
+      "path": "index.html",
+      "size_bytes": 970,
+      "sha256": "5bed132cbaddd437804c1818fbb8e98475a31c9b65e2e5c87c998e8210dba575"
+    },
+    {
+      "path": "metadata.json",
+      "size_bytes": 355,
+      "sha256": "40bc80295ace1b116f76adb3d8813c42abb780885311083ff4113a6a6479f7fd"
+    },
+    {
+      "path": "package.json",
+      "size_bytes": 956,
+      "sha256": "a86a64d96e4e33c38f1d8c68b286c86472b0eb45a981121ed34407e3e8478443"
+    },
+    {
+      "path": "project.godot",
+      "size_bytes": 1554,
+      "sha256": "adb620c7ad9e7ba0b208050ee1140f4ec9f1385ba3326bde6764b32d0c2893ea"
+    },
+    {
+      "path": "public/assets/aistudio/Paste_October_31__2026_-_7_55PM_f0f10b8a",
+      "size_bytes": 47100,
+      "sha256": "f0f10b8a6b96392aa5ba96f88d6b9a04d73eef8e74b2e7ecea01ca1838df9134"
+    },
+    {
+      "path": "scenes/characters/Player.tscn",
+      "size_bytes": 6887,
+      "sha256": "a90f0b705aee4f87ee5ade0acf4017d6349d6d672acf4d5b541c5bfbc985ddde"
+    },
+    {
+      "path": "scenes/characters/SimulatedPlayer.tscn",
+      "size_bytes": 2973,
+      "sha256": "724f8d4771a3a35a0ec152239677ea2dd9838d18cc1fb2aab36a8b8901081896"
+    },
+    {
+      "path": "scenes/core/MainGame.tscn",
+      "size_bytes": 11168,
+      "sha256": "1e9bb8c9052f61452496133b889a2c6bcbb7a36c414762e93a2d4cd146f73a9b"
+    },
+    {
+      "path": "scenes/core/TestRunnerScene.tscn",
+      "size_bytes": 220,
+      "sha256": "9ea057ef2631034ceaf99f64a371b45a8ade7d9ac47eb76e55d0038f7fc69cf0"
+    },
+    {
+      "path": "scenes/core/VisualAuditScene.tscn",
+      "size_bytes": 230,
+      "sha256": "1e640a10026d5e6741416b2bebac971c6049dcdd589a965f92d956b522fcae95"
+    },
+    {
+      "path": "scenes/enemies/BossDragon.tscn",
+      "size_bytes": 5387,
+      "sha256": "2c2879ff243904a2bc61688e01afb2e780d63848c628c40efed78f5ba3e5e5ec"
+    },
+    {
+      "path": "scenes/enemies/MonsterBase.tscn",
+      "size_bytes": 1154,
+      "sha256": "ee6d26ca6cbcafcb8a8ffdbd5cd7387c535fc605cd5b9213980078a53e3fc3a4"
+    },
+    {
+      "path": "scenes/enemies/WildWolf.tscn",
+      "size_bytes": 4469,
+      "sha256": "fe7f83c8d435b71750521ef222979fa233017c1973622ea54f6df2c164e11481"
+    },
+    {
+      "path": "scenes/npcs/NPCBase.tscn",
+      "size_bytes": 3098,
+      "sha256": "7b12903429d5d3174d9e11a867712b3af96aa41017f2517971540d950f82b478"
+    },
+    {
+      "path": "scenes/ui/BlacksmithUI.tscn",
+      "size_bytes": 1574,
+      "sha256": "adec7f9e2bd7092f3dd7cd928e1c465fe567c7ff6e499fbbba594ee124602ce2"
+    },
+    {
+      "path": "scenes/ui/DialogueUI.tscn",
+      "size_bytes": 1279,
+      "sha256": "1f82980d7c716dc17b1f2bc2e7c6c7fb082e02c5879167085faaa13789d1ffa1"
+    },
+    {
+      "path": "scenes/ui/InventoryUI.tscn",
+      "size_bytes": 2129,
+      "sha256": "c4cb39311460346afaaf65026e9f059ae6531bcbeb4333e1f1a7aaea65c5994d"
+    },
+    {
+      "path": "scenes/ui/MainHUD.tscn",
+      "size_bytes": 8207,
+      "sha256": "266dbbd6b827e78fb7fcc664113e7e2babf911d4a86007c166c0e00e1f8bfc2b"
+    },
+    {
+      "path": "scenes/ui/SettingsUI.tscn",
+      "size_bytes": 2033,
+      "sha256": "df1e11da7d74324e33329b192032c3b24faf64b4c8a1e2b2c4f1b97f823a9400"
+    },
+    {
+      "path": "scenes/world/LootDrop3D.tscn",
+      "size_bytes": 1185,
+      "sha256": "4a0d7101c463c2184c01dfe29359175642722926a8059d18c8e5964c60382b57"
+    },
+    {
+      "path": "scripts/ai/SimulatedPlayer.gd",
+      "size_bytes": 1351,
+      "sha256": "e15badd7abfe17cbbc1d69ab76a5a0a0d586eb921c6d38895d2c3c9b00e9b510"
+    },
+    {
+      "path": "scripts/automation/AutoHuntManager.gd",
+      "size_bytes": 2759,
+      "sha256": "6d934721e6728bb7fdf1521e98b1ef91585733f51c38b4bcae01d720b06d34bc"
+    },
+    {
+      "path": "scripts/automation/AutoLootManager.gd",
+      "size_bytes": 1504,
+      "sha256": "9851fb743a4a761c57e42515e3e4c949ad555027a79e6cd7f6ac706d484b5960"
+    },
+    {
+      "path": "scripts/automation/QuestNavigationAgent.gd",
+      "size_bytes": 3932,
+      "sha256": "c672a0f8612bc7ad1dde214828d83950845f81f13908ffbfea1cf1bd777fdfa0"
+    },
+    {
+      "path": "scripts/combat/CombatEngine.gd",
+      "size_bytes": 5982,
+      "sha256": "5c3ea7c9a547991d9d39517b338d959eb500b656d715042f9911b163cf76c16d"
+    },
+    {
+      "path": "scripts/combat/LootDrop3D.gd",
+      "size_bytes": 2119,
+      "sha256": "b4bc3eb2918feb4a6b4526b83c663ec036721a5d1e2dd7f7c4f947c6f51299ee"
+    },
+    {
+      "path": "scripts/core/GameManager.gd",
+      "size_bytes": 5091,
+      "sha256": "056d0d3551f83f848a09c8bca0f724529cb7f87107cfa0866292938310d33fbf"
+    },
+    {
+      "path": "scripts/core/LocalSaveEngine.gd",
+      "size_bytes": 3307,
+      "sha256": "7e581ae9f86114460536dd52e1e3ec75e09a34ba4e24b69c65afa834a1c469c4"
+    },
+    {
+      "path": "scripts/core/TestRunner.gd",
+      "size_bytes": 5434,
+      "sha256": "f1e68c796a0887b35b6f038a17ee68291c9e777b7e6a9da9d67453bc0bc02cbc"
+    },
+    {
+      "path": "scripts/core/VisualAcceptanceAudit.gd",
+      "size_bytes": 6903,
+      "sha256": "0ba7adda729c9750f69b4d3a35a95bd462db07c91751a8dd9602d2b385eabdfe"
+    },
+    {
+      "path": "scripts/enemies/MonsterBase.gd",
+      "size_bytes": 8054,
+      "sha256": "434cb3a97d17390325d589cd1a0fb86065aa82ba8a2ff8020a98e6f173652efd"
+    },
+    {
+      "path": "scripts/npcs/NPCBase.gd",
+      "size_bytes": 3028,
+      "sha256": "791ec5bfce3b60c55b7a6c6a7fde90cb79d5a43cc6d523be64566b1efe9e4ce6"
+    },
+    {
+      "path": "scripts/player/FreeCamera3D.gd",
+      "size_bytes": 1668,
+      "sha256": "ce1e721f816191a9495882b85bf28297bee7695e9a8ae5cfbf6edee2e0901556"
+    },
+    {
+      "path": "scripts/player/PlayerController.gd",
+      "size_bytes": 8672,
+      "sha256": "699833fe6e740463033290f7e88d0235138563cbbdc03c19d5478bcd682ff446"
+    },
+    {
+      "path": "scripts/player/PlayerInventory.gd",
+      "size_bytes": 8193,
+      "sha256": "bdafc40383215a90f32d5ab367c97a2807409a1b079090f92c1fe50171020546"
+    },
+    {
+      "path": "scripts/ui/BlacksmithUI.gd",
+      "size_bytes": 3616,
+      "sha256": "fd56441aea77475802c8635d5c91c907a61641db946b3b5b239c05cef52402e8"
+    },
+    {
+      "path": "scripts/ui/DialogueUI.gd",
+      "size_bytes": 1177,
+      "sha256": "a22591f555ad1c6ff3b9b3102e4dba691217be1b02d940630d014bbd2ba98a22"
+    },
+    {
+      "path": "scripts/ui/InventoryUI.gd",
+      "size_bytes": 5101,
+      "sha256": "57cd93b66b13b32b59e83f91d87ffd64ac1bc2deecdd86b5e32ab1c0d0525334"
+    },
+    {
+      "path": "scripts/ui/MainHUDController.gd",
+      "size_bytes": 9558,
+      "sha256": "fc9ebc8460c017d78a19342a46a23ae55c4ddf14dd210775d8ed0bc0a7779625"
+    },
+    {
+      "path": "scripts/ui/SettingsUI.gd",
+      "size_bytes": 5380,
+      "sha256": "79d8c4cc86ee5c8e336c94d0ce746a9f89354e607b0d4e46ec1e704e07f0a41b"
+    },
+    {
+      "path": "scripts/ui/VirtualJoystickController.gd",
+      "size_bytes": 1702,
+      "sha256": "b15fbc4a65c9089479e3fd04c24f9929d62d79f279659ecc8b4d34dfc4001b37"
+    },
+    {
+      "path": "server.ts",
+      "size_bytes": 6249,
+      "sha256": "60b14a268cf7405e2dad94a13a57c9c57bbfc64a67634dc8581a6affc33b1339"
+    },
+    {
+      "path": "src/App.tsx",
+      "size_bytes": 15822,
+      "sha256": "0687d4cd14c6712ec38a1da3351b9da14699da64e966e90a088295d1862015e8"
+    },
+    {
+      "path": "src/components/BlacksmithModal.tsx",
+      "size_bytes": 9905,
+      "sha256": "799c3f27078ce1dccdf6f0f3c5ab15b261fa3e1b9ce21d2b7617c1d413229948"
+    },
+    {
+      "path": "src/components/GameWorldCanvas.tsx",
+      "size_bytes": 39494,
+      "sha256": "b96c1560054774433bd9a07f614ec1b40fd28c1e0b815fcc018f28428f776d42"
+    },
+    {
+      "path": "src/components/GodotSuitePanel.tsx",
+      "size_bytes": 25511,
+      "sha256": "72faddd64bc78703014a4c651e33d290a5722108090376e1061a58261077f8d1"
+    },
+    {
+      "path": "src/components/InventoryModal.tsx",
+      "size_bytes": 12296,
+      "sha256": "05b0646ddc342c15fbb780fe09335fecde6c9b6eda939ea4e5a9be0a660d0803"
+    },
+    {
+      "path": "src/components/SettingsModal.tsx",
+      "size_bytes": 8677,
+      "sha256": "f1f3ad73d385fed170ed44c1e0e17ab494a6c0a97a49482fdb535e9c26680fa4"
+    },
+    {
+      "path": "src/index.css",
+      "size_bytes": 23,
+      "sha256": "42070e0b45bb201b2b838a52aaaa6e965f964e0b542d97f1fe517fe59c4b75a8"
+    },
+    {
+      "path": "src/main.tsx",
+      "size_bytes": 159,
+      "sha256": "30d02ee59cb6576973dea4368093b2dcae692a40668f288fdbc66a114873fcd3"
+    },
+    {
+      "path": "tsconfig.json",
+      "size_bytes": 561,
+      "sha256": "cbc914147cc208c35cb5f6d405f0f0bc3c1c76ae76bf45bbc4f588b924492d2a"
+    },
+    {
+      "path": "vite.config.ts",
+      "size_bytes": 705,
+      "sha256": "a7aa711292e5ad7eb10f7a17f5f34fbbf75c7b7c24d59cb0212c60bc493c3208"
+    }
+  ]
+}

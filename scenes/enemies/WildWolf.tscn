@@ -1,0 +1,128 @@
+[gd_scene load_steps=12 format=3 uid="uid://wildwolf001"]
+
+[ext_resource type="Script" path="res://scripts/enemies/MonsterBase.gd" id="1_wolf"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wolf"]
+size = Vector3(0.9, 0.9, 1.6)
+
+[sub_resource type="StandardMaterial3D" id="Mat_WolfFur"]
+albedo_color = Color(0.38, 0.32, 0.28, 1)
+roughness = 0.85
+
+[sub_resource type="StandardMaterial3D" id="Mat_WolfUnderbelly"]
+albedo_color = Color(0.65, 0.6, 0.52, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Mat_Eyes"]
+albedo_color = Color(1, 0.2, 0.1, 1)
+emission_enabled = true
+emission = Color(1, 0.2, 0.1, 1)
+emission_energy_multiplier = 4.0
+
+[sub_resource type="BoxMesh" id="Mesh_WolfBody"]
+material = SubResource("Mat_WolfFur")
+size = Vector3(0.65, 0.65, 1.1)
+
+[sub_resource type="BoxMesh" id="Mesh_WolfHead"]
+material = SubResource("Mat_WolfFur")
+size = Vector3(0.42, 0.42, 0.5)
+
+[sub_resource type="BoxMesh" id="Mesh_WolfSnout"]
+material = SubResource("Mat_WolfUnderbelly")
+size = Vector3(0.24, 0.22, 0.38)
+
+[sub_resource type="PrismMesh" id="Mesh_WolfEar"]
+material = SubResource("Mat_WolfFur")
+size = Vector3(0.14, 0.2, 0.1)
+
+[sub_resource type="BoxMesh" id="Mesh_WolfLeg"]
+material = SubResource("Mat_WolfFur")
+size = Vector3(0.18, 0.55, 0.18)
+
+[sub_resource type="CylinderMesh" id="Mesh_WolfTail"]
+material = SubResource("Mat_WolfFur")
+top_radius = 0.08
+bottom_radius = 0.03
+height = 0.55
+
+[node name="WildWolf" type="CharacterBody3D"]
+collision_layer = 1
+collision_mask = 3
+script = ExtResource("1_wolf")
+monster_name_ar = "ذئب بري"
+monster_name_en = "Wild Wolf"
+enemy_type = "wolf"
+max_health = 160
+attack_power = 24
+move_speed = 4.2
+xp_reward = 85
+gold_min = 40
+gold_max = 95
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+shape = SubResource("BoxShape3D_wolf")
+
+[node name="VisualRoot" type="Node3D" parent="."]
+
+[node name="Torso" type="MeshInstance3D" parent="VisualRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+mesh = SubResource("Mesh_WolfBody")
+
+[node name="HeadNode" type="Node3D" parent="VisualRoot/Torso"]
+transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 0.25, 0.55)
+
+[node name="HeadMesh" type="MeshInstance3D" parent="VisualRoot/Torso/HeadNode"]
+mesh = SubResource("Mesh_WolfHead")
+
+[node name="Snout" type="MeshInstance3D" parent="VisualRoot/Torso/HeadNode"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.08, 0.35)
+mesh = SubResource("Mesh_WolfSnout")
+
+[node name="LeftEar" type="MeshInstance3D" parent="VisualRoot/Torso/HeadNode"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.16, 0.26, -0.08)
+mesh = SubResource("Mesh_WolfEar")
+
+[node name="RightEar" type="MeshInstance3D" parent="VisualRoot/Torso/HeadNode"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.16, 0.26, -0.08)
+mesh = SubResource("Mesh_WolfEar")
+
+[node name="EyeLeft" type="OmniLight3D" parent="VisualRoot/Torso/HeadNode"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.14, 0.08, 0.2)
+light_color = Color(1, 0.2, 0.1, 1)
+light_energy = 1.5
+omni_range = 0.8
+
+[node name="EyeRight" type="OmniLight3D" parent="VisualRoot/Torso/HeadNode"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.14, 0.08, 0.2)
+light_color = Color(1, 0.2, 0.1, 1)
+light_energy = 1.5
+omni_range = 0.8
+
+[node name="FrontLeftLeg" type="MeshInstance3D" parent="VisualRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.22, 0.26, 0.38)
+mesh = SubResource("Mesh_WolfLeg")
+
+[node name="FrontRightLeg" type="MeshInstance3D" parent="VisualRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.22, 0.26, 0.38)
+mesh = SubResource("Mesh_WolfLeg")
+
+[node name="RearLeftLeg" type="MeshInstance3D" parent="VisualRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.22, 0.26, -0.38)
+mesh = SubResource("Mesh_WolfLeg")
+
+[node name="RearRightLeg" type="MeshInstance3D" parent="VisualRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.22, 0.26, -0.38)
+mesh = SubResource("Mesh_WolfLeg")
+
+[node name="Tail" type="MeshInstance3D" parent="VisualRoot/Torso"]
+transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 0, -0.05, -0.65)
+mesh = SubResource("Mesh_WolfTail")
+
+[node name="HealthLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
+billboard = 1
+text = "ذئب بري [160/160]"
+font_size = 26
+outline_size = 6
+modulate = Color(1, 0.8, 0.2, 1)

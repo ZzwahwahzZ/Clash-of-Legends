@@ -1,0 +1,88 @@
+[gd_scene load_steps=2 format=3 uid="uid://settingsui001"]
+
+[ext_resource type="Script" path="res://scripts/ui/SettingsUI.gd" id="1_settui"]
+
+[node name="SettingsUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_settui")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -320.0
+offset_top = -220.0
+offset_right = 320.0
+offset_bottom = 220.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TitleLabel" type="Label" parent="Panel"]
+layout_mode = 1
+offset_left = 24.0
+offset_top = 16.0
+offset_right = 400.0
+offset_bottom = 46.0
+text = "إعدادات صراع الأساطير"
+
+[node name="CloseButton" type="Button" parent="Panel"]
+layout_mode = 1
+offset_left = 560.0
+offset_top = 12.0
+offset_right = 616.0
+offset_bottom = 44.0
+text = "X"
+
+[node name="LangLabel" type="Label" parent="Panel"]
+layout_mode = 1
+offset_left = 32.0
+offset_top = 70.0
+offset_right = 200.0
+offset_bottom = 95.0
+text = "اللغة / Language:"
+
+[node name="LangOption" type="OptionButton" parent="Panel"]
+layout_mode = 1
+offset_left = 220.0
+offset_top = 65.0
+offset_right = 600.0
+offset_bottom = 105.0
+
+[node name="ClassLabel" type="Label" parent="Panel"]
+layout_mode = 1
+offset_left = 32.0
+offset_top = 130.0
+offset_right = 200.0
+offset_bottom = 155.0
+text = "فئة البطل / Class:"
+
+[node name="ClassOption" type="OptionButton" parent="Panel"]
+layout_mode = 1
+offset_left = 220.0
+offset_top = 125.0
+offset_right = 600.0
+offset_bottom = 165.0
+
+[node name="SaveButton" type="Button" parent="Panel"]
+layout_mode = 1
+offset_left = 60.0
+offset_top = 220.0
+offset_right = 300.0
+offset_bottom = 270.0
+text = "حفظ اللعبة محلياً"
+
+[node name="LoadButton" type="Button" parent="Panel"]
+layout_mode = 1
+offset_left = 340.0
+offset_top = 220.0
+offset_right = 580.0
+offset_bottom = 270.0
+text = "استرجاع الحفظ"

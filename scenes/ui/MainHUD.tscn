@@ -1,0 +1,353 @@
+[gd_scene load_steps=3 format=3 uid="uid://mainhud001"]
+
+[ext_resource type="Script" path="res://scripts/ui/MainHUDController.gd" id="1_hud"]
+[ext_resource type="Script" path="res://scripts/ui/VirtualJoystickController.gd" id="2_joy"]
+
+[node name="MainHUD" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+script = ExtResource("1_hud")
+
+[node name="TopLeft" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 350.0
+offset_bottom = 120.0
+
+[node name="LevelBadge" type="Panel" parent="TopLeft"]
+layout_mode = 0
+offset_right = 50.0
+offset_bottom = 50.0
+
+[node name="LevelLabel" type="Label" parent="TopLeft/LevelBadge"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BarsVBox" type="VBoxContainer" parent="TopLeft"]
+layout_mode = 0
+offset_left = 60.0
+offset_right = 260.0
+offset_bottom = 50.0
+
+[node name="HPBar" type="ProgressBar" parent="TopLeft/BarsVBox"]
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+value = 100.0
+show_percentage = false
+
+[node name="HPLabel" type="Label" parent="TopLeft/BarsVBox/HPBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "500 / 500"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MPBar" type="ProgressBar" parent="TopLeft/BarsVBox"]
+custom_minimum_size = Vector2(0, 18)
+layout_mode = 2
+value = 100.0
+show_percentage = false
+
+[node name="MPLabel" type="Label" parent="TopLeft/BarsVBox/MPBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "200 / 200"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="GoldBox" type="HBoxContainer" parent="TopLeft"]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 55.0
+offset_right = 260.0
+offset_bottom = 85.0
+
+[node name="GoldIcon" type="Label" parent="TopLeft/GoldBox"]
+layout_mode = 2
+text = "💰 الذهب:"
+
+[node name="GoldLabel" type="Label" parent="TopLeft/GoldBox"]
+layout_mode = 2
+text = "1500"
+
+[node name="TopRight" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -400.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = 160.0
+grow_horizontal = 0
+
+[node name="QuestBanner" type="Button" parent="TopRight"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -280.0
+offset_bottom = 60.0
+grow_horizontal = 0
+
+[node name="QuestTitle" type="Label" parent="TopRight/QuestBanner"]
+layout_mode = 1
+offset_left = 10.0
+offset_top = 5.0
+offset_right = 270.0
+offset_bottom = 28.0
+text = "تهديد الذئاب البرية"
+
+[node name="QuestProgress" type="Label" parent="TopRight/QuestBanner"]
+layout_mode = 1
+offset_left = 10.0
+offset_top = 30.0
+offset_right = 270.0
+offset_bottom = 53.0
+text = "التقدم: 0 / 5 (انقر للملاحة)"
+
+[node name="AutoControls" type="HBoxContainer" parent="TopRight"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -280.0
+offset_top = 70.0
+offset_bottom = 105.0
+grow_horizontal = 0
+
+[node name="AutoHuntBtn" type="Button" parent="TopRight/AutoControls"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "صيد تلقائي"
+
+[node name="AutoLootBtn" type="Button" parent="TopRight/AutoControls"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "جمع تلقائي"
+
+[node name="MenuButtons" type="HBoxContainer" parent="TopRight"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -280.0
+offset_top = 115.0
+offset_bottom = 150.0
+grow_horizontal = 0
+
+[node name="InvBtn" type="Button" parent="TopRight/MenuButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "الحقيبة"
+
+[node name="BlacksmithBtn" type="Button" parent="TopRight/MenuButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "الحداد"
+
+[node name="SettingsBtn" type="Button" parent="TopRight/MenuButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "الإعدادات"
+
+[node name="BottomRight" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -340.0
+offset_top = -220.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="ActionButtons" type="Control" parent="BottomRight"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="AttackBtn" type="Button" parent="BottomRight/ActionButtons"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -100.0
+offset_top = -100.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "هجوم"
+
+[node name="Skill1Btn" type="Button" parent="BottomRight/ActionButtons"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -210.0
+offset_top = -80.0
+offset_right = -115.0
+offset_bottom = -20.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "إعصار"
+
+[node name="Skill2Btn" type="Button" parent="BottomRight/ActionButtons"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -170.0
+offset_top = -170.0
+offset_right = -75.0
+offset_bottom = -110.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "السيف"
+
+[node name="UtilityButtons" type="HBoxContainer" parent="BottomRight"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -45.0
+offset_right = 140.0
+grow_vertical = 0
+
+[node name="JumpBtn" type="Button" parent="BottomRight/UtilityButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "قفز"
+
+[node name="MountBtn" type="Button" parent="BottomRight/UtilityButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "الحصان"
+
+[node name="BottomLeft" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = -240.0
+offset_right = 320.0
+offset_bottom = -20.0
+grow_vertical = 0
+
+[node name="VirtualJoystick" type="Control" parent="BottomLeft"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -180.0
+offset_right = 180.0
+grow_vertical = 0
+script = ExtResource("2_joy")
+
+[node name="Base" type="TextureRect" parent="BottomLeft/VirtualJoystick"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Handle" type="TextureRect" parent="BottomLeft/VirtualJoystick"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -30.0
+offset_top = -30.0
+offset_right = 30.0
+offset_bottom = 30.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ChatLabel" type="Label" parent="BottomLeft"]
+layout_mode = 1
+anchors_preset = 0
+offset_top = -40.0
+offset_right = 380.0
+offset_bottom = -10.0
+text = "[عالم] صراع الأساطير: أهلاً بالبطل في مدينة التوأم!"
+
+[node name="Bottom" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -12.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="XPBar" type="ProgressBar" parent="Bottom"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+show_percentage = false
+
+[node name="Center" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -120.0
+offset_right = 250.0
+offset_bottom = -60.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="NotificationLabel" type="Label" parent="Center"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+horizontal_alignment = 1
+vertical_alignment = 1

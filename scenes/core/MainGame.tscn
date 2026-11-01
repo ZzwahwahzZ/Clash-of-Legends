@@ -1,0 +1,287 @@
+[gd_scene load_steps=32 format=3 uid="uid://maingame001"]
+
+[ext_resource type="PackedScene" uid="uid://player001" path="res://scenes/characters/Player.tscn" id="1_player"]
+[ext_resource type="PackedScene" uid="uid://npcbase001" path="res://scenes/npcs/NPCBase.tscn" id="2_npc"]
+[ext_resource type="PackedScene" uid="uid://wildwolf001" path="res://scenes/enemies/WildWolf.tscn" id="3_wolf"]
+[ext_resource type="PackedScene" uid="uid://bossdragon001" path="res://scenes/enemies/BossDragon.tscn" id="4_dragon"]
+[ext_resource type="PackedScene" uid="uid://simplayer001" path="res://scenes/characters/SimulatedPlayer.tscn" id="5_sim"]
+[ext_resource type="PackedScene" uid="uid://mainhud001" path="res://scenes/ui/MainHUD.tscn" id="6_hud"]
+[ext_resource type="PackedScene" uid="uid://inventoryui001" path="res://scenes/ui/InventoryUI.tscn" id="7_inv"]
+[ext_resource type="PackedScene" uid="uid://blacksmithui001" path="res://scenes/ui/BlacksmithUI.tscn" id="8_bs"]
+[ext_resource type="PackedScene" uid="uid://settingsui001" path="res://scenes/ui/SettingsUI.tscn" id="9_sett"]
+[ext_resource type="PackedScene" uid="uid://dialogueui001" path="res://scenes/ui/DialogueUI.tscn" id="10_dlg"]
+[ext_resource type="Script" path="res://scripts/automation/QuestNavigationAgent.gd" id="11_quest"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
+size = Vector3(180, 1, 180)
+
+[sub_resource type="StandardMaterial3D" id="Mat_Grass"]
+albedo_color = Color(0.25, 0.46, 0.22, 1)
+roughness = 0.85
+
+[sub_resource type="BoxMesh" id="Mesh_Ground"]
+material = SubResource("Mat_Grass")
+size = Vector3(180, 1, 180)
+
+[sub_resource type="StandardMaterial3D" id="Mat_Cobblestone"]
+albedo_color = Color(0.48, 0.46, 0.44, 1)
+roughness = 0.75
+
+[sub_resource type="BoxMesh" id="Mesh_Plaza"]
+material = SubResource("Mat_Cobblestone")
+size = Vector3(32, 0.1, 32)
+
+[sub_resource type="StandardMaterial3D" id="Mat_RedLacquer"]
+albedo_color = Color(0.75, 0.15, 0.12, 1)
+roughness = 0.4
+
+[sub_resource type="StandardMaterial3D" id="Mat_RoofTile"]
+albedo_color = Color(0.18, 0.48, 0.38, 1)
+roughness = 0.5
+
+[sub_resource type="StandardMaterial3D" id="Mat_GoldOrnament"]
+albedo_color = Color(0.95, 0.78, 0.2, 1)
+metallic = 0.8
+roughness = 0.25
+
+[sub_resource type="StandardMaterial3D" id="Mat_Basalt"]
+albedo_color = Color(0.12, 0.12, 0.14, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Mat_Lava"]
+albedo_color = Color(1, 0.35, 0.05, 1)
+emission_enabled = true
+emission = Color(1, 0.35, 0.05, 1)
+emission_energy_multiplier = 4.0
+
+[sub_resource type="CylinderMesh" id="Mesh_Pillar"]
+material = SubResource("Mat_RedLacquer")
+top_radius = 0.35
+bottom_radius = 0.4
+height = 6.0
+
+[sub_resource type="BoxMesh" id="Mesh_Crossbeam"]
+material = SubResource("Mat_RedLacquer")
+size = Vector3(8.5, 0.6, 0.7)
+
+[sub_resource type="PrismMesh" id="Mesh_PagodaRoof"]
+material = SubResource("Mat_RoofTile")
+size = Vector3(10.0, 1.8, 2.2)
+
+[sub_resource type="BoxMesh" id="Mesh_Furnace"]
+material = SubResource("Mat_Basalt")
+size = Vector3(2.5, 2.2, 2.5)
+
+[sub_resource type="BoxMesh" id="Mesh_LavaPit"]
+material = SubResource("Mat_Lava")
+size = Vector3(1.4, 0.1, 1.4)
+
+[sub_resource type="CylinderMesh" id="Mesh_TreeTrunk"]
+material = SubResource("Mat_Basalt")
+top_radius = 0.25
+bottom_radius = 0.35
+height = 3.5
+
+[sub_resource type="CylinderMesh" id="Mesh_TreeFoliage"]
+material = SubResource("Mat_Grass")
+top_radius = 0.0
+bottom_radius = 1.8
+height = 4.0
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
+sky_top_color = Color(0.36, 0.58, 0.92, 1)
+sky_horizon_color = Color(0.72, 0.8, 0.88, 1)
+ground_bottom_color = Color(0.22, 0.28, 0.22, 1)
+ground_horizon_color = Color(0.72, 0.8, 0.88, 1)
+
+[sub_resource type="Sky" id="Sky_env"]
+sky_material = SubResource("ProceduralSkyMaterial_sky")
+
+[sub_resource type="Environment" id="Environment_world"]
+background_mode = 2
+sky = SubResource("Sky_env")
+ambient_light_source = 3
+ambient_light_color = Color(0.65, 0.7, 0.75, 1)
+tonemap_mode = 2
+glow_enabled = true
+glow_intensity = 0.6
+
+[node name="MainGame" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_world")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.353553, 0.353553, 0, 0.707107, 0.707107, -0.5, -0.612372, 0.612372, 0, 35, 0)
+shadow_enabled = true
+
+[node name="Ground" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+collision_layer = 1
+collision_mask = 3
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
+shape = SubResource("BoxShape3D_ground")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("Mesh_Ground")
+
+[node name="TwinCity" type="Node3D" parent="."]
+
+[node name="CityPlaza" type="MeshInstance3D" parent="TwinCity"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+mesh = SubResource("Mesh_Plaza")
+
+[node name="PagodaGate" type="Node3D" parent="TwinCity"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 15)
+
+[node name="LeftPillar" type="MeshInstance3D" parent="TwinCity/PagodaGate"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 3.0, 0)
+mesh = SubResource("Mesh_Pillar")
+
+[node name="RightPillar" type="MeshInstance3D" parent="TwinCity/PagodaGate"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 3.0, 0)
+mesh = SubResource("Mesh_Pillar")
+
+[node name="Beam" type="MeshInstance3D" parent="TwinCity/PagodaGate"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.5, 0)
+mesh = SubResource("Mesh_Crossbeam")
+
+[node name="PagodaRoof" type="MeshInstance3D" parent="TwinCity/PagodaGate"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.6, 0)
+mesh = SubResource("Mesh_PagodaRoof")
+
+[node name="GateLantern" type="OmniLight3D" parent="TwinCity/PagodaGate"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.8, 0)
+light_color = Color(1, 0.8, 0.35, 1)
+light_energy = 3.5
+omni_range = 8.0
+
+[node name="BlacksmithWorkshop" type="Node3D" parent="TwinCity"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, 6)
+
+[node name="Furnace" type="MeshInstance3D" parent="TwinCity/BlacksmithWorkshop"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+mesh = SubResource("Mesh_Furnace")
+
+[node name="LavaEmbers" type="MeshInstance3D" parent="TwinCity/BlacksmithWorkshop"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+mesh = SubResource("Mesh_LavaPit")
+
+[node name="ForgeGlow" type="OmniLight3D" parent="TwinCity/BlacksmithWorkshop"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0, 0)
+light_color = Color(1, 0.4, 0.1, 1)
+light_energy = 4.0
+omni_range = 6.0
+
+[node name="MountainSummitVolcano" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, -35)
+
+[node name="VolcanicCrag1" type="MeshInstance3D" parent="MountainSummitVolcano"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 2.5, -4)
+mesh = SubResource("Mesh_Furnace")
+
+[node name="VolcanicCrag2" type="MeshInstance3D" parent="MountainSummitVolcano"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 3.2, 4)
+mesh = SubResource("Mesh_Furnace")
+
+[node name="CalderaLava" type="MeshInstance3D" parent="MountainSummitVolcano"]
+transform = Transform3D(4, 0, 0, 0, 1, 0, 0, 0, 4, 0, 0.1, 0)
+mesh = SubResource("Mesh_LavaPit")
+
+[node name="LavaArenaGlow" type="OmniLight3D" parent="MountainSummitVolcano"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.0, 0)
+light_color = Color(1, 0.35, 0.05, 1)
+light_energy = 8.0
+omni_range = 18.0
+
+[node name="TwinPlainsTrees" type="Node3D" parent="."]
+
+[node name="Tree1" type="Node3D" parent="TwinPlainsTrees"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 8)
+
+[node name="Trunk" type="MeshInstance3D" parent="TwinPlainsTrees/Tree1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.75, 0)
+mesh = SubResource("Mesh_TreeTrunk")
+
+[node name="Foliage" type="MeshInstance3D" parent="TwinPlainsTrees/Tree1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.0, 0)
+mesh = SubResource("Mesh_TreeFoliage")
+
+[node name="Tree2" type="Node3D" parent="TwinPlainsTrees"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 0, 26)
+
+[node name="Trunk" type="MeshInstance3D" parent="TwinPlainsTrees/Tree2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.75, 0)
+mesh = SubResource("Mesh_TreeTrunk")
+
+[node name="Foliage" type="MeshInstance3D" parent="TwinPlainsTrees/Tree2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.0, 0)
+mesh = SubResource("Mesh_TreeFoliage")
+
+[node name="QuestNavigationAgent" type="Node" parent="." groups=["quest_agents"]]
+script = ExtResource("11_quest")
+
+[node name="Player" parent="." instance=ExtResource("1_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+
+[node name="NPC_Sage" parent="." instance=ExtResource("2_npc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.1, 3)
+npc_name_ar = "حكيم التوأم"
+npc_name_en = "Twin Sage"
+role = "sage"
+
+[node name="NPC_Blacksmith" parent="." instance=ExtResource("2_npc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.1, 4)
+npc_name_ar = "حداد الأساطير"
+npc_name_en = "Master Blacksmith"
+role = "blacksmith"
+
+[node name="NPC_Merchant" parent="." instance=ExtResource("2_npc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0.1, -4)
+npc_name_ar = "تاجر القوافل"
+npc_name_en = "General Merchant"
+role = "merchant"
+
+[node name="NPC_Warden" parent="." instance=ExtResource("2_npc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0.1, -5)
+npc_name_ar = "حارس البوابة"
+npc_name_en = "Dungeon Warden"
+role = "warden"
+
+[node name="WildWolf_1" parent="." instance=ExtResource("3_wolf")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0.1, 12)
+
+[node name="WildWolf_2" parent="." instance=ExtResource("3_wolf")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0.1, 16)
+
+[node name="WildWolf_3" parent="." instance=ExtResource("3_wolf")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0.1, 22)
+
+[node name="WildWolf_4" parent="." instance=ExtResource("3_wolf")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 0.1, 14)
+
+[node name="BossDragon" parent="." instance=ExtResource("4_dragon")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0.1, -35)
+
+[node name="SimulatedPlayer_1" parent="." instance=ExtResource("5_sim")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.1, -3)
+
+[node name="SimulatedPlayer_2" parent="." instance=ExtResource("5_sim")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0.1, 6)
+sim_name_ar = "صائد_الكنوز"
+sim_name_en = "TreasureHunter"
+sim_class = "Archer"
+level = 31
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="MainHUD" parent="CanvasLayer" instance=ExtResource("6_hud")]
+
+[node name="InventoryUI" parent="CanvasLayer" instance=ExtResource("7_inv")]
+
+[node name="BlacksmithUI" parent="CanvasLayer" instance=ExtResource("8_bs")]
+
+[node name="SettingsUI" parent="CanvasLayer" instance=ExtResource("9_sett")]
+
+[node name="DialogueUI" parent="CanvasLayer" instance=ExtResource("10_dlg")]

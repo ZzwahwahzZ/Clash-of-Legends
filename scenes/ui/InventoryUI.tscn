@@ -1,0 +1,90 @@
+[gd_scene load_steps=2 format=3 uid="uid://inventoryui001"]
+
+[ext_resource type="Script" path="res://scripts/ui/InventoryUI.gd" id="1_invui"]
+
+[node name="InventoryUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_invui")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -460.0
+offset_top = -280.0
+offset_right = 460.0
+offset_bottom = 280.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TitleLabel" type="Label" parent="Panel"]
+layout_mode = 1
+offset_left = 24.0
+offset_top = 16.0
+offset_right = 400.0
+offset_bottom = 46.0
+text = "حقيبة البطل [٤٠ خانة]"
+
+[node name="CloseButton" type="Button" parent="Panel"]
+layout_mode = 1
+offset_left = 840.0
+offset_top = 12.0
+offset_right = 896.0
+offset_bottom = 44.0
+text = "X"
+
+[node name="GridContainer" type="GridContainer" parent="Panel"]
+layout_mode = 1
+offset_left = 24.0
+offset_top = 64.0
+offset_right = 580.0
+offset_bottom = 530.0
+columns = 8
+
+[node name="DetailsPanel" type="Panel" parent="Panel"]
+layout_mode = 1
+offset_left = 600.0
+offset_top = 64.0
+offset_right = 896.0
+offset_bottom = 530.0
+
+[node name="DetailsLabel" type="Label" parent="Panel/DetailsPanel"]
+layout_mode = 1
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 280.0
+offset_bottom = 320.0
+text = "اختر عنصراً من الحقيبة لعرض التفاصيل"
+autowrap_mode = 3
+
+[node name="EquipButton" type="Button" parent="Panel/DetailsPanel"]
+layout_mode = 1
+offset_left = 16.0
+offset_top = 340.0
+offset_right = 280.0
+offset_bottom = 376.0
+text = "ارتداء"
+
+[node name="UseButton" type="Button" parent="Panel/DetailsPanel"]
+layout_mode = 1
+offset_left = 16.0
+offset_top = 388.0
+offset_right = 280.0
+offset_bottom = 424.0
+text = "استخدام"
+
+[node name="SellButton" type="Button" parent="Panel/DetailsPanel"]
+layout_mode = 1
+offset_left = 16.0
+offset_top = 436.0
+offset_right = 280.0
+offset_bottom = 472.0
+text = "بيع مقابل الذهب"

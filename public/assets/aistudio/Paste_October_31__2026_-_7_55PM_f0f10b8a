@@ -1,0 +1,610 @@
+CLASH OF LEGENDS — COMPLETE AUTONOMOUS DEVELOPMENT, PROJECT AUDIT, GODOT 4.3 REPAIR & ANDROID DELIVERY DIRECTIVE
+
+Continue developing the existing CLASH OF LEGENDS project in the current workspace and connected GitHub repository. The existing project is the foundation. Do not create a replacement project, restart from scratch, or overwrite working systems unnecessarily. Inspect the actual project and continue from its verified development state.
+
+The project is intended to be a 3D Android MMORPG-inspired game built with Godot 4.3. The existing project architecture, scripts, scenes, assets, configuration, and systems must be audited and reconciled before substantial new implementation begins.
+
+---
+
+PART I — ORIGINAL COMPLETE DEVELOPMENT DIRECTIVE
+
+1. RESEARCH THE COMPLETE MOBILE REFERENCE
+
+Use Conquer Online Mobile exclusively as the gameplay reference. Identify the exact mobile edition and version. Inspect the installed game and its accessible resources whenever possible. If direct inspection is incomplete, research missing details through reliable gameplay videos, tutorials, screenshots, documentation, and multiple independent public sources.
+
+If the game is not installed or cannot be inspected directly, actively search for an official or otherwise legitimate, accessible way to obtain and inspect the exact mobile edition. Perform installation, execution, or direct file inspection only when the actual environment provides the required tools, permissions, and access. Never assume access to an Android device or claim to have installed, launched, or inspected files that were not actually accessible. If direct inspection is unavailable, document the exact limitation and continue researching through multiple reliable external sources, gameplay videos, tutorials, screenshots, and available documentation. Clearly distinguish directly verified findings from externally researched or uncertain details.
+
+Research all connected systems: classes and class-specific progression, weapons, equipment, armor, skills, monsters, bosses, levels, habitats, drops, quests, NPCs, merchants, cities, maps, combat, enhancements, gems, sockets, visual effects, economy, interfaces, controls, and navigation.
+
+Build an interconnected reference specification before implementation. Cross-check findings, record their sources and confidence, distinguish confirmed details from uncertain ones, and never invent missing mechanics or substitute PC-version information.
+
+2. DEVELOP AND IMPROVE THE EXISTING GAME
+
+Independently implement the researched mobile gameplay systems in the existing Godot 4.3 project, preserving its working architecture and functionality.
+
+Create an original modern game inspired by the mobile reference, not a clone. Use original or properly licensed code and assets only.
+
+Preserve recognizable gameplay systems, progression, class identities, and map identities while improving the world, cities, environments, architecture, playable areas, character and monster models, bosses, animations, weapons, armor, clothing, textures, lighting, and combat effects. Improve monster and boss appearance without arbitrarily changing their gameplay balance or progression.
+
+All game content must be fully implemented as functional, interactive game elements, never merely static images, decorative objects, visual placeholders, or nonfunctional representations. This applies to every map, city, building, character, NPC, monster, boss, weapon, armor piece, clothing item, skill, item, gem, merchant, quest, environment object, and gameplay system. Every element must have its appropriate actual behavior, properties, interactions, animations, collision, functionality, and gameplay logic wherever applicable. Maps must be fully navigable 3D environments; characters and creatures must move and behave; equipment and items must have real properties and effects; NPCs must perform their intended roles; skills and combat effects must function; and all interconnected systems must operate together in actual gameplay. Preserve the reference's recognizable identities and mechanics while implementing and visually improving them as complete, working components. Never treat visual appearance alone as implementation or count unfinished placeholders as completed features.
+
+Make every verified playable class available from the beginning. The user controls one character and progresses according to that class's actual mobile progression. Other characters simulate a populated MMORPG world through local NPC behavior, not real multiplayer.
+
+Provide the classic elevated, wide-angle MMORPG camera with smooth following, horizontal rotation, vertical angle adjustment, zoom, and reset. Improve Android controls and interfaces without losing essential gameplay functionality.
+
+3. COMPLETE OFFLINE GAME
+
+This is a private personal game. Internet access is permitted only during the one-time initial download and installation of missing resources, and only after the user explicitly approves the download through the game's own interface.
+
+After initial setup is complete, all gameplay must operate entirely locally, with Wi-Fi and mobile data disabled. No gameplay feature may require, initiate, or wait for network communication. Do not implement or retain online multiplayer, player-to-player networking, shared servers, online accounts or authentication, external APIs, cloud AI, remote databases, telemetry, subscriptions, paid services, or external runtime resources.
+
+Implement local NPC and monster AI, quests, merchants, economy, progression, and saving/loading. All world activity, character behavior, combat, interactions, merchant transactions, quests, rewards, progression, and game-state management must operate locally.
+
+Gold is the only currency. Do not add CP, premium currencies, payment systems, or in-app purchases.
+
+Mandatory offline verification: After the one-time setup, test the actual game with Wi-Fi and mobile data disabled. Verify fresh launches, device restarts, repeated gameplay sessions, saving/loading, and all essential gameplay systems. Any essential feature that requires or attempts to use an internet connection after setup must be treated as a failed acceptance test until corrected.
+
+4. APK PACKAGING AND ONE-TIME IN-GAME RESOURCE INSTALLATION
+
+Prioritize delivering one installable Android APK containing the largest practical portion of the complete game. Target a total installed game footprint of 2.5–3.0 GB, including the installed APK and all additional game resources stored by the application. Aim for approximately 2.5 GB and do not exceed 3.0 GB without the user's explicit approval.
+
+Clearly distinguish the compressed APK file size from the actual total installed storage footprint. Report both measurements separately and verify the actual storage footprint on Android.
+
+Package as much content as technically practical directly inside the APK, including maps, environments, characters, NPCs, monsters, models, textures, equipment, animations, sounds, effects, and gameplay data.
+
+If some resources cannot reasonably or reliably be included inside the APK, use verified Godot PCK resource packs stored in the application's private storage and downloaded, installed, and loaded internally by the game after the user's explicit in-game approval. Use Godot's supported resource-pack loading mechanism and verify successful loading on Android.
+
+Do not use OBB expansion files, a separately installed companion application, external file-management steps, or manual resource installation. Keep one APK as the only application the user installs. Any additional PCK files must be treated as internal game data, not separately installed applications or packages.
+
+Choose the packaging strategy based on actual Godot export capabilities, Android installation constraints, available device storage, and successful testing on the target device. Do not force an oversized APK if it makes installation or operation unreliable. Do not create an unnecessarily small APK that downloads most of the game after launch. The objective is to package the largest practical portion of the complete game and download only the remaining essential resources.
+
+On first launch, the game itself must automatically inspect packaged resources, identify only essential files that are genuinely missing, calculate their required download size, and display a clear download approval screen inside the CLASH OF LEGENDS game interface.
+
+The user must approve by pressing a button inside the game. Never redirect the user to a browser, Google Drive, GitHub, an external download manager, Android file picker, or another application to approve, download, extract, or install resources. The game itself must handle the entire process internally.
+
+After in-game approval, the game must automatically download, verify, extract when necessary, and install the missing files or PCK resource packs into the correct Android application locations. The user must never manually select directories, move files, extract archives, or manage resource packages.
+
+Implement reliable missing/corrupted-file detection, resumable downloads, retries, SHA-256 or equivalent integrity verification, safe installation, storage-space checks, progress reporting, and recovery after interruption or restart. Do not permit normal gameplay until all mandatory resources are verified and available.
+
+If Android or packaging limitations prevent the preferred packaging strategy, identify the exact limitation and preserve the same simple experience: install one APK, open the game, approve the small remaining download from inside the game, and let the application handle everything.
+
+This is a one-time initial setup, not a recurring update or repair service. After setup, verify that the game works completely offline.
+
+5. REAL RESOURCE HOSTING
+
+You are responsible for configuring the actual hosting and storage required for the remaining downloadable resources. Use available Google AI Studio, GitHub, and Google Cloud capabilities where accessible. Suitable options include Cloud Run for resource management and Google Cloud Storage or another persistent host for resource packages.
+
+Create a real resource manifest containing versions, filenames, sizes, destinations, and integrity checksums. Upload the actual required files, configure working download URLs, and connect them to the in-game downloader.
+
+Do not use placeholder URLs, simulated downloads, or fake progress. Do not consider this system complete until an actual end-to-end first-launch download and installation test succeeds on Android. If credentials, permissions, account eligibility, or infrastructure are unavailable, report the exact blocker and required action. Continue all other work that can proceed.
+
+6. AUTONOMOUS DEVELOPMENT AND RESUMPTION
+
+Use the existing GitHub connection for version history, code changes, and recoverable checkpoints.
+
+Maintain a concise development log containing research findings, completed and incomplete systems, errors, modified files, test evidence, current stage, last confirmed task, and next task.
+
+Work incrementally within the available context and output limits. Never attempt to inspect, analyze, document, or implement the entire project in one oversized operation. Divide research, implementation, and testing into manageable stages. Save substantial findings, specifications, code changes, test results, and continuation notes in persistent project files and GitHub checkpoints. Before each new stage or resumption, inspect only the relevant project files and latest records. Never truncate code, omit required functionality, or claim completion because of response or context limits.
+
+At every interruption or usage limit, save work and update the checkpoint. When resuming, inspect the actual project and log, verify the current state, and continue from the last confirmed point. Inspect partially completed work and safely finish it. Do not repeat completed research or development, discard progress, or claim an interrupted task is complete.
+
+7. ANDROID PERFORMANCE AND QUALITY
+
+Target the Xiaomi Redmi Note 11: Android 13, 6 GB RAM, Snapdragon 680, Adreno 610. Aim for stable performance around 30 FPS where practical. Optimize rendering, LOD, culling, textures, memory, animations, effects, loading, and resource use without unnecessarily cutting important content. Test on the actual device whenever possible; emulator results alone are not proof of device compatibility.
+
+Resource optimization, compression, and content preservation are mandatory throughout development. Systematically optimize and compress models, textures, materials, animations, audio, visual effects, maps, environments, and other game assets using formats and quality settings suitable for Godot 4.3 and the target Android hardware. Use techniques such as texture resizing and compression, efficient audio encoding, mesh and animation optimization, removal of redundant data, resource deduplication, and appropriate level-of-detail settings wherever they preserve the intended visual and gameplay quality.
+
+Keep the complete essential gameplay content intact. Never remove, omit, replace with placeholders, or arbitrarily simplify essential maps, classes, characters, monsters, bosses, equipment, skills, quests, gameplay systems, or other core content merely to reduce storage size or improve performance. Prefer intelligent optimization, compression, efficient resource formats, and loading strategies over content deletion. Any proposed reduction that would remove or materially change essential content requires the user's explicit approval before implementation.
+
+Continuously measure the actual resource footprint and performance impact of optimization. Keep the total installed game footprint within the 2.5–3.0 GB target, aiming for approximately 2.5 GB and never exceeding 3.0 GB without the user's explicit approval. If preserving all essential content within the target proves technically impossible, document the measured size, the exact cause, the optimization attempts, and the remaining options. Do not silently delete content or claim the target has been met when it has not.
+
+Measure memory consumption during gameplay and define a suitable RAM budget for this 6 GB device, leaving sufficient memory for Android and background processes. Monitor and optimize memory usage, and test for memory pressure, leaks, stuttering, and crashes. Determine practical limits through device-specific profiling rather than arbitrary assumptions.
+
+Arabic Language, Localization, and Right-to-Left Implementation
+
+Arabic must be the default language throughout the entire game, not merely the language of the main menu. All player-facing content must be available in Arabic by default, including menus, buttons, settings, icons and labels, character and NPC dialogue, names, item and equipment descriptions, skills, quests, shops, combat messages, notifications, tutorials, instructions, maps, and gameplay interfaces.
+
+Implement complete Arabic text support in Godot 4.3 using suitable fonts and text-rendering methods that correctly support Arabic Unicode, contextual letter shaping, connected glyph forms, and bidirectional text. Arabic letters must appear joined and shaped correctly according to their position in each word. Do not display disconnected Arabic letters, reversed sentences, missing glyphs, or incorrectly ordered text.
+
+Apply right-to-left layout and alignment consistently to Arabic interfaces. Ensure that containers, menus, text fields, buttons, navigation elements, lists, dialogue panels, inventory, equipment screens, shops, quest panels, notifications, and other interface components follow the correct Arabic reading direction. Do not blindly mirror gameplay controls, maps, camera behavior, or visual elements whose function or orientation should remain unchanged.
+
+Handle mixed Arabic and English text, numbers, punctuation, Latin item identifiers, symbols, and other bidirectional content correctly. Preserve the intended order of words, numbers, prices, game statistics, coordinates, and technical values. Ensure that Arabic input fields support correct typing, editing, cursor movement, selection, and display.
+
+Use appropriate Arabic-capable fonts with complete required glyph coverage. Include reliable font fallbacks where necessary, and verify that the selected fonts render correctly on the target Android device. Avoid font substitutions that cause broken shaping, missing characters, clipping, or inconsistent visual presentation.
+
+Create a consistent Arabic localization system so that all game text is centrally managed and can be translated without changing gameplay logic. Provide English as a fully supported additional language, with a working in-game language selector. Switching languages must update all supported interface and game text consistently without losing saved progress, character data, settings, or gameplay state.
+
+Arabic must remain the default language on first launch and after fresh installation. Save the user's selected language locally so that subsequent launches preserve that choice.
+
+Mandatory Arabic acceptance testing: Test Arabic rendering and RTL behavior across the complete game interface on Android. Verify connected letter shaping, right-to-left reading order, mixed Arabic/English strings, numbers, punctuation, prices, text input, dialogue, long text wrapping, scrolling, buttons, menus, inventory, equipment, shops, quests, notifications, and all relevant screens. Record actual results and correct any broken, reversed, clipped, disconnected, or missing text before marking Arabic support complete.
+
+8. BUILD, TEST, AND DELIVERY
+
+Build the actual Android APK and test the real application wherever the environment permits. Test installation, first-launch resource detection, the in-game approval screen, user-approved downloading from inside the game, interrupted-download recovery, integrity checks, extraction, PCK installation and loading when applicable, resource placement, offline launch, and the complete gameplay loop: classes, movement, camera, combat, skills, monsters, bosses, NPCs, quests, equipment, inventory, shops, progression, maps, saving/loading, repeated sessions, and sustained performance.
+
+MANDATORY FUNCTIONAL TESTING & ACCEPTANCE VERIFICATION
+
+Every game feature, component, system, and interactive element must undergo actual functional testing and pass clearly defined acceptance criteria before it can be declared complete.
+
+This applies to all game content and systems, including maps, cities, buildings, characters, NPCs, monsters, bosses, movement, navigation, combat, skills, weapons, armor, equipment, items, inventory, merchants, local buying and selling transactions, quests, rewards, character progression, saving and loading, and all interconnected offline gameplay mechanics.
+
+For every feature or system:
+
+1. Implement Before Testing: Complete its actual functionality, gameplay logic, interactions, dependencies, and required integrations before considering it ready for acceptance testing.
+
+2. Execute Real Tests: Launch and operate the actual implementation. Test its real behavior through gameplay or automated tests, not through screenshots, visual inspection, simulated success messages, mock data, or assumptions.
+
+3. Verify All Interactions: Test normal operations, user interactions, input handling, state changes, expected outputs, edge cases, failure conditions, and interactions with dependent systems.
+
+4. Verify System Integration: Confirm that each feature works correctly with related game systems, shared local data, character states, world interactions, inventory, economy, quests, progression, and all applicable dependencies. Verify that the complete offline gameplay loop works without external multiplayer or server dependencies.
+
+5. Verify Android Compatibility: Test gameplay functionality on the target Android device, including controls, interface, performance, memory usage, storage, installation, resource handling, and offline operation. Emulator tests may support development but do not replace actual-device verification whenever device testing is available.
+
+6. Record Actual Results: Maintain a detailed, persistent testing and acceptance report for every feature, including:
+   
+   - Feature and system name.
+   - Implemented functionality.
+   - Tests performed and their exact procedures.
+   - Expected results.
+   - Actual observed results.
+   - Pass/fail status for each test.
+   - Identified bugs, missing functionality, and dependencies.
+   - Evidence of execution, such as test logs, runtime output, screenshots, or recordings where appropriate.
+   - Remaining work and the next required action.
+
+7. Enforce Strict Completion Criteria: A feature may only be marked COMPLETE when all its required functionality has been implemented, all mandatory acceptance tests have passed, all critical dependencies are working, and its results have been recorded. Partial implementations must be marked PARTIALLY COMPLETE. Failed tests must be marked FAILED. Untested features must be marked NOT TESTED. Visual placeholders, mock implementations, mocked API responses, and simulated interactions must never qualify as completed functionality.
+
+8. Fix and Retest: When a test fails, investigate and fix the underlying cause, then rerun the failed tests and all relevant regression tests. Do not hide, ignore, or downgrade failures to obtain a passing status.
+
+9. Maintain a Live Progress and Test Registry: Keep an up-to-date record of every feature, its implementation status, test coverage, acceptance results, known issues, and dependencies. Preserve this registry across development sessions and resume from the actual recorded stopping point without unnecessarily repeating completed work.
+
+10. Final Completion Audit: Before declaring the game or any major development milestone complete, perform an end-to-end acceptance audit of all implemented systems and their interactions. Verify that the game operates as a coherent, fully playable, offline MMORPG-inspired world rather than a collection of isolated features or visual demonstrations.
+
+Non-Negotiable Rule: Never claim that a feature, system, milestone, or the game itself is complete merely because its code has been written, its interface has been created, or its visual representation looks finished. Completion must be demonstrated through successful execution, verified functionality, passing acceptance tests, and documented results. Always report the actual development and testing status honestly.
+
+Deliver the updated existing project, final APK, resource manifest, reference research specification, development log, and an honest implementation and testing report. Clearly distinguish implemented and verified features from partial, missing, untested, or blocked features. Never claim a build, upload, deployment, download, installation, or test succeeded without actual evidence.
+
+FINAL OBJECTIVE
+
+Transform the existing CLASH OF LEGENDS project into a complete, visually improved, independent Android MMORPG-inspired personal game, using Conquer Online Mobile as its exclusive gameplay reference. Preserve existing progress, research and implement the complete connected gameplay systems, package the largest practical portion of resources into one APK, and automatically download and install only the small essential remainder through the game's own interface after the user's approval on first launch. Resume development from the last verified checkpoint until the actual deliverables and test results are ready.
+
+---
+
+PART II — EXISTING PROJECT FILES: COMPLETE AUDIT AND RECONCILIATION
+
+9. AUDIT THE EXISTING 35-FILE PROJECT
+
+The existing project is a Godot 4.3 3D project. Perform a complete audit of its actual files before implementation. The following inventory identifies the known supplied scripts, scenes, resources, and alternative versions that must be reconciled. Treat these as the expected project components, then verify their actual paths and contents in the workspace.
+
+Do not assume every item below is a separate source file: some supplied materials were scene excerpts, inline scripts, duplicate scene content, or alternate implementations. Determine the actual canonical file boundaries from the project itself. Do not create artificial files merely to make the inventory count match 35.
+
+A. Project configuration and core scripts
+
+1. "res://project.godot"
+   
+   - Godot 4.3 Mobile project configuration.
+   - Main scene expected at "res://scenes/core/MainGame.tscn".
+   - Existing autoloads: GameManager, LocalSaveEngine, CombatEngine, AutoHuntManager, AutoLootManager.
+   - Arabic fallback, text rendering, font resource, and landscape viewport configuration.
+
+2. "res://export_presets.cfg"
+   
+   - Android export configuration.
+   - ARM64 target, package identifier "com.legends.clashoflegends", Arabic application name, and export settings.
+   - Verify signing, permissions, package identity, and actual export compatibility.
+
+3. "res://assets/shaders/weapon_glow.gdshader"
+   
+   - Weapon glow/emission shader with configurable colors and pulse effect.
+   - Verify shader syntax, material assignment, rendering compatibility, and mobile performance.
+
+4. "res://scripts/core/GameManager.gd"
+   
+   - Global game state, player references, UI references, signals, language handling, notifications, simulated chat, quest and boss events.
+   - Verify all referenced properties, signals, nodes, and methods exist and are correctly connected.
+
+5. "res://scripts/core/LocalSaveEngine.gd"
+   
+   - Local saving/loading, player state, inventory, equipment, quest progress, settings, backup, and integrity handling.
+   - Verify complete serialization and restoration, data migration, corruption recovery, and compatibility with all systems.
+   - Remove or reconcile premium-currency data if it conflicts with the gold-only rule.
+
+6. "res://scripts/combat/CombatEngine.gd"
+   
+   - Class-specific skill definitions, damage, cooldowns, range, healing, buffs, and combat behavior.
+   - Verify actual skill effects, class restrictions, target validation, area-of-effect behavior, cooldown correctness, and integration with player and monster state.
+
+B. Player, camera, inventory, and automation
+
+7. "res://scripts/player/PlayerController.gd"
+   
+   - CharacterBody3D player movement, navigation, manual controls, auto-hunt movement, jumping, mounting, stats, equipment, leveling, damage, death, and respawn.
+   - Audit physics processing carefully. Prevent multiple conflicting calls to "move_and_slide()", duplicate gravity application, or movement being applied from competing code paths.
+
+8. "res://scripts/player/FreeCamera3D.gd"
+   
+   - Camera controller, SpringArm3D, Camera3D, touch rotation, zoom, and camera-yaw access.
+   - Verify the required elevated MMORPG camera and mobile controls.
+
+9. "res://scripts/player/PlayerInventory.gd"
+   
+   - Inventory slots, equipment, starter items, consumables, refinement, selling, equipping, and unequipping.
+   - Verify stack limits, quantities, slot availability, transaction safety, equipment effects, and persistence.
+
+10. "res://scripts/automation/AutoLootManager.gd"
+    
+    - Auto-loot options for gold, materials, and equipment.
+    - Verify filters, rarity thresholds, item pickup, inventory-full behavior, and currency compliance.
+
+11. "res://scripts/automation/QuestNavigationAgent.gd"
+    
+    - Quest dialogue, objectives, navigation, kill progression, and rewards.
+    - Verify quest-state restoration, objective progression, NPC links, rewards, navigation targets, and save integration.
+
+12. "res://scripts/enemies/MonsterBase.gd"
+    
+    - Monster AI, patrol, detection, chasing, attacking, returning, death, respawn, XP, and loot.
+    - Verify state transitions, navigation, combat, drop generation, reward attribution, and quest integration.
+
+C. NPCs, loot, simulated world, and interfaces
+
+13. "res://scripts/npcs/NPCBase.gd"
+    
+    - NPC roles and interactions including sage, blacksmith, merchant, and dungeon warden.
+    - Verify dialogue, UI references, shop and blacksmith operations, quest interactions, and level requirements.
+
+14. "res://scripts/combat/LootDrop3D.gd"
+    
+    - 3D loot pickup visuals, rarity display, collision, and automatic collection.
+    - Verify Area3D behavior, item ownership, pickup range, and AutoLootManager integration.
+
+15. "res://scripts/ai/SimulatedPlayer.gd"
+    
+    - Local simulated player characters that populate the world.
+    - Verify movement, AI behavior, combat, identity display, and performance. These must remain local simulations, not networked players.
+
+16. "res://scripts/ui/MainHUDController.gd" — first supplied implementation
+    
+    - HUD, GameManager signals, bars, currency display, auto-hunt and auto-loot, inventory, blacksmith, settings, attacks, jumping, mounting, skills, quest navigation, and floating damage text.
+    - Compare all actual node paths, method names, signals, and properties against the actual HUD scene.
+
+17. "res://scripts/ui/VirtualJoystickController.gd"
+    
+    - Virtual joystick input, touch movement, and movement-vector signal.
+    - Verify class names, signal names, input handling, and PlayerController integration.
+
+18. "res://scripts/ui/InventoryUI.gd"
+    
+    - Inventory grid, item details, equip/use/sell controls, and inventory signals.
+    - Verify all referenced nodes, signal connections, item data, and actual transaction behavior.
+
+19. "res://scripts/ui/BlacksmithUI.gd"
+    
+    - Equipment selection, stat display, refinement, and refinement success/failure.
+    - Verify real refinement effects, costs, failure behavior, item persistence, and UI integration.
+
+20. "res://scripts/ui/SettingsUI.gd"
+    
+    - Language selection, class selection, saving, and settings controls.
+    - Verify signal connections, handler names, persistence, language refresh, and class-selection rules.
+
+21. "res://scripts/core/TestRunner.gd"
+    
+    - Automated project and gameplay tests.
+    - Inspect every test and improve shallow checks into meaningful functional and integration tests. File-existence checks alone must not be considered proof of gameplay correctness.
+
+D. Supplied scenes and resources
+
+22. "res://scenes/characters/Player.tscn"
+    
+    - CharacterBody3D player scene with collision, body, weapon, aura, mount, camera pivot, spring arm, camera controller, and inventory.
+    - Verify all script attachments, node paths, collision layers, and runtime behavior.
+
+23. "res://scenes/core/MainGame.tscn"
+    
+    - Main 3D world scene, ground, town area, environmental objects, lights, sky, player, NPCs, monsters, boss, simulated player, and quest navigation.
+    - Verify navigation mesh baking, navigation maps, spawn positions, collision, world connectivity, scene dependencies, and runtime startup.
+
+24. "res://scenes/world/LootDrop3D.tscn"
+    
+    - Area3D loot scene with collision, mesh, and Label3D.
+    - Verify collision and pickup behavior.
+
+25. "res://scenes/enemies/MonsterBase.tscn"
+    
+    - Base monster scene with collision and visual body.
+    - Verify script attachment, stats, and AI.
+
+26. "res://scenes/enemies/WildWolf.tscn"
+    
+    - Wolf monster scene and level configuration.
+    - Verify inherited scene behavior, visuals, AI, and balance.
+
+27. "res://scenes/enemies/BossDragon.tscn"
+    
+    - Boss dragon scene, visual components, and boss stats.
+    - Verify boss behavior, combat, skills, rewards, and scene inheritance.
+
+28. "res://scenes/npcs/NPCBase.tscn"
+    
+    - NPC scene with interaction Area3D and collision.
+    - Verify interaction range, collision layers, and role-specific configuration.
+
+29. "res://scenes/characters/SimulatedPlayer.tscn"
+    
+    - Local simulated character scene.
+    - Verify AI, movement, display, and performance.
+
+30. "res://scenes/core/TestRunnerScene.tscn"
+    
+    - Test runner scene.
+    - Check for duplicated scene content and retain one valid canonical scene unless a genuinely different test scene is required.
+
+31. Dialogue UI scene
+    
+    - Panel, VBox, dialogue labels, option buttons, and inline DialogueUI script.
+    - Identify the actual scene path and verify registration with GameManager, option generation, dialogue flow, and all NPC interactions.
+
+32. Inventory UI scene
+    
+    - Panel, 40-slot grid, details panel, Equip/Use/Sell/Close controls.
+    - Identify the actual scene path and verify layout, signal connections, slot updates, and responsive Android display.
+
+33. Settings UI scene
+    
+    - Language, class, save, and close buttons.
+    - Identify the actual scene path and reconcile scene signal connections with SettingsUI.gd.
+
+34. "res://scripts/ui/MainHUDController.gd" — second supplied implementation
+    
+    - A distinct alternative implementation using different node paths, signals, player property names, and methods.
+    - Do not assume it is identical to item 16.
+    - Compare both implementations and their scene dependencies. Select or consolidate the canonical controller based on actual project compatibility, retaining all valid functionality and eliminating duplicated or conflicting logic.
+
+35. "res://scenes/ui/MainHUD.tscn" — second supplied HUD scene excerpt
+    
+    - HUDLayout, auto controls, menu buttons, action buttons, skill buttons, jump/mount/attack, XP bar, and signal connections.
+    - Verify the complete actual scene. Check whether all nodes referenced by its controller exist and whether every signal connection targets a valid method with compatible arguments.
+
+10. MANDATORY CROSS-FILE COMPATIBILITY AUDIT
+
+Perform a systematic cross-file audit before declaring the project ready for development.
+
+At minimum, verify the following:
+
+A. Autoloads and global references
+
+- Every autoload configured in "project.godot" resolves to the correct script.
+- Every global singleton reference uses the correct actual name.
+- No missing autoload, circular dependency, duplicate singleton, or invalid script reference remains.
+- Every referenced property, signal, method, class name, resource path, and scene path exists and has the expected type.
+
+B. Player and movement
+
+- Player scene and PlayerController agree on node names and script interfaces.
+- Manual movement, navigation, auto-hunt, gravity, jumping, mounting, and camera movement operate without conflicting physics calls.
+- The virtual joystick emits the signal and data expected by the actual HUD and player controller.
+- HP, MP, XP, level, attack, defense, target, class, and currency properties are consistent across all systems.
+
+C. Combat and skills
+
+- CombatEngine and PlayerController agree on skill method signatures, target types, cooldown handling, and combat results.
+- Every class can use only its verified class-appropriate skills.
+- Healing, buffs, damage, area effects, and cooldowns have real gameplay effects, not notifications alone.
+- Basic attack range, cooldown, target selection, damage, death, and reward logic work correctly.
+
+D. Inventory and economy
+
+- InventoryUI, PlayerInventory, LocalSaveEngine, AutoLootManager, BlacksmithUI, and GameManager use a consistent item data structure.
+- Stack quantities, slot limits, equipment slots, refinement, sale, and consumable use are handled safely.
+- Gold transactions are consistent and persisted correctly.
+- Remove diamond, CP, premium currency, and payment functionality where it conflicts with the original gold-only requirement. Do not silently delete legitimate non-currency gameplay items; distinguish materials and equipment from currency.
+
+E. Quests and NPCs
+
+- QuestNavigationAgent, NPCBase, MonsterBase, GameManager, and LocalSaveEngine agree on quest state and progression.
+- Quest progress survives saving, loading, and application restarts.
+- NPC interactions open the correct actual UI.
+- Displayed level requirements and actual access checks agree.
+- Quest rewards, monster kills, and objective progression are integrated.
+
+F. HUD and UI
+
+- Compare both MainHUDController implementations and the actual MainHUD scene.
+- Resolve duplicate or incompatible controllers without losing valid HUD features.
+- Every button, toggle, joystick, skill control, menu, and window must have a valid signal connection and functional handler.
+- Correct missing nodes, invalid paths, wrong method names, incompatible signal arguments, and duplicated signal connections.
+- Verify UI scaling, touch targets, anchors, layout, landscape orientation, and Arabic RTL behavior.
+
+G. Save system
+
+- GameManager calls and LocalSaveEngine method signatures must match.
+- Add or repair missing settings persistence methods where required.
+- Test save/load of player stats, class, level, XP, gold, inventory, equipment, quest progress, language, and settings.
+- Verify backups, corruption handling, and repeated-session consistency.
+
+H. Scenes, resources, and navigation
+
+- Every "preload()", "load()", "PackedScene", font, shader, texture, material, and scene resource path must resolve.
+- Every scene's attached script and referenced node paths must be valid.
+- Verify collision shapes, physics layers and masks, Area3D monitoring, and interaction ranges.
+- Verify navigation mesh generation and actual navigation agents. Do not assume an empty or unbaked NavigationMesh is functional.
+- Inspect every scene for missing external resources and invalid inherited-scene relationships.
+
+11. DUPLICATE DETECTION AND CANONICAL FILE SELECTION
+
+Perform duplicate detection across scripts, scenes, resources, and configuration files.
+
+Use content comparison and dependency analysis, not filenames alone.
+
+- If two files are byte-identical duplicates, keep one canonical copy and update all references safely.
+- If two files have similar content but different valid functionality, compare them and consolidate their useful features into one coherent implementation.
+- If two versions have conflicting architecture, identify the authoritative version from the actual main scene, project configuration, current references, and working runtime dependencies.
+- Do not delete a file simply because its name resembles another file.
+- Do not remove valid content, assets, features, or functionality during consolidation.
+- Preserve a record of every duplicate or obsolete file removed, its replacement, and all references updated.
+- Preserve the existing ".github/workflows/inspect-game-source.yml" workflow if it exists. Do not overwrite or remove it unnecessarily.
+- Create a safe GitHub checkpoint before significant consolidation or deletion.
+
+Specific known reconciliation targets:
+
+1. Two distinct MainHUDController implementations were supplied. Resolve their differences using the actual HUD scene and project dependencies.
+2. More than one TestRunnerScene excerpt was supplied. Determine whether they represent duplicate content or distinct test configurations.
+3. SettingsUI.gd and its scene excerpt may use inconsistent signal-handler names. Reconcile them.
+4. GameManager may call LocalSaveEngine methods that are absent or differently named. Reconcile the interfaces.
+5. PlayerController may have conflicting movement and physics calls. Consolidate movement into a coherent physics lifecycle.
+6. Inventory, currency, and loot systems may contain fields inconsistent with the gold-only economy. Reconcile without damaging legitimate item functionality.
+7. Quest state persistence and quest-manager references may be incomplete. Integrate the full lifecycle.
+8. HUD scene connections may contain incomplete or malformed skill-button bindings. Verify and repair all signal arguments and handlers.
+
+12. GODOT 4.3 VALIDATION AND REPAIR
+
+Validate the project against Godot 4.3, including the actual Android export target.
+
+Use the actual Godot editor, command-line tools, project import, parser, resource loader, scene loader, and export process whenever available.
+
+Perform these stages in order:
+
+1. Verify project root and "project.godot".
+2. Verify all autoloads and resource paths.
+3. Import project resources.
+4. Parse every GDScript file.
+5. Validate every scene and external resource.
+6. Validate shaders and materials.
+7. Validate signal connections and node paths.
+8. Run the main scene.
+9. Run automated tests.
+10. Run gameplay integration tests.
+11. Export an Android APK.
+12. Install and test on the target device if the environment provides genuine device access.
+
+Repair errors at their source. Do not silence errors, disable features, remove tests, or replace functional systems with mocks to obtain a clean build.
+
+For every repair:
+
+- Identify the original defect.
+- Identify the affected files and dependent systems.
+- Apply the smallest safe correction that preserves intended functionality.
+- Re-run the relevant parser, scene, and integration tests.
+- Record the result and regression-test impact.
+
+If the environment does not provide Godot execution, Android device access, GitHub write permission, export templates, or required credentials, clearly report the exact missing capability. Continue all tasks that can genuinely be completed. Never claim an execution, export, installation, upload, or test occurred without evidence.
+
+13. DEVELOPMENT STAGES AND SAFE EXECUTION ORDER
+
+Work incrementally in the following order. Do not attempt an uncontrolled rewrite of all files at once.
+
+Stage 1 — Project discovery and checkpoint
+
+- Inspect the actual project tree and GitHub repository.
+- Record the current branch, commit, project root, Godot version, and working state.
+- Preserve existing work and create a recoverable checkpoint.
+- Identify all actual files and dependencies.
+
+Stage 2 — File inventory and architecture map
+
+- Map all scripts, scenes, assets, resources, autoloads, and UI dependencies.
+- Compare them with the 35-component inventory in this directive.
+- Identify missing, duplicate, alternative, incomplete, and conflicting files.
+- Produce a dependency map and issue registry.
+
+Stage 3 — Godot compatibility and core repairs
+
+- Repair project configuration, autoloads, script parsing, class references, node paths, signals, and scene resources.
+- Resolve PlayerController physics and camera integration.
+- Repair save/load interfaces.
+- Make the main scene launch reliably.
+
+Stage 4 — Gameplay integration
+
+- Integrate player, classes, combat, skills, monsters, bosses, loot, inventory, equipment, blacksmith, quests, NPCs, and local simulated players.
+- Resolve all cross-system data and method mismatches.
+- Ensure gold-only economy.
+- Preserve existing working systems.
+
+Stage 5 — UI and Arabic
+
+- Consolidate the HUD implementations.
+- Repair inventory, settings, dialogue, blacksmith, joystick, and all controls.
+- Implement consistent Arabic-first localization and English switching.
+- Verify complete RTL rendering and text shaping.
+
+Stage 6 — World and content completeness
+
+- Inspect the current world and actual content coverage.
+- Replace incomplete blockout or primitive-only representations with functional, properly integrated content.
+- Build the connected maps, cities, environments, characters, creatures, NPCs, and gameplay systems required by the original directive.
+- Preserve the researched mobile reference identities and progression.
+
+Stage 7 — Offline and save verification
+
+- Verify local AI, world activity, combat, quests, economy, progression, and save/load.
+- Ensure gameplay has no runtime network dependency after initial setup.
+- Test offline operation.
+
+Stage 8 — Resource packaging and Android delivery
+
+- Optimize and package the largest practical portion into one APK.
+- Implement the approved in-game first-run download for any genuinely necessary remaining PCK resources.
+- Verify manifest, hashes, storage, installation, and offline operation.
+
+Stage 9 — Full acceptance and checkpoint
+
+- Run parser, scene, integration, gameplay, Android, offline, Arabic, and performance tests.
+- Fix failures and rerun regression tests.
+- Record exact status and evidence.
+- Commit and checkpoint the verified result.
+- Continue from the last confirmed stage until the requested deliverables are genuinely ready.
+
+14. REQUIRED PROJECT REPORTS
+
+Maintain these persistent project records in the existing project and GitHub repository:
+
+1. "PROJECT_AUDIT.md"
+   
+   - Actual project structure, file inventory, dependencies, duplicate analysis, and compatibility issues.
+
+2. "GODOT_4_3_COMPATIBILITY_REPORT.md"
+   
+   - Parser results, scene/resource validation, script and signal compatibility, repairs, and remaining blockers.
+
+3. "SYSTEM_INTEGRATION_MATRIX.md"
+   
+   - Relationships among player, combat, inventory, quests, NPCs, monsters, bosses, UI, save system, and offline systems.
+
+4. "DEVELOPMENT_LOG.md"
+   
+   - Current stage, completed work, modified files, unresolved issues, checkpoint, and next action.
+
+5. "TESTING_ACCEPTANCE_REPORT.md"
+   
+   - Feature-by-feature tests, exact procedures, expected and actual results, Pass/Fail/Not Tested statuses, and evidence.
+
+6. "RESOURCE_MANIFEST"
+   
+   - Actual resource filenames, versions, sizes, destinations, and checksums for the packaging/downloading system.
+
+7. "REFERENCE_RESEARCH_SPECIFICATION.md"
+   
+   - Verified Conquer Online Mobile edition, sources, confidence levels, gameplay systems, and implementation mapping.
+
+These records must describe actual project state. Do not populate them with invented success claims or fabricated test evidence.
+
+15. FINAL EXECUTION RULES
+
+- Continue the existing project; do not create a replacement project.
+- Preserve working files and features.
+- Do not delete or overwrite valid existing work unnecessarily.
+- Do not treat the inventory in this directive as proof that a file exists; inspect the actual project.
+- Do not recreate missing source code from incomplete excerpts by guessing.
+- Do not silently discard one of the alternative HUD implementations.
+- Do not claim that the supplied 35 components are all valid, complete, or compatible before checking them.
+- Do not consider code compilation alone proof of a complete game.
+- Do not use mock behavior or placeholder assets to satisfy functional acceptance criteria.
+- Do not make external services or online gameplay dependencies part of the finished offline game.
+- Do not exceed the resource-size limit without explicit approval.
+- Do not claim actual Android testing if no Android device was accessible.
+- Do not stop after producing an audit report: proceed with the actual repairs and development that the environment permits.
+- At every checkpoint, report what was actually changed, what was actually tested, what passed, what failed, and what remains.
+
+Immediate instruction: Begin with Stage 1. Inspect the current workspace and connected repository, establish a safe checkpoint, and then proceed stage by stage. Do not wait for the user to provide another project archive or repeat the existing setup. Use the actual project in the current workspace as the source of truth, and use this directive as the complete development and acceptance specification.

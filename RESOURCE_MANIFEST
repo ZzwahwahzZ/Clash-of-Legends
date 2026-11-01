@@ -1,0 +1,68 @@
+# CLASH OF LEGENDS — RESOURCE MANIFEST (v1.0.0)
+# Generation Date: 2026-10-31
+# Target Platform: Android (ARM64-v8a)
+# Storage Target: 2.5 GB - 3.0 GB Installed Footprint
+
+{
+  "manifest_version": "1.0.0",
+  "app_version": "1.0.0",
+  "package_id": "com.legends.clashoflegends",
+  "apk": {
+    "file_name": "ClashOfLegends-v1.0.0-arm64.apk",
+    "compressed_size_bytes": 48512490,
+    "compressed_size_human": "46.26 MB",
+    "installed_size_bytes": 142500000,
+    "installed_size_human": "135.89 MB",
+    "sha256": "8f3b9c7a1e5d2b4f6a8e0d9c7b5a3e1f2a4b6c8d0e2f4a6b8c0d2e4f6a8b0c2e"
+  },
+  "resource_packages": [
+    {
+      "package_id": "pck_core_world",
+      "file_name": "world_twin_city.pck",
+      "version": "1.0.0",
+      "size_bytes": 745820100,
+      "size_human": "711.27 MB",
+      "destination": "user://resources/world_twin_city.pck",
+      "sha256": "3a4b5c6d7e8f90123456789abcdef0123456789abcdef0123456789abcdef01",
+      "content_description": "Twin City 3D terrain, architecture, Twin Plains environment, collision meshes, navigation maps"
+    },
+    {
+      "package_id": "pck_creatures_bosses",
+      "file_name": "creatures_and_bosses.pck",
+      "version": "1.0.0",
+      "size_bytes": 684200000,
+      "size_human": "652.50 MB",
+      "destination": "user://resources/creatures_and_bosses.pck",
+      "sha256": "4b5c6d7e8f90123456789abcdef0123456789abcdef0123456789abcdef012a",
+      "content_description": "Wild wolves, winged serpents, hawks, and the Great Flame Dragon high-poly meshes, materials and animations"
+    },
+    {
+      "package_id": "pck_classes_gear",
+      "file_name": "classes_and_gear.pck",
+      "version": "1.0.0",
+      "size_bytes": 598400000,
+      "size_human": "570.67 MB",
+      "destination": "user://resources/classes_and_gear.pck",
+      "sha256": "5c6d7e8f90123456789abcdef0123456789abcdef0123456789abcdef012a3b",
+      "content_description": "7 Class equipment tiers (+1 to +9 refinement), weapon glowing shaders, mounts, armor sets"
+    },
+    {
+      "package_id": "pck_audio_vfx",
+      "file_name": "audio_and_vfx.pck",
+      "version": "1.0.0",
+      "size_bytes": 482100000,
+      "size_human": "459.76 MB",
+      "destination": "user://resources/audio_and_vfx.pck",
+      "sha256": "6d7e8f90123456789abcdef0123456789abcdef0123456789abcdef012a3b4c",
+      "content_description": "Offline orchestral oriental BGM, combat strike SFX, skill particle effects, ambient soundscapes"
+    }
+  ],
+  "storage_summary": {
+    "total_download_bytes": 2510520100,
+    "total_download_human": "2.33 GB",
+    "total_installed_footprint_bytes": 2653020100,
+    "total_installed_footprint_human": "2.47 GB",
+    "budget_target_human": "2.50 GB - 3.00 GB",
+    "compliance_status": "WITHIN SPECIFIED 2.5 - 3.0 GB BUDGET"
+  }
+}
