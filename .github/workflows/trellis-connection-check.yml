@@ -1,0 +1,110 @@
+
+name: TRELLIS.2 API Connection Check
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check-trellis-api:
+    name: Check Hugging Face TRELLIS.2
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check TRELLIS.2 API
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import sys
+          import urllib.request
+          import urllib.error
+
+          BASE = "https://microsoft-trellis-2.hf.space"
+          TOKEN = os.environ.get("HF_TOKEN", "").strip()
+
+          headers = {
+              "Accept": "application/json",
+              "User-Agent": "Clash-of-Legends-GitHub-Actions"
+          }
+
+          if TOKEN:
+              headers["Authorization"] = f"Bearer {TOKEN}"
+
+          def get_json(path):
+              url = BASE + path
+              request = urllib.request.Request(url, headers=headers)
+              with urllib.request.urlopen(request, timeout=45) as response:
+                  print(f"HTTP {response.status}: {path}")
+                  return json.loads(response.read().decode("utf-8"))
+
+          try:
+              print("===================================")
+              print("CLASH OF LEGENDS - TRELLIS API CHECK")
+              print("===================================")
+
+              print("\n[1/2] Reading API schema...")
+              api_info = get_json("/gradio_api/info")
+
+              print("\n[2/2] Reading Space configuration...")
+              config = get_json("/config")
+
+              print("\n========== API ENDPOINTS ==========")
+
+              endpoints = api_info.get("named_endpoints", {})
+              if isinstance(endpoints, dict) and endpoints:
+                  for name, details in endpoints.items():
+                      print(f"\nEndpoint: {name}")
+                      if isinstance(details, dict):
+                          print("Parameters:")
+                          for parameter in details.get("parameters", []):
+                              print(
+                                  " -",
+                                  parameter.get("label", "unnamed"),
+                                  "| type:",
+                                  parameter.get("type", "unknown")
+                              )
+              else:
+                  print("No named_endpoints found in the schema.")
+                  print("Available schema keys:", list(api_info.keys()))
+
+              print("\n========== FUNCTION INDEXES ==========")
+
+              dependencies = config.get("dependencies", [])
+              found = 0
+
+              for dependency in dependencies:
+                  if not isinstance(dependency, dict):
+                      continue
+
+                  api_name = dependency.get("api_name")
+                  fn_index = dependency.get("id")
+
+                  if api_name or fn_index is not None:
+                      print(
+                          f"api_name={api_name} | fn_index={fn_index}"
+                      )
+                      found += 1
+
+              if found == 0:
+                  print("No API function mappings found in config.")
+
+              print("\n========== RESULT ==========")
+              print("SUCCESS: GitHub can reach TRELLIS.2 API.")
+              print("No model generation was started.")
+              print("No GPU generation quota was requested.")
+
+          except urllib.error.HTTPError as error:
+              print(f"HTTP ERROR: {error.code} {error.reason}")
+              print(error.read().decode("utf-8", errors="replace")[:2000])
+              sys.exit(1)
+
+          except Exception as error:
+              print("CONNECTION CHECK FAILED:")
+              print(str(error))
+              sys.exit(1)
+          PY
