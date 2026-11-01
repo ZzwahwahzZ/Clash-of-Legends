@@ -1,0 +1,78 @@
+
+name: TRELLIS Config Inspector
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect TRELLIS Gradio configuration
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import urllib.request
+
+          BASE = "https://microsoft-trellis-2.hf.space"
+          headers = {"Accept": "application/json"}
+          token = os.environ.get("HF_TOKEN", "").strip()
+          if token:
+              headers["Authorization"] = "Bearer " + token
+
+          def get(path):
+              req = urllib.request.Request(BASE + path, headers=headers)
+              with urllib.request.urlopen(req, timeout=60) as response:
+                  print("HTTP", response.status, path)
+                  return json.loads(response.read())
+
+          config = get("/config")
+          info = get("/gradio_api/info")
+
+          print("\n========== TARGET ENDPOINTS ==========")
+          for name, details in info.get("named_endpoints", {}).items():
+              if name in ["/image_to_3d", "/extract_glb",
+                          "/start_session", "/preprocess_image",
+                          "/get_seed"]:
+                  print("\nENDPOINT:", name)
+                  print(json.dumps(details, indent=2))
+
+          print("\n========== COMPONENT INDEX ==========")
+          components = config.get("components", [])
+          component_map = {}
+          for component in components:
+              cid = component.get("id")
+              if cid is not None:
+                  component_map[cid] = component
+
+          print("\n========== RELEVANT DEPENDENCIES ==========")
+          for dep in config.get("dependencies", []):
+              fn = dep.get("id")
+              api = dep.get("api_name")
+              if fn in [2, 3, 4, 5, 6, 7, 8, 9] or api:
+                  print("\nDEPENDENCY:", fn, api)
+                  print("INPUTS:", dep.get("inputs"))
+                  print("OUTPUTS:", dep.get("outputs"))
+                  print("TARGETS:", dep.get("targets"))
+                  print("TRIGGER_AFTER:", dep.get("trigger_after"))
+
+                  ids = (dep.get("inputs") or []) + (dep.get("outputs") or [])
+                  for cid in ids:
+                      component = component_map.get(cid)
+                      if component:
+                          props = component.get("props", {})
+                          print("COMPONENT:", cid)
+                          print("TYPE:", component.get("type"))
+                          print("PROPS:", json.dumps(props, indent=2))
+
+          print("\nINSPECTION COMPLETE")
+          print("No image was uploaded.")
+          print("No model generation was started.")
+          print("No GPU quota was requested.")
+          PY
