@@ -67,56 +67,127 @@ jobs:
               r.raise_for_status()
               return r
 
+          
           def queue_call(fn_index, data, label):
-              payload = {
+              request_payload = {
                   "data": data,
                   "fn_index": fn_index,
                   "session_hash": SESSION
               }
-              r = S.post(
+              joined = S.post(
                   f"{BASE}/gradio_api/queue/join",
-                  json=payload,
+                  json=request_payload,
                   timeout=120
               )
-              check_response(r, f"Queue {label}")
-              print(f"Queued {label}; waiting for result...")
+              check_response(joined, f"Queue {label}")
+              try:
+                  join_info = joined.json()
+              except ValueError:
+                  join_info = {}
+              event_id = join_info.get("event_id")
+              print(f"Queued {label}; event_id={event_id or 'not returned'}; waiting for result...")
 
-              r = S.get(
+              stream_params = {"session_hash": SESSION}
+              if event_id:
+                  stream_params["event_id"] = event_id
+
+              response = S.get(
                   f"{BASE}/gradio_api/queue/data",
-                  params={"session_hash": SESSION},
+                  params=stream_params,
                   stream=True,
-                  timeout=TIMEOUT
+                  timeout=(30, TIMEOUT)
               )
-              check_response(r, f"Stream {label}")
+              check_response(response, f"Stream {label}")
 
-              event = None
-              for raw in r.iter_lines(decode_unicode=True):
-                  if not raw:
-                      continue
-                  if raw.startswith("event:"):
-                      event = raw[6:].strip()
-                  elif raw.startswith("data:"):
-                      payload = json.loads(raw[5:].strip())
-                      if event == "heartbeat":
+              sse_event = None
+              data_lines = []
+              recent_messages = []
+
+              def handle_message(event_name, message):
+                  msg_type = message.get("msg") if isinstance(message, dict) else None
+                  recent_messages.append({
+                      "event": event_name,
+                      "msg": msg_type,
+                      "keys": list(message.keys()) if isinstance(message, dict) else type(message).__name__
+                  })
+                  if len(recent_messages) > 8:
+                      del recent_messages[0]
+
+                  if event_name == "heartbeat" or msg_type == "heartbeat":
+                      return None
+                  if event_name in ("generating", "streaming") or msg_type in (
+                      "process_starts", "process_generating", "process_streaming"
+                  ):
+                      print(f"{label}: processing ({msg_type or event_name})...")
+                      return None
+
+                  failed = (
+                      event_name in ("error", "process_failed")
+                      or msg_type in ("process_failed", "unexpected_error", "server_stopped")
+                      or (msg_type == "process_completed" and message.get("success") is False)
+                  )
+                  if failed:
+                      raise RuntimeError(f"{label} failed: {json.dumps(message, default=str)[:4000]}")
+
+                  completed = (
+                      event_name in ("complete", "process_completed")
+                      or msg_type == "process_completed"
+                  )
+                  if completed:
+                      output = message.get("output", {})
+                      result = output.get("data") if isinstance(output, dict) else None
+                      if result is None and isinstance(message.get("data"), list):
+                          result = message["data"]
+                      if result is None:
+                          raise RuntimeError(
+                              f"{label}: completion received but output data is missing: "
+                              + json.dumps(message, default=str)[:4000]
+                          )
+                      print(f"{label}: completed")
+                      return result
+                  return None
+
+              try:
+                  for raw in response.iter_lines(decode_unicode=True):
+                      if raw is None:
                           continue
-                      if event == "generating":
-                          print(f"{label}: processing...")
-                      if event in ("complete", "error"):
-                          r.close()
-                          if event == "error":
-                              raise RuntimeError(
-                                  f"{label} failed: {payload}"
-                              )
-                          output = payload.get("output", {})
-                          result = output.get("data")
-                          if result is None:
-                              raise RuntimeError(
-                                  f"{label}: missing output data: {payload}"
-                              )
-                          print(f"{label}: completed")
-                          return result
-              raise RuntimeError(f"{label}: stream ended without completion")
+                      if raw == "":
+                          if data_lines:
+                              raw_data = "\n".join(data_lines).strip()
+                              data_lines = []
+                              try:
+                                  message = json.loads(raw_data)
+                              except ValueError:
+                                  recent_messages.append({
+                                      "event": sse_event,
+                                      "raw": raw_data[:500]
+                                  })
+                                  continue
+                              result = handle_message(sse_event, message)
+                              if result is not None:
+                                  return result
+                          sse_event = None
+                          continue
 
+                      if raw.startswith(":"):
+                          continue
+                      if raw.startswith("event:"):
+                          sse_event = raw[6:].strip()
+                      elif raw.startswith("data:"):
+                          data_lines.append(raw[5:].lstrip())
+
+                  if data_lines:
+                      message = json.loads("\n".join(data_lines).strip())
+                      result = handle_message(sse_event, message)
+                      if result is not None:
+                          return result
+              finally:
+                  response.close()
+
+              raise RuntimeError(
+                  f"{label}: Gradio SSE stream closed before a recognized completion event. "
+                  f"Last messages: {json.dumps(recent_messages, default=str)}"
+            )
           def find_glb(obj):
               found = []
               def walk(x):
