@@ -71,3 +71,13 @@
 - Built companion web studio with 3D WebGL simulator, live test runner, Godot inspector, and documentation reader.
 - Committed all changes to git checkpoint.
 - **Status**: READY FOR DEPLOYMENT.
+
+
+### Stage 10 — Owner Requirements Lock and Offline Social Corrections (2026-11-02)
+- Added `CANONICAL_GAMEPLAY_REQUIREMENTS.md` as the authoritative user-approved specification for the existing project.
+- Recorded the complete offline-only direction, original-reference fidelity goals, stationary town population behavior, sparse hunting grounds, event-only crowds, no friends/chat, retained guild/marriage/gatherings, NPC and quest completeness, Gang/Guild requirements, Gold-only economy, Black Market, full fashion/gear/mount categories, and Android performance constraints.
+- Removed generated local chat pools, periodic simulated chat emission, HUD chat signal binding, and the chat label from the active game HUD.
+- Changed `SimulatedPlayer.gd` so simulated characters remain stationary by default and move only after an explicit local command; removed autonomous random wandering.
+- Added automated checks for no chat signal and explicit-command-only simulated movement.
+- GitHub Actions run [41404156725](https://github.com/ZzwahwahzZ/Clash-of-Legends/actions/runs/41404156725) completed successfully: Godot 4.3 import, gameplay tests, visual audit, and React studio build all passed.
+- **Important scope note:** this is an initial correction and requirements lock, not completion of the full Conquer Online feature catalogue. The existing project still has prototype content and missing production asset packs; quests, NPC catalogue, classes/skills, Gang/Guild, marriage, market, mounts, fashion, gems/sockets, and full reference content remain to be implemented and validated in subsequent stages.
