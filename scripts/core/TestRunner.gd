@@ -123,9 +123,18 @@ func test_quest_progression_lifecycle() -> void:
 	add_child(qa)
 	qa.active_quest_id = "quest_wolves"
 	qa.quest_progress = 0
+	qa.on_enemy_killed("dragon")
+	assert_true(qa.quest_progress == 0, "Quest: Unrelated enemy does not advance objective")
 	qa.on_enemy_killed("wolf")
-	assert_true(qa.quest_progress == 1, "Quest: Enemy kill registers in quest progression")
+	assert_true(qa.quest_progress == 1, "Quest: Matching enemy kill registers in progression")
+	assert_true(qa.quest_database.has("quest_wolf_alpha") and qa.quest_database.has("quest_guardian"), "Quest: Expanded offline quest chain is registered")
+	var saved_quest = qa.serialize()
+	var restored_quest = QuestNavigationAgentScript.new()
+	add_child(restored_quest)
+	restored_quest.deserialize(saved_quest)
+	assert_true(restored_quest.active_quest_id == qa.active_quest_id and restored_quest.quest_progress == qa.quest_progress, "Quest: Progress survives serialization round-trip")
 	qa.queue_free()
+	restored_quest.queue_free()
 
 func test_auto_hunt_and_loot_systems() -> void:
 	assert_true(AutoHuntManager.is_enabled == false, "Auto-Hunt: Initially disabled until user toggles")
