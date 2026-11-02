@@ -121,6 +121,7 @@ func test_local_save_and_backup_recovery() -> void:
 func test_quest_progression_lifecycle() -> void:
 	var qa = QuestNavigationAgentScript.new()
 	add_child(qa)
+	qa.add_to_group("quest_agents")
 	qa.active_quest_id = "quest_wolves"
 	qa.quest_progress = 0
 	qa.on_enemy_killed("dragon")
@@ -133,6 +134,11 @@ func test_quest_progression_lifecycle() -> void:
 	add_child(restored_quest)
 	restored_quest.deserialize(saved_quest)
 	assert_true(restored_quest.active_quest_id == qa.active_quest_id and restored_quest.quest_progress == qa.quest_progress, "Quest: Progress survives serialization round-trip")
+	var quest_states = LocalSaveEngine.capture_quest_states()
+	assert_true(quest_states.has("QuestNavigationAgent") or quest_states.has(str(qa.name)), "Quest: Active agent state is captured by local save engine")
+	var persisted = LocalSaveEngine.save_game({"quest_agents": quest_states})
+	var loaded_state = LocalSaveEngine.load_game()
+	assert_true(persisted and LocalSaveEngine.restore_quest_states(loaded_state.get("quest_agents", {})) >= 1, "Quest: Agent state restores from local save payload")
 	qa.queue_free()
 	restored_quest.queue_free()
 
