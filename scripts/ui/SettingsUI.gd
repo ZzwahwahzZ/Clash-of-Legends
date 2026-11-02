@@ -115,7 +115,8 @@ func _on_save_pressed() -> void:
 		"gold": GameManager.current_gold,
 		"class": player.get_character_class(),
 		"position": {"x": player.global_position.x, "y": player.global_position.y, "z": player.global_position.z},
-		"inventory": inv_data
+		"inventory": inv_data,
+		"quest_agents": LocalSaveEngine.capture_quest_states()
 	}
 	LocalSaveEngine.save_game(p_data)
 
@@ -145,4 +146,6 @@ func _on_load_pressed() -> void:
 		if data.has("inventory") and player.has_node("PlayerInventory"):
 			var inv: PlayerInventory = player.get_node("PlayerInventory")
 			inv.deserialize(data["inventory"])
+		if data.has("quest_agents") and typeof(data["quest_agents"]) == TYPE_DICTIONARY:
+			LocalSaveEngine.restore_quest_states(data["quest_agents"])
 		player.sync_stats_to_hud()
