@@ -26,6 +26,7 @@ func _ready() -> void:
 	_update_title()
 	if interaction_area:
 		interaction_area.body_entered.connect(_on_interaction_area_entered)
+		interaction_area.body_exited.connect(_on_interaction_area_exited)
 
 func _update_title() -> void:
 	if label:
@@ -33,16 +34,22 @@ func _update_title() -> void:
 		label.text = "[%s]" % n
 
 func _on_interaction_area_entered(body: Node3D) -> void:
-	if body is PlayerController:
-		interact(body)
+	if body is PlayerController and GameManager:
+		GameManager.set_nearby_npc(self)
+
+func _on_interaction_area_exited(body: Node3D) -> void:
+	if body is PlayerController and GameManager:
+		GameManager.clear_nearby_npc(self)
 
 func interact(player: CharacterBody3D) -> void:
+	if not is_instance_valid(player):
+		return
 	if player.current_level < required_level:
-		var msg = "يتطلب التحدث معي المستوى %d!" % required_level
+		var msg := ("يتطلب التحدث معي المستوى %d!" % required_level) if GameManager.current_language == "ar" else ("You need level %d to interact." % required_level)
 		if GameManager:
 			GameManager.post_notification(msg, true)
 		return
-		
+
 	match role:
 		"sage":
 			_open_dialogue()
