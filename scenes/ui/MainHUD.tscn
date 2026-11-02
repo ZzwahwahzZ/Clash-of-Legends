@@ -268,6 +268,15 @@ offset_right = 320.0
 offset_bottom = -20.0
 grow_vertical = 0
 
+[node name="InteractBtn" type="Button" parent="BottomLeft"]
+visible = false
+layout_mode = 0
+offset_left = 185.0
+offset_top = -92.0
+offset_right = 292.0
+offset_bottom = -42.0
+text = "تفاعل"
+
 [node name="VirtualJoystick" type="Control" parent="BottomLeft"]
 layout_mode = 1
 anchors_preset = 2
