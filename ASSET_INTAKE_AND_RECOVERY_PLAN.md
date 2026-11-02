@@ -36,3 +36,7 @@ The verifier checks each file under `resources/` against the manifest's exact by
 ## Current verified repository state
 
 The repository audit reports all four binary packages missing from the audited workspace. The package names and sizes above therefore remain targets until actual binary files are staged and verified.
+
+## Manifest integrity warning
+
+The current manifest contains SHA-256 strings with obvious sequential/demo patterns. These are not trusted as real package digests. The verifier rejects such values as `INVALID MANIFEST HASH`; replace each with the SHA-256 calculated from the actual approved package before treating it as verified. The manifest's target sizes are planning values, not proof that matching files exist.
