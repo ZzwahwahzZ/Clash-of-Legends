@@ -11,6 +11,7 @@ signal notification_posted(text: String, is_alert: bool)
 var current_language: String = "ar"
 var player_reference: CharacterBody3D = null
 var current_target: Node3D = null
+var nearby_npc: Node3D = null
 var is_auto_hunting: bool = false
 var is_auto_looting: bool = true
 
@@ -78,3 +79,14 @@ func spend_gold(amount: int) -> bool:
 
 func post_notification(text: String, is_alert: bool = false) -> void:
 	emit_signal("notification_posted", text, is_alert)
+
+
+func set_nearby_npc(npc: Node3D) -> void:
+	if not is_instance_valid(npc):
+		return
+	nearby_npc = npc
+	post_notification("اضغط زر تفاعل للتحدث" if current_language == "ar" else "Tap Interact to talk", false)
+
+func clear_nearby_npc(npc: Node3D) -> void:
+	if nearby_npc == npc:
+		nearby_npc = null
