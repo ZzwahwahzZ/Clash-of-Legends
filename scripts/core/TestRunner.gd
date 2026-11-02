@@ -2,6 +2,7 @@ extends Node
 
 const PlayerInventoryScript = preload("res://scripts/player/PlayerInventory.gd")
 const QuestNavigationAgentScript = preload("res://scripts/automation/QuestNavigationAgent.gd")
+const SimulatedPlayerScript = preload("res://scripts/ai/SimulatedPlayer.gd")
 
 var total_tests: int = 0
 var passed_tests: int = 0
@@ -23,6 +24,7 @@ func run_all_tests() -> Dictionary:
 	test_autoload_presence()
 	test_class_and_skill_database()
 	test_gold_only_economy()
+	test_offline_social_and_population_rules()
 	test_arabic_localization_integrity()
 	test_inventory_and_equipment_refinement()
 	test_local_save_and_backup_recovery()
@@ -137,3 +139,14 @@ func test_combat_damage_calculations() -> void:
 	assert_true(CombatEngine.skill_database.has("trojan_cyclone"), "Combat: Trojan Cyclone skill exists")
 	var skill = CombatEngine.skill_database["trojan_cyclone"]
 	assert_true(skill["damage_multiplier"] > 1.0, "Combat: Skill multiplier is greater than basic attack")
+
+func test_offline_social_and_population_rules() -> void:
+	assert_true(not GameManager.has_signal("chat_message_received"), "Offline Social: no chat signal or simulated chat feed")
+	var simulated = SimulatedPlayerScript.new()
+	add_child(simulated)
+	assert_true(not simulated.movement_commanded, "Simulated Population: characters are stationary by default")
+	simulated.command_move_to(Vector3(5.0, 0.0, 0.0))
+	assert_true(simulated.movement_commanded, "Simulated Population: movement requires an explicit command")
+	simulated.stop_commanded_movement()
+	assert_true(not simulated.movement_commanded, "Simulated Population: commanded movement can be stopped")
+	simulated.queue_free()
