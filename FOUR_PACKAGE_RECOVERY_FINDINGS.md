@@ -48,6 +48,31 @@ The public research located official historical Conquer Online installers/patche
 - This assistant cannot operate the owner's Kaggle/Hugging Face account or see its private run output through the connected GitHub repository. Do not claim a model was generated until the owner supplies a run result or output file.
 - The Hunyuan3D 2.1 license conditions must be followed for generated output and distribution; keep model provenance with each generated asset.
 
+## Additional lawful asset candidates identified (not yet imported)
+
+These are useful gap-fillers for the *new game*, not Conquer Online assets and not evidence of parity by themselves. Each file still needs a local import test, source-page/license snapshot, file hash and asset-level review before inclusion in a release.
+
+### Creatures / NPCs / environment
+- Gobkit free model catalogue: https://gobkit.com/api/free
+  - Its published API currently describes 313 free GLB models and states that the free packs are CC0 1.0. It includes rigged fantasy-adjacent characters such as WerewolfCaptain, TombMummy, OrcLegionary, BloodironKnight and environmental props. The API documentation warns that rigged models ship separate named animation clips and require skeleton-aware cloning for multiple animated instances.
+  - Candidate source only; many models are modern/stylized and will need visual selection, retargeting, material adjustment and integration testing to fit the Conquer-inspired art direction.
+- CC0 medieval/fantasy environment collection: https://avramania.itch.io/free-collection
+  - Listing states 189 CC0 models, including terrain, village pieces, castle/siege, weapons, market props and dungeon/ruins. Candidate for Twin City blockout dressing and dungeon props after GLB import and visual review.
+- CC0 fantasy village props: https://luzbilliardsgames.itch.io/low-poly-fantasy-village-props
+  - Listing states 20 GLB/PBR game-ready props and CC0. Useful for markets, wells, barrels, anvils, lanterns and village dressing.
+- CC0 fantasy weapon pack: https://polyyai.itch.io/3d-fantasy-weapons-pack
+  - Listing states 25 GLB weapons, CC0 1.0, with a lower-poly LOD download. Candidate for weapon placeholders/variants pending visual and technical review.
+- CC0 registry (check each individual asset's license, not only the registry): https://github.com/ToxSam/open-source-3d-assets
+
+### Audio / music / SFX
+- Kenney RPG Audio: https://kenney.nl/assets/rpg-audio — 50 foley clips, CC0.
+- OpenGameArt CC0 Fantasy Music & Sounds: https://opengameart.org/content/cc0-fantasy-music-sounds — curated CC0 fantasy music listing; inspect individual included works and preserve provenance.
+- OpenGameArt Fantasy Sound Effects (Tinysized SFX): https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx — 96 files, CC0.
+- Fantasy Ambient Sound Effects Pack: https://kmontesdev.itch.io/fantasy-ambient-sound-effects-pack-cc0 — listing claims CC0 and 2 GB; verify actual contents and license file after download.
+
+### Map candidates
+- Community maps remain **license review**: https://github.com/spiritedsnowcat/conquermaps and https://github.com/flickerstop/conquerMaps. Their existence does not grant permission to bundle them; obtain and retain each creator's terms/attribution before use.
+
 ## Work we can complete without waiting for proprietary packages
 
 1. Create original environment assets for the current Twin City blockout and expand map coverage.
