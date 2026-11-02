@@ -7,7 +7,6 @@ signal quest_updated(quest_id: String, objective: String, progress: int, goal: i
 signal boss_spawned(boss_name: String, position: Vector3)
 signal boss_defeated(boss_name: String, killer_name: String)
 signal notification_posted(text: String, is_alert: bool)
-signal chat_message_received(sender: String, message: String, channel: String)
 
 var current_language: String = "ar"
 var player_reference: CharacterBody3D = null
@@ -18,39 +17,15 @@ var is_auto_looting: bool = true
 # Local economy: Gold only
 var current_gold: int = 1500
 
-var local_chat_pool_ar: Array[Dictionary] = [
-	{"sender": "سيد_السيوف", "msg": "هل ينضم أحد لصيد التنين في سهل التوأم؟", "channel": "world"},
-	{"sender": "حكيم_الرياح", "msg": "أحتاج أحجار نيزكية لترقية درع التروجان +3", "channel": "trade"},
-	{"sender": "صائد_الذئاب", "msg": "منطقة الذئاب البرية مليئة بالذهب والعتاد اليوم!", "channel": "general"},
-	{"sender": "فارس_الصحراء", "msg": "مدينة التوأم آمنة، التجار مستعدون للشراء", "channel": "world"},
-	{"sender": "رامي_السهام", "msg": "مهارة السهم السريع تصيب الأهداف بدقة فائقة", "channel": "team"}
-]
-
-var local_chat_pool_en: Array[Dictionary] = [
-	{"sender": "SwordMaster", "msg": "Anyone up for hunting the dragon at Twin Plains?", "channel": "world"},
-	{"sender": "WindSage", "msg": "Looking for meteors to upgrade Trojan armor +3", "channel": "trade"},
-	{"sender": "WolfHunter", "msg": "Wild wolf zone has great gold drops today!", "channel": "general"},
-	{"sender": "DesertKnight", "msg": "Twin City is safe, merchants ready to buy", "channel": "world"},
-	{"sender": "ArrowMaster", "msg": "Rapid arrow skill strikes targets with lethal precision", "channel": "team"}
-]
-
-var _chat_timer: float = 0.0
-
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	# Arabic is default
 	set_language("ar")
 
-func _process(delta: float) -> void:
-	_chat_timer += delta
-	if _chat_timer > 12.0:
-		_chat_timer = 0.0
-		_trigger_simulated_world_chat()
-
 func register_player(player: CharacterBody3D) -> void:
 	player_reference = player
 	emit_signal("player_registered", player)
-	post_notification("تم تسجيل دخول البطل في عالم صراع الأساطير" if current_language == "ar" else "Hero logged into Clash of Legends world", false)
+	post_notification("تم تسجيل دخول البطل في عالم صراع الأساطير" if current_language == "ar" else "Hero entered the world of Clash of Legends", false)
 
 func set_language(lang_code: String) -> void:
 	if lang_code != "ar" and lang_code != "en":
@@ -91,6 +66,8 @@ func add_gold(amount: int) -> void:
 		player_reference.sync_stats_to_hud()
 
 func spend_gold(amount: int) -> bool:
+	if amount < 0:
+		return false
 	if current_gold >= amount:
 		current_gold -= amount
 		if player_reference and player_reference.has_method("sync_stats_to_hud"):
@@ -101,9 +78,3 @@ func spend_gold(amount: int) -> bool:
 
 func post_notification(text: String, is_alert: bool = false) -> void:
 	emit_signal("notification_posted", text, is_alert)
-
-func _trigger_simulated_world_chat() -> void:
-	var pool = local_chat_pool_ar if current_language == "ar" else local_chat_pool_en
-	if pool.size() > 0:
-		var entry = pool[randi() % pool.size()]
-		emit_signal("chat_message_received", entry["sender"], entry["msg"], entry["channel"])
