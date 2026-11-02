@@ -1,0 +1,60 @@
+name: Build CC0 2D Reference Bundle
+
+on:
+  push:
+    paths:
+      - ".github/workflows/build-cc0-asset-bundle.yml"
+      - "ASSET_REFERENCE_LIBRARY/CC0_2D_BUNDLE_README.md"
+      - "ASSET_REFERENCE_LIBRARY/BUNDLE_BUILD_TRIGGER.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download upstream CC0 asset collection
+        run: |
+          set -euo pipefail
+          mkdir -p bundle
+          curl --fail --location --retry 3 \
+            https://codeload.github.com/Tiddybub/2d-assets/zip/refs/heads/main \
+            --output /tmp/tiddybub-2d-assets.zip
+          unzip -q /tmp/tiddybub-2d-assets.zip -d /tmp
+          mv /tmp/2d-assets-main bundle/Tiddybub-2d-assets
+          test -s bundle/Tiddybub-2d-assets/LICENSE
+          grep -qi "CC0 1.0" bundle/Tiddybub-2d-assets/LICENSE
+          cat > bundle/README-CLASH-OF-LEGENDS.txt <<'EOF'
+          CLASH OF LEGENDS — CC0 2D REFERENCE LIBRARY
+
+          Source: https://github.com/Tiddybub/2d-assets
+          License: CC0 1.0 Universal (see Tiddybub-2d-assets/LICENSE).
+          The upstream catalog contains 1,101 packs across characters, effects,
+          fantasy/RPG, terrain, UI, nature, buildings and other categories.
+          Each pack retains its SOURCE.md provenance where supplied.
+
+          This is a broad visual-reference pool, not a finished Conquer Online
+          asset replacement and not a 3D model archive. Review each pack's
+          SOURCE.md and select only assets that match the target game's
+          oriental-fantasy visual direction. Do not copy proprietary Conquer
+          Online art unless its own redistribution rights are explicitly granted.
+
+          Priority: user's Archer -> Oriental Assassin progression (dual
+          throwing knives first, bows second), then every other playable class,
+          NPCs, monsters/bosses, mounts/pets, maps/buildings/terrain, materials,
+          effects, items and UI.
+          EOF
+      - name: Package complete upstream reference library
+        run: |
+          set -euo pipefail
+          zip -qr clash-of-legends-cc0-2d-reference-library.zip bundle
+          ls -lh clash-of-legends-cc0-2d-reference-library.zip
+      - name: Publish downloadable GitHub Actions artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: clash-of-legends-cc0-2d-reference-library
+          path: clash-of-legends-cc0-2d-reference-library.zip
+          if-no-files-found: error
+          retention-days: 90
