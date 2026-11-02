@@ -19,6 +19,7 @@ class_name MainHUDController
 @onready var inv_btn: Button = get_node_or_null("TopRight/MenuButtons/InvBtn")
 @onready var blacksmith_btn: Button = get_node_or_null("TopRight/MenuButtons/BlacksmithBtn")
 @onready var settings_btn: Button = get_node_or_null("TopRight/MenuButtons/SettingsBtn")
+@onready var interact_btn: Button = get_node_or_null("BottomLeft/InteractBtn")
 
 @onready var attack_btn: Button = get_node_or_null("BottomRight/ActionButtons/AttackBtn")
 @onready var skill_1_btn: Button = get_node_or_null("BottomRight/ActionButtons/Skill1Btn")
@@ -63,10 +64,14 @@ func _ready() -> void:
 		settings_btn.pressed.connect(_on_settings_pressed)
 	if quest_banner:
 		quest_banner.pressed.connect(_on_quest_banner_pressed)
+	if interact_btn:
+		interact_btn.pressed.connect(_on_interact_pressed)
+		interact_btn.visible = false
 	if joystick:
 		joystick.joystick_moved.connect(_on_joystick_moved)
 
 	_refresh_hud_labels()
+	_update_interact_button()
 
 func _on_player_stats_changed(hp: int, max_hp: int, mp: int, max_mp: int, xp: int, max_xp: int, level: int, gold: int) -> void:
 	if hp_bar:
@@ -87,6 +92,19 @@ func _on_player_stats_changed(hp: int, max_hp: int, mp: int, max_mp: int, xp: in
 	if gold_label:
 		gold_label.text = "%d" % gold
 	_update_skill_buttons()
+
+func _process(_delta: float) -> void:
+	_update_interact_button()
+
+func _update_interact_button() -> void:
+	if interact_btn:
+		interact_btn.visible = GameManager != null and is_instance_valid(GameManager.nearby_npc)
+
+func _on_interact_pressed() -> void:
+	var npc = GameManager.nearby_npc if GameManager else null
+	var player = GameManager.player_reference if GameManager else null
+	if is_instance_valid(npc) and is_instance_valid(player) and npc.has_method("interact"):
+		npc.interact(player)
 
 func _update_skill_buttons() -> void:
 	var player = GameManager.player_reference if GameManager else null
@@ -224,6 +242,8 @@ func _refresh_hud_labels() -> void:
 		blacksmith_btn.text = "الحداد" if is_ar else "Forge"
 	if settings_btn:
 		settings_btn.text = "الإعدادات" if is_ar else "Settings"
+	if interact_btn:
+		interact_btn.text = "تفاعل" if is_ar else "Interact"
 	if attack_btn:
 		attack_btn.text = "هجوم" if is_ar else "Attack"
 	if jump_btn:
