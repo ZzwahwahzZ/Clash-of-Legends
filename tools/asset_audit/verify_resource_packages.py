@@ -27,6 +27,23 @@ def sha256_file(path: Path) -> str:
             digest.update(chunk)
     return digest.hexdigest()
 
+def is_plausible_sha256(value: str) -> bool:
+    """Reject obvious sequential/demo digests in a delivery manifest."""
+    value = value.lower()
+    if len(value) != 64 or any(char not in "0123456789abcdef" for char in value):
+        return False
+    if "0123456789abcdef" in value or "abcdef0123456789" in value:
+        return False
+    # Detect a digest made from a repeated ascending nibble sequence.
+    nibbles = [int(char, 16) for char in value]
+    ascending = all((nibbles[i] + 1) % 16 == nibbles[i + 1] for i in range(len(nibbles) - 1))
+    if ascending:
+        return False
+    # Real SHA-256 digests should not consist of a tiny repeating alphabet.
+    if len(set(value)) < 8:
+        return False
+    return True
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -60,6 +77,12 @@ def main() -> int:
         candidate = root / "resources" / filename
         expected_size = int(package["size_bytes"])
         expected_hash = str(package["sha256"]).lower()
+        if not is_plausible_sha256(expected_hash):
+            failures += 1
+            print(f"INVALID MANIFEST HASH  {filename}")
+            print(f"         supplied SHA-256 is a placeholder/demo pattern: {expected_hash}")
+            print("         replace it with the digest of the actual approved package")
+            continue
 
         if not candidate.is_file():
             failures += 1
