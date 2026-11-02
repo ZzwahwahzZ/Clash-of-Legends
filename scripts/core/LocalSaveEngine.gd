@@ -10,6 +10,30 @@ signal load_completed(success: bool)
 func _ready() -> void:
 	pass
 
+# Quest agents are saved by stable scene-node name so each local agent can
+# restore its own progression without a server or a hard-coded scene path.
+func capture_quest_states() -> Dictionary:
+	var states: Dictionary = {}
+	if not is_inside_tree():
+		return states
+	for agent in get_tree().get_nodes_in_group("quest_agents"):
+		if is_instance_valid(agent) and agent.has_method("serialize"):
+			states[str(agent.name)] = agent.serialize()
+	return states
+
+func restore_quest_states(states: Dictionary) -> int:
+	if not is_inside_tree() or states.is_empty():
+		return 0
+	var restored := 0
+	for agent in get_tree().get_nodes_in_group("quest_agents"):
+		if not is_instance_valid(agent) or not agent.has_method("deserialize"):
+			continue
+		var key := str(agent.name)
+		if states.has(key) and typeof(states[key]) == TYPE_DICTIONARY:
+			agent.deserialize(states[key])
+			restored += 1
+	return restored
+
 func save_game(player_data: Dictionary) -> bool:
 	var payload = {
 		"version": "1.0.0",
