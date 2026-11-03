@@ -1,0 +1,36 @@
+name: Build Conquer Original Reference Image Pack
+
+on:
+  push:
+    paths:
+      - "tools/ai-asset-generation/collect_conquer_reference_images.py"
+      - ".github/workflows/build-conquer-reference-image-pack.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  collect-and-zip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install collector dependencies
+        run: python -m pip install --disable-pip-version-check requests beautifulsoup4 pillow
+      - name: Collect and validate public reference images
+        run: python tools/ai-asset-generation/collect_conquer_reference_images.py
+      - name: Publish ZIP and collection report
+        uses: actions/upload-artifact@v4
+        with:
+          name: conquer-original-reference-images
+          path: |
+            conquer_original_reference_images.zip
+            conquer_original_reference_images/collection_report.json
+            conquer_original_reference_images/sources_manifest.csv
+          if-no-files-found: error
+          retention-days: 90
