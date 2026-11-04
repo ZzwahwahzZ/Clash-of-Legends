@@ -1,0 +1,412 @@
+{
+  "generated_utc": "2026-11-04T21:42:07.849173+00:00",
+  "source_archive": {
+    "name": "extracted-assets-001.zip",
+    "bytes": 842723106,
+    "sha256": "0d21a110c09b762ed5f1a5f4da022857b0534e489eb85052d15da460cb229d2a",
+    "verified": true
+  },
+  "apk_count": 4,
+  "apk_manifests": [
+    {
+      "archive_path": "ConquerOnline/ConquerOnline-1.1.2.3.apk",
+      "file": "ConquerOnline-1.1.2.3.apk",
+      "bytes": 155612867,
+      "sha256": "b1b8ccf0d5e1a9dcf346f8f11c20011cd9c68332f1b92676e79f87290f12c8f2",
+      "package_name": "com.Tq.CQ2ClientAndroid",
+      "version_name": "1.1.2.3",
+      "version_code": "123",
+      "version_code_string": "123",
+      "min_sdk": "21",
+      "target_sdk": "35",
+      "max_sdk": null,
+      "app_label": "ConquerOnline",
+      "permissions": [
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.INTERNET",
+        "android.permission.VIBRATE",
+        "android.permission.FOREGROUND_SERVICE",
+        "com.Tq.CQ2ClientAndroid.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION",
+        "com.google.android.c2dm.permission.RECEIVE",
+        "android.permission.WAKE_LOCK",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.ACCESS_WIFI_STATE",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "com.huawei.appmarket.service.commondata.permission.GET_COMMON_DATA",
+        "android.permission.FOREGROUND_SERVICE_DATA_SYNC",
+        "android.permission.ACCESS_ADSERVICES_CUSTOM_AUDIENCE",
+        "com.android.vending.BILLING",
+        "android.permission.ACCESS_ADSERVICES_ATTRIBUTION",
+        "com.google.android.gms.permission.AD_ID",
+        "android.permission.ACCESS_ADSERVICES_AD_ID",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.CHANGE_WIFI_STATE",
+        "android.permission.RECORD_AUDIO",
+        "com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE",
+        "com.samsung.android.mapsagent.permission.READ_APP_INFO",
+        "android.permission.ACCESS_ADSERVICES_TOPICS",
+        "android.permission.BLUETOOTH"
+      ],
+      "main_activity": "com.Tq.CQ2ClientAndroid.CQ2ClientActivity",
+      "activities": [
+        "com.Tq.CQ2ClientAndroid.CQ2ClientActivity",
+        "com.google.android.play.core.common.PlayCoreDialogWrapperActivity",
+        "com.facebook.CustomTabActivity",
+        "com.google.android.gms.auth.api.signin.internal.SignInHubActivity",
+        "com.google.android.gms.common.api.GoogleApiActivity",
+        "com.nd.tool.share.facebook.internal.NdFacebookActivity",
+        "com.google.android.gms.games.internal.v2.appshortcuts.PlayGamesAppShortcutsActivity",
+        "com.android.billingclient.api.ProxyBillingActivity",
+        "com.google.android.gms.games.internal.v2.resolution.GamesResolutionActivity",
+        "com.android.billingclient.api.ProxyBillingActivityV2",
+        "com.facebook.FacebookActivity",
+        "com.nd.overseas.permission.PermissionActivity",
+        "com.facebook.CustomTabMainActivity",
+        "com.nd.paysdk.permission.PermissionActivity"
+      ],
+      "services": [
+        "com.google.android.play.core.assetpacks.ExtractionForegroundService",
+        "com.nd.browser.service.ScreenShotService",
+        "com.tencent.smtt.export.external.DexClassLoaderProviderService",
+        "com.google.android.play.core.assetpacks.AssetPackExtractionService",
+        "com.google.android.gms.measurement.AppMeasurementService",
+        "com.snail.antifake.jni.EmulatorCheckService",
+        "androidx.room.MultiInstanceInvalidationService",
+        "androidx.work.impl.background.systemalarm.SystemAlarmService",
+        "com.google.firebase.sessions.SessionLifecycleService",
+        "com.google.android.gms.measurement.AppMeasurementJobService",
+        "com.nd.union.component.fcm.MyFirebaseMessagingService",
+        "androidx.work.impl.foreground.SystemForegroundService",
+        "com.google.android.gms.auth.api.signin.RevocationBoundService",
+        "com.google.android.datatransport.runtime.backends.TransportBackendDiscovery",
+        "com.google.firebase.components.ComponentDiscoveryService",
+        "com.google.firebase.messaging.FirebaseMessagingService",
+        "androidx.work.impl.background.systemjob.SystemJobService",
+        "com.google.android.datatransport.runtime.scheduling.jobscheduling.JobInfoSchedulerService"
+      ],
+      "receivers": [
+        "com.facebook.CurrentAccessTokenExpirationBroadcastReceiver",
+        "com.facebook.AuthenticationTokenManager$CurrentAuthenticationTokenChangedBroadcastReceiver",
+        "com.google.android.datatransport.runtime.scheduling.jobscheduling.AlarmManagerSchedulerBroadcastReceiver",
+        "androidx.work.impl.utils.ForceStopRunnable$BroadcastReceiver",
+        "com.google.firebase.iid.FirebaseInstanceIdReceiver",
+        "androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryNotLowProxy",
+        "androidx.work.impl.background.systemalarm.ConstraintProxy$StorageNotLowProxy",
+        "androidx.work.impl.background.systemalarm.ConstraintProxy$NetworkStateProxy",
+        "androidx.work.impl.background.systemalarm.RescheduleReceiver",
+        "androidx.work.impl.background.systemalarm.ConstraintProxyUpdateReceiver",
+        "androidx.work.impl.diagnostics.DiagnosticsReceiver",
+        "androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryChargingProxy",
+        "com.google.android.gms.measurement.AppMeasurementReceiver"
+      ],
+      "providers": [
+        "com.google.firebase.provider.FirebaseInitProvider",
+        "com.facebook.internal.FacebookInitProvider",
+        "com.facebook.FacebookContentProvider",
+        "com.nd.analytics.provider.NdAnalyticProvider",
+        "com.squareup.picasso.PicassoProvider",
+        "androidx.startup.InitializationProvider",
+        "androidx.core.content.FileProvider",
+        "com.google.android.gms.games.provider.PlayGamesInitProvider",
+        "com.nd.union.component.ComponentInitProvider",
+        "androidx.lifecycle.ProcessLifecycleOwnerInitializer"
+      ],
+      "is_valid_APK": true,
+      "is_signed": true,
+      "decoded_manifest_file": "ConquerOnline-1.1.2.3-AndroidManifest.xml",
+      "application_attributes": {
+        "{http://schemas.android.com/apk/res/android}theme": "@7F0F0006",
+        "{http://schemas.android.com/apk/res/android}label": "@7F0E006F",
+        "{http://schemas.android.com/apk/res/android}icon": "@7F070081",
+        "{http://schemas.android.com/apk/res/android}allowBackup": "false",
+        "{http://schemas.android.com/apk/res/android}supportsRtl": "true",
+        "{http://schemas.android.com/apk/res/android}extractNativeLibs": "false",
+        "{http://schemas.android.com/apk/res/android}usesCleartextTraffic": "true",
+        "{http://schemas.android.com/apk/res/android}resizeableActivity": "true",
+        "{http://schemas.android.com/apk/res/android}appCategory": "0",
+        "{http://schemas.android.com/apk/res/android}appComponentFactory": "androidx.core.app.CoreComponentFactory",
+        "{http://schemas.android.com/apk/res/android}requestLegacyExternalStorage": "true"
+      },
+      "launchable_activity_candidates": [
+        {
+          "tag": "activity",
+          "name": "com.Tq.CQ2ClientAndroid.CQ2ClientActivity",
+          "exported": "true",
+          "intent_filters": [
+            {
+              "actions": [
+                "android.intent.action.MAIN",
+                "com.Tq.CQ2ClientAndroid.action.fcm.launch"
+              ],
+              "categories": [
+                "android.intent.category.LAUNCHER"
+              ]
+            }
+          ]
+        },
+        {
+          "tag": "activity",
+          "name": "com.facebook.CustomTabActivity",
+          "exported": "true",
+          "intent_filters": [
+            {
+              "actions": [
+                "android.intent.action.VIEW"
+              ],
+              "categories": [
+                "android.intent.category.DEFAULT",
+                "android.intent.category.BROWSABLE"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "archive_path": "ConquerOnline/config.arm64_v8a.apk",
+      "file": "config.arm64_v8a.apk",
+      "bytes": 96368455,
+      "sha256": "4a530e88bce71ba3d049c7e9736f4703677dffc5856f5a996d8f4236412d2582",
+      "package_name": "com.Tq.CQ2ClientAndroid",
+      "version_name": null,
+      "version_code": "123",
+      "version_code_string": "123",
+      "min_sdk": null,
+      "target_sdk": null,
+      "max_sdk": null,
+      "app_label": null,
+      "permissions": [],
+      "main_activity": null,
+      "activities": [],
+      "services": [],
+      "receivers": [],
+      "providers": [],
+      "is_valid_APK": true,
+      "is_signed": true,
+      "decoded_manifest_file": "config.arm64_v8a-AndroidManifest.xml",
+      "application_attributes": {
+        "{http://schemas.android.com/apk/res/android}hasCode": "false",
+        "{http://schemas.android.com/apk/res/android}extractNativeLibs": "true"
+      },
+      "launchable_activity_candidates": []
+    },
+    {
+      "archive_path": "ConquerOnline/config.xxhdpi.apk",
+      "file": "config.xxhdpi.apk",
+      "bytes": 884163,
+      "sha256": "7f822e118a423df9a01d82e0d3622ede74ac1a89b0735703fc2a132d76792aa8",
+      "package_name": "com.Tq.CQ2ClientAndroid",
+      "version_name": null,
+      "version_code": "123",
+      "version_code_string": "123",
+      "min_sdk": null,
+      "target_sdk": null,
+      "max_sdk": null,
+      "app_label": null,
+      "permissions": [],
+      "main_activity": null,
+      "activities": [],
+      "services": [],
+      "receivers": [],
+      "providers": [],
+      "is_valid_APK": true,
+      "is_signed": true,
+      "decoded_manifest_file": "config.xxhdpi-AndroidManifest.xml",
+      "application_attributes": {
+        "{http://schemas.android.com/apk/res/android}hasCode": "false",
+        "{http://schemas.android.com/apk/res/android}extractNativeLibs": "true"
+      },
+      "launchable_activity_candidates": []
+    },
+    {
+      "archive_path": "ConquerOnline/install_time_1001.apk",
+      "file": "install_time_1001.apk",
+      "bytes": 208251259,
+      "sha256": "3f8b4232079acc137f9c3ccdfd759e3efa1f7779603d2fa657ae158280f466cd",
+      "package_name": "com.Tq.CQ2ClientAndroid",
+      "version_name": null,
+      "version_code": "123",
+      "version_code_string": "123",
+      "min_sdk": null,
+      "target_sdk": null,
+      "max_sdk": null,
+      "app_label": null,
+      "permissions": [],
+      "main_activity": null,
+      "activities": [],
+      "services": [],
+      "receivers": [],
+      "providers": [],
+      "is_valid_APK": true,
+      "is_signed": true,
+      "decoded_manifest_file": "install_time_1001-AndroidManifest.xml",
+      "application_attributes": {
+        "{http://schemas.android.com/apk/res/android}hasCode": "false"
+      },
+      "launchable_activity_candidates": []
+    }
+  ],
+  "base_apk_assessment": {
+    "archive_path": "ConquerOnline/ConquerOnline-1.1.2.3.apk",
+    "file": "ConquerOnline-1.1.2.3.apk",
+    "bytes": 155612867,
+    "sha256": "b1b8ccf0d5e1a9dcf346f8f11c20011cd9c68332f1b92676e79f87290f12c8f2",
+    "package_name": "com.Tq.CQ2ClientAndroid",
+    "version_name": "1.1.2.3",
+    "version_code": "123",
+    "version_code_string": "123",
+    "min_sdk": "21",
+    "target_sdk": "35",
+    "max_sdk": null,
+    "app_label": "ConquerOnline",
+    "permissions": [
+      "android.permission.RECEIVE_BOOT_COMPLETED",
+      "android.permission.INTERNET",
+      "android.permission.VIBRATE",
+      "android.permission.FOREGROUND_SERVICE",
+      "com.Tq.CQ2ClientAndroid.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION",
+      "com.google.android.c2dm.permission.RECEIVE",
+      "android.permission.WAKE_LOCK",
+      "android.permission.POST_NOTIFICATIONS",
+      "android.permission.WRITE_EXTERNAL_STORAGE",
+      "android.permission.ACCESS_WIFI_STATE",
+      "android.permission.ACCESS_NETWORK_STATE",
+      "com.huawei.appmarket.service.commondata.permission.GET_COMMON_DATA",
+      "android.permission.FOREGROUND_SERVICE_DATA_SYNC",
+      "android.permission.ACCESS_ADSERVICES_CUSTOM_AUDIENCE",
+      "com.android.vending.BILLING",
+      "android.permission.ACCESS_ADSERVICES_ATTRIBUTION",
+      "com.google.android.gms.permission.AD_ID",
+      "android.permission.ACCESS_ADSERVICES_AD_ID",
+      "android.permission.MODIFY_AUDIO_SETTINGS",
+      "android.permission.READ_EXTERNAL_STORAGE",
+      "android.permission.CHANGE_WIFI_STATE",
+      "android.permission.RECORD_AUDIO",
+      "com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE",
+      "com.samsung.android.mapsagent.permission.READ_APP_INFO",
+      "android.permission.ACCESS_ADSERVICES_TOPICS",
+      "android.permission.BLUETOOTH"
+    ],
+    "main_activity": "com.Tq.CQ2ClientAndroid.CQ2ClientActivity",
+    "activities": [
+      "com.Tq.CQ2ClientAndroid.CQ2ClientActivity",
+      "com.google.android.play.core.common.PlayCoreDialogWrapperActivity",
+      "com.facebook.CustomTabActivity",
+      "com.google.android.gms.auth.api.signin.internal.SignInHubActivity",
+      "com.google.android.gms.common.api.GoogleApiActivity",
+      "com.nd.tool.share.facebook.internal.NdFacebookActivity",
+      "com.google.android.gms.games.internal.v2.appshortcuts.PlayGamesAppShortcutsActivity",
+      "com.android.billingclient.api.ProxyBillingActivity",
+      "com.google.android.gms.games.internal.v2.resolution.GamesResolutionActivity",
+      "com.android.billingclient.api.ProxyBillingActivityV2",
+      "com.facebook.FacebookActivity",
+      "com.nd.overseas.permission.PermissionActivity",
+      "com.facebook.CustomTabMainActivity",
+      "com.nd.paysdk.permission.PermissionActivity"
+    ],
+    "services": [
+      "com.google.android.play.core.assetpacks.ExtractionForegroundService",
+      "com.nd.browser.service.ScreenShotService",
+      "com.tencent.smtt.export.external.DexClassLoaderProviderService",
+      "com.google.android.play.core.assetpacks.AssetPackExtractionService",
+      "com.google.android.gms.measurement.AppMeasurementService",
+      "com.snail.antifake.jni.EmulatorCheckService",
+      "androidx.room.MultiInstanceInvalidationService",
+      "androidx.work.impl.background.systemalarm.SystemAlarmService",
+      "com.google.firebase.sessions.SessionLifecycleService",
+      "com.google.android.gms.measurement.AppMeasurementJobService",
+      "com.nd.union.component.fcm.MyFirebaseMessagingService",
+      "androidx.work.impl.foreground.SystemForegroundService",
+      "com.google.android.gms.auth.api.signin.RevocationBoundService",
+      "com.google.android.datatransport.runtime.backends.TransportBackendDiscovery",
+      "com.google.firebase.components.ComponentDiscoveryService",
+      "com.google.firebase.messaging.FirebaseMessagingService",
+      "androidx.work.impl.background.systemjob.SystemJobService",
+      "com.google.android.datatransport.runtime.scheduling.jobscheduling.JobInfoSchedulerService"
+    ],
+    "receivers": [
+      "com.facebook.CurrentAccessTokenExpirationBroadcastReceiver",
+      "com.facebook.AuthenticationTokenManager$CurrentAuthenticationTokenChangedBroadcastReceiver",
+      "com.google.android.datatransport.runtime.scheduling.jobscheduling.AlarmManagerSchedulerBroadcastReceiver",
+      "androidx.work.impl.utils.ForceStopRunnable$BroadcastReceiver",
+      "com.google.firebase.iid.FirebaseInstanceIdReceiver",
+      "androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryNotLowProxy",
+      "androidx.work.impl.background.systemalarm.ConstraintProxy$StorageNotLowProxy",
+      "androidx.work.impl.background.systemalarm.ConstraintProxy$NetworkStateProxy",
+      "androidx.work.impl.background.systemalarm.RescheduleReceiver",
+      "androidx.work.impl.background.systemalarm.ConstraintProxyUpdateReceiver",
+      "androidx.work.impl.diagnostics.DiagnosticsReceiver",
+      "androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryChargingProxy",
+      "com.google.android.gms.measurement.AppMeasurementReceiver"
+    ],
+    "providers": [
+      "com.google.firebase.provider.FirebaseInitProvider",
+      "com.facebook.internal.FacebookInitProvider",
+      "com.facebook.FacebookContentProvider",
+      "com.nd.analytics.provider.NdAnalyticProvider",
+      "com.squareup.picasso.PicassoProvider",
+      "androidx.startup.InitializationProvider",
+      "androidx.core.content.FileProvider",
+      "com.google.android.gms.games.provider.PlayGamesInitProvider",
+      "com.nd.union.component.ComponentInitProvider",
+      "androidx.lifecycle.ProcessLifecycleOwnerInitializer"
+    ],
+    "is_valid_APK": true,
+    "is_signed": true,
+    "decoded_manifest_file": "ConquerOnline-1.1.2.3-AndroidManifest.xml",
+    "application_attributes": {
+      "{http://schemas.android.com/apk/res/android}theme": "@7F0F0006",
+      "{http://schemas.android.com/apk/res/android}label": "@7F0E006F",
+      "{http://schemas.android.com/apk/res/android}icon": "@7F070081",
+      "{http://schemas.android.com/apk/res/android}allowBackup": "false",
+      "{http://schemas.android.com/apk/res/android}supportsRtl": "true",
+      "{http://schemas.android.com/apk/res/android}extractNativeLibs": "false",
+      "{http://schemas.android.com/apk/res/android}usesCleartextTraffic": "true",
+      "{http://schemas.android.com/apk/res/android}resizeableActivity": "true",
+      "{http://schemas.android.com/apk/res/android}appCategory": "0",
+      "{http://schemas.android.com/apk/res/android}appComponentFactory": "androidx.core.app.CoreComponentFactory",
+      "{http://schemas.android.com/apk/res/android}requestLegacyExternalStorage": "true"
+    },
+    "launchable_activity_candidates": [
+      {
+        "tag": "activity",
+        "name": "com.Tq.CQ2ClientAndroid.CQ2ClientActivity",
+        "exported": "true",
+        "intent_filters": [
+          {
+            "actions": [
+              "android.intent.action.MAIN",
+              "com.Tq.CQ2ClientAndroid.action.fcm.launch"
+            ],
+            "categories": [
+              "android.intent.category.LAUNCHER"
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "activity",
+        "name": "com.facebook.CustomTabActivity",
+        "exported": "true",
+        "intent_filters": [
+          {
+            "actions": [
+              "android.intent.action.VIEW"
+            ],
+            "categories": [
+              "android.intent.category.DEFAULT",
+              "android.intent.category.BROWSABLE"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "notes": [
+    "The filename 1.1.2.3 is not accepted as the app version unless AndroidManifest confirms it.",
+    "Configuration APKs may be split packages; their manifest metadata must be interpreted alongside the base APK.",
+    "A manifest version identifies this supplied client package, not necessarily the server protocol/build date."
+  ]
+}
