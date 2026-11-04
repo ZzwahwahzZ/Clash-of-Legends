@@ -1,0 +1,330 @@
+{
+  "generated_utc": "2026-11-04T21:35:35.934260+00:00",
+  "downloads": [
+    {
+      "name": "ConquerOnline.zip",
+      "status": "UNAVAILABLE",
+      "error": "404 Client Error: Not Found for url: https://github.com/ZzwahwahzZ/Conquer-Mobile-Assets./releases/download/mobile-source-files/ConquerOnline.zip"
+    },
+    {
+      "name": "Conquer-Mobile-Assets.-mobile-source-files.zip",
+      "status": "UNAVAILABLE",
+      "error": "404 Client Error: Not Found for url: https://github.com/ZzwahwahzZ/Conquer-Mobile-Assets./releases/download/mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files.zip"
+    },
+    {
+      "name": "extracted-assets-001.zip",
+      "status": "VERIFIED",
+      "bytes": 842723106,
+      "sha256": "0d21a110c09b762ed5f1a5f4da022857b0534e489eb85052d15da460cb229d2a"
+    }
+  ],
+  "loose_assets": [
+    {
+      "name": "autoupdate.ini",
+      "size": 23,
+      "sha256": "9e6039dc8d7c1caa33068d822b1032a144a7d531fd31093228b68acf3dcad9d8"
+    },
+    {
+      "name": "autoupdate.dat",
+      "size": 969,
+      "sha256": "22adc23de1fef9cefbe815cb20458f43aab608c0f833b5e5bd8657389e39d4f1"
+    },
+    {
+      "name": "updateres.ini",
+      "size": 1672,
+      "sha256": "9a2935c90d362d4a41f2b0abe2ec6918727680de709a40f671964d252771cef4"
+    },
+    {
+      "name": "update.ani",
+      "size": 1339,
+      "sha256": "60497e13f27328a70417528c166710f9bea9055c9e0d14e331ed1e6444ac1686"
+    },
+    {
+      "name": "bg.ani",
+      "size": 18320,
+      "sha256": "228b5393b35fc54bb5f98dd8ea7c3d758a956a29c550102d4815aed979e2cc51"
+    },
+    {
+      "name": "archer.ani",
+      "size": 4982,
+      "sha256": "77867eee8b0397918dc6db2cd0b90f2726de212b9e6aaa360dea09000b21531a"
+    },
+    {
+      "name": "brave.ani",
+      "size": 203163,
+      "sha256": "9f7391beaf2afcdf43c6d0ab4b47e2bcc9b49af2aa377908dd5e714d3c923e61"
+    },
+    {
+      "name": "canyon.ani",
+      "size": 60762,
+      "sha256": "0124f3de87a8e13b2f93f4f0da3508ec64b1ce2e2e57ca30b33ce85ce6f40708"
+    }
+  ],
+  "metadata_candidates": [
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/.github/workflows/assemble-original-images.yml",
+      "bytes": 3446
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/.github/workflows/audit-triposr-source-images.yml",
+      "bytes": 5942
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/.github/workflows/audit-verified-original-images.yml",
+      "bytes": 5277
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/.github/workflows/build-reference-catalogue.yml",
+      "bytes": 888
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/.github/workflows/import-hf-triposr-assets.yml",
+      "bytes": 2312
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/.github/workflows/render-triposr-previews.yml",
+      "bytes": 6131
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/Conquer_TripoSR_42_Models (1) (1).zip",
+      "bytes": 24023224
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/assets/triposr_42/generation_report.csv",
+      "bytes": 2530
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/colored_test/Conquer_Color_Texture_Test_3_Samples.zip",
+      "bytes": 880237
+    },
+    {
+      "archive": "extracted-assets-001.zip!Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/colored_test/Conquer_Color_Texture_Test_3_Samples.zip",
+      "path": "colored_test/metadata.json",
+      "bytes": 1418
+    },
+    {
+      "archive": "extracted-assets-001.zip!Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/colored_test/Conquer_Color_Texture_Test_3_Samples.zip",
+      "path": "colored_test/color_test_report.csv",
+      "bytes": 665
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/colored_test/color_test_report.csv",
+      "bytes": 665
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/colored_test/metadata.json",
+      "bytes": 1418
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/conquer_original_reference_images.zip",
+      "bytes": 31214443
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/generated_models/Conquer_TripoSR_42_Models.zip",
+      "bytes": 1940
+    },
+    {
+      "archive": "extracted-assets-001.zip!Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/generated_models/Conquer_TripoSR_42_Models.zip",
+      "path": "_cloud_storage_test.txt",
+      "bytes": 31
+    },
+    {
+      "archive": "extracted-assets-001.zip!Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/generated_models/Conquer_TripoSR_42_Models.zip",
+      "path": "generation_report.csv",
+      "bytes": 6234
+    },
+    {
+      "archive": "extracted-assets-001.zip!Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/generated_models/Conquer_TripoSR_42_Models.zip",
+      "path": "Conquer_TripoSR_42_Models.zip",
+      "bytes": 796
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/generated_models/_cloud_storage_test.txt",
+      "bytes": 47
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/generated_models/generation_report.csv",
+      "bytes": 11435
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/original_archive_contents.txt",
+      "bytes": 3387
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/original_images/collection_report.json",
+      "bytes": 4068
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/original_images/sources_manifest.csv",
+      "bytes": 8547
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/original_images_manifest.txt",
+      "bytes": 2595
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/original_images_report.txt",
+      "bytes": 119
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/original_payload_filetype.txt",
+      "bytes": 131
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/previews/source_images/archive_file_manifest.txt",
+      "bytes": 3777
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/previews/source_images/image_quality_audit.csv",
+      "bytes": 14936
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/previews/source_images/summary.json",
+      "bytes": 21710
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/previews/triposr_42/geometry_audit.csv",
+      "bytes": 5354
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/previews/triposr_42/summary.json",
+      "bytes": 117
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/previews/verified_source_images/image_quality_audit.csv",
+      "bytes": 8576
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/previews/verified_source_images/summary.json",
+      "bytes": 590
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/reference_library/catalog/source_page_catalog.csv",
+      "bytes": 27021
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/reference_library/catalog/source_page_catalog.json",
+      "bytes": 49312
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/reference_library/catalog/source_registry.csv",
+      "bytes": 1505
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/reference_library/catalog/summary.json",
+      "bytes": 174
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/reference_library/intake/community_art_candidates.csv",
+      "bytes": 3278
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/uv_texture_test/Conquer_UV_Texture_Test_3_Samples.zip",
+      "bytes": 6556404
+    },
+    {
+      "archive": "extracted-assets-001.zip!Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/uv_texture_test/Conquer_UV_Texture_Test_3_Samples.zip",
+      "path": "uv_texture_test/uv_texture_report.csv",
+      "bytes": 984
+    },
+    {
+      "archive": "extracted-assets-001.zip!Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/uv_texture_test/Conquer_UV_Texture_Test_3_Samples.zip",
+      "path": "uv_texture_test/metadata.json",
+      "bytes": 2147
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/uv_texture_test/metadata.json",
+      "bytes": 2147
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "Conquer-Mobile-Assets.-mobile-source-files/Conquer-Mobile-Assets.-mobile-source-files/uv_texture_test/uv_texture_report.csv",
+      "bytes": 984
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "ConquerOnline/ConquerOnline-1.1.2.3.apk",
+      "bytes": 155612867
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "ConquerOnline/config.arm64_v8a.apk",
+      "bytes": 96368455
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "ConquerOnline/config.xxhdpi.apk",
+      "bytes": 884163
+    },
+    {
+      "archive": "extracted-assets-001.zip!ConquerOnline/config.xxhdpi.apk",
+      "path": "AndroidManifest.xml",
+      "bytes": 1044
+    },
+    {
+      "archive": "extracted-assets-001.zip!ConquerOnline/config.xxhdpi.apk",
+      "path": "res/drawable-anydpi-v21/design_ic_visibility.xml",
+      "bytes": 540
+    },
+    {
+      "archive": "extracted-assets-001.zip!ConquerOnline/config.xxhdpi.apk",
+      "path": "res/drawable-anydpi-v21/design_ic_visibility_off.xml",
+      "bytes": 1144
+    },
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "ConquerOnline/install_time_1001.apk",
+      "bytes": 208251259
+    }
+  ],
+  "direct_metadata_matches": [],
+  "apk_aab_obb": [
+    {
+      "archive": "extracted-assets-001.zip",
+      "path": "ConquerOnline/config.xxhdpi.apk",
+      "bytes": 884163
+    }
+  ],
+  "errors": [
+    {
+      "file": "Conquer_TripoSR_42_Models.zip",
+      "error": "File is not a zip file"
+    }
+  ],
+  "version_status": "UNIDENTIFIED unless explicit package/version/build evidence is found"
+}
