@@ -107,8 +107,10 @@ func _complete_quest() -> void:
 	var quest: Dictionary = quest_database[completed_id]
 	completed_quest_ids.append(completed_id)
 
-	var gold := max(0, int(quest.get("reward_gold", 0)))
-	var xp := max(0, int(quest.get("reward_xp", 0)))
+	# Explicit integer annotations prevent Godot 4.3's inferred-Variant
+	# warnings from becoming compilation errors under the project's strict settings.
+	var gold: int = maxi(0, int(quest.get("reward_gold", 0)))
+	var xp: int = maxi(0, int(quest.get("reward_xp", 0)))
 	if GameManager:
 		GameManager.add_gold(gold)
 		var player = GameManager.player_reference
