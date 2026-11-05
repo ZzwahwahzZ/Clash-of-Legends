@@ -48,6 +48,13 @@ jobs:
           grep -Eq 'TEST RESULTS SUMMARY: .* \| 0 FAILED' ci-logs/gameplay-tests.log
           if grep -Eq 'SCRIPT ERROR:|Parse Error:|Compile Error:|ERROR: Failed to load script|ERROR: Failed to instantiate an autoload' ci-logs/gameplay-tests.log; then echo 'Gameplay tests emitted script errors'; exit 1; fi
 
+      - name: Validate verified character model mapping
+        run: |
+          set -o pipefail
+          godot --headless --path . --script tools/resource_packs/validate_character_model_mapping.gd 2>&1 | tee ci-logs/character-model-mapping.log
+          grep -q "CHARACTER MODEL MAPPING AUDIT PASSED" ci-logs/character-model-mapping.log
+          if grep -Eq "SCRIPT ERROR:|Parse Error:|Compile Error:|CHARACTER MODEL MAPPING AUDIT FAILED" ci-logs/character-model-mapping.log; then echo "Character model mapping audit failed"; exit 1; fi
+
       - name: Run visual audit
         run: |
           set -o pipefail
