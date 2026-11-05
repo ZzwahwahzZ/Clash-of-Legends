@@ -160,9 +160,8 @@ def parse_rsdb(data: bytes, stem: str) -> dict:
 def parse_mesh(data: bytes) -> dict:
     """Parse legacy MESH and Mobile MESZ equipment records.
 
-    MESZ retains the MESH 8-byte table header and 16-byte parts, then appends
-    eight float32 values to every record. Their semantics are deliberately
-    preserved as raw extension values rather than guessed.
+    MESH uses 16-byte parts. Mobile MESZ extends every part with eight raw
+    float32 values (32 bytes); preserve them without assigning guessed semantics.
     """
     if len(data) < 8:
         raise ValueError("MESH table is shorter than its header")
@@ -174,39 +173,37 @@ def parse_mesh(data: bytes) -> dict:
     records = []
     for index in range(count):
         if offset + 8 > len(data):
-            raise ValueError(f"MESH record {index} header exceeds table size")
+            raise ValueError(f"MESH record {index} header exceeds table size at offset {offset}")
         unique_id, part_count = struct.unpack_from("<II", data, offset)
         offset += 8
-        if part_count > 64 or offset + part_count * 16 > len(data):
+        if part_count > 64:
             raise ValueError(f"MESH record {unique_id} has invalid part count {part_count}")
         parts = []
         for part_index in range(part_count):
+            part_size = 48 if magic == b"MESZ" else 16
+            if offset + part_size > len(data):
+                raise ValueError(f"MESH record {unique_id} part {part_index} exceeds table size")
             mesh_id, texture_id, mix_texture_id = struct.unpack_from("<III", data, offset)
             mix_opt, asb, adb, material = struct.unpack_from("<BBBB", data, offset + 12)
-            offset += 16
-            parts.append({
+            part = {
                 "part_index": part_index, "mesh_id": mesh_id,
                 "texture_id": texture_id, "mix_texture_id": mix_texture_id,
                 "mix_option": mix_opt, "alpha_source_blend": asb,
                 "alpha_destination_blend": adb, "material_id": material,
-            })
-        extension = []
-        if magic == b"MESZ":
-            if offset + 32 > len(data):
-                raise ValueError(f"MESZ record {unique_id} is missing its 32-byte record extension")
-            extension = list(struct.unpack_from("<8f", data, offset))
-            offset += 32
-        records.append({
-            "id": unique_id, "part_count": part_count, "parts": parts,
-            "record_extension_f32": extension,
-        })
+                "part_extension_f32": [],
+            }
+            if magic == b"MESZ":
+                part["part_extension_f32"] = list(struct.unpack_from("<8f", data, offset + 16))
+            parts.append(part)
+            offset += part_size
+        records.append({"id": unique_id, "part_count": part_count, "parts": parts})
     trailing = len(data) - offset
     if trailing:
-        raise ValueError(f"MESH table has {trailing} trailing byte(s)")
+        raise ValueError(f"MESH table has {trailing} trailing byte(s) after record {len(records)}")
     return {
         "format": magic.decode("ascii", errors="replace"),
         "record_count": count, "parse_status": "PARSED",
-        "record_extension": "8 raw float32 values per MESZ record" if magic == b"MESZ" else None,
+        "part_extension": "8 raw float32 values per MESZ part" if magic == b"MESZ" else None,
         "sample_records": records[:20], "_records": records,
     }
 
@@ -460,7 +457,7 @@ def parse_wdb(data: bytes) -> dict:
             "status": "PREFIX_JOIN_CANDIDATE_REQUIRES_RUNTIME_CONFIRMATION",
             "record_count": len(mount_motion_rows),
         },
-        "note": "Source ID/path catalog only. Texture file presence, C3 geometry correctness, rig attachment and runtime rendering are validated separately."
+        "note": "Source ID/path catalog only. Mobile MESZ part extensions are preserved as eight raw float32 values per part. Texture file presence, C3 geometry correctness, rig attachment and runtime rendering are validated separately."
     }
     equipment_catalog_path.write_text(json.dumps(equipment_catalog, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     catalog_path = catalog_dir / "simple_object_catalog.json"
