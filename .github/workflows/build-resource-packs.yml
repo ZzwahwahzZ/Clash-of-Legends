@@ -38,6 +38,8 @@ jobs:
         run: |
           rm -rf resource_stage
           godot --headless --path . --script tools/resource_packs/extract_resource_packs.gd
+      - name: Test safe nested audio extraction and provenance
+        run: python3 -m unittest tools/resource_packs/test_nested_audio_7z.py
       - name: Extract and index audio embedded in nested 7z archives
         run: python3 tools/resource_packs/extract_nested_audio_7z.py
       - name: Audit C3 WDB motion, object and texture tables
