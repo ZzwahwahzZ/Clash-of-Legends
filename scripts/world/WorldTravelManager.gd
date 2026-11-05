@@ -30,10 +30,14 @@ func get_current_destination_id() -> String:
 func travel_to(destination_id: String, reason: String = "manual") -> bool:
 	if travel_in_progress:
 		return false
-	if not DESTINATIONS.has(destination_id):
-		_notify("وجهة الانتقال غير معروفة" if GameManager.current_language == "ar" else "Unknown travel destination", true)
+	var game_manager := _get_game_manager()
+	if game_manager == null:
+		push_error("WorldTravelManager requires /root/GameManager.")
 		return false
-	if not is_instance_valid(GameManager.player_reference):
+	if not DESTINATIONS.has(destination_id):
+		_notify("وجهة الانتقال غير معروفة" if str(game_manager.get("current_language")) == "ar" else "Unknown travel destination", true)
+		return false
+	if not is_instance_valid(game_manager.get("player_reference")):
 		_notify("لا يوجد بطل مسجل للانتقال" if GameManager.current_language == "ar" else "No active hero to travel", true)
 		return false
 	if destination_id == current_destination_id:
@@ -43,7 +47,7 @@ func travel_to(destination_id: String, reason: String = "manual") -> bool:
 	travel_in_progress = true
 	travel_serial += 1
 	emit_signal("travel_started", destination_id)
-	var player := GameManager.player_reference
+	var player: Node3D = game_manager.get("player_reference") as Node3D
 	var destination: Dictionary = DESTINATIONS[destination_id]
 	var target: Vector3 = destination.position
 	if player is CharacterBody3D:
@@ -56,13 +60,17 @@ func travel_to(destination_id: String, reason: String = "manual") -> bool:
 	current_destination_id = destination_id
 	travel_in_progress = false
 	emit_signal("travel_completed", destination_id, target)
-	var label := str(destination.name_ar) if GameManager.current_language == "ar" else str(destination.name_en)
-	var message := "تم الانتقال اللحظي إلى %s" % label if GameManager.current_language == "ar" else "Instant travel to %s complete" % label
+	var label := str(destination.name_ar) if str(game_manager.get("current_language")) == "ar" else str(destination.name_en)
+	var message := "تم الانتقال اللحظي إلى %s" % label if str(game_manager.get("current_language")) == "ar" else "Instant travel to %s complete" % label
 	if reason == "quest":
-		message = "انتقلت مباشرة إلى موقع المهمة: %s" % label if GameManager.current_language == "ar" else "Instantly travelled to quest location: %s" % label
+		message = "انتقلت مباشرة إلى موقع المهمة: %s" % label if str(game_manager.get("current_language")) == "ar" else "Instantly travelled to quest location: %s" % label
 	_notify(message, false)
 	return true
 
+func _get_game_manager() -> Node:
+	return get_node_or_null("/root/GameManager")
+
 func _notify(message: String, alert: bool) -> void:
-	if is_instance_valid(GameManager):
-		GameManager.post_notification(message, alert)
+	var game_manager := _get_game_manager()
+	if game_manager != null:
+		game_manager.call("post_notification", message, alert)
