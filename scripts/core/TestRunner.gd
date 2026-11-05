@@ -4,6 +4,7 @@ const PlayerInventoryScript = preload("res://scripts/player/PlayerInventory.gd")
 const QuestNavigationAgentScript = preload("res://scripts/automation/QuestNavigationAgent.gd")
 const SimulatedPlayerScript = preload("res://scripts/ai/SimulatedPlayer.gd")
 const MountModelMappingRulesScript = preload("res://scripts/core/MountModelMappingRules.gd")
+const PlayerControllerScript = preload("res://scripts/player/PlayerController.gd")
 
 var total_tests: int = 0
 var passed_tests: int = 0
@@ -31,6 +32,7 @@ func run_all_tests() -> Dictionary:
 	test_arabic_localization_integrity()
 	test_inventory_and_equipment_refinement()
 	test_mount_identity_mapping_rules()
+	test_character_candidate_requires_bound_skinning()
 	test_inventory_capacity_is_transactional()
 	test_local_save_and_backup_recovery()
 	test_quest_progression_lifecycle()
@@ -53,6 +55,35 @@ func test_mount_identity_mapping_rules() -> void:
 	assert_true(MountModelMappingRulesScript.find_verified_mount_model_index(entries, "mount_wolf") == 2, "Mount: only the exact verified complete-mount identity is eligible")
 	assert_true(MountModelMappingRulesScript.find_verified_mount_model_index(entries, "mount_unknown") == -1, "Mount: unknown item identity cannot select an arbitrary model")
 	assert_true(MountModelMappingRulesScript.find_verified_mount_model_index(entries, "") == -1, "Mount: empty item identity is rejected")
+
+func test_character_candidate_requires_bound_skinning() -> void:
+	var controller := CharacterBody3D.new()
+	controller.set_script(PlayerControllerScript)
+	var candidate := Node3D.new()
+	var mesh_instance := MeshInstance3D.new()
+	mesh_instance.mesh = BoxMesh.new()
+	mesh_instance.material_override = StandardMaterial3D.new()
+	candidate.add_child(mesh_instance)
+	var skeleton := Skeleton3D.new()
+	for bone_index in range(8):
+		skeleton.add_bone("test_bone_%d" % bone_index)
+	candidate.add_child(skeleton)
+	var animation_player := AnimationPlayer.new()
+	var idle := Animation.new()
+	idle.add_track(Animation.TYPE_VALUE)
+	idle.track_set_path(0, NodePath(".:position"))
+	idle.track_insert_key(0, 0.0, Vector3.ZERO)
+	var walk := Animation.new()
+	walk.add_track(Animation.TYPE_VALUE)
+	walk.track_set_path(0, NodePath(".:position"))
+	walk.track_insert_key(0, 0.0, Vector3.ZERO)
+	animation_player.add_animation("idle", idle)
+	animation_player.add_animation("walk", walk)
+	var result: Dictionary = controller._validate_character_candidate(candidate, animation_player)
+	assert_true(not bool(result.get("ok", true)) and str(result.get("reason", "")).contains("skinned mesh"), "Character: unbound primitive mesh cannot pass skeletal replacement gate")
+	candidate.free()
+	animation_player.free()
+	controller.free()
 
 func assert_true(condition: bool, test_name: String) -> void:
 	total_tests += 1
