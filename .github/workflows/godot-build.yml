@@ -286,12 +286,36 @@ jobs:
           cat builds/android/SHA256SUMS.txt
           cat builds/android/INSTALL-INFO.txt
 
+      - name: Export x86_64 emulator-only APK without changing the phone release APK
+        run: |
+          set -euo pipefail
+          cp export_presets.cfg export_presets.arm64-backup.cfg
+          restore_preset() { mv -f export_presets.arm64-backup.cfg export_presets.cfg; }
+          trap restore_preset EXIT
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path("export_presets.cfg")
+          s=p.read_text()
+          s=s.replace("architectures/arm64-v8a=true", "architectures/arm64-v8a=false")
+          s=s.replace("architectures/x86_64=false", "architectures/x86_64=true")
+          if "architectures/arm64-v8a=false" not in s or "architectures/x86_64=true" not in s:
+              raise SystemExit("Could not configure x86_64 emulator export preset")
+          p.write_text(s)
+          PY
+          godot --headless --path . --export-debug "Android" builds/android/ClashOfLegends-emulator-x86_64.apk
+          test -s builds/android/ClashOfLegends-emulator-x86_64.apk
+          "$ANDROID_HOME/build-tools/34.0.0/apksigner" verify builds/android/ClashOfLegends-emulator-x86_64.apk
+          echo "EMULATOR APK EXPORTED: x86_64 test build; ARM64 phone APK remains unchanged."
+          restore_preset
+          trap - EXIT
+
       - name: Upload verified Android APK and checksum
         uses: actions/upload-artifact@v4
         with:
           name: ClashOfLegends-Android13-SIGNED-VERIFIED
           path: |
             builds/android/ClashOfLegends-debug.apk
+            builds/android/ClashOfLegends-emulator-x86_64.apk
             builds/android/SHA256SUMS.txt
             builds/android/INSTALL-INFO.txt
             builds/android/signature-verification.txt
