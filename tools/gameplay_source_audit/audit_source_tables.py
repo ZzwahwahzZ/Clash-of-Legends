@@ -158,6 +158,7 @@ def main() -> None:
                     "file_count": len(itemtypes),
                     "record_count": sum(int(e.get("record_count", 0)) for e in itemtypes),
                     "malformed_or_duplicate_lines": sum(int(e.get("malformed_or_duplicate_lines", 0)) for e in itemtypes),
+                    "column_59_candidate_count": sum(1 for e in itemtypes for row in e.get("records", []) if "column_59_candidate" in row),
                     "schema_policy": "Only numeric record ID and visible name are parsed; every remaining positional field remains opaque."
                 },
                 "acceptance": "SOURCE_INVENTORY_ONLY_NOT_RUNTIME_APPROVED",
