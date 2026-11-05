@@ -194,7 +194,7 @@ pub fn export_document(document: &C3Document, texture_png: &[u8], source: &str, 
         let flat_positions: Vec<f32> = positions.iter().flat_map(|p| p.iter().copied()).collect();
         let flat_normals: Vec<f32> = normals.iter().flat_map(|p| p.iter().copied()).collect();
         let flat_uvs: Vec<f32> = mesh.vertices.iter()
-            .flat_map(|v| [v.texture_coordinate.x, v.texture_coordinate.y]).collect();
+            .flat_map(|v| [v.texture_coordinate.x, 1.0 - v.texture_coordinate.y]).collect();
         // TEXCOORD_1 preserves the original C3 vertex ID. Godot may split
         // imported vertices along normal/material boundaries; duplicates keep
         // this source index so VAT lookup remains stable after import.
