@@ -133,3 +133,14 @@ A guarded Rust API, `export_document_with_external_motion`, has now been added t
 Regression tests cover successful external motion replacement and rejection of a mismatched PHY/MOTI count. This proves the conversion path can safely represent external clips when the source pairing is established; it does **not** yet mean the 558 clips have been assigned to classes/actions or integrated into the playable character controller.
 
 Reference reviewed: [C3Studio community C3 model/role viewer](https://github.com/abdouthematrix/C3Studio) (desktop reference; version compatibility with this Android source set remains to be validated).
+
+### 8.1 Male/female PHY-to-MOTI slot order
+
+The path-key audit also established two distinct body slot signatures:
+
+- Male look 7: `body/7130000.c3` has 18 PHY/MOTI slots; slot 0 carries 66 bones and slots 1–17 carry one bone each. Motion-only `0007/500/100.c3` has the same ordered `[66, 1 × 17]` signature.
+- Female look 8: `body/8133010.c3` has 18 PHY/MOTI slots; slots 0–16 carry one bone each and slot 17 carries 60 bones. Motion-only `0008/500/100.c3` has the same ordered `[1 × 17, 60]` signature.
+
+This order matters: applying the male MOTI order to the female mesh list would animate the wrong slot. The exact ordered signatures and matching numeric look tokens reduce the body candidates to 11 look-7 models and 4 look-8 models in this source set. These are structural candidates, not class identity proof.
+
+An audit-only proof-of-concept exporter has now been added to generate StandBy/Walk/Run candidate clips (action tokens 100/110/120, weapon token 500) for one male and one female base body. The outputs are kept under `build/c3-glb/motion-poc`, outside the runtime category folders, so they cannot silently enter the shipped PCK catalog. CI is currently responsible for confirming the six GLBs import and expose usable animation tracks before this experiment is accepted.
