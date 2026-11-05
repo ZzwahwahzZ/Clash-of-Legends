@@ -7,7 +7,9 @@
 
 ### 1. Preserve original C3 skinning data before attempting auto-rigging
 
-The current C3-to-GLB exporter emits per-mesh morph targets from sampled vertex positions. This is useful as a diagnostic preview, but it is not skeletal skinning and must not be accepted as a finished character rig. The source PHY vertices contain two bone indices and two weights; the source MOTI tracks contain per-bone matrices. A correct production converter must preserve both influences and build a glTF `skin`, `JOINTS_0`, `WEIGHTS_0`, inverse-bind matrices, joint nodes, and bone-transform animation channels.
+**Important format finding:** The available C3 readers expose bone-indexed MOTI matrices but no verified parent/child hierarchy. C3-Operator's importer also creates independent bones rather than a proven hierarchy. Do not invent parent links. Start with a flat joint list only if matrix-space tests prove the C3 matrices are already model-space; otherwise keep the model in diagnostic preview and reject skeletal export until the transform convention is established.
+
+The current C3-to-GLB exporter emits per-mesh morph targets from sampled vertex positions. This is useful as a diagnostic preview, but it is not skeletal skinning and must not be accepted as a finished character rig. The source PHY vertices contain two bone indices and two weights; the source MOTI tracks contain per-bone matrices. Two independent C3 implementations (C3Studio and the C3 Blender Add-On) apply the first-positive-influence rule and stop at the first positive slot; they do not blend both influences. Preserve both raw slots in audit metadata, but reproduce this observed C3 runtime behavior in the rendered skin unless a controlled comparison against the original client proves otherwise. A production converter still needs a glTF `skin`, `JOINTS_0`, `WEIGHTS_0`, inverse-bind matrices, joint nodes, and bone-transform animation channels.
 
 The source bone hierarchy/rest-pose semantics and matrix conventions must be established from controlled reference renders before shipping. Do not invent parent relationships or assume that bone-count equality proves a correct rig. Do not discard the second vertex influence.
 
@@ -50,7 +52,7 @@ A production character is rejected unless all checks pass:
 
 - At least one real `Skeleton3D` and one glTF `skin` exist; a morph-only model is not a substitute.
 - Every skinned mesh has valid `JOINTS_0` and normalized `WEIGHTS_0`; all positive-weight joint indices resolve.
-- Both source influences are retained where present; no silent first-influence-only truncation.
+- Both raw source influence slots are recorded for audit; the runtime influence selection matches the verified first-positive C3 behavior rather than assuming conventional weighted blending.
 - Inverse-bind matrices and rest pose produce the correct neutral pose.
 - Idle, walk, run, attack, skill, hit, and death clips (where applicable) animate the intended bones.
 - No detached limbs, exploding vertices, twisted bind pose, floating equipment, or body/weapon socket drift in sampled frames.
