@@ -386,8 +386,9 @@ jobs:
             adb pull /sdcard/clash-launch.png emulator-evidence/launch-screen.png
             # Dismiss Android's one-time immersive-mode education overlay.
             # The game is landscape (2400x1080 after orientation), so tap the
-            # actual "Got it" button rather than the portrait-coordinate guess.
-            adb shell input tap 1500 380
+            # actual "Got it" button. adb input uses the emulator's natural 1080x2400
+            # coordinate space while the captured landscape framebuffer is 2400x1080.
+            adb shell input tap 700 1500
             sleep 3
             adb shell screencap -p /sdcard/clash-character-select.png
             adb pull /sdcard/clash-character-select.png emulator-evidence/character-select.png
@@ -406,7 +407,7 @@ jobs:
                 raise SystemExit("Immersive-mode overlay is still visible; character selection was not reached.")
             PY
             # Enter the journey using the center of the actual start button.
-            adb shell input tap 1200 975
+            adb shell input tap 105 1200
             sleep 15
             adb shell screencap -p /sdcard/clash-world-entry.png
             adb pull /sdcard/clash-world-entry.png emulator-evidence/world-entry.png
@@ -424,7 +425,7 @@ jobs:
                 raise SystemExit("Start-button input did not transition from character selection into the world.")
             PY
             # Exercise the landscape movement area and capture the resulting scene.
-            adb shell input swipe 280 900 420 900 700
+            adb shell input swipe 180 280 180 420 700
             sleep 3
             adb shell screencap -p /sdcard/clash-interaction.png
             adb pull /sdcard/clash-interaction.png emulator-evidence/interaction-screen.png
