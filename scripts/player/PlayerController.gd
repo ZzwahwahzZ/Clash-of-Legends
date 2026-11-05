@@ -31,6 +31,7 @@ var target_nav_position: Vector3 = Vector3.ZERO
 var is_moving_to_target: bool = false
 var imported_model_animation: AnimationPlayer = null
 var imported_animation_name: String = ""
+var imported_mount_item_id: String = ""
 
 @onready var camera_pivot: Node3D = $CameraPivot
 @onready var free_camera: FreeCamera3D = $CameraPivot/FreeCamera3D
@@ -360,13 +361,22 @@ func get_character_class() -> String:
 	return character_class
 
 func _apply_mount_model() -> void:
-	if not mount_mesh or not AssetCatalog or not inventory:
+	if not mount_mesh or not inventory:
 		return
 	var equipped_mount: Variant = inventory.equipment.get("mount", null)
-	if not equipped_mount is Dictionary:
-		return
-	var mount_item_id := str(equipped_mount.get("id", ""))
-	if mount_item_id.is_empty():
+	var mount_item_id := str(equipped_mount.get("id", "")) if equipped_mount is Dictionary else ""
+	var existing_root := mount_mesh.get_node_or_null("ImportedMountRoot")
+	# Never let a previously equipped mount masquerade as a newly equipped item.
+	if mount_item_id != imported_mount_item_id:
+		if is_mounted:
+			is_mounted = false
+			mount_mesh.visible = false
+			if torso_node:
+				torso_node.position.y = 0.9
+		if existing_root:
+			existing_root.queue_free()
+		imported_mount_item_id = ""
+	if mount_item_id.is_empty() or not AssetCatalog:
 		return
 	var mount_entries := AssetCatalog.get_asset_entries("mounts", [".glb", ".gltf"])
 	var verified_index := -1
@@ -400,6 +410,7 @@ func _apply_mount_model() -> void:
 	if old_root:
 		old_root.queue_free()
 	candidate_root.name = "ImportedMountRoot"
+	imported_mount_item_id = mount_item_id
 	for child in mount_mesh.get_children():
 		if child != candidate_root and child is Node3D:
 			child.visible = false
