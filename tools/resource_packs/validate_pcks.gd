@@ -49,7 +49,7 @@ func _validate_packages() -> void:
 			quit(1)
 			return
 		print("PCK category OK: ", required_category, " (", entries.size(), " entries)")
-	for model_category in ["characters", "monsters", "mounts"]:
+	for model_category in ["characters", "monsters", "mounts", "equipment"]:
 		var model_entries: Array = []
 		for entry in assets.get(model_category, []):
 			var ext := str(entry.get("extension", "")).to_lower()
