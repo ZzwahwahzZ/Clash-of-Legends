@@ -35,8 +35,8 @@ func _run_audit() -> void:
 		}
 	}
 	for pack_name in PACK_NAMES:
-		var pack_path := "res://ci-resource-packs/" + pack_name
-		var mounted := FileAccess.file_exists(pack_path) and ProjectSettings.load_resource_pack(pack_path, true)
+		var pack_path: String = "res://ci-resource-packs/" + str(pack_name)
+		var mounted: bool = FileAccess.file_exists(pack_path) and ProjectSettings.load_resource_pack(pack_path, true)
 		report["pack_mounts"][pack_name] = mounted
 		print("PCK_MOUNT ", pack_name, " ", mounted)
 		if not mounted:
