@@ -133,8 +133,9 @@ jobs:
           (cd builds/android && sha256sum ClashOfLegends-debug.apk > SHA256SUMS.txt)
           {
             echo "Package: com.zwahwahzz.clashoflegends"
-            echo "Minimum Android: 6.0 (API 23)"
-            echo "Target Android: 13 (API 33)"
+            echo "Minimum Android API: $MIN_SDK"
+            echo "Target Android API: $TARGET_SDK"
+            echo "Compatibility check: Android 13 (API 33)"
             echo "Architecture: ARM64-v8a"
             echo "Signature: verified CI debug signature"
             echo "APK size: $(stat -c%s "$APK") bytes"
