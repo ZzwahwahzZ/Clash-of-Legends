@@ -253,7 +253,7 @@ jobs:
         run: |
           set -euo pipefail
           BUILD_TOOLS="$ANDROID_HOME/build-tools/34.0.0"
-          APK="builds/android/ClashOfLegends-debug.apk"
+          APK="builds/android/ClashOfLegends-emulator-x86_64.apk"
           unzip -t "$APK"
           "$BUILD_TOOLS/apksigner" verify --verbose --print-certs "$APK" | tee builds/android/signature-verification.txt
           APK_ANALYZER="$ANDROID_HOME/cmdline-tools/latest/bin/apkanalyzer"
