@@ -81,3 +81,11 @@
 - Added automated checks for no chat signal and explicit-command-only simulated movement.
 - GitHub Actions run [41404156725](https://github.com/ZzwahwahzZ/Clash-of-Legends/actions/runs/41404156725) completed successfully: Godot 4.3 import, gameplay tests, visual audit, and React studio build all passed.
 - **Important scope note:** this is an initial correction and requirements lock, not completion of the full Conquer Online feature catalogue. The existing project still has prototype content and missing production asset packs; quests, NPC catalogue, classes/skills, Gang/Guild, marriage, market, mounts, fashion, gems/sockets, and full reference content remain to be implemented and validated in subsequent stages.
+
+### Stage 11 — External Troubleshooting & Production Quality Rules (2026-11-05)
+- For recurring technical blockers, research primary developer documentation, issue trackers, maintainer discussions, and proven community workarounds before repeating failed attempts.
+- Record the exact failing step, reproducible error, environment/version, attempted fixes, and verified resolution; distinguish confirmed fixes from experiments.
+- Continue independent work while a blocker is investigated; do not bypass acceptance gates or replace production assets with placeholders.
+- External tools may be used when they materially improve the existing project; verify licensing and avoid uploading proprietary source assets to third-party services without explicit rights/approval.
+- Keep user-facing progress updates short: completed work, current blocker, next concrete action, and evidence link only. Avoid long status narration.
+- **Status**: ACTIVE standing execution rules.
