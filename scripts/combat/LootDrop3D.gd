@@ -23,6 +23,7 @@ func setup_loot(data: Dictionary) -> void:
 	if data.get("has_item", false) and data.has("item_data") and data["item_data"] != null:
 		item_payload = data["item_data"]
 		
+	_apply_drop_visual()
 	if label:
 		if not item_payload.is_empty():
 			var it_name = item_payload.get("name_ar", "عتاد") if (GameManager and GameManager.current_language == "ar") else item_payload.get("name_en", "Gear")
@@ -31,6 +32,39 @@ func setup_loot(data: Dictionary) -> void:
 		else:
 			label.text = "%d ذهب" % gold_amount if (GameManager and GameManager.current_language == "ar") else "%d Gold" % gold_amount
 			label.modulate = Color(1.0, 0.95, 0.3)
+
+func get_loot_category() -> String:
+	if item_payload.is_empty():
+		return "gold"
+	var item_type := str(item_payload.get("type", "material"))
+	if item_type == "equipment":
+		return "equipment"
+	if item_type in ["gem", "quest"]:
+		return item_type
+	return "material"
+
+func _apply_drop_visual() -> void:
+	if not mesh_instance:
+		return
+	var material := StandardMaterial3D.new()
+	material.metallic = 0.72
+	material.roughness = 0.24
+	material.emission_enabled = true
+	var item_type := str(item_payload.get("type", "gold")) if not item_payload.is_empty() else "gold"
+	var rarity := str(item_payload.get("rarity", "normal")) if not item_payload.is_empty() else "normal"
+	var tint := Color(1.0, 0.78, 0.16)
+	if item_type == "equipment":
+		tint = Color(0.35, 0.72, 1.0) if rarity in ["elite", "rare"] else Color(0.72, 0.82, 0.95)
+	elif item_type == "gem":
+		tint = Color(0.25, 1.0, 0.72)
+	elif item_type == "quest":
+		tint = Color(0.78, 0.48, 1.0)
+	elif rarity in ["elite", "legendary"]:
+		tint = Color(1.0, 0.32, 0.12)
+	material.albedo_color = tint
+	material.emission = tint
+	material.emission_energy_multiplier = 2.4 if rarity in ["elite", "legendary"] else 1.25
+	mesh_instance.material_override = material
 
 func _on_body_entered(body: Node3D) -> void:
 	if body is PlayerController and not is_collected:
