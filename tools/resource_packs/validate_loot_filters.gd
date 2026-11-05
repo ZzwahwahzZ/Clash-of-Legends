@@ -12,6 +12,24 @@ func _run() -> void:
 	root.add_child(drop)
 	var failures: Array[String] = []
 
+	var settings_scene = load("res://scenes/ui/SettingsUI.tscn")
+	var settings_ui = settings_scene.instantiate()
+	root.add_child(settings_ui)
+	await process_frame
+	var filter_grid: GridContainer = settings_ui.get_node_or_null("Panel/LootFiltersGrid")
+	if filter_grid == null or filter_grid.get_child_count() != 9:
+		failures.append("settings UI must expose all nine independent loot filters")
+	else:
+		var gem_checkbox: CheckBox = filter_grid.get_node_or_null("gems")
+		if gem_checkbox == null:
+			failures.append("settings UI is missing the stable Gems filter control")
+		else:
+			var previous_gem_setting: bool = AutoLootManager.loot_gems
+			gem_checkbox.toggled.emit(not previous_gem_setting)
+			if AutoLootManager.loot_gems == previous_gem_setting:
+				failures.append("settings Gems checkbox did not update the live AutoLootManager")
+			AutoLootManager.set_category_enabled("gems", previous_gem_setting)
+
 	drop.setup_loot({"gold": 10, "has_item": false, "item_data": null})
 	manager.loot_gold = false
 	if manager._category_enabled_for(drop):
