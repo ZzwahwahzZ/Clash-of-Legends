@@ -127,6 +127,10 @@ func _render() -> void:
 		" bones=", _count_bones(character),
 		" screenshots=reports/c3-skeletal-poc-frame-a.png,reports/c3-skeletal-poc-frame-b.png")
 
+	animation_player.stop()
+	character.queue_free()
+	await process_frame
+
 	# Render all six real male/female Idle, Walk and Run clips on complete textured characters.
 	# VAT is attached only to deforming meshes; static parts remain visible from the full GLB.
 	var expected_clips := [
