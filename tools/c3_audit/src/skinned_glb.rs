@@ -420,8 +420,57 @@ mod tests {
 }
 
 
-/// Exact C3 Vertex Animation Texture payload. RGBA32F rows preserve full affine
-/// transforms (including shear) without forcing matrices through glTF TRS.
+/// Evaluate a vertex using every positive C3 influence and its real weight.
+/// The complete affine product is retained; no TRS decomposition is involved.
+fn weighted_c3_position(mesh: &C3Mesh, motion: &C3Motion, vertex_index: usize, frame: f32) -> Result<sandbox_data::c3::Vector3, String> {
+    let vertex = &mesh.vertices[vertex_index];
+    let mut total_weight = 0.0_f32;
+    let mut x = 0.0_f32;
+    let mut y = 0.0_f32;
+    let mut z = 0.0_f32;
+    for slot in 0..2 {
+        let weight = vertex.bone_weights[slot];
+        if weight <= 0.0 { continue; }
+        let bone = u32::from(vertex.bone_indices[slot]);
+        if bone >= motion.bone_count {
+            return Err(format!("vertex {vertex_index} references bone {bone} outside {}", motion.bone_count));
+        }
+        let point = mesh.initial_matrix.multiply(motion.matrix_at(bone, frame)).transform_point(vertex.position);
+        x += point.x * weight;
+        y += point.y * weight;
+        z += point.z * weight;
+        total_weight += weight;
+    }
+    if total_weight <= 0.0 {
+        return Err(format!("vertex {vertex_index} has no positive C3 bone influence"));
+    }
+    // C3's two influence weights are normalized for position blending.
+    Ok(sandbox_data::c3::Vector3 { x: x / total_weight, y: y / total_weight, z: z / total_weight })
+}
+
+/// A mesh is VAT-animated only when its evaluated vertex positions actually
+/// change over the clip. Weighted affine matrices, not bone-name heuristics,
+/// decide whether it is static.
+pub fn is_deforming(mesh: &C3Mesh, motion: &C3Motion) -> Result<bool, String> {
+    if mesh.vertices.is_empty() || motion.bone_count == 0 || motion.frame_count <= 1 || motion.keys.is_empty() {
+        return Ok(false);
+    }
+    let baseline: Vec<_> = (0..mesh.vertices.len())
+        .map(|i| weighted_c3_position(mesh, motion, i, 0.0))
+        .collect::<Result<_, _>>()?;
+    for frame in 1..motion.frame_count {
+        for (vertex_index, base) in baseline.iter().enumerate() {
+            let current = weighted_c3_position(mesh, motion, vertex_index, frame as f32)?;
+            if (current.x - base.x).abs() > 1e-5
+                || (current.y - base.y).abs() > 1e-5
+                || (current.z - base.z).abs() > 1e-5 {
+                return Ok(true);
+            }
+        }
+    }
+    Ok(false)
+}
+
 pub fn export_vat(mesh: &C3Mesh, motion: &C3Motion, output_prefix: &Path, clip_id: &str, mesh_index: usize) -> Result<(u64, usize, usize), Box<dyn std::error::Error>> {
     if mesh.vertices.is_empty() || motion.bone_count == 0 || motion.frame_count == 0 {
         return Err("VAT requires vertices and a non-empty C3 motion".into());
@@ -433,20 +482,7 @@ pub fn export_vat(mesh: &C3Mesh, motion: &C3Motion, output_prefix: &Path, clip_i
     let mut max = [f32::NEG_INFINITY; 3];
     for frame in 0..frame_count {
         for (vertex_index, vertex) in mesh.vertices.iter().enumerate() {
-            let mut selected = None;
-            for slot in 0..2 {
-                if vertex.bone_weights[slot] > 0.0 {
-                    let bone = u32::from(vertex.bone_indices[slot]);
-                    if bone >= motion.bone_count {
-                        return Err(format!("vertex {vertex_index} references bone {bone} outside {}", motion.bone_count).into());
-                    }
-                    selected = Some(bone);
-                    break;
-                }
-            }
-            let bone = selected.ok_or_else(|| format!("vertex {vertex_index} has no positive C3 bone influence"))?;
-            // This is the same complete affine product used by the source C3 renderer.
-            let point = mesh.initial_matrix.multiply(motion.matrix_at(bone, frame as f32)).transform_point(vertex.position);
+            let point = weighted_c3_position(mesh, motion, vertex_index, frame as f32)?;
             let p = [point.x * 0.01, -point.z * 0.01, point.y * 0.01];
             for axis in 0..3 {
                 if !p[axis].is_finite() { return Err(format!("non-finite VAT position at frame {frame}").into()); }
@@ -466,7 +502,8 @@ pub fn export_vat(mesh: &C3Mesh, motion: &C3Motion, output_prefix: &Path, clip_i
         "vertex_count":vertex_count,"frame_count":frame_count,"fps":30,
         "bytes_per_texel":16,"binary_bytes":bytes.len(),
         "sampling":"one texel per source vertex per frame; RGBA=(x,y,z,1)",
-        "matrix_semantics":"initial_matrix * motion.matrix_at(first_positive_influence, frame)",
+        "matrix_semantics":"weighted blend of initial_matrix * motion.matrix_at(each_positive_influence, frame)",
+        "influence_semantics":"all positive C3 bone_weights are used and normalized",
         "preserves_affine_shear":true,
         "coordinate_conversion":"C3 centimeters Z-down to meters Y-up: (x*0.01,-z*0.01,y*0.01)",
         "bounds_min":min,"bounds_max":max,
