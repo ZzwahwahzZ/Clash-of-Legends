@@ -62,7 +62,11 @@ func test_character_candidate_requires_bound_skinning() -> void:
 	var candidate := Node3D.new()
 	var mesh_instance := MeshInstance3D.new()
 	mesh_instance.mesh = BoxMesh.new()
-	mesh_instance.material_override = StandardMaterial3D.new()
+	var test_material := StandardMaterial3D.new()
+	var test_image := Image.create(2, 2, false, Image.FORMAT_RGBA8)
+	test_image.fill(Color.WHITE)
+	test_material.albedo_texture = ImageTexture.create_from_image(test_image)
+	mesh_instance.material_override = test_material
 	candidate.add_child(mesh_instance)
 	var skeleton := Skeleton3D.new()
 	for bone_index in range(8):
