@@ -24,6 +24,7 @@ func _ready() -> void:
 	_setup_options()
 
 func open_ui() -> void:
+	FeatureGuidanceManager.show_feature_intro("settings")
 	visible = true
 	_setup_options()
 
