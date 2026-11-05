@@ -1,0 +1,87 @@
+name: Publish verified resource packs v4
+on:
+  push:
+    paths:
+      - ".github/workflows/publish-resource-packs-v4.yml"
+  workflow_dispatch:
+permissions:
+  actions: read
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download previously verified PCK build artifact
+        env:
+          GH_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p build/recovered build/audit release-assets
+          gh run download 41973023226 --repo ZzwahwahzZ/Clash-of-Legends --name ClashOfLegends-Godot43-Resource-PCKs --dir build/recovered
+          gh run download 41973023226 --repo ZzwahwahzZ/Clash-of-Legends --name ClashOfLegends-Source-Audit-Reports --dir build/audit
+      - name: Verify package bytes and prepare v4 manifest
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, shutil
+          from pathlib import Path
+
+          root = Path("build/recovered")
+          manifest_path = root / "RESOURCE_MANIFEST"
+          if not manifest_path.is_file():
+              raise SystemExit("Verified source artifact is missing RESOURCE_MANIFEST")
+          manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+          if len(manifest.get("resource_packages", [])) != 11:
+              raise SystemExit("Expected exactly eleven resource packages")
+          manifest["manifest_version"] = "2.3.0"
+          manifest["release_tag"] = "resource-packs-v4"
+          manifest["build_note"] = "Godot 4.3 PCKs verified by runtime pack loader; release URLs refreshed for v4."
+          for package in manifest["resource_packages"]:
+              matches = list(root.rglob(package["file_name"]))
+              if len(matches) != 1:
+                  raise SystemExit(f"Expected one file for {package['file_name']}, found {len(matches)}")
+              source = matches[0]
+              digest = hashlib.sha256()
+              size = 0
+              with source.open("rb") as stream:
+                  while True:
+                      chunk = stream.read(1024 * 1024)
+                      if not chunk:
+                          break
+                      size += len(chunk)
+                      digest.update(chunk)
+              if size != int(package["size_bytes"]):
+                  raise SystemExit(f"Size mismatch for {source.name}: {size} != {package['size_bytes']}")
+              if digest.hexdigest().lower() != package["sha256"].lower():
+                  raise SystemExit(f"SHA-256 mismatch for {source.name}")
+              package["download_url"] = f"https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/resource-packs-v4/{source.name}"
+              shutil.copy2(source, Path("release-assets") / source.name)
+          manifest_path_out = Path("release-assets/RESOURCE_MANIFEST")
+          manifest_path_out.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          index_candidates = list(root.rglob("resource-source-index.csv"))
+          if len(index_candidates) != 1:
+              raise SystemExit("Resource source index is missing or ambiguous")
+          shutil.copy2(index_candidates[0], Path("release-assets/resource-source-index.csv"))
+          audit_root = Path("build/audit")
+          for filename in ["source-archive-extension-audit.json", "source-format-samples.txt", "tpi-extraction-audit.json", "tpi-indexes.zip"]:
+              candidates = list(audit_root.rglob(filename))
+              if len(candidates) != 1:
+                  raise SystemExit(f"Audit report missing or ambiguous: {filename}")
+              shutil.copy2(candidates[0], Path("release-assets") / filename)
+          print(json.dumps({"release_tag": manifest["release_tag"], "packages": len(manifest["resource_packages"]), "verified": [p["file_name"] for p in manifest["resource_packages"]]}, ensure_ascii=False, indent=2))
+          PY
+      - name: Publish v4 release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: resource-packs-v4
+          name: Clash of Legends Resource Packs v4
+          body: "Eleven Godot 4.3 resource packs. Every package size and SHA-256 was rechecked against the previously runtime-validated build artifact."
+          files: |
+            release-assets/*.pck
+            release-assets/RESOURCE_MANIFEST
+            release-assets/resource-source-index.csv
+            release-assets/source-archive-extension-audit.json
+            release-assets/source-format-samples.txt
+            release-assets/tpi-extraction-audit.json
+            release-assets/tpi-indexes.zip
+          fail_on_unmatched_files: true
