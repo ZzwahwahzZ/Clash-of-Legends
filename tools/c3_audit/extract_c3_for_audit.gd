@@ -31,13 +31,12 @@ func _extract_bundle(paths: Array, output_path: String) -> int:
 	return extracted
 
 func _extract() -> void:
-	if not FileAccess.file_exists("res://build/models.pck"):
-		push_error("C3/PVR audit: models.pck is missing.")
-		quit(1)
-		return
-	if not ProjectSettings.load_resource_pack("res://build/models.pck", true):
-		push_error("C3/PVR audit: Godot could not load models.pck.")
-		quit(1)
+	# During the resource build, source files are already staged under resource_stage/models.
+	# Read them directly to avoid creating/importing a large temporary PCK.
+	if FileAccess.file_exists("res://build/models.pck"):
+		if not ProjectSettings.load_resource_pack("res://build/models.pck", true):
+			push_error("C3/PVR audit: Godot could not load models.pck.")
+			quit(1)
 	var c3_file := FileAccess.open("res://build/c3-paths.json", FileAccess.READ)
 	var pvr_file := FileAccess.open("res://build/pvr-paths.json", FileAccess.READ)
 	if c3_file == null or pvr_file == null:
