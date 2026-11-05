@@ -117,7 +117,7 @@ def numeric_ini_section_ids(path: Path) -> set[str]:
     if not path.is_file():
         return set()
     text = read_text(path)
-    return set(re.findall(r"(?m)^\\s*\\[\\s*(\\d+)\\s*\\]\\s*$", text))
+    return set(re.findall(r"(?m)^\s*\[\s*(\d+)\s*\]\s*$", text))
 
 
 def candidate_id_cross_check(label: str, candidate_path: Path, reference_ids: set[str]) -> dict:
@@ -253,7 +253,7 @@ def main() -> None:
     itemtype_data = parse_itemtype_files()
     if itemtype_data["file_count"] > 0:
         (OUT / "itemtype_source_catalog.json").write_text(
-            json.dumps(itemtype_data, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8"
+            json.dumps(itemtype_data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
         )
         result["itemtype_catalog"] = {
             "file_count": itemtype_data["file_count"],
