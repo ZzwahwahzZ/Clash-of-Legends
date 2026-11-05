@@ -44,6 +44,7 @@ jobs:
           set -o pipefail
           godot --headless --path . --scene res://scenes/core/TestRunnerScene.tscn --quit-after 2 2>&1 | tee ci-logs/gameplay-tests.log
           grep -Eq 'TEST RESULTS SUMMARY: .* \| 0 FAILED' ci-logs/gameplay-tests.log
+          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Compile Error:|ERROR: Failed to load script|ERROR: Failed to instantiate an autoload' ci-logs/gameplay-tests.log; then echo 'Gameplay tests emitted script errors'; exit 1; fi
 
       - name: Run visual audit
         run: |
