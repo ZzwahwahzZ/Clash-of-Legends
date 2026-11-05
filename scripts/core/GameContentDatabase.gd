@@ -120,6 +120,12 @@ const SKILLS := {
 func get_class_ids() -> Array[String]:
  var result: Array[String] = []
  for id in CLASSES.keys():
+  result.append(str(id))
+ return result
+
+func get_selectable_class_ids() -> Array[String]:
+ var result: Array[String] = []
+ for id in CLASSES.keys():
   if bool(CLASSES[id].get("selectable", true)):
    result.append(str(id))
  return result
