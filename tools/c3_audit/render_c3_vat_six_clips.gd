@@ -219,8 +219,26 @@ func _run() -> void:
 		character.queue_free()
 		await process_frame
 
-	if not all_passed:
+	if not all_passed or clip_proofs.size() != 6:
 		push_error("C3 six-clip visual proof failed. Inspect reports/" + OUTPUT_DIR)
+		quit(1)
+		return
+	var contact_before := Image.create(3840, 1440, false, Image.FORMAT_RGBA8)
+	var contact_after := Image.create(3840, 1440, false, Image.FORMAT_RGBA8)
+	for image_index in range(clip_proofs.size()):
+		var frame_a_path := ProjectSettings.globalize_path("res://" + str(clip_proofs[image_index]["frame_a"]))
+		var frame_b_path := ProjectSettings.globalize_path("res://" + str(clip_proofs[image_index]["frame_b"]))
+		var frame_a_image := Image.load_from_file(frame_a_path)
+		var frame_b_image := Image.load_from_file(frame_b_path)
+		if frame_a_image == null or frame_b_image == null or frame_a_image.get_width() != 1280 or frame_a_image.get_height() != 720 or frame_b_image.get_width() != 1280 or frame_b_image.get_height() != 720:
+			push_error("C3 six-clip visual proof: screenshot pair is missing or has invalid dimensions.")
+			quit(1)
+			return
+		var destination := Vector2i((image_index % 3) * 1280, int(image_index / 3) * 720)
+		contact_before.blit_rect(frame_a_image, Rect2i(0, 0, 1280, 720), destination)
+		contact_after.blit_rect(frame_b_image, Rect2i(0, 0, 1280, 720), destination)
+	if contact_before.save_png("reports/c3-vat-poc-frame-a.png") != OK or contact_after.save_png("reports/c3-vat-poc-frame-b.png") != OK:
+		push_error("C3 six-clip visual proof: could not save contact sheets.")
 		quit(1)
 		return
 	var proof_report := {
@@ -228,6 +246,8 @@ func _run() -> void:
 		"validated_clip_count": clip_proofs.size(),
 		"layout": "male/female; Idle, Walk, Run; individual before/after PNGs",
 		"artifact_directory": OUTPUT_DIR,
+		"before_contact_sheet": "reports/c3-vat-poc-frame-a.png",
+		"after_contact_sheet": "reports/c3-vat-poc-frame-b.png",
 		"clips": clip_proofs,
 		"status": "PASSED"
 	}
