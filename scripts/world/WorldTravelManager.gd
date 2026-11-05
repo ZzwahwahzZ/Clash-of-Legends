@@ -40,7 +40,7 @@ func travel_to(destination_id: String, reason: String = "manual") -> bool:
 	if not is_instance_valid(game_manager.get("player_reference")):
 		_notify("لا يوجد بطل مسجل للانتقال" if str(game_manager.get("current_language")) == "ar" else "No active hero to travel", true)
 		return false
-	if destination_id == current_destination_id:
+	if destination_id == current_destination_id and reason != "respawn":
 		_notify("أنت موجود بالفعل في هذه المنطقة" if str(game_manager.get("current_language")) == "ar" else "You are already in this area", false)
 		return true
 
