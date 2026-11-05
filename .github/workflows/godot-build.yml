@@ -18,8 +18,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Verify published PCK host supports safe HTTP range resume
+        run: |
+          python3 - <<'PY'
+          import json
+          import pathlib
+          import urllib.request
+
+          manifest = json.loads(pathlib.Path("RESOURCE_MANIFEST").read_text(encoding="utf-8"))
+          packages = manifest.get("resource_packages", [])
+          target = next((item for item in packages if item.get("package_id") == "models"), None)
+          if not target or not target.get("download_url"):
+              raise SystemExit("Published models PCK URL is missing; range-resume capability cannot be verified.")
+          request = urllib.request.Request(
+              target["download_url"],
+              headers={"Range": "bytes=0-1023", "Accept-Encoding": "identity", "User-Agent": "ClashOfLegends-RangeProbe/1.0"},
+          )
+          with urllib.request.urlopen(request, timeout=45) as response:
+              content_range = response.headers.get("Content-Range", "")
+              body = response.read(2048)
+              print(f"RANGE PROBE: HTTP {response.status}; Content-Range={content_range}; bytes={len(body)}")
+              if response.status != 206 or not content_range.startswith("bytes 0-1023/") or len(body) != 1024:
+                  raise SystemExit("Published PCK host does not provide a valid 206 byte-range response.")
+          print("PCK RANGE SUPPORT VERIFIED: safe chunked resume is available.")
+          PY
 
       - name: Enforce original-reference acceptance ledger
         run: python3 tools/quality/validate_acceptance_ledger.py
