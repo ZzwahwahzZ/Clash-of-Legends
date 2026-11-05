@@ -241,7 +241,7 @@ func _run() -> void:
 		push_error("C3 six-clip visual proof: could not write combined validation report.")
 		quit(1)
 		return
-	proof_file.store_string(JSON.stringify(existing_report, "\\t") + "\\n")
+	proof_file.store_string(JSON.stringify(existing_report, "\t") + "\n")
 	proof_file.close()
 	print("C3 SIX-CLIP VISUAL PROOF PASSED: ", JSON.stringify(proof_report))
 	stage.queue_free()
