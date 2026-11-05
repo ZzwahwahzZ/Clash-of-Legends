@@ -6,6 +6,7 @@ signal picked_up(player: CharacterBody3D)
 var gold_amount: int = 50
 var item_payload: Dictionary = {}
 var is_collected: bool = false
+var inventory_full_notified: bool = false
 
 @onready var label: Label3D = get_node_or_null("Label3D")
 @onready var mesh_instance: MeshInstance3D = get_node_or_null("MeshInstance3D")
@@ -19,7 +20,8 @@ func _process(delta: float) -> void:
 	rotate_y(delta * 2.0)
 
 func setup_loot(data: Dictionary) -> void:
-	gold_amount = data.get("gold", 50)
+	gold_amount = maxi(0, int(data.get("gold", 50)))
+	inventory_full_notified = false
 	if data.get("has_item", false) and data.has("item_data") and data["item_data"] != null:
 		item_payload = data["item_data"]
 		
@@ -71,25 +73,39 @@ func _on_body_entered(body: Node3D) -> void:
 		collect_by_player(body)
 
 func collect_by_player(player: CharacterBody3D) -> void:
-	if is_collected:
+	if is_collected or player == null or not is_instance_valid(player):
 		return
+
+	var inventory: PlayerInventory = null
+	var collected_quantity := 0
+	if not item_payload.is_empty():
+		if not player.has_node("PlayerInventory"):
+			return
+		inventory = player.get_node("PlayerInventory") as PlayerInventory
+		if inventory == null:
+			return
+		collected_quantity = maxi(1, int(item_payload.get("quantity", 1)))
+		if not inventory.can_add_item(item_payload):
+			if not inventory_full_notified and GameManager:
+				GameManager.post_notification("الحقيبة ممتلئة!" if GameManager.current_language == "ar" else "Inventory is Full!", true)
+				inventory_full_notified = true
+			return
+		if not inventory.add_item(item_payload):
+			return
+
 	is_collected = true
-	
-	if GameManager:
+	if GameManager and gold_amount > 0:
 		GameManager.add_gold(gold_amount)
 		if AutoLootManager:
 			AutoLootManager.emit_signal("loot_collected", "Gold", gold_amount, true)
-			
-	if not item_payload.is_empty() and player.has_node("PlayerInventory"):
-		var inv: PlayerInventory = player.get_node("PlayerInventory")
-		var added := inv.add_item(item_payload)
-		if added:
-			for agent in get_tree().get_nodes_in_group("quest_agents"):
-				if agent.has_method("on_item_collected"):
-					agent.on_item_collected(str(item_payload.get("id", "")), int(item_payload.get("quantity", 1)))
+
+	if not item_payload.is_empty():
+		for agent in get_tree().get_nodes_in_group("quest_agents"):
+			if agent.has_method("on_item_collected"):
+				agent.on_item_collected(str(item_payload.get("id", "")), collected_quantity)
 		if AutoLootManager:
-			var n = item_payload.get("name_ar", "عتاد") if (GameManager and GameManager.current_language == "ar") else item_payload.get("name_en", "Gear")
-			AutoLootManager.emit_signal("loot_collected", n, 1, false)
-			
+			var item_name = item_payload.get("name_ar", "عتاد") if (GameManager and GameManager.current_language == "ar") else item_payload.get("name_en", "Gear")
+			AutoLootManager.emit_signal("loot_collected", item_name, collected_quantity, false)
+
 	emit_signal("picked_up", player)
 	queue_free()
