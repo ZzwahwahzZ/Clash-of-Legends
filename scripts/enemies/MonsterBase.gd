@@ -242,9 +242,12 @@ func _on_death(killer: CharacterBody3D) -> void:
 	collision_layer = 0
 	collision_mask = 0
 	
-	# Give rewards
-	if killer and killer.has_method("add_xp"):
-		killer.add_xp(xp_reward)
+	# Rewards require an explicitly source-verified profile on this monster scene.
+	var reward_profile := _get_verified_reward_profile()
+	if not reward_profile.is_empty():
+		if killer and killer.has_method("add_xp"):
+			killer.add_xp(int(reward_profile["xp"]))
+		_spawn_verified_loot(reward_profile)
 		
 	# Notify Quest Agent
 	var tree = get_tree()
@@ -254,9 +257,6 @@ func _on_death(killer: CharacterBody3D) -> void:
 			if qa.has_method("on_enemy_killed"):
 				qa.on_enemy_killed(enemy_type)
 				
-	# Spawn Loot Drop
-	_spawn_loot()
-	
 	if is_boss and GameManager:
 		var killer_name = "البطل" if GameManager.current_language == "ar" else "Hero"
 		GameManager.emit_signal("boss_defeated", monster_name_ar if GameManager.current_language == "ar" else monster_name_en, killer_name)
@@ -265,49 +265,49 @@ func _on_death(killer: CharacterBody3D) -> void:
 	await get_tree().create_timer(respawn_time).timeout
 	_respawn()
 
-func _spawn_loot() -> void:
-	if loot_scene:
-		var drop = loot_scene.instantiate()
-		var gold_val = randi_range(gold_min, gold_max)
-		var is_equipment = randf() < 0.25
-		var is_meteor = randf() < 0.15
-		
-		var item_info = {
-			"gold": gold_val,
-			"has_item": is_equipment or is_meteor,
-			"item_data": null
-		}
-		
-		if is_meteor:
-			item_info["item_data"] = {
-				"id": "meteor_stone",
-				"name_ar": "حجر نيزك",
-				"name_en": "Meteor",
-				"type": "material",
-				"quantity": 1,
-				"max_stack": 99,
-				"sell_price": 150,
-				"rarity": "elite"
-			}
-		elif is_equipment:
-			item_info["item_data"] = {
-				"id": "refined_blade",
-				"slot": "weapon",
-				"name_ar": "نصل الذئب الفولاذي",
-				"name_en": "Steel Wolf Blade",
-				"type": "equipment",
-				"attack_bonus": 45,
-				"defense_bonus": 8,
-				"refine_level": 0,
-				"sockets": 1,
-				"sell_price": 320,
-				"rarity": "refined"
-			}
-			
-		get_parent().add_child(drop)
-		drop.global_position = global_position + Vector3(0, 0.5, 0)
-		if drop.has_method("setup_loot"):
-			drop.setup_loot(item_info)
+func _get_verified_reward_profile() -> Dictionary:
+	var raw_profile: Variant = get_meta("verified_reward_profile", {})
+	if not raw_profile is Dictionary:
+		return {}
+	var profile: Dictionary = raw_profile
+	for required_key in ["xp", "gold_min", "gold_max", "drops"]:
+		if not profile.has(required_key):
+			return {}
+	if int(profile["xp"]) < 0 or int(profile["gold_min"]) < 0 or int(profile["gold_max"]) < int(profile["gold_min"]):
+		return {}
+	if not profile["drops"] is Array:
+		return {}
+	for entry in profile["drops"]:
+		if not entry is Dictionary or not entry.has("chance") or not entry.has("item_data"):
+			return {}
+		if float(entry["chance"]) < 0.0 or float(entry["chance"]) > 1.0 or not entry["item_data"] is Dictionary:
+			return {}
+	return profile
+
+
+func _spawn_verified_loot(profile: Dictionary) -> void:
+	if loot_scene == null:
+		return
+	var gold_minimum := int(profile["gold_min"])
+	var gold_maximum := int(profile["gold_max"])
+	var gold_value := randi_range(gold_minimum, gold_maximum) if gold_maximum > 0 else 0
+	var selected_item: Variant = null
+	for entry in profile["drops"]:
+		if randf() <= float(entry["chance"]):
+			selected_item = entry["item_data"].duplicate(true)
+			break
+	if gold_value <= 0 and selected_item == null:
+		return
+	var drop := loot_scene.instantiate()
+	get_parent().add_child(drop)
+	drop.global_position = global_position + Vector3(0, 0.5, 0)
+	if drop.has_method("setup_loot"):
+		drop.setup_loot({
+			"gold": gold_value,
+			"has_item": selected_item != null,
+			"item_data": selected_item
+		})
+
 
 func _respawn() -> void:
 	current_health = max_health
