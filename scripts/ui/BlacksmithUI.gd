@@ -65,6 +65,8 @@ func _setup_options() -> void:
 	for entry in slots_display:
 		slot_option.add_item(entry.label)
 		slot_option.set_item_metadata(slot_option.get_item_count() - 1, entry.key)
+	if slot_option.get_item_count() > 0:
+		slot_option.select(0)
 	if upgrade_option:
 		upgrade_option.clear()
 		var upgrade_types := [
@@ -77,12 +79,15 @@ func _setup_options() -> void:
 		for entry in upgrade_types:
 			upgrade_option.add_item(entry.ar if is_ar else entry.en)
 			upgrade_option.set_item_metadata(upgrade_option.get_item_count() - 1, entry.id)
+		if upgrade_option.get_item_count() > 0:
+			upgrade_option.select(0)
 	if stat_option:
 		stat_option.clear()
 		stat_option.add_item("هجوم" if is_ar else "Attack")
 		stat_option.set_item_metadata(0, "attack")
 		stat_option.add_item("دفاع" if is_ar else "Defense")
 		stat_option.set_item_metadata(1, "defense")
+		stat_option.select(0)
 
 func _on_selection_changed(_index: int) -> void:
 	_update_info()
