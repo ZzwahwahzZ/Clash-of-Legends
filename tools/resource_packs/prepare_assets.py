@@ -25,7 +25,7 @@ RULES=[
  ("mounts",re.compile(r"mount|horse|pet|ride|dragon",re.I)),
  ("effects",re.compile(r"effect|particle|skill|spell|magic|vfx|fx|trail|projectile",re.I)),
 ]
-seen=set(); rows=[]; totals={}
+seen=set(); rows=[]; totals={}; extension_counts={}; archive_entry_counts={}; unsupported=[]
 for archive_name,_ in ARCHIVES:
     archive=SOURCE/archive_name
     if not archive.exists(): raise SystemExit(f"Missing downloaded archive: {archive}")
@@ -36,8 +36,12 @@ for archive_name,_ in ARCHIVES:
             parts=[x for x in raw.split("/") if x not in ("",".","..")]
             if not parts: continue
             name=parts[-1]
-            ext=Path(name).suffix.lower()
-            if ext not in EXTS: continue
+            ext=Path(name).suffix.lower() or "[no-extension]"
+            extension_counts[ext]=extension_counts.get(ext,0)+1
+            archive_entry_counts[archive_name]=archive_entry_counts.get(archive_name,0)+1
+            if ext not in EXTS:
+                unsupported.append({"archive":archive_name,"path":raw,"extension":ext,"size_bytes":info.file_size})
+                continue
             if any(x.startswith(".") for x in parts): continue
             # Stable content hash deduplication across the three source bundles.
             digest=hashlib.sha256()
@@ -59,7 +63,11 @@ for archive_name,_ in ARCHIVES:
             with z.open(info) as src, open(dest,"wb") as out: shutil.copyfileobj(src,out,1024*1024)
             rows.append({"category":category,"source_archive":archive_name,"source_path":raw,"staged_path":dest.relative_to(ROOT).as_posix(),"size_bytes":info.file_size,"sha256":sha})
             totals[category]=totals.get(category,0)+1
-with open(ROOT/"build/resource-source-index.csv","w",newline="",encoding="utf-8") as f:
+reports=ROOT/"reports"
+reports.mkdir(parents=True,exist_ok=True)
+with open(reports/"resource-source-index.csv","w",newline="",encoding="utf-8") as f:
     w=csv.DictWriter(f,fieldnames=["category","source_archive","source_path","staged_path","size_bytes","sha256"]);w.writeheader();w.writerows(rows)
-print(json.dumps({"unique_files":len(rows),"category_counts":totals,"staged_bytes":sum(x["size_bytes"] for x in rows)},indent=2))
+audit={"archive_entry_counts":archive_entry_counts,"extension_counts":dict(sorted(extension_counts.items())),"unsupported_files":unsupported,"unique_supported_files":len(rows),"category_counts":totals,"staged_bytes":sum(x["size_bytes"] for x in rows)}
+(reports/"source-archive-extension-audit.json").write_text(json.dumps(audit,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+print(json.dumps(audit,ensure_ascii=False,indent=2))
 if not rows: raise SystemExit("No compatible asset files found; refusing to publish empty packs.")
