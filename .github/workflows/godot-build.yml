@@ -72,7 +72,7 @@ jobs:
       - name: Run gameplay tests
         run: |
           set -o pipefail
-          godot --headless --path . --scene res://scenes/core/TestRunnerScene.tscn --quit-after 2 2>&1 | tee ci-logs/gameplay-tests.log
+          xvfb-run -a godot --path . --rendering-method gl_compatibility --scene res://scenes/core/TestRunnerScene.tscn --quit-after 2 2>&1 | tee ci-logs/gameplay-tests.log
           grep -Eq 'TEST RESULTS SUMMARY: .* \| 0 FAILED' ci-logs/gameplay-tests.log
           if grep -Eq 'SCRIPT ERROR:|Parse Error:|Compile Error:|ERROR: Failed to load script|ERROR: Failed to instantiate an autoload' ci-logs/gameplay-tests.log; then echo 'Gameplay tests emitted script errors'; exit 1; fi
 
@@ -93,7 +93,7 @@ jobs:
       - name: Run visual audit
         run: |
           set -o pipefail
-          godot --headless --path . --scene res://scenes/core/VisualAuditScene.tscn 2>&1 | tee ci-logs/visual-audit.log
+          xvfb-run -a godot --path . --rendering-method gl_compatibility --scene res://scenes/core/VisualAuditScene.tscn 2>&1 | tee ci-logs/visual-audit.log
           if grep -Eq "SCRIPT ERROR:|Parse Error:|Compile Error:|ERROR: Failed to load script|ERROR: Failed to instantiate an autoload" ci-logs/visual-audit.log; then echo "Visual audit emitted script errors"; exit 1; fi
 
       - name: Enforce production visual assets (no primitive blockouts)
