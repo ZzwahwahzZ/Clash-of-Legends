@@ -1,4 +1,4 @@
-[gd_scene load_steps=33 format=3 uid="uid://maingame001"]
+[gd_scene load_steps=34 format=3 uid="uid://maingame001"]
 
 [ext_resource type="PackedScene" uid="uid://player001" path="res://scenes/characters/Player.tscn" id="1_player"]
 [ext_resource type="PackedScene" uid="uid://npcbase001" path="res://scenes/npcs/NPCBase.tscn" id="2_npc"]
@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" uid="uid://dialogueui001" path="res://scenes/ui/DialogueUI.tscn" id="10_dlg"]
 [ext_resource type="Script" path="res://scripts/automation/QuestNavigationAgent.gd" id="11_quest"]
 [ext_resource type="PackedScene" path="res://scenes/ui/ResourcePacksUI.tscn" id="12_resource_packs"]
+[ext_resource type="PackedScene" path="res://scenes/ui/NewPlayerGuide.tscn" id="13_new_player_guide"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
 size = Vector3(180, 1, 180)
@@ -292,3 +293,5 @@ level = 31
 [node name="DialogueUI" parent="CanvasLayer" instance=ExtResource("10_dlg")]
 
 [node name="ResourcePacksUI" parent="CanvasLayer" instance=ExtResource("12_resource_packs")]
+
+[node name="NewPlayerGuide" parent="CanvasLayer" instance=ExtResource("13_new_player_guide")]
