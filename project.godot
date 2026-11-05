@@ -21,6 +21,7 @@ config/icon="res://public/icon.svg"
 
 GameManager="*res://scripts/core/GameManager.gd"
 ClassProgressionManager="*res://scripts/progression/ClassProgressionManager.gd"
+FeatureGuidanceManager="*res://scripts/ui/FeatureGuidanceManager.gd"
 LocalSaveEngine="*res://scripts/core/LocalSaveEngine.gd"
 CombatEngine="*res://scripts/combat/CombatEngine.gd"
 AutoHuntManager="*res://scripts/automation/AutoHuntManager.gd"
