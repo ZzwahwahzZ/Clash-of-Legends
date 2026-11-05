@@ -1,0 +1,63 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/ResourcePacksUI.gd" id="1"]
+
+[node name="ResourcePacksUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -430.0
+offset_top = -300.0
+offset_right = 430.0
+offset_bottom = 300.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Title" type="Label" parent="Panel"]
+layout_mode = 1
+offset_left = 24.0
+offset_top = 18.0
+offset_right = 560.0
+offset_bottom = 52.0
+text = "تنزيل موارد اللعبة"
+
+[node name="Close" type="Button" parent="Panel"]
+layout_mode = 1
+offset_left = 760.0
+offset_top = 14.0
+offset_right = 820.0
+offset_bottom = 50.0
+text = "إغلاق"
+
+[node name="Status" type="Label" parent="Panel"]
+layout_mode = 1
+offset_left = 24.0
+offset_top = 58.0
+offset_right = 820.0
+offset_bottom = 100.0
+autowrap_mode = 3
+text = "حالة الموارد"
+
+[node name="Scroll" type="ScrollContainer" parent="Panel"]
+layout_mode = 1
+offset_left = 20.0
+offset_top = 112.0
+offset_right = 820.0
+offset_bottom = 570.0
+horizontal_scroll_mode = 0
+
+[node name="PackageList" type="VBoxContainer" parent="Panel/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
