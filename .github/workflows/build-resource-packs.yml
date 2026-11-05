@@ -107,6 +107,7 @@ jobs:
           path: |
             reports/resource-source-index.csv
             reports/source-archive-extension-audit.json
+            reports/source-format-samples.txt
           if-no-files-found: error
           retention-days: 30
       - name: Publish resource pack release
@@ -120,4 +121,5 @@ jobs:
             RESOURCE_MANIFEST
             reports/resource-source-index.csv
             reports/source-archive-extension-audit.json
+            reports/source-format-samples.txt
           fail_on_unmatched_files: true
