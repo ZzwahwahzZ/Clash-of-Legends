@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0.0",
+  "policy": "Only explicitly allowlisted project-original files may enter downloadable resource packs.",
+  "assets": [
+    {
+      "path": "assets/shaders/weapon_glow.gdshader",
+      "category": "project_original_shader",
+      "reason": "Original shader implementation created for Clash of Legends.",
+      "redistribution_scope": "Clash of Legends downloadable resource pack"
+    }
+  ],
+  "excluded_by_default": [
+    "resource_stage/**",
+    "assets/audio/extracted/**",
+    "converted C3/GLB/PVR assets",
+    "all files from Conquer Mobile source archives unless redistribution permission is documented"
+  ]
+}
