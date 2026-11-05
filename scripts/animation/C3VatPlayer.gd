@@ -67,6 +67,10 @@ func configure(mesh_instance: MeshInstance3D, metadata_path: String, binary_path
 	_material.set_shader_parameter("vat_height", float(_frame_count))
 	if albedo != null:
 		_material.set_shader_parameter("albedo_texture", albedo)
+	# VAT already contains fully evaluated C3 vertex positions for every frame.
+	# Keeping the imported glTF Skin would deform those baked positions a second time.
+	mesh_instance.skin = null
+	mesh_instance.skeleton = NodePath()
 	_hide_c3_attachment_socket_markers(mesh_instance)
 	mesh_instance.material_override = _material
 	_fps = fps_override if fps_override > 0.0 else float(parsed.get("fps", 30.0))
