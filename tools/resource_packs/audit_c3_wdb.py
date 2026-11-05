@@ -158,64 +158,58 @@ def parse_rsdb(data: bytes, stem: str) -> dict:
 
 
 def parse_mesh(data: bytes) -> dict:
-    """Parse legacy MESH and probe the Mobile MESZ variant without unsafe assumptions."""
+    """Parse legacy MESH and Mobile MESZ equipment records.
+
+    MESZ retains the MESH 8-byte table header and 16-byte parts, then appends
+    eight float32 values to every record. Their semantics are deliberately
+    preserved as raw extension values rather than guessed.
+    """
     if len(data) < 8:
         raise ValueError("MESH table is shorter than its header")
     magic = data[:4]
     if magic not in (b"MESH", b"MESZ"):
         raise ValueError(f"Unsupported MESH identifier: {magic!r}")
     count = struct.unpack_from("<I", data, 4)[0]
-
-    def parse_records(start_offset: int):
-        offset = start_offset
-        records = []
-        for index in range(count):
-            if offset + 8 > len(data):
-                raise ValueError(f"record {index} header exceeds table size")
-            unique_id, part_count = struct.unpack_from("<II", data, offset)
-            offset += 8
-            if part_count > 64 or offset + part_count * 16 > len(data):
-                raise ValueError(f"record {unique_id} has invalid part count {part_count}")
-            parts = []
-            for part_index in range(part_count):
-                mesh_id, texture_id, mix_texture_id = struct.unpack_from("<III", data, offset)
-                mix_opt, asb, adb, material = struct.unpack_from("<BBBB", data, offset + 12)
-                offset += 16
-                parts.append({
-                    "part_index": part_index, "mesh_id": mesh_id,
-                    "texture_id": texture_id, "mix_texture_id": mix_texture_id,
-                    "mix_option": mix_opt, "alpha_source_blend": asb,
-                    "alpha_destination_blend": adb, "material_id": material,
-                })
-            records.append({"id": unique_id, "part_count": part_count, "parts": parts})
-        if offset != len(data):
-            raise ValueError(f"{len(data) - offset} trailing byte(s)")
-        return records
-
-    offsets = (8, 16) if magic == b"MESZ" else (8,)
-    errors = []
-    for start_offset in offsets:
-        try:
-            records = parse_records(start_offset)
-            return {
-                "format": magic.decode("ascii", errors="replace"),
-                "record_count": count, "parse_status": "PARSED",
-                "header_extension_hex": data[8:start_offset].hex(" "),
-                "sample_records": records[:20], "_records": records,
-                "record_start_offset": start_offset,
-            }
-        except ValueError as exc:
-            errors.append(f"offset {start_offset}: {exc}")
-    words = [struct.unpack_from("<I", data, off)[0] for off in range(4, min(len(data) - 3, 68), 4)]
-    floats = [struct.unpack_from("<f", data, off)[0] for off in range(4, min(len(data) - 3, 68), 4)]
+    offset = 8
+    records = []
+    for index in range(count):
+        if offset + 8 > len(data):
+            raise ValueError(f"MESH record {index} header exceeds table size")
+        unique_id, part_count = struct.unpack_from("<II", data, offset)
+        offset += 8
+        if part_count > 64 or offset + part_count * 16 > len(data):
+            raise ValueError(f"MESH record {unique_id} has invalid part count {part_count}")
+        parts = []
+        for part_index in range(part_count):
+            mesh_id, texture_id, mix_texture_id = struct.unpack_from("<III", data, offset)
+            mix_opt, asb, adb, material = struct.unpack_from("<BBBB", data, offset + 12)
+            offset += 16
+            parts.append({
+                "part_index": part_index, "mesh_id": mesh_id,
+                "texture_id": texture_id, "mix_texture_id": mix_texture_id,
+                "mix_option": mix_opt, "alpha_source_blend": asb,
+                "alpha_destination_blend": adb, "material_id": material,
+            })
+        extension = []
+        if magic == b"MESZ":
+            if offset + 32 > len(data):
+                raise ValueError(f"MESZ record {unique_id} is missing its 32-byte record extension")
+            extension = list(struct.unpack_from("<8f", data, offset))
+            offset += 32
+        records.append({
+            "id": unique_id, "part_count": part_count, "parts": parts,
+            "record_extension_f32": extension,
+        })
+    trailing = len(data) - offset
+    if trailing:
+        raise ValueError(f"MESH table has {trailing} trailing byte(s)")
     return {
         "format": magic.decode("ascii", errors="replace"),
-        "record_count": count, "parse_status": "LAYOUT_UNRESOLVED",
-        "parse_errors": errors,
-        "header_hex": data[:128].hex(" "),
-        "u32_probe": words, "f32_probe": floats,
-        "_records": [],
+        "record_count": count, "parse_status": "PARSED",
+        "record_extension": "8 raw float32 values per MESZ record" if magic == b"MESZ" else None,
+        "sample_records": records[:20], "_records": records,
     }
+
 
 
 def parse_simo(data: bytes) -> dict:
@@ -303,7 +297,7 @@ def parse_wdb(data: bytes) -> dict:
     simple_rows = take_rows("ini/3DSimpleObj.dbc")
     mount_motion_rows = take_rows("ini/mountmotion.dbc")
     mesh_table_names = (
-        "ini/mount.dbc", "ini/armet.dbc", "ini/armor.dbc",
+        "ini/mount.dbc", "ini/armet.dbc", "ini/armet1.dbc", "ini/armor.dbc",
         "ini/weapon.dbc", "ini/head.dbc", "ini/misc.dbc", "ini/shield.dbc",
     )
     mesh_table_rows = {name: take_rows(name) for name in mesh_table_names}
@@ -399,6 +393,7 @@ def parse_wdb(data: bytes) -> dict:
             full_record = {
                 "unique_id": int(row["id"]), "part_count": int(row["part_count"]),
                 "parts": resolved_parts,
+                "record_extension_f32": row.get("record_extension_f32", []),
             }
             full_records.append(full_record)
             if len(resolved_records) < 60:
