@@ -7,6 +7,9 @@ on:
       - ".github/workflows/build-resource-packs.yml"
 permissions:
   contents: write
+concurrency:
+  group: resource-packs-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   build-resource-packs:
     runs-on: ubuntu-latest
