@@ -125,6 +125,7 @@ func test_inventory_and_equipment_refinement() -> void:
 	assert_true(inv.slots.size() == PlayerInventoryScript.MAX_SLOTS, "Inventory: 40 slots initialized")
 	var test_item = {"id":"meteor_stone","name_ar":"حجر النيزك","name_en":"Meteor","type":"material","quantity":10,"max_stack":99,"sell_price":150}
 	assert_true(inv.add_item(test_item), "Inventory: Item addition succeeds")
+	assert_true(not inv.remove_item_at(0, -1), "Inventory: negative removal quantities are rejected")
 	inv.equipment["weapon"] = {"id":"test_blade","slot":"weapon","type":"equipment","attack_bonus":20,"defense_bonus":5,"refine_level":0,"sockets":1,"name_ar":"سيف الاختبار"}
 	GameManager.current_gold = 10000
 	var preview := inv.get_refine_preview("weapon")
@@ -146,6 +147,8 @@ func test_inventory_and_equipment_refinement() -> void:
 	inv.equipment["weapon"]["refine_level"] = 12
 	assert_true(bool(inv.get_refine_preview("weapon").get("maxed", false)), "Refinement: +12 cap is enforced")
 	assert_true(not inv.refine_equipment("weapon"), "Refinement: cannot exceed +12")
+	inv.deserialize({"slots": [], "equipment": {"weapon": {"id":"legacy_weapon","slot":"weapon","type":"equipment"}}})
+	assert_true(inv.equipment.has("mount") and inv.equipment.has("garment") and inv.slots.size() == PlayerInventoryScript.MAX_SLOTS, "Inventory: legacy saves migrate to the expanded equipment layout")
 	inv.queue_free()
 
 func test_local_save_and_backup_recovery() -> void:
