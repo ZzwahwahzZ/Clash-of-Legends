@@ -32,7 +32,7 @@ A successful build, a GLB import, or animation tracks in a headless test do not 
 - A coarse bone-count-only comparison yields 82,440 possible pairs and is explicitly **not** accepted as a mapping.
 - Exact ordered PHY/MOTI signatures plus numeric look-family matching narrow the report to 11 look-7 and 4 look-8 body candidates. These are structural candidates, not verified class identities.
 - Six audit-only clips (action tokens 100/110/120, weapon token 500) were applied to look-7/look-8 body candidates and imported by Godot 4.3. Each imported with 18 MeshInstance3D nodes, 18 surfaces and 18 morph-capable meshes. Per clip: action 100 had 198 tracks / 918 keys; action 110 had 126 / 558; action 120 had 72 / 288.
-- The POC outputs remain under `build/c3-glb/motion-poc`, outside runtime PCK category folders. This validates the conversion/import path only; it does not prove correct in-game poses, action naming, class mapping, or visual quality.
+- The POC outputs remain under `build/c3-glb/motion-poc`, outside runtime PCK category folders. The current exporter samples at most 12 motion keys per mesh, so this is a reduced-frame proof of concept rather than full keyframe fidelity. The next motion pass must preserve more source keys or move to skeletal animation, then verify performance. This validates the conversion/import path only; it does not prove correct in-game poses, action naming, class mapping, or visual quality.
 
 ### WDB/DBC source investigation
 - A metadata-only parser for the original `c3.wdb` container was added to the source-staging pipeline. It indexes DBC table names, formats, counts and selected records without publishing the original DBC blobs.
