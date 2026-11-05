@@ -81,3 +81,21 @@ Target table observations:
 - `mounttype.dat`, skill animation DAT files, and all five refinement DAT files were inventoried as binary/metadata-only. No field interpretation was attempted.
 
 This gives us a much stronger ID/name inventory for the equipment family, but it does **not** yet establish item categories, paid status, exact models, helmet/armor texture regions, or a complete runtime wardrobe. The next safe step is to validate itemtype positional fields against independently readable source references and then join their IDs to the C3 object/texture index. The dedicated audit was also corrected to emit valid JSON and stream the archive checksum rather than loading the entire 842 MB archive into memory.
+
+### Full itemtype ID/name export and armor-look candidate
+
+A follow-up successful run [42076016258](https://github.com/ZzwahwahzZ/Clash-of-Legends/actions/runs/42076016258) now retains the full record-level ID/name catalogue in its private workflow artifact, rather than only samples. The report is valid JSON and includes all 57,940 itemtype records. For `itemtype13.ini`, all 3,638 records have 69 positional fields; column 59 is preserved as an **unlabelled candidate only**. Its observed values/counts are:
+
+- `0`: 1,430 records
+- `3000`: 456
+- `3040`: 255
+- `3010`: 249
+- `3060`: 248
+- `3050`: 248
+- `3020`: 248
+- `3030`: 248
+- `3080`: 228
+- `14040`: 14
+- `3070`: 14
+
+These values overlap some Look candidates already documented in the character-mapping research, but the column is deliberately not renamed to `Look` until its meaning is confirmed against the 1.1.2.3 client resolver. This is a promising cross-reference for armor/body model families, not yet an accepted model mapping.
