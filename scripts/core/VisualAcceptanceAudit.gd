@@ -7,9 +7,16 @@ func _has_renderable_mesh(root: Node, node_path: String) -> bool:
 	if not node is MeshInstance3D:
 		return false
 	var mesh_instance := node as MeshInstance3D
-	if mesh_instance.mesh == null or mesh_instance.mesh.get_surface_count() <= 0:
+	var mesh_resource: Mesh = mesh_instance.mesh
+	if mesh_resource == null:
+		print("VISUAL MESH PROBE: ", node_path, " | mesh_resource=NULL")
+		return false
+	var surface_count := mesh_resource.get_surface_count()
+	print("VISUAL MESH PROBE: ", node_path, " | mesh_class=", mesh_resource.get_class(), " | surfaces=", surface_count)
+	if surface_count <= 0:
 		return false
 	var bounds := mesh_instance.get_aabb()
+	print("VISUAL BOUNDS PROBE: ", node_path, " | origin=", bounds.position, " | size=", bounds.size)
 	return is_finite(bounds.position.x) and is_finite(bounds.position.y) and is_finite(bounds.position.z) and is_finite(bounds.size.x) and is_finite(bounds.size.y) and is_finite(bounds.size.z) and bounds.size.length() > 0.001
 
 func _all_required_meshes_exist(root: Node, paths: Array[String]) -> bool:
