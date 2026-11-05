@@ -43,8 +43,43 @@ func _ready() -> void:
 	spawn_position = global_position
 	current_health = max_health
 	_update_label()
+	if AssetCatalog:
+		AssetCatalog.catalog_loaded.connect(_on_asset_catalog_loaded)
+	call_deferred("_apply_monster_model")
 	if is_boss and GameManager:
 		GameManager.emit_signal("boss_spawned", monster_name_ar if GameManager.current_language == "ar" else monster_name_en, spawn_position)
+
+func _on_asset_catalog_loaded(_asset_count: int) -> void:
+	_apply_monster_model()
+
+func _apply_monster_model() -> void:
+	if not visual_root or not AssetCatalog:
+		return
+	var model_entries := AssetCatalog.get_asset_entries("monsters", [".glb", ".gltf"])
+	if model_entries.is_empty():
+		return
+	var model_index := 0
+	if is_boss:
+		model_index = model_entries.size() - 1
+	elif enemy_type != "wolf":
+		model_index = abs(enemy_type.hash()) % model_entries.size()
+	var old_root := visual_root.get_node_or_null("ImportedModelRoot")
+	if old_root:
+		old_root.queue_free()
+	var target_height := 4.5 if is_boss else 1.35
+	var imported_root := AssetCatalog.instantiate_fitted_model("monsters", model_index, visual_root, target_height, "ImportedModelRoot")
+	if imported_root == null:
+		return
+	for child in visual_root.get_children():
+		if child != imported_root and child is Node3D:
+			child.visible = false
+	var instance: Node = imported_root.get_child(0)
+	var model_animation := instance.find_child("AnimationPlayer", true, false)
+	if model_animation is AnimationPlayer:
+		if model_animation.has_animation("idle"):
+			model_animation.play("idle")
+		elif model_animation.get_animation_list().size() > 0:
+			model_animation.play(model_animation.get_animation_list()[0])
 
 func _physics_process(delta: float) -> void:
 	if current_state == State.DEAD:
