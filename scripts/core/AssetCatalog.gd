@@ -131,7 +131,7 @@ func get_category_counts() -> Dictionary:
 		counts[category] = assets_by_category[category].size() if assets_by_category[category] is Array else 0
 	return counts
 
-static func find_verified_character_model_index(entries: Array, requested_class: String, requested_gender: String = "") -> int:
+func find_verified_character_model_index(entries: Array, requested_class: String, requested_gender: String = "") -> int:
 	for index in range(entries.size()):
 		var entry: Variant = entries[index]
 		if typeof(entry) != TYPE_DICTIONARY:
