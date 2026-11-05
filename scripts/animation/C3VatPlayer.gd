@@ -24,8 +24,8 @@ func configure(mesh_instance: MeshInstance3D, metadata_path: String, binary_path
 		return false
 	var width := int(parsed.get("width", 0))
 	_frame_count = int(parsed.get("height", 0))
-	if parsed.get("format", "") != "C3_VAT_RGBA32F" or width <= 0 or _frame_count <= 1:
-		push_error("C3 VAT: metadata format or dimensions are invalid.")
+	if parsed.get("format", "") != "C3_VAT_RGBA32F" or parsed.get("classification", "") != "deforming" or not str(parsed.get("vertex_order", "")).begins_with("source C3 vertex index") or width <= 0 or _frame_count <= 1:
+		push_error("C3 VAT: metadata format, deformation class, source vertex map, or dimensions are invalid.")
 		return false
 	if mesh_instance.mesh == null or mesh_instance.mesh.get_surface_count() == 0:
 		push_error("C3 VAT: target mesh has no surfaces.")
@@ -35,10 +35,23 @@ func configure(mesh_instance: MeshInstance3D, metadata_path: String, binary_path
 		push_error("C3 VAT: binary size does not match metadata dimensions.")
 		return false
 	for surface in range(mesh_instance.mesh.get_surface_count()):
+		var arrays: Array = mesh_instance.mesh.surface_get_arrays(surface)
 		var imported_count: int = mesh_instance.mesh.surface_get_array_len(surface)
-		if imported_count != width:
-			push_error("C3 VAT: imported surface vertex count %d does not match VAT width %d." % [imported_count, width])
+		if arrays.size() <= Mesh.ARRAY_TEX_UV2 or not (arrays[Mesh.ARRAY_TEX_UV2] is PackedVector2Array):
+			push_error("C3 VAT: imported surface is missing TEXCOORD_1/UV2 source vertex IDs.")
 			return false
+		var source_ids: PackedVector2Array = arrays[Mesh.ARRAY_TEX_UV2]
+		if source_ids.size() != imported_count:
+			push_error("C3 VAT: source vertex ID count does not match imported surface vertices.")
+			return false
+		for source_uv in source_ids:
+			if not is_finite(source_uv.x):
+				push_error("C3 VAT: imported source vertex ID is not finite.")
+				return false
+			var source_index := int(floor(source_uv.x * float(width)))
+			if source_index < 0 or source_index >= width or absf(source_uv.x - (float(source_index) + 0.5) / float(width)) > 0.00001:
+				push_error("C3 VAT: imported vertex has an invalid original C3 vertex index.")
+				return false
 	var image := Image.create_from_data(width, _frame_count, false, Image.FORMAT_RGBAF, raw)
 	if image == null or image.is_empty():
 		push_error("C3 VAT: could not create RGBA32F animation texture.")
