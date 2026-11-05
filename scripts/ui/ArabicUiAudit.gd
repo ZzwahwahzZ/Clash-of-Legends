@@ -10,7 +10,7 @@ static func _walk(node: Node, result: Dictionary) -> void:
 	if node is Control:
 		result["controls"] += 1
 		var control := node as Control
-		if control.layout_direction == Control.LAYOUT_DIRECTION_RTL and control.text_direction == Control.TEXT_DIRECTION_RTL:
+		if control.layout_direction == Control.LAYOUT_DIRECTION_RTL:
 			result["rtl_controls"] += 1
 		var visible_text := ""
 		if control is Label:
@@ -23,7 +23,7 @@ static func _walk(node: Node, result: Dictionary) -> void:
 			visible_text = (control as RichTextLabel).text
 		if _contains_arabic(visible_text):
 			result["arabic_text_controls"] += 1
-			if control.text_direction != Control.TEXT_DIRECTION_RTL:
+			if control.layout_direction != Control.LAYOUT_DIRECTION_RTL:
 				result["bad_direction"].append(str(control.get_path()))
 	for child in node.get_children():
 		_walk(child, result)
