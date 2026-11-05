@@ -114,6 +114,7 @@ func _on_save_pressed() -> void:
 		"max_xp": player.max_xp,
 		"gold": GameManager.current_gold,
 		"class": player.get_character_class(),
+		" class_progression": ClassProgressionManager.serialize() if ClassProgressionManager else {},
 		"position": {"x": player.global_position.x, "y": player.global_position.y, "z": player.global_position.z},
 		"inventory": inv_data,
 		"quest_agents": LocalSaveEngine.capture_quest_states()
@@ -138,6 +139,8 @@ func _on_load_pressed() -> void:
 		player.max_xp = data.get("max_xp", 1000)
 		if data.has("class"):
 			player.set_character_class(data["class"])
+		if data.has(" class_progression") and ClassProgressionManager:
+			ClassProgressionManager.deserialize(data[" class_progression"])
 		if data.has("gold"):
 			GameManager.current_gold = data["gold"]
 		if data.has("position"):
