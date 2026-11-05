@@ -127,8 +127,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "skipped_models": skipped.len(),
         "models": parsed,
         "failed": failed,
-        "converted": converted,
-        "skipped": skipped
+        "converted": converted.clone(),
+        "skipped": skipped.clone()
     });
     if let Some(parent) = output.parent() { fs::create_dir_all(parent)?; }
     fs::write(&output, serde_json::to_vec_pretty(&report)?)?;

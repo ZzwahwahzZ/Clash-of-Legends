@@ -135,9 +135,9 @@ pub fn export_document(document: &C3Document, texture_png: &[u8], source: &str, 
         if primitives.is_empty() { continue; }
         let name = if mesh.name.is_empty() { format!("mesh_{mesh_index}") } else { mesh.name.clone() };
         let gltf_index = gltf_meshes.len();
-        gltf_meshes.push(json!({"name":name,"primitives":primitives}));
+        gltf_meshes.push(json!({"name":name.clone(),"primitives":primitives}));
         let node_index = nodes.len();
-        nodes.push(json!({"name":name,"mesh":gltf_index}));
+        nodes.push(json!({"name":name.clone(),"mesh":gltf_index}));
         children.push(node_index);
         mesh_count += 1;
     }
