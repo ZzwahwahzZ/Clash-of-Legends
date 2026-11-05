@@ -6,6 +6,8 @@ source = Path("resource-source-index.csv")
 catalog_path = Path("resource_stage/world/resource_mappings/mesh_equipment_catalog.json")
 if not source.is_file():
     raise SystemExit("resource-source-index.csv is missing.")
+with source.open("r", encoding="utf-8-sig", newline="") as stream:
+    rows = list(csv.DictReader(stream))
 catalog_available = catalog_path.is_file()
 
 c3_paths = set()
@@ -20,8 +22,7 @@ resource_stage_rehydrated = any(
 def staged_path_available(path):
     return (not resource_stage_rehydrated) or Path(path).is_file()
 
-with source.open("r", encoding="utf-8-sig", newline="") as stream:
-    for row in csv.DictReader(stream):
+for row in rows:
         category = row.get("category", "")
         source_path = row.get("source_path", "")
         staged = row.get("staged_path", "")
