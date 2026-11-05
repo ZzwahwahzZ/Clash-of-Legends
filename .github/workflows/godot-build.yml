@@ -57,6 +57,12 @@ jobs:
           godot --headless --path . --script tools/resource_packs/validate_physics_shapes.gd 2>&1 | tee ci-logs/physics-audit.log
           if grep -Eq "SCRIPT ERROR:|Parse Error:|Compile Error:|PHYSICS SHAPE AUDIT FAILED" ci-logs/physics-audit.log; then echo "Physics acceptance audit failed"; exit 1; fi
 
+      - name: Test real Player versus WildWolf collision
+        run: |
+          set -o pipefail
+          godot --headless --path . --script tools/resource_packs/validate_runtime_collisions.gd 2>&1 | tee ci-logs/runtime-collision.log
+          if grep -Eq "SCRIPT ERROR:|Parse Error:|Compile Error:|RUNTIME COLLISION AUDIT FAILED" ci-logs/runtime-collision.log; then echo "Runtime collision test failed"; exit 1; fi
+
       - name: Upload logs
         if: always()
         uses: actions/upload-artifact@v4
