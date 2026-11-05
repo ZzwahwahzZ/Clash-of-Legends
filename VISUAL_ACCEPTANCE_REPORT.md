@@ -24,7 +24,8 @@ The project has working structural and technical foundations, but the game is no
 - 563 converted C3 GLB scenes imported and passed the geometry/import validator.
 - 2,454 GLB mesh surfaces were imported.
 - 936,015 triangles and 709,677 vertices were reported by the C3 audit.
-- 497 converted models expose imported animation tracks; the audit reports 18,029 motion tracks across parsed C3 sources.
+- The audit parsed 18,029 C3 MOTI chunks. This is a source-chunk count, not a count of imported animation clips.
+- Inspection of the previous exporter found it reused the first MOTI chunk for every mesh. Sampled body GLBs therefore had no skin and often no animation clip even when later per-mesh MOTI chunks contained keyframes. A per-mesh motion exporter and stricter Godot morph/track validation are now under CI; not yet accepted.
 - 1,060 PVR textures decoded; 0 decoder failures.
 - 40 C3 files were rejected by the pinned parser, all in effect paths, due to 4- or 8-byte unparsed mesh tails. These require format investigation; they are not silently accepted.
 - Additional C3 models were skipped when a matching decoded PVR texture or renderable mesh was unavailable.
@@ -39,7 +40,7 @@ Successful conversion/import is not proof that these models are correctly assign
 - The current `MainGame.tscn` world is procedural blockout architecture/terrain, not an accepted reconstruction of the original mobile maps.
 - The wolf, dragon, NPC, player, and world scenes have procedural geometry. Their hierarchy checks do not establish professional visual quality.
 - No comparable rendered screenshots have been reviewed against the approved mobile reference.
-- The PCK validator reports 172/172 model scenes structurally valid, but only 15/172 expose imported AnimationPlayer tracks in the runtime model-scene sample; this is not enough to claim animation coverage.
+- The previous PCK validator reported 172/172 model scenes structurally valid and 15/172 with AnimationPlayer nodes. That count did not verify useful morph tracks or per-mesh motion; a stricter validator is now being added.
 - No Redmi Note 11 measurements exist yet for FPS, memory, heat, loading time, or stability.
 
 ## 4. Current Android build
