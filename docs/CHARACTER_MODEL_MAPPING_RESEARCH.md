@@ -99,3 +99,17 @@ The source selection labels Monk and Saint separately. The project's Monk class 
 6. Replace the current index-based model selection in `PlayerController.gd` only after the source mapping is verified. Never use arbitrary catalog array positions as class identity.
 
 **Current implementation rule:** the source mappings in this report are research evidence. They are not yet authorized for runtime class assignment until the remaining checks above pass.
+
+## 7. Runtime safety gate added after repository review
+
+The runtime previously selected a character GLB using a fixed class-to-array-index table and modulo arithmetic. This is unsafe because the converted `characters` category contains mixed C3 body parts, NPCs, and other models; file order is not a class identity contract.
+
+The current runtime now requires explicit metadata before selecting a class model:
+- `asset_role = complete_character`
+- `mapping_status = verified`
+- exact `character_class`
+- exact `gender` when a gender is requested
+
+The lookup helper returns no model when these conditions are not met. In that case the existing fallback scene remains visible rather than silently attaching an unrelated GLB. This is a safety gate, **not** completion of the visual character system. The current C3 conversion catalog does not yet prove full-character metadata or attachment transforms.
+
+A new regression script, `tools/resource_packs/validate_character_model_mapping.gd`, tests that body-part records, candidate mappings, unknown classes, and wrong-gender models are rejected. The Godot CI workflow now runs this check. The source-to-class mappings remain unaccepted until rendered male/female characters and their head/equipment attachment points are verified.
