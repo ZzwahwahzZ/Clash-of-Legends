@@ -128,23 +128,60 @@ func _apply_character_model() -> void:
 	var model_index := AssetCatalog.get_verified_character_model_index(character_class)
 	if model_index < 0:
 		return
-	imported_model_animation = null
-	imported_animation_name = ""
+	# Build and validate the candidate while the current visible model remains intact.
+	var candidate_root := AssetCatalog.instantiate_fitted_model("characters", model_index, visual_root, 1.7, "CharacterCandidate")
+	if candidate_root == null:
+		push_warning("Character replacement rejected: scene could not be instantiated.")
+		return
+	var candidate_instance: Node = candidate_root.get_child(0) if candidate_root.get_child_count() > 0 else null
+	var candidate_animation := candidate_instance.find_child("AnimationPlayer", true, false) if candidate_instance else null
+	var validation := _validate_character_candidate(candidate_instance, candidate_animation)
+	if not bool(validation.get("ok", false)):
+		push_warning("Character replacement rejected; keeping current visible model. " + str(validation.get("reason", "validation failed")))
+		candidate_root.queue_free()
+		return
+
 	var old_root := visual_root.get_node_or_null("ImportedModelRoot")
 	if old_root:
 		old_root.queue_free()
-	var imported_root := AssetCatalog.instantiate_fitted_model("characters", model_index, visual_root, 1.7, "ImportedModelRoot")
-	if imported_root == null:
-		return
-	var instance: Node = imported_root.get_child(0)
-	var model_animation := instance.find_child("AnimationPlayer", true, false)
-	if model_animation is AnimationPlayer:
-		imported_model_animation = model_animation as AnimationPlayer
-		_set_imported_animation_state("idle")
+	candidate_root.name = "ImportedModelRoot"
+	imported_model_animation = candidate_animation as AnimationPlayer
+	imported_animation_name = ""
+	_set_imported_animation_state("idle")
 	for child in visual_root.get_children():
-		if child != imported_root and child is Node3D:
+		if child != candidate_root and child is Node3D:
 			child.visible = false
 	call_deferred("_apply_refinement_glow")
+
+func _validate_character_candidate(candidate: Node, animation_node: Node) -> Dictionary:
+	if candidate == null:
+		return {"ok": false, "reason": "missing instantiated model root"}
+	var mesh_count := 0
+	for node in candidate.find_children("*", "MeshInstance3D", true, false):
+		var mesh_instance := node as MeshInstance3D
+		if not _is_renderable_mesh_instance(mesh_instance):
+			continue
+		mesh_count += 1
+		for surface_index in range(mesh_instance.mesh.get_surface_count()):
+			var surface_material := mesh_instance.get_surface_override_material(surface_index)
+			if surface_material == null:
+				surface_material = mesh_instance.mesh.surface_get_material(surface_index)
+			if surface_material == null:
+				return {"ok": false, "reason": "mesh surface has no assigned material"}
+	if mesh_count == 0:
+		return {"ok": false, "reason": "no renderable mesh surfaces"}
+	if not animation_node is AnimationPlayer:
+		return {"ok": false, "reason": "no AnimationPlayer"}
+	var animation_player := animation_node as AnimationPlayer
+	var has_idle := false
+	var has_move := false
+	for animation_name in animation_player.get_animation_list():
+		var normalized := animation_name.to_lower()
+		has_idle = has_idle or normalized.contains("idle") or normalized.contains("stand")
+		has_move = has_move or normalized.contains("walk") or normalized.contains("run") or normalized.contains("move")
+	if not has_idle or not has_move:
+		return {"ok": false, "reason": "missing semantic idle/stand or walk/run/move animation"}
+	return {"ok": true, "reason": "mesh surfaces, materials and semantic idle/move clips present"}
 
 func _physics_process(delta: float) -> void:
 	if is_dead:
