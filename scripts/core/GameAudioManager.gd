@@ -71,10 +71,6 @@ func _ready() -> void:
 	_music_player.bus = "Master"
 	add_child(_music_player)
 
-func _process(delta: float) -> void:
-	for cue in _footstep_cooldowns.keys():
-		_footstep_cooldowns[cue] = maxf(0.0, float(_footstep_cooldowns[cue]) - delta)
-
 func _index_audio_files() -> void:
 	var directory := DirAccess.open(AUDIO_DIR)
 	if directory == null:
