@@ -108,6 +108,40 @@ fn accessor_min_max(values: &[[f32; 3]]) -> (Value, Value) {
     (json!([min[0],min[1],min[2]]), json!([max[0],max[1],max[2]]))
 }
 
+pub fn export_document_with_external_motion(
+    base_document: &C3Document,
+    motion_document: &C3Document,
+    texture_png: &[u8],
+    source: &str,
+    output: &Path,
+) -> Result<(u64, usize, usize), Box<dyn std::error::Error>> {
+    if base_document.meshes.len() != motion_document.motions.len() {
+        return Err(format!(
+            "external motion has {} MOTI chunks for {} base PHY meshes",
+            motion_document.motions.len(),
+            base_document.meshes.len()
+        ).into());
+    }
+    for (mesh_index, (mesh, motion)) in base_document.meshes.iter().zip(motion_document.motions.iter()).enumerate() {
+        for vertex in &mesh.vertices {
+            for influence in 0..2 {
+                if vertex.bone_weights[influence] > 0.0
+                    && u32::from(vertex.bone_indices[influence]) >= motion.bone_count
+                {
+                    return Err(format!(
+                        "external motion mesh slot {mesh_index} has {} bones but a vertex references bone {}",
+                        motion.bone_count,
+                        vertex.bone_indices[influence]
+                    ).into());
+                }
+            }
+        }
+    }
+    let mut merged_document = base_document.clone();
+    merged_document.motions = motion_document.motions.clone();
+    export_document(&merged_document, texture_png, source, output)
+}
+
 pub fn export_document(document: &C3Document, texture_png: &[u8], source: &str, output: &Path) -> Result<(u64, usize, usize), Box<dyn std::error::Error>> {
     let mut builder = GlbBuilder::new();
     let mut gltf_meshes: Vec<Value> = Vec::new();
@@ -337,6 +371,60 @@ mod tests {
             MotionKey { frame: *frame, bone_matrices: vec![matrix] }
         }).collect();
         C3Motion { bone_count: 1, frame_count, keys, morph_count: 0, morph_values: Vec::new() }
+    }
+
+    #[test]
+    fn external_motion_replaces_static_embedded_motion_for_each_phy_slot() {
+        let base_document = C3Document {
+            version: "base".to_owned(),
+            meshes: vec![mesh("body"), mesh("arm")],
+            motions: vec![motion(21, &[0]), motion(21, &[0])],
+            unknown_chunks: Vec::new(),
+        };
+        let motion_document = C3Document {
+            version: "motion-only".to_owned(),
+            meshes: Vec::new(),
+            motions: vec![motion(21, &[0, 10, 20]), motion(21, &[0, 10, 20])],
+            unknown_chunks: Vec::new(),
+        };
+        let png = [
+            137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,1,0,0,0,1,
+            8,6,0,0,0,31,21,196,137,0,0,0,13,73,68,65,84,120,156,99,248,207,192,
+            240,31,0,5,0,1,255,137,153,61,29,0,0,0,0,73,69,78,68,174,66,96,130
+        ];
+        let output = std::env::temp_dir().join(format!("c3-external-motion-{}.glb", std::process::id()));
+        let (_, meshes_written, animated_meshes) = export_document_with_external_motion(
+            &base_document, &motion_document, &png, "base+motion.c3", &output
+        ).unwrap();
+        assert_eq!(meshes_written, 2);
+        assert_eq!(animated_meshes, 2);
+        let glb = fs::read(&output).unwrap();
+        let json_length = u32::from_le_bytes(glb[12..16].try_into().unwrap()) as usize;
+        let json: Value = serde_json::from_slice(&glb[20..20 + json_length]).unwrap();
+        assert_eq!(json["animations"][0]["channels"].as_array().unwrap().len(), 2);
+        fs::remove_file(output).unwrap();
+    }
+
+    #[test]
+    fn rejects_external_motion_with_wrong_mesh_count() {
+        let base_document = C3Document {
+            version: "base".to_owned(),
+            meshes: vec![mesh("body"), mesh("arm")],
+            motions: vec![motion(1, &[0]), motion(1, &[0])],
+            unknown_chunks: Vec::new(),
+        };
+        let motion_document = C3Document {
+            version: "motion-only".to_owned(),
+            meshes: Vec::new(),
+            motions: vec![motion(21, &[0, 10, 20])],
+            unknown_chunks: Vec::new(),
+        };
+        let png = [0_u8; 0];
+        let output = std::env::temp_dir().join(format!("c3-invalid-external-motion-{}.glb", std::process::id()));
+        assert!(export_document_with_external_motion(
+            &base_document, &motion_document, &png, "bad.c3", &output
+        ).is_err());
+        assert!(!output.exists());
     }
 
     #[test]
