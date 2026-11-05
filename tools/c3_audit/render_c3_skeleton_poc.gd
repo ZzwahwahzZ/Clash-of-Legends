@@ -126,6 +126,56 @@ func _render() -> void:
 		" animation=", animation_name,
 		" bones=", _count_bones(character),
 		" screenshots=reports/c3-skeletal-poc-frame-a.png,reports/c3-skeletal-poc-frame-b.png")
+
+	# Render a shear-containing walk clip through the new VAT shader, not merely
+	# validate the binary payload. The source mesh is reused; VAT replaces vertices.
+	animation_player.stop()
+	var vat_mesh := mesh_nodes[0] as MeshInstance3D
+	var source_material := vat_mesh.get_active_material(0) as StandardMaterial3D
+	var source_albedo: Texture2D = source_material.albedo_texture if source_material != null else null
+	var vat_player_script = load("res://scripts/animation/C3VatPlayer.gd")
+	if vat_player_script == null:
+		push_error("C3 VAT visual proof: runtime player script could not load.")
+		quit(1)
+		return
+	var vat_player = vat_player_script.new()
+	stage.add_child(vat_player)
+	var vat_metadata := "res://build/c3-glb/motion-poc-vat/look7_model7130000_weapon500_action110.json"
+	var vat_binary := "res://build/c3-glb/motion-poc-vat/look7_model7130000_weapon500_action110.rgba32f"
+	if not vat_player.configure(vat_mesh, vat_metadata, vat_binary, source_albedo):
+		push_error("C3 VAT visual proof: runtime VAT player rejected the validated walk clip.")
+		quit(1)
+		return
+	vat_player.pause()
+	vat_player.set_frame(0.0)
+	await process_frame
+	await process_frame
+	var vat_first := get_root().get_texture().get_image()
+	if vat_first.save_png("reports/c3-vat-poc-frame-a.png") != OK:
+		push_error("C3 VAT visual proof: could not save first VAT frame.")
+		quit(1)
+		return
+	vat_player.set_frame(14.0)
+	await process_frame
+	await process_frame
+	var vat_second := get_root().get_texture().get_image()
+	if vat_second.save_png("reports/c3-vat-poc-frame-b.png") != OK:
+		push_error("C3 VAT visual proof: could not save second VAT frame.")
+		quit(1)
+		return
+	var first_pixels := vat_first.get_data()
+	var second_pixels := vat_second.get_data()
+	var changed_pixels := 0
+	if first_pixels.size() == second_pixels.size():
+		for pixel_byte in range(first_pixels.size()):
+			if first_pixels[pixel_byte] != second_pixels[pixel_byte]:
+				changed_pixels += 1
+	if changed_pixels < 100:
+		push_error("C3 VAT visual proof: rendered frames did not show a meaningful pixel change.")
+		quit(1)
+		return
+	print("C3 VAT VISUAL PROOF: clip=look7 action110 vertices=2155 frames=15 changed_pixel_bytes=", changed_pixels,
+		" screenshots=reports/c3-vat-poc-frame-a.png,reports/c3-vat-poc-frame-b.png")
 	character.queue_free()
 	stage.queue_free()
 	quit(0)
