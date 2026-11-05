@@ -1,0 +1,39 @@
+name: Audit mobile gameplay source tables
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/audit-gameplay-source-tables.yml"
+      - "tools/gameplay_source_audit/**"
+permissions:
+  contents: read
+concurrency:
+  group: gameplay-source-table-audit-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  audit-source-tables:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and verify the exact mobile source archive
+        run: |
+          set -euo pipefail
+          mkdir -p build/source reports
+          curl --fail --location --retry 5 --retry-all-errors \
+            "https://github.com/ZzwahwahzZ/Conquer-Mobile-Assets./releases/download/mobile-extracted-assets/extracted-assets-001.zip" \
+            -o build/source/extracted-assets-001.zip
+          echo "0d21a110c09b762ed5f1a5f4da022857b0534e489eb85052d15da460cb229d2a  build/source/extracted-assets-001.zip" | sha256sum -c -
+      - name: Inventory and parse safe source fields
+        run: |
+          python3 tools/gameplay_source_audit/audit_source_tables.py \
+            build/source/extracted-assets-001.zip \
+            --output reports/gameplay-source-table-audit.json
+      - name: Upload source table audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Gameplay-Source-Table-Audit
+          path: reports/gameplay-source-table-audit.json
+          if-no-files-found: error
+          retention-days: 30
