@@ -177,7 +177,7 @@ func _validate() -> void:
 								break
 						if changed:
 							break
-			var valid_vat := finite_values and changed and metadata.get("format", "") == "C3_VAT_RGBA32F" and metadata.get("preserves_affine_shear", false)
+			var valid_vat: bool = finite_values and changed and str(metadata.get("format", "")) == "C3_VAT_RGBA32F" and bool(metadata.get("preserves_affine_shear", false))
 			vat_results.append({
 					"metadata": metadata_name, "width": width, "height": height,
 					"bytes": data.size(), "finite": finite_values, "frame_positions_change": changed,
