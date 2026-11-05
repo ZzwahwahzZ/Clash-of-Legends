@@ -12,7 +12,7 @@
       "display_name_ar": "الحركات والأنيميشن",
       "display_name_en": "Animations",
       "size_bytes": 15665760,
-      "sha256": "26fdc8b185cfadce445bc2c0fe9b3999f4c2bc5f382832fcf22f0e172d3b9c8f",
+      "sha256": "4028128f08cbf0bde358a145429d2e96a7a553036bd74067ec0b93aa8e9576c4",
       "download_url": "",
       "godot_version": "4.3",
       "platform": "all"
@@ -22,8 +22,8 @@
       "file_name": "audio.pck",
       "display_name_ar": "الأصوات والموسيقى",
       "display_name_en": "Audio and Music",
-      "size_bytes": 13912864,
-      "sha256": "390dcbcda540ae4eabe45b22381483526fa96aaed7635021c8f85f7dd903b458",
+      "size_bytes": 13912912,
+      "sha256": "f9395a456b3c968917c26aae8e24f3108a65654eb6efa608a8f97d66eb91600a",
       "download_url": "",
       "godot_version": "4.3",
       "platform": "all"
@@ -33,8 +33,8 @@
       "file_name": "characters.pck",
       "display_name_ar": "الشخصيات والفئات",
       "display_name_en": "Characters and Classes",
-      "size_bytes": 109473008,
-      "sha256": "d9a1f5f5e562088f176e851fb4b1a89b7cb3c486e06029cfd6c145d23408d49e",
+      "size_bytes": 109473056,
+      "sha256": "2fe16a87f26bb147be4d9dc1fc9abbea114100cc7406359fed05f07924692233",
       "download_url": "",
       "godot_version": "4.3",
       "platform": "all"
@@ -45,7 +45,7 @@
       "display_name_ar": "المهارات والمؤثرات",
       "display_name_en": "Skills and Effects",
       "size_bytes": 55191408,
-      "sha256": "c94909ac9474301ad51dcfeb222b6780d06aa893970fb71546aee24084187778",
+      "sha256": "d0ea8b0428c7de7b6ef53f6d47179d5126bf34325f6c04111f9f9d9a055491bb",
       "download_url": "",
       "godot_version": "4.3",
       "platform": "all"
@@ -55,8 +55,8 @@
       "file_name": "equipment.pck",
       "display_name_ar": "الأسلحة والمعدات",
       "display_name_en": "Weapons and Equipment",
-      "size_bytes": 11603680,
-      "sha256": "da45a41400aa917c3818b490063388bd5b7f58c89c74be23945039c5f7ec3949",
+      "size_bytes": 11603664,
+      "sha256": "baff1192f067a3d60d07e6b3ffa53fff35da047eb0686b706004eb0501635617",
       "download_url": "",
       "godot_version": "4.3",
       "platform": "all"
@@ -66,8 +66,8 @@
       "file_name": "interface.pck",
       "display_name_ar": "موارد الواجهة",
       "display_name_en": "Interface Resources",
-      "size_bytes": 75735680,
-      "sha256": "cc2f39e09da7bb74b6483f8bea4e27c4f119466da04a3d4f1dd60d304d27623b",
+      "size_bytes": 75735504,
+      "sha256": "0e8f4b2c8165519b5899072674da41bad69bb8f62af7b9f04fad91782ff25b21",
       "download_url": "",
       "godot_version": "4.3",
       "platform": "all"
@@ -77,8 +77,8 @@
       "file_name": "maps.pck",
       "display_name_ar": "الخرائط والمناطق",
       "display_name_en": "Maps and Regions",
-      "size_bytes": 468531808,
-      "sha256": "12c9d6e1736ba03b6fae4e9a1651a1b4a5ff1f22505a6e7b2af75ea9881d46d7",
+      "size_bytes": 468531824,
+      "sha256": "7a1ce49388628ff764a2727c17a5338b37abd30090e489d9d03a0fa6fdb37489",
       "download_url": "",
       "godot_version": "4.3",
       "platform": "all"
@@ -89,7 +89,7 @@
       "display_name_ar": "نماذج C3 الأصلية",
       "display_name_en": "Original C3 Models",
       "size_bytes": 366202560,
-      "sha256": "3e648112fc1ae48c03a654eec9be98f6e926ea8276f89474d0cd8d44c0292723",
+      "sha256": "3f318d15481544f155e8f8435a94b118ded3c6a3204fad2624c63bb64c3fb415",
       "download_url": "",
       "godot_version": "4.3",
       "platform": "all"
@@ -99,8 +99,8 @@
       "file_name": "monsters.pck",
       "display_name_ar": "الوحوش والأعداء",
       "display_name_en": "Monsters and Enemies",
-      "size_bytes": 66997152,
-      "sha256": "e915c31761b6c8a5793e7b0e8661dbfe4843569d126027daf6e951b2d18237c3",
+      "size_bytes": 66997136,
+      "sha256": "1d292af486dfc6bb20eaed58c68cc9db833ba23670d0a299e1c0ed4bce65e124",
       "download_url": "",
       "godot_version": "4.3",
       "platform": "all"
@@ -110,8 +110,8 @@
       "file_name": "mounts.pck",
       "display_name_ar": "المطايا والمرافقون",
       "display_name_en": "Mounts and Companions",
-      "size_bytes": 34605264,
-      "sha256": "24b5ebd74645c063fec8ea0678774c8c1d51be5ec92a3ec4230d47f09420a3bc",
+      "size_bytes": 34605280,
+      "sha256": "6b0053b2c94e40b1509e3a50951ed384a269f7024e79d21dbf868fd4f1efc5cd",
       "download_url": "",
       "godot_version": "4.3",
       "platform": "all"
@@ -122,7 +122,7 @@
       "display_name_ar": "العالم والأصول العامة",
       "display_name_en": "World and Core Data",
       "size_bytes": 192680736,
-      "sha256": "4cea8504c33132d68bfff8487d1235ebaf050131347439d8663b3913842cc2c9",
+      "sha256": "d90575786a0af825c5a3c7cb3fc670179be71ae3ce50fa89329312982b38595f",
       "download_url": "",
       "godot_version": "4.3",
       "platform": "all"
