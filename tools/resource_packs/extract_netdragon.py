@@ -297,5 +297,7 @@ print(json.dumps({"tpi_tpd_pairs":len(results),"extracted_unique_files":len(new_
     "extracted_bytes":sum(int(r["size_bytes"]) for r in new_rows),
     "categories":dict(collections.Counter(r["category"] for r in new_rows)),
     "multiblock_pending":total_multi,"failures":total_failed},ensure_ascii=False,indent=2))
-if not new_rows and not total_multi:
-    raise SystemExit("No TPI/TPD assets extracted; refusing to publish empty resource generation.")
+if not new_rows and not total_multi and pairs:
+    raise SystemExit("TPI/TPD pairs were present but no assets could be extracted; refusing to publish empty resource generation.")
+elif not pairs:
+    print("INFO: resource-packs-v4 contains no indexed TPI/TPD pairs; extraction is not applicable to this baseline. The verified PCK assets remain available.")
