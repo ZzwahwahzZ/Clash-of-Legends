@@ -132,7 +132,9 @@ func get_skill_database() -> Dictionary:
 
 func validate_registry() -> bool:
  for class_id in CLASSES:
-  if CLASSES[class_id].get("weapons", []).is_empty(): return false
+  var definition: Dictionary = CLASSES[class_id]
+  if definition.get("weapons", []).is_empty() and definition.get("combat_styles", []).is_empty(): return false
+  if str(definition.get("source_family", "")).is_empty() or str(definition.get("source_reference", "")).is_empty(): return false
  for skill_id in SKILLS:
   var class_id := str(SKILLS[skill_id].get("class_req", ""))
   if not CLASSES.has(class_id): return false
