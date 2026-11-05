@@ -14,8 +14,8 @@ const MAX_MANIFEST_BYTES := 1024 * 1024
 const APPLICATION_ID := "com.zwahwahzz.clashoflegends"
 const GODOT_VERSION := "4.3"
 const RESOURCE_RELEASE_TAG := "resource-packs-v4"
-const MAX_PARALLEL_DOWNLOADS := 4
-const DOWNLOAD_TIMEOUT_SECONDS := 900.0
+const MAX_PARALLEL_DOWNLOADS := 6
+const DOWNLOAD_TIMEOUT_SECONDS := 1200.0
 
 var manifest: Dictionary = {}
 var packages: Dictionary = {}
