@@ -167,12 +167,40 @@ jobs:
 
       - name: Export signed Android APK
         run: |
+          set -euo pipefail
           mkdir -p builds/android
           godot --headless --path . --export-debug "Android" builds/android/ClashOfLegends-debug.apk
           test -s builds/android/ClashOfLegends-debug.apk
-          test "$(stat -c%s builds/android/ClashOfLegends-debug.apk)" -gt 500000000
-          unzip -l builds/android/ClashOfLegends-debug.apk | grep -q 'assets/bundled/maps.pck'
-          unzip -l builds/android/ClashOfLegends-debug.apk | grep -q 'assets/bundled/models.pck'
+          python3 - <<'PY'
+          import hashlib, json, pathlib, zipfile
+          apk = pathlib.Path("builds/android/ClashOfLegends-debug.apk")
+          manifest = json.loads(pathlib.Path("RESOURCE_MANIFEST").read_text())
+          expected = {e["package_id"]: e for e in manifest["resource_packages"] if e["package_id"] in {"maps", "models"}}
+          if set(expected) != {"maps", "models"}:
+              raise SystemExit("Manifest does not define both required bundled packs")
+          with zipfile.ZipFile(apk) as z:
+              names = z.namelist()
+              for package_id, entry in expected.items():
+                  suffix = "/bundled/" + entry["file_name"]
+                  matches = [name for name in names if name.endswith(suffix)]
+                  if len(matches) != 1:
+                      raise SystemExit(f"Expected exactly one embedded {package_id} pack; found {matches}")
+                  info = z.getinfo(matches[0])
+                  if info.file_size != int(entry["size_bytes"]):
+                      raise SystemExit(f"Embedded {package_id} size mismatch: {info.file_size}")
+                  digest = hashlib.sha256()
+                  with z.open(info) as stream:
+                      for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                          digest.update(chunk)
+                  if digest.hexdigest() != entry["sha256"]:
+                      raise SystemExit(f"Embedded {package_id} SHA-256 mismatch")
+                  print(f"APK RESOURCE VERIFIED: {package_id} {info.file_size} bytes SHA-256 OK at {matches[0]}")
+              icon_entries = [n for n in names if n.endswith("/mipmap-xxxhdpi-v4/icon.png")]
+              if not icon_entries:
+                  raise SystemExit("Android launcher icon is missing from APK")
+              print("ANDROID LAUNCHER ICON PRESENT:", icon_entries[0])
+          print(f"APK EXPORT PASSED: {apk.stat().st_size} bytes")
+          PY
 
       - name: Verify APK archive, signature, package id and Android compatibility
         run: |
