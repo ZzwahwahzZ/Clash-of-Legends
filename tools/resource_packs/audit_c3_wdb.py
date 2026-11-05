@@ -174,6 +174,8 @@ def parse_simo(data: bytes) -> dict:
             offset += 8
             parts.append({"part_id": part_id, "texture_id": texture_id})
         records.append({"object_id": object_id, "part_count": part_count, "parts": parts})
+    if offset != len(data):
+        raise ValueError(f"SIMO table has {len(data) - offset} trailing byte(s)")
     return {"format": "SIMO", "record_count": count, "parse_status": "PARSED",
             "sample_records": records[:20], "_records": records}
 
@@ -208,6 +210,12 @@ def parse_wdb(data: bytes) -> dict:
             parsed = parse_rsdb(blob, stem)
         elif magic == b"SIMO":
             parsed = parse_simo(blob)
+        elif magic == b"SIM5":
+            parsed = {
+                "format": "SIM5", "record_count": struct.unpack_from("<I", blob, 4)[0] if len(blob) >= 8 else None,
+                "parse_status": "RAW_LAYOUT_PROBE_ONLY", "raw_size_bytes": len(blob),
+                "raw_hex": blob.hex(" ")
+            }
         else:
             parsed = {"format": magic.decode("ascii", errors="replace"),
                       "record_count": struct.unpack_from("<I", blob, 4)[0] if len(blob) >= 8 else None,
@@ -239,7 +247,12 @@ def parse_wdb(data: bytes) -> dict:
     missing_object_ids = set()
     missing_texture_ids = set()
     resolved_samples = []
+    missing_object_references = []
+    missing_texture_references = []
+    simple_object_catalog = []
+
     for simple in simple_rows:
+        catalog_parts = []
         for part in simple.get("parts", []):
             total_parts += 1
             part_id = int(part["part_id"])
@@ -254,16 +267,50 @@ def parse_wdb(data: bytes) -> dict:
                 texture_matches += 1
             else:
                 missing_texture_ids.add(texture_id)
+            part_record = {
+                "part_id": part_id,
+                "object_path": object_path,
+                "object_resolved": object_path is not None,
+                "texture_id": texture_id,
+                "texture_path": texture_path,
+                "texture_resolved": texture_path is not None,
+            }
+            catalog_parts.append(part_record)
             if object_path is not None and texture_path is not None:
                 full_matches += 1
                 if len(resolved_samples) < 40:
                     resolved_samples.append({
                         "simple_object_id": int(simple["object_id"]),
-                        "part_id": part_id,
-                        "object_path": object_path,
-                        "texture_id": texture_id,
-                        "texture_path": texture_path,
+                        **part_record,
                     })
+            else:
+                unresolved = {"simple_object_id": int(simple["object_id"]), **part_record}
+                if object_path is None and len(missing_object_references) < 100:
+                    missing_object_references.append(unresolved)
+                if texture_path is None and len(missing_texture_references) < 100:
+                    missing_texture_references.append(unresolved)
+        simple_object_catalog.append({
+            "simple_object_id": int(simple["object_id"]),
+            "part_count": int(simple["part_count"]),
+            "parts": catalog_parts,
+        })
+
+    catalog_dir = Path("resource_stage/world/resource_mappings")
+    catalog_dir.mkdir(parents=True, exist_ok=True)
+    catalog_path = catalog_dir / "simple_object_catalog.json"
+    catalog_data = {
+        "schema_version": "1.0.0",
+        "source_container_sha256": hashlib.sha256(data).hexdigest(),
+        "source_table": "ini/3DSimpleObj.dbc",
+        "reference_tables": ["ini/3DObj.dbc", "ini/3DTexture.dbc"],
+        "schema_status": "SOURCE_ID_PATH_MAPPING_ONLY",
+        "object_count": len(simple_object_catalog),
+        "part_count": total_parts,
+        "fully_resolved_part_count": full_matches,
+        "objects": simple_object_catalog,
+        "note": "This catalog resolves source IDs to C3/PVR paths. It does not assert correct mesh assembly, UVs, transforms, materials or visual acceptance.",
+    }
+    catalog_path.write_text(json.dumps(catalog_data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     resource_reference_audit = {
         "schema_status": "CROSS_REFERENCED_BY_SOURCE_IDS",
@@ -278,13 +325,20 @@ def parse_wdb(data: bytes) -> dict:
         },
         "simple_object_parts": total_parts,
         "object_id_matches": object_matches,
+        "object_id_match_percent": round(100.0 * object_matches / total_parts, 2) if total_parts else 0.0,
         "texture_id_matches": texture_matches,
+        "texture_id_match_percent": round(100.0 * texture_matches / total_parts, 2) if total_parts else 0.0,
         "both_object_and_texture_match": full_matches,
+        "fully_resolved_percent": round(100.0 * full_matches / total_parts, 2) if total_parts else 0.0,
         "missing_object_id_count": len(missing_object_ids),
         "missing_texture_id_count": len(missing_texture_ids),
         "missing_object_id_samples": sorted(missing_object_ids)[:40],
         "missing_texture_id_samples": sorted(missing_texture_ids)[:40],
+        "missing_object_reference_samples": missing_object_references,
+        "missing_texture_reference_samples": missing_texture_references,
         "resolved_samples": resolved_samples,
+        "simple_object_catalog_path": str(catalog_path),
+        "simple_object_catalog_sha256": hashlib.sha256(catalog_path.read_bytes()).hexdigest(),
         "note": "ID-level joins only; C3 geometry, UV/material correctness and rendered appearance still require separate validation.",
     }
 
