@@ -58,3 +58,26 @@ The index includes `gemtip.ini`, `item_refine_attr.dat`, `item_refine_cost.dat`,
 6. Keep all entries `UNRESOLVED — NOT APPROVED` until identity, implementation, visual comparison, runtime behavior and distribution rights are verified.
 
 **Distribution note:** the inventory does not grant permission to redistribute proprietary Conquer assets. Reference use and shipment rights remain separate gates.
+
+## Dedicated nested-APK audit results — 2026-11-05
+
+The first CI pass exposed a packaging detail: the outer source archive contains the Android client as a nested APK. The audit was corrected to inspect that nested APK, and the corrected workflow completed successfully:
+
+- Workflow: [Audit mobile gameplay source tables — run 42075363202](https://github.com/ZzwahwahzZ/Clash-of-Legends/actions/runs/42075363202)
+- Commit: `93658671dc96f3dca5089bf12f2fa83712b81dda`
+- Audit artifact: [Gameplay-Source-Table-Audit](https://github.com/ZzwahwahzZ/Clash-of-Legends/actions/runs/42075363202/artifacts/13438815306)
+- Exact archive SHA-256: `0d21a110c09b762ed5f1a5f4da022857b0534e489eb85052d15da460cb229d2a`
+- Version-matched source members indexed inside the nested client: 4,238.
+
+The audit established a useful equipment-data baseline: **89 version-matched `itemtype*.ini` files containing 57,940 unique numeric record IDs and visible names, with zero malformed or duplicate lines** under the conservative ID/name parser. All remaining positional fields were retained as opaque; no gameplay meaning was guessed.
+
+Target table observations:
+- `gemtip.ini`: 52 INI sections parsed.
+- `weaponeffect.ini`: 111 INI sections parsed.
+- `actionlee3deffect.ini`: 8 INI sections parsed.
+- `3deffectinfo.ini`: 3 INI sections parsed.
+- `equiphole.ini`: 2 INI sections parsed.
+- `mountinfo.ini`, `weaponskillname.ini`, `weaponskilllevelexp.ini`, several transform/matching files, and some fashion/socket INIs were present but did not pass the generic INI parser. They remain preserved as source files with hashes and explicit parse-failure status; their schema is not accepted.
+- `mounttype.dat`, skill animation DAT files, and all five refinement DAT files were inventoried as binary/metadata-only. No field interpretation was attempted.
+
+This gives us a much stronger ID/name inventory for the equipment family, but it does **not** yet establish item categories, paid status, exact models, helmet/armor texture regions, or a complete runtime wardrobe. The next safe step is to validate itemtype positional fields against independently readable source references and then join their IDs to the C3 object/texture index. The dedicated audit was also corrected to emit valid JSON and stream the archive checksum rather than loading the entire 842 MB archive into memory.
