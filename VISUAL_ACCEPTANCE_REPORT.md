@@ -25,7 +25,7 @@ A successful build, a GLB import, or animation tracks in a headless test do not 
 - 1,944 C3 files found; 1,904 parsed; 40 parser failures remain, all in effect paths with unparsed 4- or 8-byte tails.
 - 8,340 meshes, 709,677 vertices, 936,015 triangles, and 18,029 MOTI chunks were reported.
 - 569 GLBs imported and passed the current geometry/morph/animation validator: 2,562 surfaces, 2,307 morph-capable mesh nodes, 509 animated models, 13,163 animation tracks, and 57,012 keys.
-- 1,060 PVR textures decoded with zero decoder failures. 497 C3 models were skipped when required renderable geometry or matching decoded texture data was unavailable.
+- 1,060 PVR textures decoded with zero decoder failures. 497 C3 models were skipped when required renderable geometry or matching decoded texture data was unavailable: 434 effects, 33 NPCs, 13 monsters, 10 body variants, 4 ghost models, and one each from cape, misc and weapon. The WDB/DBC object and texture indexes are being decoded to determine which skips are recoverable.
 
 ### Motion-only C3 research and POC
 - 558 motion-only C3 documents were found; 537 have a parsed numeric look/weapon/action path key.
