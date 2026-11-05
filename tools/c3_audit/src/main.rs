@@ -40,6 +40,37 @@ fn category_for(path: &Path) -> Option<&'static str> {
     }
 }
 
+fn motion_signature_matches(model: &[u32], action: &[u32]) -> bool {
+    !model.is_empty() && model == action
+}
+
+fn has_valid_mesh_bone_indices(document: &C3Document) -> bool {
+    if document.meshes.is_empty() || document.meshes.len() != document.motions.len() {
+        return false;
+    }
+    document.meshes.iter().zip(document.motions.iter()).all(|(mesh, motion)| {
+        mesh.vertices.iter().all(|vertex| {
+            (0..2).all(|influence| {
+                vertex.bone_weights[influence] <= 0.0
+                    || vertex.bone_indices[influence] < motion.bone_count
+            })
+        })
+    })
+}
+
+#[cfg(test)]
+mod motion_pairing_tests {
+    use super::*;
+
+    #[test]
+    fn accepts_only_exact_nonempty_bone_count_signatures() {
+        assert!(motion_signature_matches(&[66, 1, 1], &[66, 1, 1]));
+        assert!(!motion_signature_matches(&[66, 1, 1], &[66, 1]));
+        assert!(!motion_signature_matches(&[66, 1, 1], &[66, 2, 1]));
+        assert!(!motion_signature_matches(&[], &[]));
+    }
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = std::env::args().collect();
     if args.len() < 5 {
@@ -56,6 +87,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut failed = Vec::new();
     let mut converted = Vec::new();
     let mut skipped = Vec::new();
+    let mut motion_only_documents: Vec<(String, Vec<u32>, Vec<u32>)> = Vec::new();
+    let mut model_motion_signatures: Vec<(String, Vec<u32>)> = Vec::new();
     let mut total_vertices = 0_u64;
     let mut total_triangles = 0_u64;
     let mut total_motion_chunks = 0_u64;
@@ -65,6 +98,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let relative = path.strip_prefix(&root)?.to_string_lossy().replace('\\', "/");
         match C3Document::parse(&bytes) {
             Ok(document) => {
+                let motion_signature: Vec<u32> = document.motions.iter().map(|motion| motion.bone_count).collect();
+                let frame_signature: Vec<u32> = document.motions.iter().map(|motion| motion.frame_count).collect();
+                if document.meshes.is_empty() && !document.motions.is_empty() {
+                    motion_only_documents.push((relative.clone(), motion_signature.clone(), frame_signature));
+                } else if has_valid_mesh_bone_indices(&document)
+                    && motion_signature.len() == document.meshes.len()
+                {
+                    model_motion_signatures.push((relative.clone(), motion_signature.clone()));
+                }
                 let mut textures = BTreeSet::new();
                 let mut meshes = Vec::new();
                 let mut vertices = 0_u64;
@@ -135,6 +177,32 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             Err(error) => failed.push(json!({"path": relative, "size_bytes": bytes.len(), "error": error.to_string()})),
         }
     }
+    // Motion-only C3 documents contain action data but no PHY geometry. Match them
+    // conservatively against renderable model files by exact per-mesh bone-count
+    // signature and valid vertex bone indices. This is a structural candidate list,
+    // not proof of semantic action ID, rig identity, or visual correctness.
+    let motion_pairing_report: Vec<Value> = motion_only_documents.iter().map(|(motion_path, signature, frames)| {
+        let candidates: Vec<String> = model_motion_signatures.iter()
+            .filter(|(_, model_signature)| motion_signature_matches(model_signature, signature))
+            .map(|(model_path, _)| model_path.clone())
+            .collect();
+        json!({
+            "motion_only_path": motion_path,
+            "motion_bone_count_signature": signature,
+            "motion_frame_count_signature": frames,
+            "structural_candidate_model_count": candidates.len(),
+            "structural_candidate_model_paths": candidates.iter().take(50).collect::<Vec<_>>(),
+            "candidate_paths_truncated": candidates.len() > 50,
+            "acceptance": "STRUCTURAL_CANDIDATES_ONLY_NOT_RUNTIME_PAIRED"
+        })
+    }).collect();
+    let total_structural_pairs: usize = motion_pairing_report.iter()
+        .map(|row| row["structural_candidate_model_count"].as_u64().unwrap_or(0) as usize)
+        .sum();
+    let uniquely_pairable_motion_files = motion_pairing_report.iter()
+        .filter(|row| row["structural_candidate_model_count"].as_u64() == Some(1))
+        .count();
+
     let report: Value = json!({
         "format": "Conquer C3 model audit and GLB conversion",
         "source_parser": "Preservation CO Client sandbox-data (Apache-2.0, pinned commit 090541d10d8a7d001fe804dd1c23325c344f861d)",
@@ -146,6 +214,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "total_triangles": total_triangles,
         "total_motion_chunks": total_motion_chunks,
         "total_animated_meshes": total_animated_meshes,
+        "motion_only_documents": motion_pairing_report.len(),
+        "motion_only_structural_candidate_pairs": total_structural_pairs,
+        "motion_only_uniquely_pairable_documents": uniquely_pairable_motion_files,
+        "motion_only_pairing_status": "STRUCTURAL_CANDIDATES_ONLY_NOT_RUNTIME_PAIRED",
+        "motion_only_pairing": motion_pairing_report,
         "converted_models": converted.len(),
         "skipped_models": skipped.len(),
         "models": parsed,
@@ -157,10 +230,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     fs::write(&output, serde_json::to_vec_pretty(&report)?)?;
     let conversion_path = output.parent().unwrap_or(Path::new(".")).join("c3-conversion-report.json");
     fs::write(&conversion_path, serde_json::to_vec_pretty(&json!({"converted":converted,"skipped":skipped}))?)?;
-    println!("C3 audit: {} files, {} parsed, {} failed, {} meshes, {} vertices, {} triangles, {} motion chunks, {} animated mesh channels; converted {} GLB models",
+    println!("C3 audit: {} files, {} parsed, {} failed, {} meshes, {} vertices, {} triangles, {} motion chunks, {} animated mesh channels; {} motion-only files, {} structural candidate pairs, {} unique candidates; converted {} GLB models",
         files.len(), parsed.len(), report["failed_files"].as_u64().unwrap_or(0),
         report["total_meshes"].as_u64().unwrap_or(0), total_vertices, total_triangles, total_motion_chunks,
-        total_animated_meshes, report["converted_models"].as_u64().unwrap_or(0));
+        total_animated_meshes, report["motion_only_documents"].as_u64().unwrap_or(0),
+        report["motion_only_structural_candidate_pairs"].as_u64().unwrap_or(0),
+        report["motion_only_uniquely_pairable_documents"].as_u64().unwrap_or(0),
+        report["converted_models"].as_u64().unwrap_or(0));
     if parsed.is_empty() { return Err("no C3 models parsed successfully".into()); }
     if converted.is_empty() { return Err("no C3 models with matching PVR textures converted".into()); }
     Ok(())
