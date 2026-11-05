@@ -72,7 +72,7 @@ func _setup_options() -> void:
 		
 	if class_option:
 		class_option.clear()
-		var class_ids := GameContentDatabase.get_class_ids() if GameContentDatabase else []
+		var class_ids := GameContentDatabase.get_selectable_class_ids() if GameContentDatabase else []
 		for class_id in class_ids:
 			if class_id == "Taoist":
 				continue
