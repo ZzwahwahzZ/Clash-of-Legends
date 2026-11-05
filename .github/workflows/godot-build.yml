@@ -170,7 +170,9 @@ jobs:
           mkdir -p builds/android
           godot --headless --path . --export-debug "Android" builds/android/ClashOfLegends-debug.apk
           test -s builds/android/ClashOfLegends-debug.apk
-          test "$(stat -c%s builds/android/ClashOfLegends-debug.apk)" -gt 1048576
+          test "$(stat -c%s builds/android/ClashOfLegends-debug.apk)" -gt 500000000
+          unzip -l builds/android/ClashOfLegends-debug.apk | grep -q 'assets/bundled/maps.pck'
+          unzip -l builds/android/ClashOfLegends-debug.apk | grep -q 'assets/bundled/models.pck'
 
       - name: Verify APK archive, signature, package id and Android compatibility
         run: |
