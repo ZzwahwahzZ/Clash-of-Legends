@@ -13,6 +13,7 @@ const MAX_MANIFEST_BYTES := 1024 * 1024
 
 var manifest: Dictionary = {}
 var packages: Dictionary = {}
+var installed_packages: Dictionary = {}
 var busy := false
 var _active_request: HTTPRequest
 var _active_package_id := ""
@@ -20,6 +21,21 @@ var _active_package_id := ""
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(INSTALL_DIR))
+	call_deferred("_bootstrap_installed_resources")
+
+func _bootstrap_installed_resources() -> void:
+	var cache_path := INSTALL_DIR.path_join("RESOURCE_MANIFEST")
+	if FileAccess.file_exists(cache_path):
+		var cache_file := FileAccess.open(cache_path, FileAccess.READ)
+		if cache_file:
+			var parser := JSON.new()
+			var parse_error := parser.parse(cache_file.get_as_text())
+			cache_file.close()
+			if parse_error == OK and typeof(parser.data) == TYPE_DICTIONARY:
+				_accept_manifest(parser.data)
+	if packages.is_empty():
+		await refresh_manifest()
+	_load_installed_packages()
 
 func refresh_manifest(url: String = MANIFEST_URL) -> bool:
 	if busy:
@@ -46,7 +62,9 @@ func refresh_manifest(url: String = MANIFEST_URL) -> bool:
 	if parser.parse(response[3].get_string_from_utf8()) != OK or typeof(parser.data) != TYPE_DICTIONARY:
 		push_error("Resource manifest is not valid JSON.")
 		return false
-	var candidate: Dictionary = parser.data
+	return _accept_manifest(parser.data)
+
+func _accept_manifest(candidate: Dictionary) -> bool:
 	var entries: Variant = candidate.get("resource_packages", [])
 	if typeof(entries) != TYPE_ARRAY:
 		return false
@@ -57,7 +75,7 @@ func refresh_manifest(url: String = MANIFEST_URL) -> bool:
 		var package_id := str(entry.get("package_id", ""))
 		var filename := str(entry.get("file_name", ""))
 		var url_value := str(entry.get("download_url", ""))
-		var size_value: int = int(entry.get("size_bytes", 0))
+		var size_value := int(entry.get("size_bytes", 0))
 		var digest := str(entry.get("sha256", "")).to_lower()
 		if package_id.is_empty() or filename.is_empty() or filename.get_file() != filename:
 			return false
@@ -70,8 +88,31 @@ func refresh_manifest(url: String = MANIFEST_URL) -> bool:
 		validated[package_id] = entry
 	manifest = candidate
 	packages = validated
+	var cache := FileAccess.open(INSTALL_DIR.path_join("RESOURCE_MANIFEST"), FileAccess.WRITE)
+	if cache:
+		cache.store_string(JSON.stringify(candidate, "\t"))
+		cache.close()
 	manifest_loaded.emit(packages.size())
 	return true
+
+func _load_installed_packages() -> void:
+	installed_packages.clear()
+	for package_id in packages:
+		var entry: Dictionary = packages[package_id]
+		var path := INSTALL_DIR.path_join(str(entry.file_name))
+		if not FileAccess.file_exists(path):
+			continue
+		var file := FileAccess.open(path, FileAccess.READ)
+		if file == null:
+			continue
+		var actual_size := file.get_length()
+		file.close()
+		if actual_size != int(entry.size_bytes) or _sha256_file(path) != str(entry.sha256).to_lower():
+			continue
+		if ProjectSettings.load_resource_pack(path, true):
+			installed_packages[package_id] = true
+			package_installed.emit(package_id, path)
+
 
 func download_package(package_id: String) -> bool:
 	if busy:
@@ -82,6 +123,8 @@ func download_package(package_id: String) -> bool:
 	if not packages.has(package_id):
 		package_failed.emit(package_id, "حزمة الموارد غير منشورة في البيان")
 		return false
+	if is_package_installed(package_id):
+		return true
 	var entry: Dictionary = packages[package_id]
 	var filename := str(entry.file_name)
 	var expected_size := int(entry.size_bytes)
@@ -137,6 +180,7 @@ func _on_download_completed(result: int, response_code: int, _headers: PackedStr
 	if not ProjectSettings.load_resource_pack(final_path, true):
 		_finish_failure(package_id, "Godot رفض تحميل حزمة PCK", final_path)
 		return
+	installed_packages[package_id] = true
 	package_installed.emit(package_id, final_path)
 	_clear_request()
 
