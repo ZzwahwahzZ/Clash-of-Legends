@@ -1,6 +1,6 @@
 {
-  "schema_version": "1.0.0",
-  "policy": "No element is complete based on code/build success alone.",
+  "schema_version": "1.1.0",
+  "policy": "No element is complete based on code/build success alone. Character classes and every equipment/mount family are tracked separately; approval is per item and requires target-device evidence.",
   "reference": "Conquer Online Mobile source assets and gameplay data supplied for this project",
   "items": [
     {
@@ -203,6 +203,324 @@
       "evidence": [],
       "open_issues": [
         "Original-reference comparison and required evidence not yet completed."
+      ]
+    },
+    {
+      "id": "class_trojan",
+      "status": "BLOCKED",
+      "gates": {
+        "source_traceability": false,
+        "reference_match": false,
+        "functional_integration": false,
+        "runtime_visual_verification": false,
+        "automated_tests": false,
+        "device_performance": false
+      },
+      "evidence": [],
+      "open_issues": [
+        "Exact Mobile 1.1.2.3 body/head/look identity and gender mapping not yet source-decoded.",
+        "Complete rigged model, six-action runtime set, class weapon family, and attachment transforms not visually verified.",
+        "Front/back/side/close-up in-game captures and Redmi Note 11 performance evidence are absent."
+      ]
+    },
+    {
+      "id": "class_warrior",
+      "status": "BLOCKED",
+      "gates": {
+        "source_traceability": false,
+        "reference_match": false,
+        "functional_integration": false,
+        "runtime_visual_verification": false,
+        "automated_tests": false,
+        "device_performance": false
+      },
+      "evidence": [],
+      "open_issues": [
+        "Exact Mobile 1.1.2.3 body/head/look identity and gender mapping not yet source-decoded.",
+        "Complete rigged model, six-action runtime set, class weapon family, and attachment transforms not visually verified.",
+        "Front/back/side/close-up in-game captures and Redmi Note 11 performance evidence are absent."
+      ]
+    },
+    {
+      "id": "class_archer",
+      "status": "BLOCKED",
+      "gates": {
+        "source_traceability": false,
+        "reference_match": false,
+        "functional_integration": false,
+        "runtime_visual_verification": false,
+        "automated_tests": false,
+        "device_performance": false
+      },
+      "evidence": [],
+      "open_issues": [
+        "Exact Mobile 1.1.2.3 body/head/look identity and gender mapping not yet source-decoded.",
+        "Complete rigged model, six-action runtime set, class weapon family, and attachment transforms not visually verified.",
+        "Front/back/side/close-up in-game captures and Redmi Note 11 performance evidence are absent."
+      ]
+    },
+    {
+      "id": "class_ninja",
+      "status": "BLOCKED",
+      "gates": {
+        "source_traceability": false,
+        "reference_match": false,
+        "functional_integration": false,
+        "runtime_visual_verification": false,
+        "automated_tests": false,
+        "device_performance": false
+      },
+      "evidence": [],
+      "open_issues": [
+        "Exact Mobile 1.1.2.3 body/head/look identity and gender mapping not yet source-decoded.",
+        "Complete rigged model, six-action runtime set, class weapon family, and attachment transforms not visually verified.",
+        "Front/back/side/close-up in-game captures and Redmi Note 11 performance evidence are absent."
+      ]
+    },
+    {
+      "id": "class_monk",
+      "status": "BLOCKED",
+      "gates": {
+        "source_traceability": false,
+        "reference_match": false,
+        "functional_integration": false,
+        "runtime_visual_verification": false,
+        "automated_tests": false,
+        "device_performance": false
+      },
+      "evidence": [],
+      "open_issues": [
+        "Exact Mobile 1.1.2.3 body/head/look identity and gender mapping not yet source-decoded.",
+        "Complete rigged model, six-action runtime set, class weapon family, and attachment transforms not visually verified.",
+        "Front/back/side/close-up in-game captures and Redmi Note 11 performance evidence are absent."
+      ]
+    },
+    {
+      "id": "class_pirate",
+      "status": "BLOCKED",
+      "gates": {
+        "source_traceability": false,
+        "reference_match": false,
+        "functional_integration": false,
+        "runtime_visual_verification": false,
+        "automated_tests": false,
+        "device_performance": false
+      },
+      "evidence": [],
+      "open_issues": [
+        "Exact Mobile 1.1.2.3 body/head/look identity and gender mapping not yet source-decoded.",
+        "Complete rigged model, six-action runtime set, class weapon family, and attachment transforms not visually verified.",
+        "Front/back/side/close-up in-game captures and Redmi Note 11 performance evidence are absent."
+      ]
+    },
+    {
+      "id": "class_dragonwarrior",
+      "status": "BLOCKED",
+      "gates": {
+        "source_traceability": false,
+        "reference_match": false,
+        "functional_integration": false,
+        "runtime_visual_verification": false,
+        "automated_tests": false,
+        "device_performance": false
+      },
+      "evidence": [],
+      "open_issues": [
+        "Exact Mobile 1.1.2.3 body/head/look identity and gender mapping not yet source-decoded.",
+        "Complete rigged model, six-action runtime set, class weapon family, and attachment transforms not visually verified.",
+        "Front/back/side/close-up in-game captures and Redmi Note 11 performance evidence are absent."
+      ]
+    },
+    {
+      "id": "class_windwalker",
+      "status": "BLOCKED",
+      "gates": {
+        "source_traceability": false,
+        "reference_match": false,
+        "functional_integration": false,
+        "runtime_visual_verification": false,
+        "automated_tests": false,
+        "device_performance": false
+      },
+      "evidence": [],
+      "open_issues": [
+        "Exact Mobile 1.1.2.3 body/head/look identity and gender mapping not yet source-decoded.",
+        "Complete rigged model, six-action runtime set, class weapon family, and attachment transforms not visually verified.",
+        "Front/back/side/close-up in-game captures and Redmi Note 11 performance evidence are absent."
+      ]
+    },
+    {
+      "id": "class_thunderstriker",
+      "status": "BLOCKED",
+      "gates": {
+        "source_traceability": false,
+        "reference_match": false,
+        "functional_integration": false,
+        "runtime_visual_verification": false,
+        "automated_tests": false,
+        "device_performance": false
+      },
+      "evidence": [],
+      "open_issues": [
+        "Exact Mobile 1.1.2.3 body/head/look identity and gender mapping not yet source-decoded.",
+        "Complete rigged model, six-action runtime set, class weapon family, and attachment transforms not visually verified.",
+        "Front/back/side/close-up in-game captures and Redmi Note 11 performance evidence are absent."
+      ]
+    },
+    {
+      "id": "class_watertaoist",
+      "status": "BLOCKED",
+      "gates": {
+        "source_traceability": false,
+        "reference_match": false,
+        "functional_integration": false,
+        "runtime_visual_verification": false,
+        "automated_tests": false,
+        "device_performance": false
+      },
+      "evidence": [],
+      "open_issues": [
+        "Exact Mobile 1.1.2.3 body/head/look identity and gender mapping not yet source-decoded.",
+        "Complete rigged model, six-action runtime set, class weapon family, and attachment transforms not visually verified.",
+        "Front/back/side/close-up in-game captures and Redmi Note 11 performance evidence are absent."
+      ]
+    },
+    {
+      "id": "class_firetaoist",
+      "status": "BLOCKED",
+      "gates": {
+        "source_traceability": false,
+        "reference_match": false,
+        "functional_integration": false,
+        "runtime_visual_verification": false,
+        "automated_tests": false,
+        "device_performance": false
+      },
+      "evidence": [],
+      "open_issues": [
+        "Exact Mobile 1.1.2.3 body/head/look identity and gender mapping not yet source-decoded.",
+        "Complete rigged model, six-action runtime set, class weapon family, and attachment transforms not visually verified.",
+        "Front/back/side/close-up in-game captures and Redmi Note 11 performance evidence are absent."
+      ]
+    },
+    {
+      "id": "mounts_and_riding_equipment",
+      "status": "BLOCKED",
+      "gates": {
+        "source_traceability": false,
+        "reference_match": false,
+        "functional_integration": false,
+        "runtime_visual_verification": false,
+        "automated_tests": false,
+        "device_performance": false
+      },
+      "evidence": [],
+      "open_issues": [
+        "Current C3 conversion produced zero complete mount GLBs; 18 catalog entries are not complete runtime mounts.",
+        "Mount IDs, body/tack/ornaments, textures, rider sockets, mount motion and effects are not joined and verified.",
+        "No per-mount visual comparison or riding runtime evidence."
+      ]
+    },
+    {
+      "id": "helmets_and_headgear",
+      "status": "NEEDS_SOURCE_ANALYSIS",
+      "gates": {
+        "source_traceability": false,
+        "reference_match": false,
+        "functional_integration": false,
+        "runtime_visual_verification": false,
+        "automated_tests": false,
+        "device_performance": false
+      },
+      "evidence": [],
+      "open_issues": [
+        "Helmet/armet/headgear item IDs have not been joined to exact C3 model parts, texture atlas regions and head sockets.",
+        "Per-item source provenance, rights evidence, visual comparison and runtime integration remain required."
+      ]
+    },
+    {
+      "id": "armor_and_body_gear",
+      "status": "NEEDS_SOURCE_ANALYSIS",
+      "gates": {
+        "source_traceability": false,
+        "reference_match": false,
+        "functional_integration": false,
+        "runtime_visual_verification": false,
+        "automated_tests": false,
+        "device_performance": false
+      },
+      "evidence": [],
+      "open_issues": [
+        "Armor/body equipment look IDs and part assembly remain candidate-only; clipping, UV and material review is missing.",
+        "Per-item source provenance, rights evidence, visual comparison and runtime integration remain required."
+      ]
+    },
+    {
+      "id": "weapons_all_families",
+      "status": "NEEDS_SOURCE_ANALYSIS",
+      "gates": {
+        "source_traceability": false,
+        "reference_match": false,
+        "functional_integration": false,
+        "runtime_visual_verification": false,
+        "automated_tests": false,
+        "device_performance": false
+      },
+      "evidence": [],
+      "open_issues": [
+        "Weapon item IDs, model/texture mappings, hand sockets, class restrictions and motion/effect links are not fully decoded.",
+        "Per-item source provenance, rights evidence, visual comparison and runtime integration remain required."
+      ]
+    },
+    {
+      "id": "fashion_garments_capes_wings",
+      "status": "NEEDS_SOURCE_ANALYSIS",
+      "gates": {
+        "source_traceability": false,
+        "reference_match": false,
+        "functional_integration": false,
+        "runtime_visual_verification": false,
+        "automated_tests": false,
+        "device_performance": false
+      },
+      "evidence": [],
+      "open_issues": [
+        "Fashion, garments, capes and wings have incomplete source-to-model and attachment mappings.",
+        "Per-item source provenance, rights evidence, visual comparison and runtime integration remain required."
+      ]
+    },
+    {
+      "id": "paid_and_premium_equipment",
+      "status": "NEEDS_SOURCE_ANALYSIS",
+      "gates": {
+        "source_traceability": false,
+        "reference_match": false,
+        "functional_integration": false,
+        "runtime_visual_verification": false,
+        "automated_tests": false,
+        "device_performance": false
+      },
+      "evidence": [],
+      "open_issues": [
+        "Paid/free classification is not source-verified; do not infer it from IDs, names or folders.",
+        "Per-item source provenance, rights evidence, visual comparison and runtime integration remain required."
+      ]
+    },
+    {
+      "id": "mount_tack_saddles_ornaments",
+      "status": "NEEDS_SOURCE_ANALYSIS",
+      "gates": {
+        "source_traceability": false,
+        "reference_match": false,
+        "functional_integration": false,
+        "runtime_visual_verification": false,
+        "automated_tests": false,
+        "device_performance": false
+      },
+      "evidence": [],
+      "open_issues": [
+        "Saddles, tack, ornaments and mount-specific effects lack verified model/texture/attachment mappings.",
+        "Per-item source provenance, rights evidence, visual comparison and runtime integration remain required."
       ]
     }
   ]
