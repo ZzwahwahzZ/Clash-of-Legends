@@ -37,6 +37,12 @@ Artifact: [C3-Model-Conversion-Reports](https://github.com/ZzwahwahzZ/Clash-of-L
 
 **These results prove a technical conversion/import path and selected animation proofs. They do not prove premium item identity, complete equipment coverage, texture-to-mesh correctness, visual parity, or production art quality.**
 
+## Matching mobile source-index evidence
+
+A separate metadata-only audit of the same Conquer Online 1.1.2.3 source set located `ini/c3.wdb` (SHA-256 `5e2412beb9000d38578f88f7ba68ce17c17448f376d13e8fd5f36d9234a35f80`). It parsed the C3 object-path index (`3DObj.dbc`: 3,316 records) and the simple-object composition table (`3DSimpleObj.dbc`: 797 records). It also detected 25,405 weapon records, 3,041 armet records, 1,376 mount records, and 53,254 3D texture records, but the current audit only records those tables' headers/counts where their record layouts are not yet validated. **These counts are not a verified paid-item catalogue and do not yet map shop entries to exact visual assets.**
+
+The source-index audit report is available in [Source-Audit-Reports run 42000137006](https://github.com/ZzwahwahzZ/Clash-of-Legends/actions/runs/42000137006). The next data task is to safely decode and validate the relevant item-table schemas, then cross-reference their IDs with the C3 object/texture and mount records before any visual approval.
+
 ## Explicit gaps found in this audit
 
 - No mount-category C3 output was produced in this audit (`mounts/c3` count: 0). Mounts and their tack/ornaments remain unresolved here.
