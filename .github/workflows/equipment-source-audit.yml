@@ -1,0 +1,39 @@
+name: Equipment source coverage audit
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/equipment-source-audit.yml"
+      - "tools/external_assets/audit_equipment_coverage.py"
+permissions:
+  contents: read
+jobs:
+  source-coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch verified original reference manifest
+        run: |
+          set -euo pipefail
+          mkdir -p build/reference-input reports/equipment
+          curl --fail --location --retry 4 "https://raw.githubusercontent.com/ZzwahwahzZ/Conquer-Mobile-Assets./main/original_images/sources_manifest.csv" -o build/reference-input/sources_manifest.csv
+      - name: Audit equipment family coverage
+        run: |
+          python3 tools/external_assets/audit_equipment_coverage.py build/reference-input/sources_manifest.csv --project-root . --output reports/equipment/equipment_coverage_audit.json
+      - name: Validate report and retain explicit gaps
+        run: |
+          python3 - <<'PY'
+          import json
+          p=json.load(open('reports/equipment/equipment_coverage_audit.json'))
+          expected={'headgear','armor','shield','one_handed_weapon','two_handed_weapon','accessory','mount','garment','talisman_and_special'}
+          got={x['family'] for x in p['coverage']}
+          assert got == expected, (got, expected)
+          assert p['status'] == 'BLOCKED_INCOMPLETE_EQUIPMENT_SOURCE_COVERAGE'
+          print('COVERAGE_AUDIT_OK: inventory is complete; production asset coverage remains blocked')
+          for x in p['coverage']: print(x['family'], x['classified_source_records'], x['status'])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Equipment-Source-Coverage-Audit
+          path: reports/equipment/equipment_coverage_audit.json
+          retention-days: 30
