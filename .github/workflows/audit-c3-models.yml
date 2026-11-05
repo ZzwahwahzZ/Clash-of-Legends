@@ -50,14 +50,13 @@ jobs:
           godot --headless --path . --script tools/c3_audit/validate_c3_glb.gd
       - uses: actions/upload-artifact@v4
         with:
-          name: Original-C3-Model-Audit
+          name: C3-Model-Conversion-Reports
           path: |
             reports/c3-model-audit.json
             reports/pvr-texture-audit.json
             reports/pvr-decode-report.json
             reports/c3-conversion-report.json
-            build/c3-glb/**/*.glb
             reports/c3-conversion-report.json
             tools/c3_audit/THIRD_PARTY_NOTICES.md
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 14
