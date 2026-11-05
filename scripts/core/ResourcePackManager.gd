@@ -175,6 +175,9 @@ func _verify_package_file(path: String, expected_size: int, expected_hash: Strin
 	return actual_size == expected_size and _sha256_file(path) == expected_hash
 
 
+func emit_current_progress() -> void:
+	_emit_aggregate_progress()
+
 func get_missing_package_count() -> int:
 	var missing := 0
 	for package_id in packages.keys():
@@ -293,6 +296,7 @@ func _process(_delta: float) -> void:
 			var total := request_node.get_body_size()
 			var received := request_node.get_downloaded_bytes()
 			download_progress.emit(str(package_id), received, total)
+	_emit_aggregate_progress()
 
 func _on_download_completed(result: int, response_code: int, _headers: PackedStringArray, _body: PackedByteArray, package_id: String) -> void:
 	if not _active_downloads.has(package_id):
