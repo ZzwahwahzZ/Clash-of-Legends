@@ -134,6 +134,10 @@ func _validate_quest_database() -> bool:
 		if target.is_empty():
 			push_error("Quest %s has no objective target." % quest_id)
 			return false
+		var turn_in_npc := str(quest.get("turn_in_npc_id", "")).strip_edges()
+		if turn_in_npc.is_empty():
+			push_error("Quest %s has no designated turn-in NPC." % quest_id)
+			return false
 		var next_id := str(quest.get("next_quest", ""))
 		if not next_id.is_empty() and not quest_database.has(next_id):
 			push_error("Quest %s points to missing next quest %s." % [quest_id, next_id])
@@ -282,20 +286,26 @@ func serialize() -> Dictionary:
 		"active_quest_id": active_quest_id,
 		"quest_progress": quest_progress,
 		"is_quest_completed": is_quest_completed,
-		"completed_quest_ids": completed_quest_ids.duplicate()
+		"completed_quest_ids": completed_quest_ids.duplicate(),
+		"chain_completed": active_quest_id.is_empty()
 	}
 
 func deserialize(data: Dictionary) -> void:
 	var requested_id := str(data.get("active_quest_id", DEFAULT_QUEST_ID))
-	active_quest_id = requested_id if quest_database.has(requested_id) else DEFAULT_QUEST_ID
-	var quest: Dictionary = quest_database[active_quest_id]
-	quest_progress = clampi(int(data.get("quest_progress", 0)), 0, int(quest["required_kills"]))
-	is_quest_completed = bool(data.get("is_quest_completed", false))
 	completed_quest_ids.clear()
 	for value in data.get("completed_quest_ids", []):
 		var quest_id := str(value)
 		if quest_database.has(quest_id) and not completed_quest_ids.has(quest_id):
 			completed_quest_ids.append(quest_id)
+	if bool(data.get("chain_completed", false)) or requested_id.is_empty():
+		active_quest_id = ""
+		quest_progress = 0
+		is_quest_completed = true
+		return
+	active_quest_id = requested_id if quest_database.has(requested_id) else DEFAULT_QUEST_ID
+	var quest: Dictionary = quest_database[active_quest_id]
+	quest_progress = clampi(int(data.get("quest_progress", 0)), 0, int(quest["required_kills"]))
+	is_quest_completed = bool(data.get("is_quest_completed", false))
 	# Completed history is authoritative; never replay its reward after loading.
 	if completed_quest_ids.has(active_quest_id):
 		is_quest_completed = true
