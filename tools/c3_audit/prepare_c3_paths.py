@@ -11,6 +11,11 @@ catalog_available = catalog_path.is_file()
 c3_paths = set()
 pvr_paths = set()
 source_by_inner = {}
+resource_stage_rehydrated = Path("resource_stage").is_dir()
+
+def staged_path_available(path):
+    return (not resource_stage_rehydrated) or Path(path).is_file()
+
 with source.open("r", encoding="utf-8-sig", newline="") as stream:
     for row in csv.DictReader(stream):
         category = row.get("category", "")
@@ -23,7 +28,7 @@ with source.open("r", encoding="utf-8-sig", newline="") as stream:
         inner = source_path.split("!")[-1].replace("\\", "/").lower()
         if inner:
             source_by_inner.setdefault(inner, []).append(row)
-        if category == "models" and inner.endswith(".c3") and staged.startswith("resource_stage/models/") and Path(staged).is_file():
+        if category == "models" and inner.endswith(".c3") and staged.startswith("resource_stage/models/") and staged_path_available(staged):
             c3_paths.add(staged)
         if category == "models" and inner.endswith(".pvr") and inner.startswith("c3/") and staged.startswith("resource_stage/models/") and Path(staged).is_file():
             pvr_paths.add(staged)
@@ -46,7 +51,7 @@ for table_name, table in catalog.get("tables", {}).items():
                 referenced_mesh_paths.add(mesh_path)
                 rows = source_by_inner.get(mesh_path, [])
                 staged_files = [row.get("staged_path", "") for row in rows if row.get("staged_path")]
-                present = next((path for path in staged_files if Path(path).is_file()), None)
+                present = next((path for path in staged_files if staged_path_available(path)), None)
                 if present:
                     c3_paths.add(present)
                     mesh_found += 1
