@@ -292,6 +292,21 @@ def main() -> None:
                             record["parse_status"] = parsed.get("parse_status")
                             record["section_count"] = parsed.get("section_count")
                             record["sections"] = parsed.get("sections", [])[:80]
+                            # Preserve exact key/value rows from mapping tables so later joins can be
+                            # verified against the Mobile 1.1.2.3 source instead of PC-client assumptions.
+                            pairs = []
+                            current_section = ""
+                            for raw_line in data.decode("cp1252", errors="replace").splitlines():
+                                line = raw_line.strip()
+                                if not line or line.startswith((";", "#")):
+                                    continue
+                                if line.startswith("[") and "]" in line:
+                                    current_section = line[1:line.index("]")].strip()
+                                elif "=" in line and len(pairs) < 4000:
+                                    key, value = line.split("=", 1)
+                                    pairs.append({"section": current_section, "key": key.strip(), "value": value.strip()})
+                            record["key_value_pair_count"] = len(pairs)
+                            record["key_value_pairs"] = pairs
                         elif rel.lower().endswith(".dat"):
                             record["cipher_probe"] = probe_tq_candidates(data)
                         ini_asset_mapping_inventory[label].append(record)
