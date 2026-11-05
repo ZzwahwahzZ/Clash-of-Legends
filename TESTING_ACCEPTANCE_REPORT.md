@@ -31,7 +31,7 @@ The Android artifact is an internal debug build, not a production release. It is
 - Godot headless logs still show renderer warnings involving null mesh references during scene teardown. They remain open for diagnosis.
 - No side-by-side rendered comparison against the mobile reference has been accepted.
 - No installation, FPS, memory, thermal, loading-time, or stability measurements have been performed on the Redmi Note 11 itself.
-- PCK validation reported these category counts: characters 223, monsters 78, maps 5,069, equipment 124, mounts 48, effects 1,168, animations 58, interface 5,523, audio 323, models 3,634, world 1,309. It also reported 172/172 structurally valid model scenes, 96 converted C3 GLB models catalogued in the checked non-effect runtime categories, and 15/172 model scenes exposing imported animation tracks.
+- PCK validation reported these category counts: characters 223, monsters 78, maps 5,069, equipment 124, mounts 48, effects 1,168, animations 58, interface 5,523, audio 323, models 3,634, world 1,309. It also reported 172/172 structurally valid model scenes and 96 converted C3 GLB models catalogued in the checked non-effect runtime categories. The old 15/172 AnimationPlayer count is not accepted as proof of working per-mesh animation; the stricter animation validator is now under CI.
 
 ## 3. Original asset conversion evidence
 
@@ -39,7 +39,7 @@ C3 audit run: https://github.com/ZzwahwahzZ/Clash-of-Legends/actions/runs/419914
 
 - 563 converted C3 GLB scenes imported and passed geometry checks.
 - 2,454 mesh surfaces, 936,015 triangles, and 709,677 vertices reported.
-- 497 models expose imported animation tracks; 18,029 motion tracks reported.
+- 18,029 C3 MOTI chunks were parsed. This is not a count of imported animations. The previous exporter incorrectly reused the first MOTI chunk for every mesh; a per-mesh motion exporter and stricter morph/track validation are now under CI.
 - 1,060 PVR textures decoded with zero decoder failures.
 - 40 C3 parser failures remain in effect paths because 4- or 8-byte tails are not understood by the pinned parser.
 - Additional models were skipped when matching decoded PVR textures or renderable geometry were unavailable.
