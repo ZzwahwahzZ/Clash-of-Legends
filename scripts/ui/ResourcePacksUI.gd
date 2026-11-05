@@ -9,6 +9,7 @@ class_name ResourcePacksUI
 var row_controls: Dictionary = {}
 
 func _ready() -> void:
+	add_to_group("resource_packs_ui")
 	visible = false
 	if close_button:
 		close_button.pressed.connect(close_ui)
