@@ -134,7 +134,7 @@ func _run() -> void:
 				continue
 			vat_player.pause()
 			vat_player.set_frame(0.0)
-			vat_players.append(vat_player)
+				vat_players.append({"player":vat_player,"middle_frame":float(maxi(1, int(metadata_value.get("height", 2)) / 2))})
 			vat_mesh_count += 1
 		if vat_mesh_count == 0:
 			push_error("C3 six-clip visual proof: no moving VAT meshes for " + clip_id)
@@ -149,9 +149,8 @@ func _run() -> void:
 		if image_a.save_png(OUTPUT_DIR.path_join(file_stem + "_frame_a.png")) != OK:
 			push_error("C3 six-clip visual proof: failed to save frame A for " + clip_id)
 			all_passed = false
-		var mid_frame := 1.0
-		for vat_player in vat_players:
-			vat_player.set_frame(mid_frame)
+		for vat_entry in vat_players:
+			vat_entry["player"].set_frame(float(vat_entry["middle_frame"]))
 		await process_frame
 		await process_frame
 		var image_b := get_root().get_texture().get_image()
