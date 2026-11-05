@@ -89,7 +89,7 @@ func instantiate_fitted_model(category: String, index: int, parent: Node3D, targ
 		var mesh_instance := mesh_node as MeshInstance3D
 		if mesh_instance and mesh_instance.mesh:
 			var relative_transform := root.global_transform.affine_inverse() * mesh_instance.global_transform
-			var mesh_bounds := mesh_instance.get_aabb().transformed(relative_transform)
+			var mesh_bounds: AABB = _transform_aabb(mesh_instance.get_aabb(), relative_transform)
 			combined_bounds = mesh_bounds if not has_bounds else combined_bounds.merge(mesh_bounds)
 			has_bounds = true
 	if has_bounds and combined_bounds.size.y > 0.001:
@@ -101,6 +101,26 @@ func instantiate_fitted_model(category: String, index: int, parent: Node3D, targ
 			-(combined_bounds.position.z + combined_bounds.size.z * 0.5) * fit_scale
 		)
 	return root
+
+func _transform_aabb(bounds: AABB, transform: Transform3D) -> AABB:
+	var corners := [
+		bounds.position,
+		bounds.position + Vector3(bounds.size.x, 0.0, 0.0),
+		bounds.position + Vector3(0.0, bounds.size.y, 0.0),
+		bounds.position + Vector3(0.0, 0.0, bounds.size.z),
+		bounds.position + Vector3(bounds.size.x, bounds.size.y, 0.0),
+		bounds.position + Vector3(bounds.size.x, 0.0, bounds.size.z),
+		bounds.position + Vector3(0.0, bounds.size.y, bounds.size.z),
+		bounds.position + bounds.size
+	]
+	var first_point: Vector3 = transform * corners[0]
+	var minimum := first_point
+	var maximum := first_point
+	for index in range(1, corners.size()):
+		var point: Vector3 = transform * corners[index]
+		minimum = Vector3(minf(minimum.x, point.x), minf(minimum.y, point.y), minf(minimum.z, point.z))
+		maximum = Vector3(maxf(maximum.x, point.x), maxf(maximum.y, point.y), maxf(maximum.z, point.z))
+	return AABB(minimum, maximum - minimum)
 
 func has_category(category: String) -> bool:
 	return assets_by_category.has(category) and assets_by_category[category] is Array and not assets_by_category[category].is_empty()
