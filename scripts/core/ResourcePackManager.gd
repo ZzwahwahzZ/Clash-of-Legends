@@ -114,6 +114,9 @@ func _load_installed_packages() -> void:
 			package_installed.emit(package_id, path)
 
 
+func is_package_installed(package_id: String) -> bool:
+	return bool(installed_packages.get(package_id, false))
+
 func download_package(package_id: String) -> bool:
 	if busy:
 		return false
