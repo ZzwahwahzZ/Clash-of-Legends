@@ -16,6 +16,8 @@ func _run_audit() -> void:
 		"engine": Engine.get_version_info(),
 		"pack_mounts": {},
 		"extension_counts": {},
+		"extension_samples": {},
+		"pack_directory": "",
 		"model_files_found": 0,
 		"models_loaded": 0,
 		"models_with_renderable_meshes": 0,
@@ -34,8 +36,12 @@ func _run_audit() -> void:
 			"degenerate_meshes": 0
 		}
 	}
+	var pack_directory := OS.get_environment("RESOURCE_PACK_DIR")
+	if pack_directory.is_empty():
+		pack_directory = "res://ci-resource-packs"
+	report["pack_directory"] = pack_directory
 	for pack_name in PACK_NAMES:
-		var pack_path: String = "res://ci-resource-packs/" + str(pack_name)
+		var pack_path: String = pack_directory.path_join(str(pack_name))
 		var mounted: bool = FileAccess.file_exists(pack_path) and ProjectSettings.load_resource_pack(pack_path, true)
 		report["pack_mounts"][pack_name] = mounted
 		print("PCK_MOUNT ", pack_name, " ", mounted)
@@ -46,7 +52,7 @@ func _run_audit() -> void:
 			return
 
 	var model_paths: Array[String] = []
-	_walk_directory("res://", report["extension_counts"], model_paths)
+	_walk_directory("res://", report["extension_counts"], model_paths, report["extension_samples"])
 	report["model_files_found"] = model_paths.size()
 	_audit_resource_catalog(report)
 	model_paths.sort()
@@ -167,7 +173,7 @@ func _audit_resource_catalog(report: Dictionary) -> void:
 		if not verified_classes.has(class_id):
 			report["missing_character_classes"].append(class_id)
 
-func _walk_directory(path: String, counts: Dictionary, model_paths: Array[String]) -> void:
+func _walk_directory(path: String, counts: Dictionary, model_paths: Array[String], samples: Dictionary) -> void:
 	var directory := DirAccess.open(path)
 	if directory == null:
 		return
@@ -183,6 +189,10 @@ func _walk_directory(path: String, counts: Dictionary, model_paths: Array[String
 		else:
 			var extension := entry.get_extension().to_lower()
 			counts[extension] = int(counts.get(extension, 0)) + 1
+			if not samples.has(extension):
+				samples[extension] = []
+			if samples[extension].size() < 15:
+				samples[extension].append(full_path)
 			if extension in MODEL_EXTENSIONS:
 				model_paths.append(full_path)
 		entry = directory.get_next()
