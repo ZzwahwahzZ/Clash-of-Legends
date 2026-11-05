@@ -65,7 +65,14 @@ func _validate_packages() -> void:
 			push_error("PCK validation: GLB model failed to load as PackedScene: " + model_path)
 			quit(1)
 			return
-		print("PCK model OK: ", model_category, " -> ", model_path)
+		var model_instance := model_resource.instantiate()
+		var mesh_count := model_instance.find_children("*", "MeshInstance3D", true, false).size()
+		if mesh_count < 1:
+			push_error("PCK validation: model has no renderable meshes: " + model_path)
+			quit(1)
+			return
+		print("PCK model OK: ", model_category, " -> ", model_path, " | meshes: ", mesh_count)
+		model_instance.free()
 	var audio_entries: Array = assets.get("audio", [])
 	var audio_path := ""
 	for entry in audio_entries:
