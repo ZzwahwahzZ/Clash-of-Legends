@@ -86,9 +86,10 @@ func _validate_packages() -> void:
 					model_ok = false
 				if bounds.size.x <= 0.0001 or bounds.size.y <= 0.0001 or bounds.size.z <= 0.0001:
 					model_ok = false
-			var animation_player := instance.find_child("*", "AnimationPlayer", true, false)
+			var animation_nodes := instance.find_children("*", "AnimationPlayer", true, false)
 			var animation_count := 0
-			if animation_player is AnimationPlayer:
+			if not animation_nodes.is_empty():
+				var animation_player := animation_nodes[0] as AnimationPlayer
 				animation_count = animation_player.get_animation_list().size()
 				if animation_count > 0:
 					animated_models += 1
