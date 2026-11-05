@@ -23,6 +23,7 @@ func run_all_tests() -> Dictionary:
 	test_autoload_presence()
 	test_class_and_skill_database()
 	test_archer_advancement_path()
+	test_arabic_ui_direction()
 	test_gold_only_economy()
 	test_offline_social_and_population_rules()
 	test_arabic_localization_integrity()
@@ -80,6 +81,18 @@ func test_archer_advancement_path() -> void:
 	assert_true(ClassProgressionManager.get_form_id() == "OrientalAssassin" and ClassProgressionManager.selected_weapon_style == "bow", "Archer: advancement and selected weapon style survive serialization")
 	ClassProgressionManager.configure_for_character("Trojan")
 	assert_true(not ClassProgressionManager.select_weapon_style("flying_daggers"), "Other classes cannot select Archer weapon paths")
+
+func test_arabic_ui_direction() -> void:
+	var root := Control.new()
+	var label := Label.new()
+	label.text = "الحقيبة والإعدادات"
+	root.add_child(label)
+	FeatureGuidanceManager._apply_rtl_tree(root)
+	var audit := ArabicUiAudit.audit_tree(root)
+	assert_true(audit["controls"] == 2, "Arabic UI: audit detects all test controls")
+	assert_true(audit["rtl_controls"] == 2, "Arabic UI: every control receives RTL layout and text direction")
+	assert_true(audit["arabic_text_controls"] == 1 and audit["bad_direction"].is_empty(), "Arabic UI: Arabic text is flagged only when direction is incorrect")
+	root.free()
 
 func test_gold_only_economy() -> void:
 	GameManager.current_gold = 1000
