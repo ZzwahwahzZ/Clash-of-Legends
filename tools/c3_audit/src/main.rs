@@ -1,4 +1,5 @@
 mod glb;
+mod skinned_glb;
 
 use sandbox_data::c3::C3Document;
 use serde_json::{json, Value};
@@ -233,6 +234,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // clips to one male and one female base body. These remain audit-only GLBs under
     // build/c3-glb/motion-poc and are intentionally excluded from runtime PCK merge.
     let mut external_motion_poc: Vec<Value> = Vec::new();
+    let mut skeletal_motion_poc: Vec<Value> = Vec::new();
     for (model_id, look) in [(7130000_u32, 7_u32), (8133010_u32, 8_u32)] {
         let body_suffix = format!("/c3/body/{model_id}.c3");
         let Some(body_path) = files.iter().find(|path| path.to_string_lossy().replace('\\', "/").ends_with(&body_suffix)) else {
@@ -307,6 +309,26 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         "mesh_count":mesh_count,"animated_mesh_count":animated_mesh_count,
                         "status":"EXPORTED_PENDING_GODOT_IMPORT_VALIDATION"
                     }));
+                    let mut skinned_document = body_document.clone();
+                    skinned_document.motions = motion_document.motions.clone();
+                    let skinned_relative = Path::new("motion-poc-skinned").join(format!("look{look}_model{model_id}_weapon{weapon}_action{action}.glb"));
+                    let skinned_path = glb_root.join(&skinned_relative);
+                    let skinned_source = format!("{body_relative} + {motion_relative}");
+                    match skinned_glb::export_document(&skinned_document, &texture_bytes, &skinned_source, &skinned_path) {
+                        Ok((skinned_bytes, skinned_meshes, skinned_animated_meshes)) => {
+                            skeletal_motion_poc.push(json!({
+                                "model_id":model_id,"look":look,"weapon":weapon,"action":action,
+                                "output":skinned_relative.to_string_lossy().replace('\\', "/"),
+                                "glb_bytes":skinned_bytes,"mesh_count":skinned_meshes,
+                                "animated_mesh_count":skinned_animated_meshes,
+                                "status":"EXPORTED_PENDING_GODOT_SKELETON_VALIDATION"
+                            }));
+                        },
+                        Err(error) => skeletal_motion_poc.push(json!({
+                            "model_id":model_id,"look":look,"weapon":weapon,"action":action,
+                            "status":"REJECTED","reason":error.to_string()
+                        }))
+                    }
                 },
                 Err(error) => external_motion_poc.push(json!({
                     "model_id":model_id,"motion_source":motion_relative,"status":"REJECTED",
@@ -381,6 +403,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "motion_only_body_look_candidate_pairs": body_look_candidate_pairs,
         "external_motion_poc_count": external_motion_poc.iter().filter(|row| row["status"] == "EXPORTED_PENDING_GODOT_IMPORT_VALIDATION").count(),
         "external_motion_poc": external_motion_poc,
+        "skeletal_motion_poc": skeletal_motion_poc,
         "motion_only_pairing_status": "PATH_KEY_AND_BONE_SIGNATURE_CANDIDATES_ONLY_NOT_RUNTIME_PAIRED",
         "motion_only_pairing": motion_pairing_report,
         "converted_models": converted.len(),
