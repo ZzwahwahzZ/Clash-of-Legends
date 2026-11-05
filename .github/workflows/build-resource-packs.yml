@@ -13,6 +13,8 @@ jobs:
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
+      - name: Enforce reference acceptance ledger
+        run: python3 tools/quality/validate_acceptance_ledger.py
       - name: Download verified source release bundles
         run: |
           mkdir -p build/source_archives
