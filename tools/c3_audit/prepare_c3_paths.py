@@ -36,12 +36,13 @@ referenced_mesh_paths = set()
 referenced_texture_paths = set()
 for table_name, table in catalog.get("tables", {}).items():
     family = table_name.rsplit("/", 1)[-1]
-    mesh_found = texture_found = 0
-    mesh_missing = texture_missing = 0
+    mesh_found = texture_found = mix_texture_found = 0
+    mesh_missing = texture_missing = mix_texture_missing = 0
     for record in table.get("records", []):
         for part in record.get("parts", []):
             mesh_path = str(part.get("mesh_path") or "").replace("\\", "/").lower()
             texture_path = str(part.get("texture_path") or "").replace("\\", "/").lower()
+            mix_texture_path = str(part.get("mix_texture_path") or "").replace("\\", "/").lower()
             if mesh_path:
                 referenced_mesh_paths.add(mesh_path)
                 rows = source_by_inner.get(mesh_path, [])
@@ -66,12 +67,26 @@ for table_name, table in catalog.get("tables", {}).items():
                     texture_missing += 1
                     if len(missing_samples) < 250:
                         missing_samples.append({"family": family, "kind": "texture", "path": texture_path, "unique_id": record.get("unique_id")})
+            if mix_texture_path:
+                referenced_texture_paths.add(mix_texture_path)
+                rows = source_by_inner.get(mix_texture_path, [])
+                staged_files = [row.get("staged_path", "") for row in rows if row.get("staged_path")]
+                present = next((path for path in staged_files if Path(path).is_file()), None)
+                if present:
+                    pvr_paths.add(present)
+                    mix_texture_found += 1
+                else:
+                    mix_texture_missing += 1
+                    if len(missing_samples) < 250:
+                        missing_samples.append({"family": family, "kind": "mix_texture", "path": mix_texture_path, "unique_id": record.get("unique_id")})
     family_coverage[family] = {
         "record_count": table.get("record_count", 0),
         "mesh_path_file_found_count": mesh_found,
         "mesh_path_missing_count": mesh_missing,
         "texture_path_file_found_count": texture_found,
         "texture_path_missing_count": texture_missing,
+        "mix_texture_path_file_found_count": mix_texture_found,
+        "mix_texture_path_missing_count": mix_texture_missing,
     }
 
 if not c3_paths:
@@ -99,4 +114,4 @@ Path("reports").mkdir(exist_ok=True)
 Path("reports/c3-equipment-source-path-coverage.json").write_text(json.dumps(coverage, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 print(f"Prepared {len(c3_paths)} C3 model paths and {len(pvr_paths)} C3 PVR texture paths from source index plus MESH references.")
 for family, values in family_coverage.items():
-    print(f"{family}: C3 present={values['mesh_path_file_found_count']} missing={values['mesh_path_missing_count']} | PVR present={values['texture_path_file_found_count']} missing={values['texture_path_missing_count']}")
+    print(f"{family}: C3 present={values['mesh_path_file_found_count']} missing={values['mesh_path_missing_count']} | PVR present={values['texture_path_file_found_count']} missing={values['texture_path_missing_count']} | blend PVR present={values['mix_texture_path_file_found_count']} missing={values['mix_texture_path_missing_count']}")
