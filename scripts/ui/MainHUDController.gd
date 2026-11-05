@@ -20,6 +20,7 @@ class_name MainHUDController
 @onready var inv_btn: Button = get_node_or_null("TopRight/MenuButtons/InvBtn")
 @onready var blacksmith_btn: Button = get_node_or_null("TopRight/MenuButtons/BlacksmithBtn")
 @onready var settings_btn: Button = get_node_or_null("TopRight/MenuButtons/SettingsBtn")
+@onready var travel_btn: Button = get_node_or_null("TopRight/MenuButtons/TravelBtn")
 @onready var interact_btn: Button = get_node_or_null("BottomLeft/InteractBtn")
 
 @onready var attack_btn: Button = get_node_or_null("BottomRight/ActionButtons/AttackBtn")
@@ -32,6 +33,8 @@ class_name MainHUDController
 @onready var notification_label: Label = get_node_or_null("Center/NotificationLabel")
 
 var current_skills: Array[String] = []
+var travel_panel: PanelContainer = null
+var travel_list: VBoxContainer = null
 
 func _ready() -> void:
 	if GameManager:
@@ -64,6 +67,9 @@ func _ready() -> void:
 		blacksmith_btn.pressed.connect(_on_blacksmith_pressed)
 	if settings_btn:
 		settings_btn.pressed.connect(_on_settings_pressed)
+	if travel_btn:
+		travel_btn.pressed.connect(_on_travel_pressed)
+	_build_travel_panel()
 	if quest_banner:
 		quest_banner.pressed.connect(_on_quest_banner_pressed)
 	if interact_btn:
@@ -200,6 +206,67 @@ func _on_settings_pressed() -> void:
 		if settings_ui and settings_ui.has_method("toggle_ui"):
 			settings_ui.toggle_ui()
 
+func _build_travel_panel() -> void:
+	travel_panel = PanelContainer.new()
+	travel_panel.name = "InstantTravelPanel"
+	travel_panel.visible = false
+	travel_panel.set_anchors_preset(Control.PRESET_CENTER)
+	travel_panel.position = Vector2(-175, -190)
+	travel_panel.custom_minimum_size = Vector2(350, 380)
+	travel_panel.z_index = 30
+	add_child(travel_panel)
+	var outer := VBoxContainer.new()
+	outer.add_theme_constant_override("separation", 8)
+	travel_panel.add_child(outer)
+	var heading := Label.new()
+	heading.text = "خريطة العالم والانتقال اللحظي" if GameManager.current_language == "ar" else "World Map & Instant Travel"
+	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	outer.add_child(heading)
+	travel_list = VBoxContainer.new()
+	travel_list.add_theme_constant_override("separation", 5)
+	outer.add_child(travel_list)
+	var close_button := Button.new()
+	close_button.text = "إغلاق" if GameManager.current_language == "ar" else "Close"
+	close_button.pressed.connect(func(): travel_panel.visible = false)
+	outer.add_child(close_button)
+	_refresh_travel_destinations()
+
+func _refresh_travel_destinations() -> void:
+	if travel_list == null:
+		return
+	for child in travel_list.get_children():
+		child.queue_free()
+	var manager := get_tree().get_first_node_in_group("world_travel_manager")
+	if manager == null:
+		var missing := Label.new()
+		missing.text = "نظام النقل غير متاح" if GameManager.current_language == "ar" else "Travel system unavailable"
+		travel_list.add_child(missing)
+		return
+	var destinations: Dictionary = manager.get_destinations()
+	for destination_id in destinations:
+		var data: Dictionary = destinations[destination_id]
+		var is_ar := GameManager.current_language == "ar"
+		var button := Button.new()
+		var title := str(data.get("name_ar", destination_id)) if is_ar else str(data.get("name_en", destination_id))
+		var description := str(data.get("description_ar", "")) if is_ar else str(data.get("description_en", ""))
+		button.text = title + "  —  " + description
+		button.custom_minimum_size = Vector2(0, 38)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.pressed.connect(_on_travel_destination_selected.bind(str(destination_id)))
+		travel_list.add_child(button)
+
+func _on_travel_pressed() -> void:
+	if travel_panel == null:
+		_build_travel_panel()
+	_refresh_travel_destinations()
+	travel_panel.visible = not travel_panel.visible
+
+func _on_travel_destination_selected(destination_id: String) -> void:
+	var manager := get_tree().get_first_node_in_group("world_travel_manager")
+	if manager and manager.has_method("travel_to"):
+		if manager.travel_to(destination_id, "manual"):
+			travel_panel.visible = false
+
 func _on_quest_banner_pressed() -> void:
 	FeatureGuidanceManager.show_feature_intro("quest")
 	var tree = get_tree()
@@ -262,6 +329,10 @@ func _refresh_hud_labels() -> void:
 		blacksmith_btn.text = "الحداد" if is_ar else "Forge"
 	if settings_btn:
 		settings_btn.text = "الإعدادات" if is_ar else "Settings"
+	if travel_btn:
+		travel_btn.text = "الخريطة" if is_ar else "World Map"
+	if travel_panel and travel_panel.visible:
+		_refresh_travel_destinations()
 	if interact_btn:
 		interact_btn.text = "تفاعل" if is_ar else "Interact"
 	if attack_btn:
