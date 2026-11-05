@@ -68,7 +68,7 @@ jobs:
       - name: Convert original C3 models and validate Godot imports
         run: |
           cargo run --manifest-path tools/c3_audit/Cargo.toml --release --bin clash-c3-audit -- build/c3-source build/pvr-png build/c3-glb reports/c3-model-audit.json
-          godot --headless --editor --path . --quit
+          godot --headless --editor --path . --import --quit
           godot --headless --path . --script tools/c3_audit/validate_c3_glb.gd
           python3 tools/c3_audit/merge_c3_glb_assets.py
       - name: Audit original DMap terrain and map catalog
@@ -77,7 +77,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p build/pcks
-          godot --headless --editor --path . --quit
+          godot --headless --editor --path . --import --quit
           for category in world maps characters monsters equipment mounts effects animations interface audio models; do
             if [ ! -d "resource_stage/$category" ]; then echo "No files for $category; it will be omitted rather than publishing an empty PCK."; continue; fi
             cat > "export_presets.cfg" <<EOF
