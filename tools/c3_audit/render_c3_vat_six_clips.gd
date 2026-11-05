@@ -25,7 +25,7 @@ func _run() -> void:
 	var environment_node := WorldEnvironment.new()
 	var environment := Environment.new()
 	environment.background_mode = Environment.BG_COLOR
-	environment.background_color = Color(0.055, 0.065, 0.09)
+	environment.background_color = Color(0.16, 0.17, 0.19)
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	environment.ambient_light_color = Color(0.72, 0.76, 0.86)
 	environment.ambient_light_energy = 0.9
@@ -116,7 +116,7 @@ func _run() -> void:
 		var center := bounds.get_center()
 		var extent := maxf(bounds.size.x, maxf(bounds.size.y, bounds.size.z))
 		camera.far = maxf(100.0, extent * 20.0)
-		camera.position = center + Vector3(extent * 0.55, extent * 0.25, extent * 2.6)
+		camera.position = center + Vector3(extent * 0.35, extent * 0.15, extent * 2.0)
 		camera.look_at(center + Vector3(0.0, extent * 0.08, 0.0), Vector3.UP)
 		fill_light.omni_range = maxf(5.0, extent * 5.0)
 		fill_light.position = center + Vector3(-extent, extent * 0.8, extent * 0.6)
@@ -258,8 +258,8 @@ func _run() -> void:
 		var foreground_size := foreground_max - foreground_min + Vector2i.ONE
 		var foreground_height_ratio := float(foreground_size.y) / float(image_a.get_height())
 		var foreground_width_ratio := float(foreground_size.x) / float(image_a.get_width())
-		if foreground_pixel_count < 500 or foreground_height_ratio < 0.25 or foreground_width_ratio < 0.05:
-			push_error("C3 six-clip visual proof: character silhouette is absent, too small, or clipped for " + clip_id)
+		if foreground_pixel_count < 500 or foreground_height_ratio < 0.40 or foreground_width_ratio < 0.08:
+			push_error("C3 six-clip visual proof: character silhouette is absent, too small, or clipped (minimum 40% frame height / 8% width) for " + clip_id)
 			all_passed = false
 		if foreground_min.x <= 2 or foreground_min.y <= 2 or foreground_max.x >= image_a.get_width() - 3 or foreground_max.y >= image_a.get_height() - 3:
 			push_error("C3 six-clip visual proof: character silhouette touches the render boundary for " + clip_id)
