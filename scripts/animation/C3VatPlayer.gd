@@ -67,6 +67,7 @@ func configure(mesh_instance: MeshInstance3D, metadata_path: String, binary_path
 	_material.set_shader_parameter("vat_height", float(_frame_count))
 	if albedo != null:
 		_material.set_shader_parameter("albedo_texture", albedo)
+	_hide_c3_attachment_socket_markers(mesh_instance)
 	mesh_instance.material_override = _material
 	_fps = fps_override if fps_override > 0.0 else float(parsed.get("fps", 30.0))
 	_frame = 0.0
@@ -90,3 +91,25 @@ func _process(delta: float) -> void:
 		return
 	_frame = fposmod(_frame + delta * _fps, float(_frame_count))
 	_material.set_shader_parameter("vat_frame", _frame)
+
+
+# C3's v_slot/v_zero meshes are tiny attachment-reference markers, not
+# visible character surfaces. Keep their original nodes, transforms and
+# geometry in the GLB for equipment/socket placement, but do not draw the
+# marker triangles over the character in-game.
+func _hide_c3_attachment_socket_markers(mesh_instance: MeshInstance3D) -> void:
+	var scene_root: Node = mesh_instance
+	while scene_root.get_parent() != null and scene_root.get_parent() is Node3D:
+		scene_root = scene_root.get_parent()
+	var helper_names := {
+		"v_zero": true,
+		"v_slot": true,
+		"v_l_slot01": true,
+		"v_l_slot02": true,
+		"v_r_slot01": true,
+		"v_r_slot02": true
+	}
+	for node in scene_root.find_children("*", "MeshInstance3D", true, false):
+		var helper := node as MeshInstance3D
+		if helper_names.has(helper.name.to_lower()):
+			helper.visible = false
