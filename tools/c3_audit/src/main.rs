@@ -40,6 +40,24 @@ fn category_for(path: &Path) -> Option<&'static str> {
     }
 }
 
+fn parse_motion_path_key(path: &str) -> Option<(u32, u32, u32)> {
+    let components: Vec<&str> = path.split('/').collect();
+    let c3_index = components.iter().position(|part| part.eq_ignore_ascii_case("c3"))?;
+    let look = components.get(c3_index + 1)?.parse::<u32>().ok()?;
+    let weapon = components.get(c3_index + 2)?.parse::<u32>().ok()?;
+    let action_name = Path::new(components.get(c3_index + 3)?).file_stem()?.to_str()?;
+    let action = action_name.parse::<u32>().ok()?;
+    Some((look, weapon, action))
+}
+
+fn parse_body_model_look(path: &str) -> Option<u32> {
+    if !path.to_ascii_lowercase().contains("/c3/body/") {
+        return None;
+    }
+    let model_id = Path::new(path).file_stem()?.to_str()?.parse::<u32>().ok()?;
+    Some(model_id / 1_000_000)
+}
+
 fn motion_signature_matches(model: &[u32], action: &[u32]) -> bool {
     !model.is_empty() && model == action
 }
@@ -69,6 +87,20 @@ mod motion_pairing_tests {
         assert!(!motion_signature_matches(&[66, 1, 1], &[66, 2, 1]));
         assert!(!motion_signature_matches(&[], &[]));
     }
+
+    #[test]
+    fn parses_motion_path_as_look_weapon_action_without_guessing_names() {
+        assert_eq!(parse_motion_path_key("netdragon/c31/c3/0007/500/100.c3"), Some((7, 500, 100)));
+        assert_eq!(parse_motion_path_key("netdragon/c31/c3/1008/620/121.c3"), Some((1008, 620, 121)));
+        assert_eq!(parse_motion_path_key("netdragon/c31/c3/weaponmotion/data.c3"), None);
+    }
+
+    #[test]
+    fn derives_body_look_from_numeric_model_id() {
+        assert_eq!(parse_body_model_look("netdragon/c31/c3/body/7130000.c3"), Some(7));
+        assert_eq!(parse_body_model_look("netdragon/c31/c3/body/8130000.c3"), Some(8));
+        assert_eq!(parse_body_model_look("netdragon/c31/c3/head/7000000.c3"), None);
+    }
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -87,8 +119,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut failed = Vec::new();
     let mut converted = Vec::new();
     let mut skipped = Vec::new();
-    let mut motion_only_documents: Vec<(String, Vec<u32>, Vec<u32>)> = Vec::new();
-    let mut model_motion_signatures: Vec<(String, Vec<u32>)> = Vec::new();
+    let mut motion_only_documents: Vec<(String, Vec<u32>, Vec<u32>, Option<(u32, u32, u32)>)> = Vec::new();
+    let mut model_motion_signatures: Vec<(String, Vec<u32>, Option<u32>)> = Vec::new();
     let mut total_vertices = 0_u64;
     let mut total_triangles = 0_u64;
     let mut total_motion_chunks = 0_u64;
@@ -101,11 +133,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 let motion_signature: Vec<u32> = document.motions.iter().map(|motion| motion.bone_count).collect();
                 let frame_signature: Vec<u32> = document.motions.iter().map(|motion| motion.frame_count).collect();
                 if document.meshes.is_empty() && !document.motions.is_empty() {
-                    motion_only_documents.push((relative.clone(), motion_signature.clone(), frame_signature));
+                    motion_only_documents.push((relative.clone(), motion_signature.clone(), frame_signature, parse_motion_path_key(&relative)));
                 } else if has_valid_mesh_bone_indices(&document)
                     && motion_signature.len() == document.meshes.len()
                 {
-                    model_motion_signatures.push((relative.clone(), motion_signature.clone()));
+                    model_motion_signatures.push((relative.clone(), motion_signature.clone(), parse_body_model_look(&relative)));
                 }
                 let mut textures = BTreeSet::new();
                 let mut meshes = Vec::new();
@@ -181,19 +213,34 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // conservatively against renderable model files by exact per-mesh bone-count
     // signature and valid vertex bone indices. This is a structural candidate list,
     // not proof of semantic action ID, rig identity, or visual correctness.
-    let motion_pairing_report: Vec<Value> = motion_only_documents.iter().map(|(motion_path, signature, frames)| {
+    let motion_pairing_report: Vec<Value> = motion_only_documents.iter().map(|(motion_path, signature, frames, path_key)| {
         let candidates: Vec<String> = model_motion_signatures.iter()
-            .filter(|(_, model_signature)| motion_signature_matches(model_signature, signature))
-            .map(|(model_path, _)| model_path.clone())
+            .filter(|(_, model_signature, _)| motion_signature_matches(model_signature, signature))
+            .map(|(model_path, _, _)| model_path.clone())
             .collect();
+        let body_candidates: Vec<(String, &'static str)> = if let Some((motion_look, _, _)) = path_key {
+            model_motion_signatures.iter()
+                .filter(|(_, model_signature, body_look)| {
+                    motion_signature_matches(model_signature, signature)
+                        && body_look.is_some_and(|look| *look == *motion_look || *motion_look % 1000 == *look)
+                })
+                .map(|(model_path, _, body_look)| {
+                    let relation = if body_look == &Some(path_key.unwrap().0) { "direct_numeric_look_match" } else { "suffix_look_candidate_unverified" };
+                    (model_path.clone(), relation)
+                })
+                .collect()
+        } else { Vec::new() };
         json!({
             "motion_only_path": motion_path,
+            "motion_path_key": path_key.map(|(look, weapon, action)| json!({"look_token":look,"weapon_token":weapon,"action_token":action})),
             "motion_bone_count_signature": signature,
             "motion_frame_count_signature": frames,
-            "structural_candidate_model_count": candidates.len(),
-            "structural_candidate_model_paths": candidates.iter().take(50).collect::<Vec<_>>(),
-            "candidate_paths_truncated": candidates.len() > 50,
-            "acceptance": "STRUCTURAL_CANDIDATES_ONLY_NOT_RUNTIME_PAIRED"
+            "bone_signature_candidate_model_count": candidates.len(),
+            "bone_signature_candidate_model_paths": candidates.iter().take(50).collect::<Vec<_>>(),
+            "body_look_candidate_model_count": body_candidates.len(),
+            "body_look_candidate_model_paths": body_candidates.iter().take(20).map(|(path, relation)| json!({"path":path,"relation":relation})).collect::<Vec<_>>(),
+            "candidate_paths_truncated": candidates.len() > 50 || body_candidates.len() > 20,
+            "acceptance": "PATH_KEY_AND_BONE_SIGNATURE_CANDIDATES_ONLY_NOT_RUNTIME_PAIRED"
         })
     }).collect();
     let total_structural_pairs: usize = motion_pairing_report.iter()
@@ -217,7 +264,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "motion_only_documents": motion_pairing_report.len(),
         "motion_only_structural_candidate_pairs": total_structural_pairs,
         "motion_only_uniquely_pairable_documents": uniquely_pairable_motion_files,
-        "motion_only_pairing_status": "STRUCTURAL_CANDIDATES_ONLY_NOT_RUNTIME_PAIRED",
+        "motion_only_pairing_status": "PATH_KEY_AND_BONE_SIGNATURE_CANDIDATES_ONLY_NOT_RUNTIME_PAIRED",
         "motion_only_pairing": motion_pairing_report,
         "converted_models": converted.len(),
         "skipped_models": skipped.len(),
