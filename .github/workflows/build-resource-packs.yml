@@ -147,10 +147,7 @@ jobs:
             echo "RESOURCE_MANIFEST already matches this build."
           else
             git commit -m "Update resource manifest from verified PCK build"
-            # Another workflow may have pushed while this long asset build was running.
-            # Rebase the generated manifest commit instead of failing on a non-fast-forward push.
-            git pull --rebase origin "${GITHUB_REF_NAME}"
-            # Another workflow may update main while this build is running.
+            # Another workflow may push while this long asset build is running.
             git pull --rebase origin "${GITHUB_REF_NAME}"
             git push origin "HEAD:${GITHUB_REF_NAME}"
           fi
