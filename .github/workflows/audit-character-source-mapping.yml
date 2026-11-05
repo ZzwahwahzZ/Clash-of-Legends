@@ -110,7 +110,7 @@ jobs:
                                       "seed": seed,
                                       "printable_ratio": round(printable,4),
                                       "lua_table_marker": bool(re.search(rb"local\s+[A-Za-z_][A-Za-z0-9_]*\s*=", decoded[:4096])),
-                                      "ini_section_count": len(re.findall(r"^\\s*\\[[^]]+\\]", decoded_text, flags=re.MULTILINE)),
+                                      "ini_section_count": len(re.findall(r"^\s*\[[^]]+\]", decoded_text, flags=re.MULTILINE)),
                                       "model_reference_count": len(set(re.findall(r"[A-Za-z0-9_./\-]+\.c3", decoded_text, flags=re.IGNORECASE))),
                                       "accepted_as_mobile_format": False
                                   })
