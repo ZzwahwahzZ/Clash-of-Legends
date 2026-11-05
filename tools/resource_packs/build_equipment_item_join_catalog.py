@@ -238,6 +238,8 @@ mount_armor_ref_count = mount_armor_match_count = 0
 for item_id, props in mounttype_sections.items():
     armor_id = str(props.get("armor", "")).strip()
     rec = mount_records.get(armor_id)
+    motion_set_id = str(rec.get("motion_set_mesh_id", "")) if rec else ""
+    motion_set = mesh_catalog.get("mount_motion_sets", {}).get(motion_set_id) if motion_set_id else None
     if armor_id:
         mount_armor_ref_count += 1
     if rec:
@@ -249,8 +251,11 @@ for item_id, props in mounttype_sections.items():
         **names,
         "properties": props,
         "mesh_parts": part_paths(rec),
-        "motion_records": rec.get("motion_records", []) if rec else [],
-        "status": ("MESH_AND_MOTION_SOURCE_JOINED_REQUIRES_RUNTIME_PLAYBACK" if rec and rec.get("motion_records") else ("MESH_SOURCE_JOINED_MOTION_NOT_MAPPED" if rec else "MOUNT_MESH_ID_NOT_FOUND")),
+        "motion_set_mesh_id": motion_set.get("base_mesh_id") if motion_set else None,
+        "motion_set_source_record_ids": motion_set.get("source_record_ids", []) if motion_set else [],
+        "motion_set_record_count": motion_set.get("record_count", 0) if motion_set else 0,
+        "motion_set_unique_path_count": motion_set.get("unique_path_count", 0) if motion_set else 0,
+        "status": ("MESH_AND_MOTION_SOURCE_JOINED_REQUIRES_RUNTIME_PLAYBACK" if rec and motion_set else ("MESH_SOURCE_JOINED_MOTION_NOT_MAPPED" if rec else "MOUNT_MESH_ID_NOT_FOUND")),
     })
 
 default_resources = []
@@ -273,15 +278,25 @@ default_mount_model_id = str(default_mount.get("model_id", "")) if default_mount
 default_mount_motion_id = str(default_mount.get("properties", {}).get("motionid", "")) if default_mount else ""
 default_mount_mesh_record, default_mount_mesh_join_kind = lookup_record("ini/mount.dbc", (default_mount_model_id,))
 default_mount_motion_matches = find_motion(default_mount_motion_id)
+default_mount_motion_set_id = str(default_mount_mesh_record.get("motion_set_mesh_id", "")) if default_mount_mesh_record else ""
+default_mount_motion_set = mesh_catalog.get("mount_motion_sets", {}).get(default_mount_motion_set_id) if default_mount_motion_set_id else None
 default_mountmotion_paths = [
     str(row.get("motion_path", ""))
-    for row in (default_mount_mesh_record or {}).get("motion_records", [])
+    for row in (default_mount_motion_set or {}).get("motion_records", [])
     if row.get("motion_path")
 ]
 default_3dmotion_paths = [row["motion_path"] for row in default_mount_motion_matches if row.get("motion_path")]
-default_mount_cross_table_match = bool(set(default_mountmotion_paths) & set(default_3dmotion_paths))
-mount_items_with_motion = sum(1 for row in mount_items if row.get("motion_records"))
-mount_motion_paths = sorted({str(m.get("motion_path")) for row in mount_items for m in row.get("motion_records", []) if m.get("motion_path")})
+defaultres_motion_id_matches_model_id = bool(default_mount_model_id and default_mount_motion_id and int(default_mount_motion_id) // 1000 == int(default_mount_model_id))
+defaultres_mesh_matches_motion_set = bool(default_mount_motion_set and default_mount_motion_set_id == default_mount_model_id)
+default_mount_cross_table_match = defaultres_motion_id_matches_model_id and defaultres_mesh_matches_motion_set and bool(default_mountmotion_paths)
+mount_items_with_motion = sum(1 for row in mount_items if row.get("motion_set_mesh_id") is not None)
+mount_motion_paths = sorted({
+    str(path)
+    for motion_set in mesh_catalog.get("mount_motion_sets", {}).values()
+    for motion in motion_set.get("motion_records", [])
+    for path in [motion.get("motion_path")]
+    if path
+})
 
 # Keep only source itemtype records referenced by translation maps, MESH IDs/part IDs, or mount IDs.
 candidate_ids = set()
@@ -335,10 +350,13 @@ catalog = {
             "defaultres_motion_id": default_mount_motion_id,
             "mount_mesh_record_id": default_mount_mesh_record.get("unique_id") if default_mount_mesh_record else None,
             "mount_mesh_join_kind": default_mount_mesh_join_kind,
-            "mountmotion_paths": default_mountmotion_paths,
-            "defaultres_3dmotion_paths": default_3dmotion_paths,
-            "same_motion_path_across_tables": default_mount_cross_table_match,
-            "status": "DEFAULTRES_MESH_MOUNTMOTION_AND_3DMOTION_AGREE" if default_mount_cross_table_match else "CROSS_TABLE_MOTION_CHECK_INCOMPLETE",
+            "motion_set_mesh_id": default_mount_motion_set_id or None,
+            "defaultres_motion_id_divided_by_1000_matches_model_id": defaultres_motion_id_matches_model_id,
+            "defaultres_mesh_record_has_motion_set": defaultres_mesh_matches_motion_set,
+            "mountmotion_paths": default_mountmotion_paths[:100],
+            "defaultres_3dmotion_paths": default_3dmotion_paths[:20],
+            "cross_table_motion_mapping_validated": default_mount_cross_table_match,
+            "status": "DEFAULTRES_MODEL_ID_AND_MOUNTMOTION_SET_AGREE" if default_mount_cross_table_match else "CROSS_TABLE_MOTION_CHECK_INCOMPLETE",
         },
         "records": mount_items,
     },
@@ -371,9 +389,12 @@ summary = {
             "defaultres_mount_model_id": default_mount_model_id,
             "defaultres_motion_id": default_mount_motion_id,
             "mount_mesh_record_id": default_mount_mesh_record.get("unique_id") if default_mount_mesh_record else None,
-            "same_motion_path_across_tables": default_mount_cross_table_match,
-            "mountmotion_paths": default_mountmotion_paths,
-            "defaultres_3dmotion_paths": default_3dmotion_paths,
+            "motion_set_mesh_id": default_mount_motion_set_id or None,
+            "defaultres_motion_id_divided_by_1000_matches_model_id": defaultres_motion_id_matches_model_id,
+            "defaultres_mesh_record_has_motion_set": defaultres_mesh_matches_motion_set,
+            "cross_table_motion_mapping_validated": default_mount_cross_table_match,
+            "mountmotion_paths": default_mountmotion_paths[:100],
+            "defaultres_3dmotion_paths": default_3dmotion_paths[:20],
         },
         "unmatched_mount_samples": [r for r in mount_items if r["status"] == "MOUNT_MESH_ID_NOT_FOUND"][:50],
     },
