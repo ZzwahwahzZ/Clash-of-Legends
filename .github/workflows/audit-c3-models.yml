@@ -52,10 +52,11 @@ jobs:
         run: |
           godot --headless --editor --path . --import --quit
           godot --headless --path . --script tools/c3_audit/validate_c3_glb.gd
-      - name: Render imported C3 skeletal character with Godot
+      - name: Render imported C3 skeletal and all six full-character VAT clips with Godot
         run: |
           mkdir -p reports
           ALSOFT_DRIVERS=null LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a godot --path . --rendering-method gl_compatibility --script tools/c3_audit/render_c3_skeleton_poc.gd
+          ALSOFT_DRIVERS=null LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a godot --path . --rendering-method gl_compatibility --script tools/c3_audit/render_c3_vat_six_clips.gd
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -75,5 +76,6 @@ jobs:
             build/c3-glb/motion-poc-vat/*.rgba32f
             reports/c3-vat-poc-frame-a.png
             reports/c3-vat-poc-frame-b.png
+            reports/c3-vat-six-clips/*.png
           if-no-files-found: warn
           retention-days: 14
