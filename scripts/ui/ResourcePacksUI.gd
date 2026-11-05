@@ -21,6 +21,28 @@ func _ready() -> void:
 		ResourcePackManager.download_progress.connect(_on_download_progress)
 		ResourcePackManager.package_installed.connect(_on_package_installed)
 		ResourcePackManager.package_failed.connect(_on_package_failed)
+		call_deferred("_startup_resource_check")
+
+func _startup_resource_check() -> void:
+	# Give the autoload bootstrap a moment to read its cached manifest first.
+	for _attempt in range(120):
+		if not ResourcePackManager.busy:
+			break
+		await get_tree().process_frame
+	if ResourcePackManager.packages.is_empty():
+		_set_status("جارٍ فحص موارد اللعبة..." if _is_ar() else "Checking game resources...")
+		await ResourcePackManager.refresh_manifest()
+	if ResourcePackManager.packages.is_empty():
+		return
+	var missing := false
+	for package_id in ResourcePackManager.packages:
+		if not ResourcePackManager.is_package_installed(str(package_id)):
+			missing = true
+			break
+	if missing:
+		await open_ui()
+	else:
+		_set_status("كل موارد اللعبة مثبتة ويمكن اللعب دون اتصال." if _is_ar() else "All game resources are installed. Offline play is ready.")
 
 func open_ui() -> void:
 	visible = true

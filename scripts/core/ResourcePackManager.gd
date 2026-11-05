@@ -139,12 +139,9 @@ func download_all_packages() -> bool:
 	for package_id in package_ids:
 		if is_package_installed(str(package_id)):
 			continue
+		# download_package waits for the matching completion signal, so callers
+		# never race the HTTPRequest callback or mistake "started" for "installed".
 		if not await download_package(str(package_id)):
-			return false
-		var result: Array = await package_finished
-		if result.size() < 2 or str(result[0]) != str(package_id):
-			return false
-		if not bool(result[1]):
 			return false
 	return true
 
@@ -180,7 +177,12 @@ func download_package(package_id: String) -> bool:
 	if error != OK:
 		_finish_failure(package_id, "فشل بدء التنزيل: %s" % error, temp_path)
 		return false
-	return true
+	# The request callback emits package_finished only after hash verification,
+	# atomic file placement, and successful PCK mounting.
+	var completion: Array = await package_finished
+	if completion.size() < 3 or str(completion[0]) != package_id:
+		return false
+	return bool(completion[1])
 
 func _process(_delta: float) -> void:
 	if busy and is_instance_valid(_active_request) and _active_package_id != "":
