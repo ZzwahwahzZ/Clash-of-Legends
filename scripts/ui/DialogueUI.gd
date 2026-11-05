@@ -16,6 +16,7 @@ func _ready() -> void:
 		close_button.pressed.connect(close_dialogue)
 
 func show_dialogue(speaker: String, text: String, options: Array = []) -> void:
+	FeatureGuidanceManager.show_feature_intro("dialogue")
 	visible = true
 	if speaker_label:
 		speaker_label.text = speaker
