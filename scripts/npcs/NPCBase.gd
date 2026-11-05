@@ -51,6 +51,8 @@ func interact(player: CharacterBody3D) -> void:
 			GameManager.post_notification(msg, true)
 		return
 
+	if GameAudioManager:
+		GameAudioManager.play_sfx("npc_talk", self, -10.0)
 	for agent in get_tree().get_nodes_in_group("quest_agents"):
 		if agent.has_method("on_npc_talked"):
 			agent.on_npc_talked(npc_id)
