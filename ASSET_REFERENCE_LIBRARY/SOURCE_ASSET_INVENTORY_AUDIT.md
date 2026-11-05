@@ -99,3 +99,18 @@ A follow-up successful run [42076016258](https://github.com/ZzwahwahzZ/Clash-of-
 - `3070`: 14
 
 These values overlap some Look candidates already documented in the character-mapping research, but the column is deliberately not renamed to `Look` until its meaning is confirmed against the 1.1.2.3 client resolver. This is a promising cross-reference for armor/body model families, not yet an accepted model mapping.
+
+## Second-pass table-format parsing — 2026-11-05
+
+The audit now safely recognizes the observed custom formats (INI sections with `//` comments, comma-delimited rows, whitespace-delimited rows, key/value maps, and `@@` records) while preserving unknown columns as opaque. The successful run is [42076724797](https://github.com/ZzwahwahzZ/Clash-of-Legends/actions/runs/42076724797), artifact [13439820139](https://github.com/ZzwahwahzZ/Clash-of-Legends/actions/runs/42076724797/artifacts/13439820139).
+
+Newly confirmed table structures:
+- `mountinfo.ini`: two sections, `MountActionDataTrans` with 610 keys and `MountWeaponTrans` with 26 keys. `mounttype.dat` remains binary-only, so the exact mount model catalogue and semantics are still unresolved.
+- Weapon proficiency reference: `weaponskillname.ini` has 69 comma-delimited rows; `weaponskilllevelexp.ini` has 21 rows. These are weapon-skill/proficiency labels and level thresholds, **not** the full active combat spell catalogue.
+- `weaponeffect.ini`: 111 sections, each exposing the keys `HitEffect`, `HitSound`, `BlkEffect`, and `BlkSound`.
+- `action3deffect.ini`: six source sections, including `wing` (1,820 keys), `body` (910), `cloak` (240), `mount` (1,134), `weapon` (12,482), and `armet` (32). This is a valuable cross-reference for equipment/mount effects; exact keys still need to be joined to item/model IDs.
+- `weapon_trans.ini`: 8,264 opaque key/value pairs; `armor_trans.ini`: 1,401. They are candidate transformation/mapping tables, not yet semantically accepted.
+- `weaponshow.ini`: 48 whitespace-delimited rows; `weaponmatch.ini`: three sections; `equipsolidify.ini`: 79 sections; `equiptreeinfo.ini`: 24 comma-delimited rows.
+- `gemtip.ini`: 52 sections; `equiphole.ini`: two sections; `wenzhang_suit_effect.ini`: 88 `@@`-delimited rows.
+
+The exact active-skill candidates are now more clearly identified in the source index: `magic.dat`, `newskill.dat`, `prize_newskill.dat`, `runemagic.dat`, `skilltag.dat`, `skilltip.dat`, `magic_group_rate.dat`, `magiceffect.dat`, `magictype.dat`, `magictypeex.dat`, and `magictypeop.dat`. These DAT files are now inventoried by the audit but remain binary-only and are not yet decoded or mapped. This is the next major skill-data task; do not mistake the 69 weapon proficiency labels for all active skills.
