@@ -58,14 +58,74 @@ def decode_text(data: bytes) -> str:
 
 def parse_ini_opaque(data: bytes) -> dict:
     text = decode_text(data)
-    parser = configparser.ConfigParser(interpolation=None, strict=False, delimiters=("=",))
+    parser = configparser.ConfigParser(
+        interpolation=None, strict=False, delimiters=("=",),
+        comment_prefixes=("#", ";", "//"), inline_comment_prefixes=None,
+    )
     parser.optionxform = str
     try:
         parser.read_string(text)
         sections = [{"section": s, "keys": list(parser[s].keys())} for s in parser.sections()]
         return {"parse_status": "INI_SECTIONS_AND_KEYS_PARSED_OPAQUE", "section_count": len(sections), "sections": sections}
     except configparser.Error as exc:
-        return {"parse_status": "TEXT_PRESENT_INI_PARSE_FAILED", "error": str(exc), "line_count": len(text.splitlines()), "line_samples": [line[:300] for line in text.splitlines()[:20]]}
+        lines = [line.strip() for line in text.splitlines()
+                 if line.strip() and not line.lstrip().startswith(("#", ";", "//"))]
+        samples = [line[:300] for line in lines[:20]]
+        # Preserve custom positional formats without assigning undocumented column meanings.
+        if lines and all("@@" in line for line in lines[:min(20, len(lines))]):
+            rows = []
+            histogram = {}
+            for line_no, line in enumerate(text.splitlines(), 1):
+                clean = line.strip()
+                if not clean or clean.startswith(("#", ";", "//")):
+                    continue
+                parts = clean.split("@@")
+                if parts and parts[-1] == "":
+                    parts.pop()
+                histogram[str(len(parts))] = histogram.get(str(len(parts)), 0) + 1
+                if len(rows) < 20:
+                    rows.append({"source_line": line_no, "opaque_columns": parts})
+            return {"parse_status": "DELIMITED_AT_AT_ROWS_PARSED_OPAQUE", "row_count": sum(histogram.values()),
+                    "field_count_histogram": histogram, "sample_rows": rows}
+        if lines and all("," in line and "=" not in line for line in lines[:min(20, len(lines))]):
+            rows = []
+            histogram = {}
+            for line_no, line in enumerate(text.splitlines(), 1):
+                clean = line.strip()
+                if not clean or clean.startswith(("#", ";", "//")):
+                    continue
+                parts = [part.strip() for part in clean.split(",")]
+                histogram[str(len(parts))] = histogram.get(str(len(parts)), 0) + 1
+                if len(rows) < 20:
+                    rows.append({"source_line": line_no, "opaque_columns": parts})
+            return {"parse_status": "COMMA_DELIMITED_ROWS_PARSED_OPAQUE", "row_count": sum(histogram.values()),
+                    "field_count_histogram": histogram, "sample_rows": rows}
+        if lines and all("=" in line for line in lines[:min(20, len(lines))]):
+            pairs = []
+            for line_no, line in enumerate(text.splitlines(), 1):
+                clean = line.strip()
+                if not clean or clean.startswith(("#", ";", "//")) or "=" not in clean:
+                    continue
+                key, value = clean.split("=", 1)
+                if len(pairs) < 20:
+                    pairs.append({"source_line": line_no, "opaque_key": key.strip(), "opaque_value": value.strip()})
+            return {"parse_status": "KEY_VALUE_PAIRS_PARSED_OPAQUE", "pair_count": sum(1 for line in lines if "=" in line),
+                    "sample_pairs": pairs, "parser_note": str(exc)}
+        if lines and all(len(line.split()) >= 2 for line in lines[:min(20, len(lines))]):
+            rows = []
+            histogram = {}
+            for line_no, line in enumerate(text.splitlines(), 1):
+                clean = line.strip()
+                if not clean or clean.startswith(("#", ";", "//")):
+                    continue
+                parts = clean.split()
+                histogram[str(len(parts))] = histogram.get(str(len(parts)), 0) + 1
+                if len(rows) < 20:
+                    rows.append({"source_line": line_no, "opaque_columns": parts})
+            return {"parse_status": "WHITESPACE_DELIMITED_ROWS_PARSED_OPAQUE", "row_count": sum(histogram.values()),
+                    "field_count_histogram": histogram, "sample_rows": rows}
+        return {"parse_status": "TEXT_PRESENT_SCHEMA_UNRESOLVED", "parser_error": str(exc),
+                "line_count": len(text.splitlines()), "line_samples": samples}
 
 def parse_itemtype(data: bytes, include_column_59_candidate: bool = False) -> dict:
     text = decode_text(data)
