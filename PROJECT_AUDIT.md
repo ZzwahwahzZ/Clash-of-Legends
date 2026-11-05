@@ -2,10 +2,14 @@
 **Engine**: Godot 4.3 Stable (Mobile Profile)  
 **Target Platform**: Android (ARM64-v8a)  
 **Gameplay Reference**: Conquer Online Mobile  
-**Date**: October 31, 2026  
-**Status**: AUDITED & RECONCILED  
+**Date**: November 5, 2026  
+**Status**: INTERNAL BASELINE INVENTORY — PARITY NOT ACCEPTED  
 
 ---
+
+## Important scope note
+
+This file inventory confirms that listed scripts/scenes exist and load in CI. It is not a gameplay, visual-quality, reference-parity, or target-device acceptance report. See `VISUAL_ACCEPTANCE_REPORT.md` and `docs/REFERENCE_PARITY_ACCEPTANCE.md` for the actual open gates.
 
 ## 1. Project Overview & Architectural Boundaries
 The project is an offline-first 3D MMORPG-inspired action adventure built for mobile and touchscreen hardware (Xiaomi Redmi Note 11 baseline: Snapdragon 680, Adreno 610, 6GB RAM). It simulates an active MMORPG realm locally with zero runtime network requirements after initial asset staging.
@@ -58,7 +62,7 @@ The project is an offline-first 3D MMORPG-inspired action adventure built for mo
    - **Resolution**: Formed a unified, robust `MainHUDController.gd` integrating player stats (HP/MP/XP/Level/Gold), class-specific skill loading, virtual touch joystick binding, one-touch quest navigation, auto-hunt/auto-loot toggles, dialogue integration, and full Arabic RTL text mirroring.
 2. **Gold-Only Currency Enforcement**:
    - Any residual references to CP (Conquer Points) or VIP diamonds were eliminated.
-   - Economy strictly operates on Gold minted via monster drops, quest completions, and merchant item transactions.
+   - The runtime currency interface is Gold-only. Monster drop amounts, quest rewards, and merchant prices remain provisional until the mobile source records are decoded; they are not accepted as source-backed economy values.
 3. **Player Physics Lifecycle**:
    - Removed competing physics processing. `PlayerController.gd` consolidates manual joystick input, camera-yaw orientation, navigation target tracking, gravity, and jumping into a single, authoritative `move_and_slide()` call per physics tick.
 4. **GDScript Keyword Collision**:
