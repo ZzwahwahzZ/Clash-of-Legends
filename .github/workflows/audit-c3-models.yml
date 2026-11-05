@@ -18,7 +18,6 @@ jobs:
           mkdir -p build reports
           base="https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/resource-packs-v4"
           curl --fail --location --retry 5 "$base/models.pck" -o build/models.pck
-          curl --fail --location --retry 5 "$base/maps.pck" -o build/maps.pck
           curl --fail --location --retry 5 "$base/resource-source-index.csv" -o resource-source-index.csv
       - name: Configure Godot 4.3
         uses: chickensoft-games/setup-godot@v2

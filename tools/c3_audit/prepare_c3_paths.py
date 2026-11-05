@@ -19,7 +19,7 @@ with source.open("r",encoding="utf-8-sig",newline="") as stream:
         inner=source_path.split("!")[-1].replace("\\","/").lower()
         if category=="models" and inner.endswith(".c3") and staged.startswith("resource_stage/models/"):
             c3_paths.append(staged)
-        if category=="maps" and inner.endswith(".pvr") and inner.startswith("c3/") and not inner.startswith("c3/effect/") and staged.startswith("resource_stage/maps/"):
+        if category=="models" and inner.endswith(".pvr") and inner.startswith("c3/") and not inner.startswith("c3/effect/") and staged.startswith("resource_stage/maps/"):
             pvr_paths.append(staged)
 if not c3_paths:
     raise SystemExit("No clean original C3 model paths were found.")

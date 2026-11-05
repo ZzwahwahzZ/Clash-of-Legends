@@ -35,4 +35,4 @@ def unpack_bundle(bundle, out, prefix):
     return written
 
 unpack_bundle("build/c3-sources.bin","build/c3-source","resource_stage/models")
-unpack_bundle("build/pvr-sources.bin","build/pvr-source","resource_stage/maps")
+unpack_bundle("build/pvr-sources.bin","build/pvr-source","resource_stage/models")

@@ -31,8 +31,8 @@ func _extract_bundle(paths: Array, output_path: String) -> int:
 	return extracted
 
 func _extract() -> void:
-	if not FileAccess.file_exists("res://build/models.pck") or not FileAccess.file_exists("res://build/maps.pck"):
-		push_error("C3/PVR audit: models.pck or maps.pck is missing.")
+	if not FileAccess.file_exists("res://build/models.pck"):
+		push_error("C3/PVR audit: models.pck is missing.")
 		quit(1)
 		return
 	if not ProjectSettings.load_resource_pack("res://build/models.pck", true):
@@ -59,9 +59,6 @@ func _extract() -> void:
 	var c3_paths: Array = c3_parser.data
 	var pvr_paths: Array = pvr_parser.data
 	var c3_count := _extract_bundle(c3_paths, "res://build/c3-sources.bin")
-	if not ProjectSettings.load_resource_pack("res://build/maps.pck", true):
-		push_error("C3/PVR audit: Godot could not load maps.pck.")
-		quit(1)
 	var pvr_count := _extract_bundle(pvr_paths, "res://build/pvr-sources.bin")
 	if c3_count == 0 or pvr_count == 0:
 		quit(1)
