@@ -2,6 +2,7 @@ extends CharacterBody3D
 class_name PlayerController
 
 @export var character_class: String = "Trojan"
+@export_enum("male", "female") var character_gender: String = "male"
 @export var base_speed: float = 6.5
 @export var mount_speed_multiplier: float = 1.6
 @export var jump_velocity: float = 5.5
@@ -127,7 +128,7 @@ func _apply_character_model() -> void:
 		return
 	# Never assign a class model by array position: source catalogs contain body
 	# parts, NPCs and unrelated models. Only explicit, reviewed runtime mappings qualify.
-	var model_index := AssetCatalog.get_verified_character_model_index(character_class)
+	var model_index := AssetCatalog.get_verified_character_model_index(character_class, character_gender)
 	if model_index < 0:
 		return
 	# Build and validate the candidate while the current visible model remains intact.
@@ -422,6 +423,13 @@ func set_character_class(new_cls: String) -> void:
 	_apply_character_model()
 	if GameManager:
 		GameManager.post_notification("تم تغيير فئة البطل إلى " + new_cls, false)
+
+func set_character_gender(new_gender: String) -> void:
+	var normalized := new_gender.strip_edges().to_lower()
+	if normalized not in ["male", "female"]:
+		return
+	character_gender = normalized
+	_apply_character_model()
 
 func select_archer_weapon_style(style_id: String) -> bool:
 	if character_class != "Archer" or not ClassProgressionManager:
