@@ -8,11 +8,12 @@ signal package_installed(package_id: String, path: String)
 signal package_failed(package_id: String, reason: String)
 signal package_finished(package_id: String, success: bool, reason: String)
 
-const MANIFEST_URL := "https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/resource-packs-v1/RESOURCE_MANIFEST"
+const MANIFEST_URL := "https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/resource-packs-v2/RESOURCE_MANIFEST"
 const INSTALL_DIR := "user://resource_packs"
 const MAX_MANIFEST_BYTES := 1024 * 1024
 const APPLICATION_ID := "com.zwahwahzz.clashoflegends"
 const GODOT_VERSION := "4.3"
+const RESOURCE_RELEASE_TAG := "resource-packs-v2"
 
 var manifest: Dictionary = {}
 var packages: Dictionary = {}
@@ -34,7 +35,7 @@ func _bootstrap_installed_resources() -> void:
 			var parser := JSON.new()
 			var parse_error := parser.parse(cache_file.get_as_text())
 			cache_file.close()
-			if parse_error == OK and typeof(parser.data) == TYPE_DICTIONARY:
+			if parse_error == OK and typeof(parser.data) == TYPE_DICTIONARY and str(parser.data.get("release_tag", "")) == RESOURCE_RELEASE_TAG:
 				_accept_manifest(parser.data)
 	if packages.is_empty():
 		await refresh_manifest()
@@ -70,6 +71,9 @@ func refresh_manifest(url: String = MANIFEST_URL) -> bool:
 func _accept_manifest(candidate: Dictionary) -> bool:
 	if str(candidate.get("package_id", "")) != APPLICATION_ID:
 		push_error("Resource manifest belongs to a different Android application.")
+		return false
+	if str(candidate.get("release_tag", "")) != RESOURCE_RELEASE_TAG:
+		push_error("Resource manifest release tag does not match this client.")
 		return false
 	var entries: Variant = candidate.get("resource_packages", [])
 	if typeof(entries) != TYPE_ARRAY:
