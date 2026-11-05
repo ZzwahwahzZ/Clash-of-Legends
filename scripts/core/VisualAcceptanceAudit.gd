@@ -7,6 +7,25 @@ func _ready() -> void:
 	
 	var pass_count = 0
 	var total_count = 0
+
+	# Presence of node names is not visual proof: every required part must own
+	# a real mesh with at least one surface and non-degenerate bounds.
+	func _has_renderable_mesh(root: Node, node_path: String) -> bool:
+		var node := root.get_node_or_null(node_path)
+		if not node is MeshInstance3D:
+			return false
+		var mesh_instance := node as MeshInstance3D
+		if mesh_instance.mesh == null or mesh_instance.mesh.get_surface_count() <= 0:
+			return false
+		var bounds := mesh_instance.get_aabb()
+		return is_finite(bounds.position.x) and is_finite(bounds.position.y) and is_finite(bounds.position.z) and is_finite(bounds.size.x) and is_finite(bounds.size.y) and is_finite(bounds.size.z) and bounds.size.length() > 0.001
+
+	func _all_required_meshes_exist(root: Node, paths: Array[String]) -> bool:
+		for node_path in paths:
+			if not _has_renderable_mesh(root, node_path):
+				push_warning("VISUAL GEOMETRY MISSING OR EMPTY: " + node_path)
+				return false
+		return true
 	
 	# Test 1: Player Visual Hierarchy
 	total_count += 1
@@ -22,7 +41,7 @@ func _ready() -> void:
 		var has_weapon = p.has_node("VisualRoot/Torso/WeaponMount/MainWeapon")
 		var has_mount = p.has_node("VisualRoot/MountMesh/HorseBody")
 		var has_anim = p.has_node("AnimationPlayer")
-		if has_torso and has_head and has_helmet and has_pauldrons and has_arms and has_legs and has_weapon and has_mount and has_anim:
+		if has_torso and has_head and has_helmet and has_pauldrons and has_arms and has_legs and has_weapon and has_mount and has_anim and _all_required_meshes_exist(p, ["VisualRoot/Torso", "VisualRoot/Torso/HeadNode/HeadMesh", "VisualRoot/Torso/HeadNode/HelmetMesh", "VisualRoot/Torso/LeftPauldron", "VisualRoot/Torso/LeftArm", "VisualRoot/LeftLeg", "VisualRoot/Torso/WeaponMount/MainWeapon", "VisualRoot/MountMesh/HorseBody", "VisualRoot/MountMesh/Saddle", "VisualRoot/MountMesh/HorseHead"]):
 			print("[PASS] Visual Check: 3D Player Anatomical Hierarchy (Torso, Head, Helm, Pauldrons, Limbs, Weapon, Warhorse Mount, AnimPlayer)")
 			pass_count += 1
 		else:
@@ -42,7 +61,7 @@ func _ready() -> void:
 		var has_eyes = w.has_node("VisualRoot/Torso/HeadNode/EyeLeft") and w.has_node("VisualRoot/Torso/HeadNode/EyeRight")
 		var has_legs = w.has_node("VisualRoot/FrontLeftLeg") and w.has_node("VisualRoot/FrontRightLeg") and w.has_node("VisualRoot/RearLeftLeg") and w.has_node("VisualRoot/RearRightLeg")
 		var has_tail = w.has_node("VisualRoot/Torso/Tail")
-		if has_body and has_snout and has_ears and has_eyes and has_legs and has_tail:
+		if has_body and has_snout and has_ears and has_eyes and has_legs and has_tail and _all_required_meshes_exist(w, ["VisualRoot/Torso", "VisualRoot/Torso/HeadNode/HeadMesh", "VisualRoot/Torso/HeadNode/Snout", "VisualRoot/Torso/HeadNode/LeftEar", "VisualRoot/FrontLeftLeg", "VisualRoot/RearLeftLeg", "VisualRoot/Torso/Tail"]):
 			print("[PASS] Visual Check: Wild Wolf Anatomical Model (Torso, Snout, Ears, Glowing Eyes, 4 Articulated Legs, Tail)")
 			pass_count += 1
 		else:
@@ -62,7 +81,7 @@ func _ready() -> void:
 		var has_maw = d.has_node("VisualRoot/Torso/Neck/HeadNode/MawLight")
 		var has_wings = d.has_node("VisualRoot/Torso/LeftWing") and d.has_node("VisualRoot/Torso/RightWing")
 		var has_tail = d.has_node("VisualRoot/Torso/Tail")
-		if has_torso and has_neck and has_horns and has_maw and has_wings and has_tail:
+		if has_torso and has_neck and has_horns and has_maw and has_wings and has_tail and _all_required_meshes_exist(d, ["VisualRoot/Torso", "VisualRoot/Torso/Neck", "VisualRoot/Torso/Neck/HeadNode/HeadMesh", "VisualRoot/Torso/Neck/HeadNode/LeftHorn", "VisualRoot/Torso/LeftWing/Strut", "VisualRoot/Torso/LeftWing/Membrane", "VisualRoot/Torso/Tail"]):
 			print("[PASS] Visual Check: Great Flame Dragon Boss Model (Spined Body, Neck, Horns, Glowing Maw Light, Dual Wings, Tail)")
 			pass_count += 1
 		else:
@@ -81,7 +100,7 @@ func _ready() -> void:
 		var has_hat = n.has_node("VisualRoot/Robe/HeadNode/HatMesh")
 		var has_orb = n.has_node("VisualRoot/FloatingOrb")
 		var has_light = n.has_node("VisualRoot/FloatingOrb/OrbLight")
-		if has_robe and has_head and has_hat and has_orb and has_light:
+		if has_robe and has_head and has_hat and has_orb and has_light and _all_required_meshes_exist(n, ["VisualRoot/Robe", "VisualRoot/Robe/HeadNode/HeadMesh", "VisualRoot/Robe/HeadNode/HatMesh", "VisualRoot/FloatingOrb"]):
 			print("[PASS] Visual Check: Oriental NPC Model (Flowing Robe, Conical Hat, Floating Luminescent Divination Orb)")
 			pass_count += 1
 		else:
@@ -99,7 +118,7 @@ func _ready() -> void:
 		var has_head = s.has_node("VisualRoot/Torso/Head")
 		var has_limbs = s.has_node("VisualRoot/Torso/LeftArm") and s.has_node("VisualRoot/LeftLeg")
 		var has_weapon = s.has_node("VisualRoot/Torso/Weapon")
-		if has_torso and has_head and has_limbs and has_weapon:
+		if has_torso and has_head and has_limbs and has_weapon and _all_required_meshes_exist(s, ["VisualRoot/Torso", "VisualRoot/Torso/Head", "VisualRoot/Torso/LeftArm", "VisualRoot/LeftLeg", "VisualRoot/Torso/Weapon"]):
 			print("[PASS] Visual Check: Simulated Hero Character Model (Torso, Head, Limbs, Weapon)")
 			pass_count += 1
 		else:
@@ -120,7 +139,7 @@ func _ready() -> void:
 		var has_forge = g.has_node("TwinCity/BlacksmithWorkshop/Furnace")
 		var has_volcano = g.has_node("MountainSummitVolcano/CalderaLava")
 		var has_trees = g.has_node("TwinPlainsTrees/Tree1")
-		if has_env and has_light and has_plaza and has_gate and has_forge and has_volcano and has_trees:
+		if has_env and has_light and has_plaza and has_gate and has_forge and has_volcano and has_trees and _all_required_meshes_exist(g, ["TwinCity/CityPlaza", "TwinCity/PagodaGate/PagodaRoof", "TwinCity/BlacksmithWorkshop/Furnace", "MountainSummitVolcano/CalderaLava", "TwinPlainsTrees/Tree1/Trunk", "TwinPlainsTrees/Tree1/Foliage"]):
 			print("[PASS] Visual Check: 3D Environment Architecture (Pagoda Gate, Stone Plaza, Forge, Plains Trees, Volcano Caldera)")
 			pass_count += 1
 		else:
