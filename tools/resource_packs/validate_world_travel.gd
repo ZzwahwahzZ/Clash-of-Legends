@@ -8,7 +8,7 @@ func _run_travel_test() -> void:
 	player.name = "TravelTestPlayer"
 	get_root().add_child(player)
 	GameManager.register_player(player)
-	var manager := load("res://scripts/world/WorldTravelManager.gd").new()
+	var manager: Node = (load("res://scripts/world/WorldTravelManager.gd") as Script).new()
 	get_root().add_child(manager)
 	await process_frame
 	var destinations: Dictionary = manager.get_destinations()
