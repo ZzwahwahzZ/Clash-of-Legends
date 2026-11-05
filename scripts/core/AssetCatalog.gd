@@ -1,6 +1,7 @@
 extends Node
 
 const CharacterModelMappingRules = preload("res://scripts/core/CharacterModelMappingRules.gd")
+const MountModelMappingRules = preload("res://scripts/core/MountModelMappingRules.gd")
 ## Runtime index for verified resource PCK contents.
 
 signal catalog_loaded(asset_count: int)
@@ -136,3 +137,7 @@ func get_category_counts() -> Dictionary:
 func get_verified_character_model_index(requested_class: String, requested_gender: String = "") -> int:
 	var entries := get_asset_entries("characters", [".glb", ".gltf"])
 	return CharacterModelMappingRules.find_verified_character_model_index(entries, requested_class, requested_gender)
+
+func get_verified_mount_model_index(requested_item_id: String) -> int:
+	var entries := get_asset_entries("mounts", [".glb", ".gltf"])
+	return MountModelMappingRules.find_verified_mount_model_index(entries, requested_item_id)
