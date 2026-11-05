@@ -204,15 +204,27 @@ func navigate_to_quest_target() -> void:
 	if not GameManager or not is_instance_valid(GameManager.player_reference):
 		return
 	var destination := Vector3(18.0, 0.0, 15.0)
+	var travel_id := "twin_city"
 	match active_quest_id:
+		"quest_wolves", "quest_wolf_alpha", "quest_meteor_gather":
+			travel_id = "twin_plains"
+			destination = Vector3(18.0, 0.0, 15.0)
 		"quest_dragon":
+			travel_id = "mountain_summit"
 			destination = Vector3(40.0, 0.0, -35.0)
 		"quest_guardian":
-			destination = Vector3(25.0, 0.0, 20.0)
+			travel_id = "desert_ruins"
+			destination = Vector3(-32.0, 0.0, 28.0)
 		"quest_blacksmith_visit":
+			travel_id = "twin_city"
 			destination = Vector3(-5.0, 0.0, 4.0)
 		"quest_final_sage":
+			travel_id = "twin_city"
 			destination = Vector3(4.0, 0.0, 3.0)
+	var travel_manager := get_tree().get_first_node_in_group("world_travel_manager")
+	if travel_manager and travel_manager.has_method("travel_to"):
+		if not travel_manager.travel_to(travel_id, "quest"):
+			return
 	if GameManager.player_reference.has_method("move_towards_target_position"):
 		GameManager.player_reference.move_towards_target_position(destination, 0.0)
 		var message := "الملاحة التلقائية إلى موقع المهمة..." if GameManager.current_language == "ar" else "Navigating to quest objective..."
