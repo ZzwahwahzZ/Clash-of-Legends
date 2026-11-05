@@ -1,3 +1,17 @@
+# Testing Acceptance Report
+
+## Latest verified state — 2026-11-05
+
+- **Android/Godot CI:** run [41999396225](https://github.com/ZzwahwahzZ/Clash-of-Legends/actions/runs/41999396225) passed. The ARM64 Android debug APK was exported and signature-verified; artifact size is 36,342,142 bytes. This is a technical debug build, not a production release.
+- **Gameplay/scene tests:** 102/102 gameplay tests, 7/7 structural geometry checks, 3/3 physics-shape checks, 7 destination checks, and the current auto-loot/collision checks passed in CI. These verify internal behavior only, not source parity.
+- **C3 external-motion POC:** run [41999396204](https://github.com/ZzwahwahzZ/Clash-of-Legends/actions/runs/41999396204) passed. It produced 569 GLBs including six audit-only external-motion clips. Godot imported all six clips; each has 18 mesh nodes, 18 surfaces and 18 morph-capable meshes. Action 100 imported 198 tracks/918 keys per clip, action 110 imported 126/558, and action 120 imported 72/288.
+- **C3 source audit:** 1,944 C3 files found; 1,904 parsed; 40 still fail; 8,340 meshes; 709,677 vertices; 936,015 triangles; 18,029 MOTI chunks. The six external-motion clips are conversion/import experiments, not accepted in-game animations.
+- **Motion-only mapping:** 558 motion-only documents found; 537 have a parsed numeric look/weapon/action path key. Ordered bone signatures and look-family matching produce candidate sets only; the 82,440 broad bone-signature pairs are intentionally not treated as valid assignments.
+- **WDB/DBC:** a metadata-only parser was added for the original `c3.wdb` container. Its audit step passed in the source-staging workflow, and the current full run [42000137006](https://github.com/ZzwahwahzZ/Clash-of-Legends/actions/runs/42000137006) is rerunning the pipeline to publish the compact metadata report. No original DBC blobs are included in that report.
+- **Device testing:** no real Redmi Note 11 installation, FPS, memory, thermal, loading-time or long-session stability capture has been performed.
+
+The sections below retain earlier test history; the latest results and corrections above supersede older counts and statements where they differ.
+
 # TESTING & TECHNICAL VALIDATION REPORT
 **Game:** Clash of Legends (صراع الأساطير)  
 **Updated:** 2026-11-05  
@@ -37,9 +51,9 @@ The Android artifact is an internal debug build, not a production release. It is
 
 C3 audit run: https://github.com/ZzwahwahzZ/Clash-of-Legends/actions/runs/41991461493
 
-- 563 converted C3 GLB scenes imported and passed geometry checks.
-- 2,454 mesh surfaces, 936,015 triangles, and 709,677 vertices reported.
-- 18,029 C3 MOTI chunks were parsed. The per-mesh exporter passed its Rust regression test and Godot import validation: 563 GLBs imported, 2,454 surfaces, 2,199 morph-capable mesh nodes, 503 animated models, 12,371 animation tracks, and 53,484 keys. 558 motion-only C3 documents remain unpaired to body models and may contain additional action clips.
+- 569 converted C3 GLB scenes (including six audit-only external-motion POCs) imported and passed geometry checks.
+- 2,562 mesh surfaces, 936,015 triangles, and 709,677 vertices reported.
+- 18,029 C3 MOTI chunks were parsed. The per-mesh exporter passed its Rust regression test and Godot import validation: 569 GLBs imported, 2,562 surfaces, 2,307 morph-capable mesh nodes, 509 animated models, 13,163 animation tracks, and 57,012 keys. 558 motion-only C3 documents were analyzed; 537 expose numeric look/weapon/action path keys. Six proof-of-concept clips were applied to look-7/look-8 candidate bodies and imported by Godot. Full class/action assignment remains open.
 - 1,060 PVR textures decoded with zero decoder failures.
 - 40 C3 parser failures remain in effect paths because 4- or 8-byte tails are not understood by the pinned parser.
 - Additional models were skipped when matching decoded PVR textures or renderable geometry were unavailable.
@@ -50,9 +64,9 @@ Conversion/import success is not equivalent to in-game model assignment, animati
 
 Resource workflow: https://github.com/ZzwahwahzZ/Clash-of-Legends/actions/runs/41991454834
 
-The full resource pipeline completed successfully in run https://github.com/ZzwahwahzZ/Clash-of-Legends/actions/runs/41991454834: 11 category PCKs exported, runtime PCK/model catalog validation passed, collision validation passed, and `RESOURCE_MANIFEST` with sizes/SHA-256 was committed. The packages total 1,414,091,280 bytes (about 1.317 GiB). The upload/release steps were skipped because the redistribution permission gate remains false; no PCK download URLs are published.
+The full resource pipeline completed successfully in run https://github.com/ZzwahwahzZ/Clash-of-Legends/actions/runs/41991454834: 11 category PCKs exported, runtime PCK/model catalog validation passed, collision validation passed, and `RESOURCE_MANIFEST` with sizes/SHA-256 was committed. The historical package build total was 1,414,091,280 bytes (about 1.317 GiB); the currently public v4 release contains 11 PCK assets. The upload/release steps in that historical build were skipped because the redistribution permission gate was false. However, the existing public release tag resource-packs-v4 already exposes 11 PCK assets, including models.pck and world.pck. The current gate prevents new publication but does not retract that older public release.
 
-The explicit redistribution permission gate remains disabled. Do not publish original client assets or derivative copies publicly without separate rights clearance.
+The explicit redistribution permission gate remains disabled for new publication. Existing public release resource-packs-v4 remains downloadable; do not publish additional original client assets or derivative copies without separate rights clearance.
 
 ## 5. Acceptance decision
 
