@@ -30,7 +30,7 @@ jobs:
 
           archive = Path("build/character_source/extracted-assets-001.zip")
           output = Path("build/character_source/role-model-mapping-report.json")
-          targets = [
+          base_targets = [
               "assets/ConquerRes/ini/3dsimplerole.ini",
               "assets/ConquerRes/ini/rolechoose.ini",
               "assets/ConquerRes/ini/rolechoose_js.ini",
@@ -46,7 +46,18 @@ jobs:
               "assets/ConquerRes/ini/luacfg/roleselect.dat",
               "assets/ConquerRes/ini/luacfg/wraphair.dat",
               "assets/ConquerRes/ani/playerface.ani",
+              "assets/ConquerRes/ini/armor_trans.ini",
+              "assets/ConquerRes/ini/armet_trans.ini",
+              "assets/ConquerRes/ini/weapon_trans.ini",
+              "assets/ConquerRes/ini/weaponmatch.ini",
+              "assets/ConquerRes/ini/weaponshow.ini",
           ]
+          known_role_model_ids = {
+              "134080","131230","139000","133080","138230","136000","135000","130000",
+              "101230","102000","103990","3135990","4135990","3136990","4136990",
+              "3133580","4133580","3139590","4139590","1130570","2130570","1131860",
+              "2131860","1133980","2133580","1134590","2134590"
+          }
 
           def tq_candidate(data, seed):
               state = seed & 0xffffffff
@@ -86,6 +97,11 @@ jobs:
                   with zipfile.ZipFile(tmp.name) as apk:
                       available = set(apk.namelist())
                       missing = []
+                      itemtype_targets = sorted(
+                          name for name in available
+                          if name.startswith("assets/ConquerRes/ini/itemtype/") and name.lower().endswith(".ini")
+                      )
+                      targets = base_targets + itemtype_targets
                       for target in targets:
                           if target not in available:
                               missing.append(target)
@@ -128,6 +144,13 @@ jobs:
                                   elif "=" in stripped and current_section and not stripped.startswith((";", "#")):
                                       key, value = stripped.split("=", 1)
                                       ini_sections[current_section][key.strip()] = value.strip()
+                          matching_role_sections = {}
+                          for section_name, fields in ini_sections.items():
+                              searchable = section_name + " " + " ".join(str(value) for value in fields.values())
+                              if any(re.search(r"(?<![0-9])" + re.escape(model_id) + r"(?![0-9])", searchable) for model_id in known_role_model_ids):
+                                  matching_role_sections[section_name] = fields
+                          is_bulk_itemtype = "/itemtype/" in target.lower()
+                          stored_ini_sections = matching_role_sections if is_bulk_itemtype or target.lower().endswith(("_trans.ini", "weaponmatch.ini", "weaponshow.ini")) else ini_sections
                           xml_structure = {}
                           if target.lower().endswith(".xml"):
                               try:
@@ -149,8 +172,10 @@ jobs:
                               "text_encoding_candidate": encoding,
                               "line_count": len(lines),
                               "section_count": len(sections),
+                              "ini_section_count": len(ini_sections),
+                              "matching_role_section_count": len(matching_role_sections),
                               "key_names": keys[:300],
-                              "ini_sections": ini_sections,
+                              "ini_sections": stored_ini_sections,
                               "xml_structure": xml_structure,
                               "asset_reference_count": len(refs),
                               "asset_references": refs[:500],
@@ -165,6 +190,9 @@ jobs:
               "embedded_apk_path": apk_info.filename,
               "embedded_apk_size_bytes": apk_info.file_size,
               "records_found": len(records),
+              "base_records_found": sum(1 for x in records if x["source_path"] in base_targets),
+              "itemtype_ini_files_found": len(itemtype_targets),
+              "known_role_model_ids": sorted(known_role_model_ids),
               "missing_paths": missing,
               "records": records,
               "policy": "This report contains hashes and structural metadata only. Candidate TQ decryptions are diagnostics, not accepted mobile data."
@@ -180,7 +208,7 @@ jobs:
                   for x in records
               ]
           }, ensure_ascii=False, indent=2))
-          if len(records) < 10 or missing:
+          if len(records) < 10 or missing or len(itemtype_targets) < 20:
               raise SystemExit("Character source mapping audit is incomplete.")
           PY
       - name: Upload character source mapping audit report
