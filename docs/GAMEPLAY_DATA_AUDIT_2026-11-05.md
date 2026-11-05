@@ -15,7 +15,7 @@ The source probe located these mobile files but did not decode them:
 - `item_refine_effect.dat` and `item_refine_effect_ex.dat` — refinement visual effects
 - `monster.dat` (language variants) — monster definitions
 
-Their current status remains `PROBE_ONLY_NOT_PARSED`. The probe report contains encrypted-looking bytes and hashes, not decoded records.
+Their current status remains `PROBE_ONLY_NOT_PARSED`. The probe report contains source hashes plus a seed-9527 candidate output that now has strong structural signatures: `itemcfg.dat` resembles a Lua item table, `copydrop.dat` a Lua drop table, `questinfo.dat` and `taskitem_info.dat` Lua tables, and the two refinement files `@@`-delimited records. These remain candidate decryptions only; the report explicitly sets `accepted_as_mobile_format=false` because the seed/algorithm was borrowed from older PC-client research and has not yet been verified against the Android 1.1.2.3 reader.
 
 Two readable source files were also found:
 
@@ -46,6 +46,18 @@ These features can remain available for development testing, but their status mu
 
 `scripts/automation/AutoLootManager.gd` groups gems and quest items under the generic materials toggle. This may not match the original mobile filter semantics. The UI/filter mapping needs comparison against the original client behavior before acceptance.
 
+## Latest CI catalog and candidate diagnostics
+
+The completed resource run `41991454834` produced:
+- `monstertype.ini`: 738 unique readable records, 0 malformed/duplicate lines.
+- `gemtip.ini`: 52 readable sections, exact keys/values preserved without inferred gameplay effects.
+- Candidate `copydrop.dat`: 981 drop groups and 53 unique `dropItemTypeID` values under the seed-9527 probe.
+- Candidate `itemcfg.dat`: 18,771 indexed item entries.
+- Candidate quest file: 3 top-level Lua tables and 341 keyed entries; task-item candidate has 10 rows.
+- Candidate refinement tables: 648 base rows and 240 extended rows.
+
+Cross-checks are incomplete: only 160 of 981 candidate drop-group IDs overlap the 738 IDs in the readable `monstertype.ini` catalog, and only 14 of 53 unique candidate drop item IDs overlap the 18,771 `itemcfg.dat` IDs. These mismatches may reflect distinct namespaces, missing companion tables, or a wrong client-version/cipher assumption. Do not import the candidate values into runtime until the Android reader/cipher is verified and the cross-references are explained.
+
 ## Changes made in this phase
 
 - Added `tools/resource_packs/build_gameplay_reference_catalog.py`.
@@ -55,8 +67,8 @@ These features can remain available for development testing, but their status mu
 
 ## Required next work
 
-1. Verify the new catalog-generation step in CI and inspect the generated JSON/report.
-2. Identify the actual encryption/encoding used by the supplied Android 1.1.2.3 APK by examining its client reader code or validating candidate decoders against known plaintext signatures. Do not assume the PC patch 5517 cipher applies.
+1. Completed: verify the catalog-generation step in CI and inspect the generated JSON/report; preserve the source hashes and opaque fields.
+2. Identify the actual encryption/encoding used by the supplied Android 1.1.2.3 APK by examining its client reader code or validating the candidate decoder against known plaintext signatures and cross-file relationships. Do not assume the PC patch 5517 cipher applies.
 3. Decode item, drop, quest, task-item, monster, and refinement records with source hashes and record-level provenance.
 4. Cross-link item IDs, monster IDs, drop groups, quest requirements, materials, refinement requirements, and visual effect IDs.
 5. Replace provisional runtime constants with the decoded source-backed catalog.
