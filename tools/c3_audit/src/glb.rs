@@ -50,7 +50,7 @@ fn u16_bytes(values: &[u16]) -> Vec<u8> {
 fn transformed_positions(mesh: &sandbox_data::c3::C3Mesh, motion: Option<&sandbox_data::c3::C3Motion>, frame: f32) -> Result<Vec<[f32; 3]>, String> {
     mesh.vertices.iter().enumerate().map(|(vertex_index, vertex)| {
         let point = if let Some(motion) = motion {
-            crate::skinned_glb::weighted_c3_position(mesh, motion, vertex_index, frame)?
+            crate::skinned_glb::c3_vertex_position(mesh, motion, vertex_index, frame)?
         } else {
             mesh.initial_matrix.transform_point(vertex.position)
         };
@@ -388,7 +388,7 @@ mod tests {
     }
 
     #[test]
-    fn sampled_deformation_matches_normalized_weighted_c3_influences() {
+    fn sampled_deformation_matches_stock_first_positive_c3_influence() {
         let mut source = mesh("two_slot_vertex");
         source.vertices[0].bone_indices = [0, 1];
         source.vertices[0].bone_weights = [0.25, 0.75];
@@ -404,8 +404,8 @@ mod tests {
             morph_values: Vec::new(),
         };
         let result = transformed_positions(&source, Some(&motion), 0.0).unwrap();
-        // 25% of the first transform (4) plus 75% of the second (40) = 31 cm.
-        assert!((result[0][0] - 0.31).abs() < 0.00001);
+        // Stock C3 uses the first positive influence (bone 0), yielding 4 cm.
+        assert!((result[0][0] - 0.04).abs() < 0.00001);
     }
 
     #[test]
