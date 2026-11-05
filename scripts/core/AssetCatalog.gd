@@ -1,0 +1,78 @@
+extends Node
+## Runtime index for verified resource PCK contents.
+
+signal catalog_loaded(asset_count: int)
+
+var assets_by_category: Dictionary = {}
+var catalog_version: int = 0
+
+func _ready() -> void:
+	if ResourcePackManager:
+		ResourcePackManager.package_installed.connect(_on_package_installed)
+	call_deferred("_reload_catalog")
+
+func _on_package_installed(_package_id: String, _path: String) -> void:
+	_reload_catalog()
+
+func _reload_catalog() -> bool:
+	var catalog_path := "res://resource_stage/world/resource_catalog.json"
+	if not FileAccess.file_exists(catalog_path):
+		return false
+	var file := FileAccess.open(catalog_path, FileAccess.READ)
+	if file == null:
+		return false
+	var parser := JSON.new()
+	var error := parser.parse(file.get_as_text())
+	file.close()
+	if error != OK or typeof(parser.data) != TYPE_DICTIONARY:
+		push_error("Resource catalog JSON is invalid.")
+		return false
+	var candidate: Dictionary = parser.data
+	var assets: Variant = candidate.get("assets", {})
+	if typeof(assets) != TYPE_DICTIONARY:
+		return false
+	assets_by_category = assets
+	catalog_version = int(candidate.get("catalog_version", 0))
+	var count := 0
+	for category in assets_by_category:
+		if assets_by_category[category] is Array:
+			count += assets_by_category[category].size()
+	catalog_loaded.emit(count)
+	return true
+
+func get_asset_entries(category: String, extension_filter: Array[String] = []) -> Array:
+	var entries: Variant = assets_by_category.get(category, [])
+	if typeof(entries) != TYPE_ARRAY:
+		return []
+	if extension_filter.is_empty():
+		return entries.duplicate(true)
+	var filtered: Array = []
+	for entry in entries:
+		var ext := str(entry.get("extension", "")).to_lower()
+		if extension_filter.has(ext):
+			filtered.append(entry.duplicate(true))
+	return filtered
+
+func get_asset_path(category: String, index: int) -> String:
+	var entries: Array = get_asset_entries(category)
+	if index < 0 or index >= entries.size():
+		return ""
+	return "res://" + str(entries[index].get("path", ""))
+
+func load_model_scene(category: String, index: int) -> PackedScene:
+	var path := get_asset_path(category, index)
+	if path.is_empty():
+		return null
+	var resource := ResourceLoader.load(path)
+	if resource is PackedScene:
+		return resource
+	return null
+
+func has_category(category: String) -> bool:
+	return assets_by_category.has(category) and assets_by_category[category] is Array and not assets_by_category[category].is_empty()
+
+func get_category_counts() -> Dictionary:
+	var counts: Dictionary = {}
+	for category in assets_by_category:
+		counts[category] = assets_by_category[category].size() if assets_by_category[category] is Array else 0
+	return counts
