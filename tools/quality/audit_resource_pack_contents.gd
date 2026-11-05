@@ -185,7 +185,7 @@ func _walk_directory(path: String, counts: Dictionary, model_paths: Array[String
 			continue
 		var full_path := path.path_join(entry)
 		if directory.current_is_dir():
-			_walk_directory(full_path, counts, model_paths)
+			_walk_directory(full_path, counts, model_paths, samples)
 		else:
 			var extension := entry.get_extension().to_lower()
 			counts[extension] = int(counts.get(extension, 0)) + 1
