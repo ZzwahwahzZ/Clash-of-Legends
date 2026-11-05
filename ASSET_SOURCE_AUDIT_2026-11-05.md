@@ -59,3 +59,22 @@ The source index contains the original mobile `c3.wdb` at:
 A metadata-only WDB/DBC parser was added at `tools/resource_packs/audit_c3_wdb.py`. Its source-staging audit step passed in workflow run `42000137006`; the full workflow is still processing C3 conversion, DMap validation and PCK checks before it uploads the compact report. It does not place original DBC blobs in the report or public resource packs.
 
 **Publication correction:** the current workflow gate blocks new PCK publication when `ALLOW_C3_ASSET_REDISTRIBUTION` is false, but the existing public release tag `resource-packs-v4` already exposes 11 PCK assets, including `models.pck` and `world.pck`. The gate does not retract that historical release. No release deletion or access change has been made.
+
+
+## 2026-11-05 live audit of the currently published PCK release
+
+Workflow run: https://github.com/ZzwahwahzZ/Clash-of-Legends/actions/runs/42080338561  
+Audit request: ASSET_REFERENCE_LIBRARY/PUBLISHED_RESOURCE_PACK_AUDIT_REQUEST.md
+
+The exact 11 PCK files listed in the current RESOURCE_MANIFEST all mounted successfully in Godot 4.3. The runtime scan of the mounted package contents reported:
+
+- 1,946 original .c3 files, 1,511 .pvr files, 1,468 .dat files, 1,474 .ini files, 246 .scene files, 209 .dmap files, and 85 .ani files.
+- Zero .glb/.gltf model files found anywhere in the mounted runtime resource set.
+- Zero renderable GLB models, zero imported skeletons, and zero imported animation clips in that package set.
+- The runtime catalog expected by AssetCatalog.gd, res://resource_stage/world/resource_catalog.json, is absent. No alternative resource_catalog.json was found among the package JSON files; the JSON files present are source previews/reports and client configuration.
+
+The resource-pack audit therefore failed correctly at the missing runtime catalog check. This is not a Godot import failure and must not be "fixed" by weakening the audit. It proves that the published PCK release currently mounted by the game contains the original C3/PVR/DAT source inventory, but not the converted GLB runtime catalog required by AssetCatalog. The prior 563/707 C3-to-GLB conversion results were produced in separate audit/build workspaces and are not evidence that those GLBs are included in these published PCKs.
+
+Runtime consequence: the class-model lookup cannot resolve a verified runtime character model from these PCKs; the player keeps the existing fallback scene. The mount model lookup likewise has no verified runtime catalog to bind an equipped mount to its exact model. The recent runtime safety changes deliberately refuse arbitrary array-index selection and preserve the current visible model when a verified candidate is unavailable.
+
+Required next step: rebuild the runtime resource packages from a reviewed, rights-cleared asset bundle that includes the converted model outputs and generated catalog, then rerun the full PCK mount/catalog/identity/rig/material/animation audit. Do not copy the currently published source PCKs into a new release or expose proprietary source assets publicly as a shortcut.
