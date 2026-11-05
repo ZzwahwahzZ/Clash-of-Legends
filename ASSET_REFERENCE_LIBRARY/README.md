@@ -2,10 +2,12 @@
 
 This folder tracks visual-reference assets for the game's art/3D-generation workflow.
 
-## Selection rule
-- Original Conquer artwork is used only when its specific page or author grants redistribution/reuse rights.
-- When a Conquer image cannot be redistributed, use an independently created asset with a clearly stated compatible license and a similar gameplay role/silhouette. Do not copy Conquer's exact character, monster, weapon, costume, or map design.
-- Keep source, creator, license, and original download page with every imported file. Re-check each source before shipping.
+## Selection and fidelity rules
+- **Paid/premium Conquer Online Mobile appearance is a locked fidelity target.** Weapons, armor, helmets, clothing, fashions, mounts, mount tack/ornaments, and their visual effects must retain the exact source design, silhouette, colors, engravings, patterns, and material details. Do not recolor, simplify, redesign, or substitute these items with a merely similar asset.
+- Exact source files may be used only where the project owner has the rights/permission required for the intended use and distribution. Keep proprietary originals out of this public repository and public releases unless redistribution rights are explicitly established.
+- If the exact source asset or permission is unavailable, mark that item **UNRESOLVED — NOT APPROVED**. A licensed substitute may be used for unrelated/non-premium content only when it does not violate the locked premium-asset requirement.
+- Preserve provenance for every imported file: source URL/archive, original path/name, owner, license/permission evidence, retrieval date, checksum, transformations, and intended use (reference, private build, or distributable build).
+- Technical conversion or a successful render is not visual approval. Every item must pass source-to-render comparison and texture/UV/material review before acceptance.
 
 ## Initial verified source candidates
 
