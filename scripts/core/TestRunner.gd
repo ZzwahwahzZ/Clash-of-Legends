@@ -60,7 +60,7 @@ func test_autoload_presence() -> void:
 	assert_true(AutoLootManager != null, "Autoload: AutoLootManager is loaded and active")
 
 func test_class_and_skill_database() -> void:
-	var classes = ["Trojan", "Warrior", "Archer", "Taoist", "Ninja", "Monk", "Pirate"]
+	var classes = ["Trojan", "Warrior", "Archer", "Ninja", "Monk", "Pirate", "DragonWarrior", "Windwalker", "Thunderstriker", "WaterTaoist", "FireTaoist", "Taoist"]\n\tassert_true(GameContentDatabase.validate_registry(), "Content DB: class and skill references are internally valid")\n\tassert_true(GameContentDatabase.get_class_ids().size() == 12, "Content DB: all 11 canonical classes plus legacy Taoist alias are registered")
 	for c in classes:
 		var skills = CombatEngine.get_class_skills(c)
 		assert_true(skills.size() > 0, "Class Verification: %s has functional combat skills" % c)
