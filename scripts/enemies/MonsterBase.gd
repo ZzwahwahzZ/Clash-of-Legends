@@ -215,12 +215,16 @@ func _check_player_detection() -> void:
 func _perform_attack() -> void:
 	attack_cooldown = 1.6
 	if target_player and target_player.has_method("take_damage"):
+		if GameAudioManager:
+			GameAudioManager.play_sfx("monster_attack", self)
 		target_player.take_damage(attack_power, self)
 
 func take_damage(amount: int, attacker: CharacterBody3D) -> void:
 	if current_state == State.DEAD:
 		return
 	current_health = max(0, current_health - amount)
+	if GameAudioManager:
+		GameAudioManager.play_sfx("hit", self, -8.0)
 	_update_label()
 	
 	if target_player == null and attacker:
@@ -237,6 +241,8 @@ func _update_label() -> void:
 
 func _on_death(killer: CharacterBody3D) -> void:
 	current_state = State.DEAD
+	if GameAudioManager:
+		GameAudioManager.play_sfx("monster_death", self)
 	velocity = Vector3.ZERO
 	visible = false
 	collision_layer = 0
