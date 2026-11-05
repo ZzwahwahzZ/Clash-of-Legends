@@ -67,12 +67,14 @@ def inspect_tq_cipher_candidates(path: Path, role: str, data: bytes) -> list:
     # Seeds 9527 and 1234 are documented for specific older desktop-client files only.
     # Trying them here is a falsifiable diagnostic, not a claim about the mobile APK.
     results = []
+    source_path = path.as_posix()
+    locale = "ar" if "/ini_ar/" in source_path else ("sp" if "/ini_sp/" in source_path else "en")
     for seed in (9527, 1234):
         decoded = tq_decrypt_candidate(data, seed)
         signals = candidate_text_signals(decoded)
-        entry = {"cipher_candidate": "TQ_FILE_CIPHER_RESEARCH_ONLY", "seed": seed, **signals, "accepted_as_mobile_format": False}
+        entry = {"cipher_candidate": "TQ_FILE_CIPHER_RESEARCH_ONLY", "seed": seed, "source_locale": locale, **signals, "accepted_as_mobile_format": False}
         if signals["looks_like_known_text"]:
-            out = Path("build/gameplay_decode_candidates") / f"{role}_{path.stem}_seed_{seed}.txt"
+            out = Path("build/gameplay_decode_candidates") / f"{role}_{path.stem}_{locale}_seed_{seed}.txt"
             out.parent.mkdir(parents=True, exist_ok=True)
             out.write_bytes(decoded)
             entry["candidate_output"] = str(out)

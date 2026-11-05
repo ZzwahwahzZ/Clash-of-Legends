@@ -251,6 +251,8 @@ def main() -> None:
     else:
         result["blocked_sources"].append({"role": "gem_definitions", "reason": "gemtip.ini not found"})
     itemtype_data = parse_itemtype_files()
+    if itemtype_data["file_count"] > 0 and itemtype_data["record_count"] == 0:
+        raise SystemExit("Found version-matched itemtype INI files but parsed zero records; inspect delimiter/schema before proceeding.")
     if itemtype_data["file_count"] > 0:
         (OUT / "itemtype_source_catalog.json").write_text(
             json.dumps(itemtype_data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
@@ -271,15 +273,15 @@ def main() -> None:
     cross_checks = {
         "itemcfg_vs_itemtype_ids": candidate_id_cross_check(
             "itemcfg.dat sections vs readable itemtype INI IDs",
-            candidate_dir / "item_definitions_itemcfg_seed_9527.txt", item_ids
+            candidate_dir / "item_definitions_itemcfg_en_seed_9527.txt", item_ids
         ),
         "monster_dat_vs_monstertype_ids": candidate_id_cross_check(
             "monster.dat sections vs readable monstertype.ini IDs",
-            candidate_dir / "monster_definitions_monster_seed_9527.txt", monster_ids
+            candidate_dir / "monster_definitions_monster_en_seed_9527.txt", monster_ids
         ),
         "copydrop_vs_monstertype_ids": candidate_id_cross_check(
             "copydrop.dat sections vs readable monstertype.ini IDs",
-            candidate_dir / "monster_drop_rules_copydrop_seed_9527.txt", monster_ids
+            candidate_dir / "monster_drop_rules_copydrop_en_seed_9527.txt", monster_ids
         ),
     }
     result["candidate_mobile_id_cross_checks"] = cross_checks
