@@ -67,6 +67,11 @@ The previous GLB exporter incorrectly reused `document.motions.first()` for ever
 
 The C3 body assets are not necessarily complete character models. The inspected `c3/body/7000000.c3` is a separate head-like mesh; the 713xxxx body models contain multiple body/equipment submeshes but may not include the head. Head, helmet, weapon, cape, mount, and other parts must be assembled using the source part order and verified transforms. A successful GLB import alone does not complete the character.
 
+The broader C3 audit found 558 motion-only C3 documents (zero PHY meshes, 18 MOTI chunks each in the dominant groups). Their paths include groups such as `c3/0007/500/100.c3`, `c3/0008/500/100.c3`, and other action/weapon groups. The first MOTI chunk commonly has 66 bones while the remaining 17 have one bone each, matching the 18-part body layout. This strongly suggests the files carry action animation for a compatible body/skeleton, but the exact group-to-body/action mapping is not yet verified.
+
+The current per-mesh exporter fix addresses embedded MOTI data only. It does **not** yet merge these 558 motion-only documents into body GLBs or create the full idle/walk/attack/skill/death animation library. `weaponmotiondata.dat` is being added to the source audit to help resolve action/weapon group selection.
+
+
 ## 4. Additional role presentation and equipment data
 
 - `3dsimplerole.ini` has Role0–Role7 selection-preview records with 3DSimpleObjID values 20001–20008, standby/blaze motion IDs, role sounds, and role-selection effects.
