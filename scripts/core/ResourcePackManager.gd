@@ -10,6 +10,8 @@ signal package_failed(package_id: String, reason: String)
 const MANIFEST_URL := "https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/resource-packs-v1/RESOURCE_MANIFEST"
 const INSTALL_DIR := "user://resource_packs"
 const MAX_MANIFEST_BYTES := 1024 * 1024
+const APPLICATION_ID := "com.zwahwahzz.clashoflegends"
+const GODOT_VERSION := "4.3"
 
 var manifest: Dictionary = {}
 var packages: Dictionary = {}
@@ -65,6 +67,9 @@ func refresh_manifest(url: String = MANIFEST_URL) -> bool:
 	return _accept_manifest(parser.data)
 
 func _accept_manifest(candidate: Dictionary) -> bool:
+	if str(candidate.get("package_id", "")) != APPLICATION_ID:
+		push_error("Resource manifest belongs to a different Android application.")
+		return false
 	var entries: Variant = candidate.get("resource_packages", [])
 	if typeof(entries) != TYPE_ARRAY:
 		return false
@@ -81,7 +86,11 @@ func _accept_manifest(candidate: Dictionary) -> bool:
 			return false
 		if not filename.to_lower().ends_with(".pck") or not url_value.begins_with("https://"):
 			return false
-		if size_value <= 0 or digest.length() != 64 or not _is_hex_digest(digest):
+		if size_value <= 0 or size_value > 3 * 1024 * 1024 * 1024 or digest.length() != 64 or not _is_hex_digest(digest):
+			return false
+		if str(entry.get("godot_version", "")) != GODOT_VERSION:
+			return false
+		if str(entry.get("platform", "all")) not in ["all", "android"]:
 			return false
 		if validated.has(package_id):
 			return false
