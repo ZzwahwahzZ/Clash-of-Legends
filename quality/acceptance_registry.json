@@ -5,7 +5,7 @@
   "items": [
     {
       "id": "characters_and_classes",
-      "status": "NOT_ACCEPTED",
+      "status": "IN_PROGRESS",
       "gates": {
         "source_traceability": false,
         "reference_match": false,
@@ -14,14 +14,19 @@
         "automated_tests": false,
         "device_performance": false
       },
-      "evidence": [],
+      "evidence": [
+        "C3 motion POC CI run 41999396204: six look-7/look-8 candidate clips imported and passed Godot 4.3 mesh/morph/animation-track validation; this is not class identity or visual acceptance.",
+        "docs/CHARACTER_MODEL_MAPPING_RESEARCH.md: ordered PHY/MOTI signatures and candidate look/weapon/action path keys."
+      ],
       "open_issues": [
-        "Original-reference comparison and required evidence not yet completed."
+        "Look 7/8 gender and class interpretation remains a candidate; exact class-to-body ID mapping still requires WDB 3dobj and motion-table cross-checks.",
+        "Complete character assembly, equipment attachment, in-scene reference comparison, and clipping review are not complete.",
+        "No real Redmi Note 11 visual/performance capture has been recorded."
       ]
     },
     {
       "id": "skeleton_and_equipment_attachment",
-      "status": "NOT_ACCEPTED",
+      "status": "IN_PROGRESS",
       "gates": {
         "source_traceability": false,
         "reference_match": false,
@@ -30,9 +35,14 @@
         "automated_tests": false,
         "device_performance": false
       },
-      "evidence": [],
+      "evidence": [
+        "Base body C3 candidates contain 18 ordered PHY/MOTI slots; the look-7 and look-8 motion-only documents match their respective ordered bone-count signatures.",
+        "C3 motion POC CI run 41999396204: six external-motion GLBs passed Godot 4.3 import and animation-track validation."
+      ],
       "open_issues": [
-        "Original-reference comparison and required evidence not yet completed."
+        "Virtual socket transforms for v_armet, v_l_weapon, v_r_weapon, v_back, v_pelvis and other attachment points are not yet exported and runtime-verified.",
+        "Armor, head, hair, weapon, mount and cape assembly plus clipping/intersection checks remain incomplete.",
+        "No in-scene visual comparison or Redmi Note 11 test has been completed."
       ]
     },
     {
