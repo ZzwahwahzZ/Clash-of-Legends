@@ -32,6 +32,8 @@ func _validate() -> void:
 	var total_animation_tracks := 0
 	var total_animation_keys := 0
 	var morph_mesh_nodes := 0
+	var motion_poc_results: Array[Dictionary] = []
+	var motion_poc_failed := false
 	for path in files:
 		var packed := ResourceLoader.load(path) as PackedScene
 		if packed == null:
@@ -86,9 +88,42 @@ func _validate() -> void:
 		total_animation_keys += model_animation_keys
 		morph_mesh_nodes += model_morph_meshes
 		total_surfaces += model_surfaces
+		if path.contains("/motion-poc/"):
+			var clip_ok := model_surfaces > 0 and model_morph_meshes == meshes.size() and model_animation_tracks > 0 and model_animation_keys > 1
+			var clip_result := {
+				"path": path,
+				"mesh_instance_count": meshes.size(),
+				"surface_count": model_surfaces,
+				"morph_mesh_count": model_morph_meshes,
+				"animation_track_count": model_animation_tracks,
+				"animation_key_count": model_animation_keys,
+				"status": "GODOT_IMPORT_VALIDATED" if clip_ok else "FAILED"
+			}
+			motion_poc_results.append(clip_result)
+			if not clip_ok:
+				motion_poc_failed = true
 		print("C3 GLB OK: ", path, " | MeshInstance3D: ", meshes.size(), " | surfaces: ", model_surfaces, " | morph meshes: ", model_morph_meshes, " | animation tracks: ", model_animation_tracks, " | animation keys: ", model_animation_keys)
 		instance.free()
 		valid += 1
+	var poc_report := {
+		"expected_clip_count": 6,
+		"validated_clip_count": motion_poc_results.filter(func(row): return row.get("status") == "GODOT_IMPORT_VALIDATED").size(),
+		"status": "PASSED" if motion_poc_results.size() == 6 and not motion_poc_failed else "FAILED",
+		"clips": motion_poc_results
+	}
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://reports"))
+	var poc_file := FileAccess.open("res://reports/c3-motion-poc-validation.json", FileAccess.WRITE)
+	if poc_file == null:
+		push_error("C3 motion POC validation: could not write validation report.")
+		quit(1)
+		return
+	poc_file.store_string(JSON.stringify(poc_report, "\t") + "\n")
+	poc_file.close()
+	print("C3 MOTION POC VALIDATION: ", poc_report["validated_clip_count"], "/", poc_report["expected_clip_count"], " clips passed Godot import and animation-track checks.")
+	if motion_poc_results.size() != 6 or motion_poc_failed:
+		push_error("C3 motion POC validation failed: expected six fully animated imported clips.")
+		quit(1)
+		return
 	if animated == 0 or morph_mesh_nodes == 0 or total_animation_tracks == 0:
 		push_error("C3 GLB validation: converted models did not expose usable morph animation tracks.")
 		quit(1)
