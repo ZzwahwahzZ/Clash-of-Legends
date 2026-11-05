@@ -45,8 +45,22 @@ func _run() -> void:
 	camera.make_current()
 
 	var all_passed := true
+	var clip_proofs: Array[Dictionary] = []
+	var audit_data = JSON.parse_string(FileAccess.get_file_as_string("res://reports/c3-model-audit.json"))
+	if not (audit_data is Dictionary):
+		push_error("C3 six-clip visual proof: model audit report is missing.")
+		quit(1)
+		return
+	var clip_reports: Dictionary = {}
+	for row in audit_data.get("vat_motion_poc", []):
+		clip_reports[str(row.get("clip_id", ""))] = row
 	for clip in CLIPS:
 		var clip_id := str(clip["id"])
+		if not clip_reports.has(clip_id):
+			push_error("C3 six-clip visual proof: audit report is missing " + clip_id)
+			all_passed = false
+			continue
+		var clip_report: Dictionary = clip_reports[clip_id]
 		var model_path := "res://build/c3-glb/motion-poc".path_join(clip_id + ".glb")
 		var packed := ResourceLoader.load(model_path) as PackedScene
 		if packed == null:
@@ -60,8 +74,9 @@ func _run() -> void:
 		for player_node in character.find_children("*", "AnimationPlayer", true, false):
 			(player_node as AnimationPlayer).stop()
 		var mesh_nodes := character.find_children("*", "MeshInstance3D", true, false)
-		if mesh_nodes.size() < 10:
-			push_error("C3 six-clip visual proof: incomplete character mesh set for " + clip_id + " count=" + str(mesh_nodes.size()))
+		var expected_mesh_count := int(clip_report.get("source_renderable_mesh_count", -1))
+		if expected_mesh_count < 1 or mesh_nodes.size() != expected_mesh_count:
+			push_error("C3 six-clip visual proof: imported full-character mesh count differs from source for " + clip_id + " count=" + str(mesh_nodes.size()))
 			character.queue_free()
 			await process_frame
 			all_passed = false
@@ -104,6 +119,7 @@ func _run() -> void:
 		var metadata_files := DirAccess.get_files_at(VAT_DIR)
 		metadata_files.sort()
 		var vat_players: Array = []
+		var applied_mesh_names: Dictionary = {}
 		var vat_mesh_count := 0
 		for metadata_name in metadata_files:
 			if not metadata_name.ends_with(".json"):
@@ -135,7 +151,17 @@ func _run() -> void:
 			vat_player.pause()
 			vat_player.set_frame(0.0)
 			vat_players.append({"player":vat_player,"middle_frame":float(maxi(1, int(int(metadata_value.get("height", 2)) / 2)))})
+			applied_mesh_names[mesh_name] = true
 			vat_mesh_count += 1
+		var static_parts: Array = clip_report.get("static_meshes_retained_without_vat", [])
+		for static_part in static_parts:
+			var static_name := str(static_part.get("mesh_name", ""))
+			if static_name.is_empty() or not mesh_by_name.has(static_name) or applied_mesh_names.has(static_name):
+				push_error("C3 six-clip visual proof: static part missing or incorrectly VAT-animated: " + static_name)
+				all_passed = false
+		if vat_mesh_count != int(clip_report.get("mesh_count", 0)):
+			push_error("C3 six-clip visual proof: VAT part count differs from audit report for " + clip_id)
+			all_passed = false
 		if vat_mesh_count == 0:
 			push_error("C3 six-clip visual proof: no moving VAT meshes for " + clip_id)
 			character.queue_free()
@@ -176,6 +202,18 @@ func _run() -> void:
 			push_error("C3 six-clip visual proof: no meaningful rendered change for " + clip_id)
 			all_passed = false
 		print("C3 SIX-CLIP VISUAL: ", clip["look"], " ", clip["action"], " | full_meshes=", mesh_nodes.size(), " | VAT_moving_meshes=", vat_mesh_count, " | changed_sampled_pixels=", changed_sampled_pixels)
+		clip_proofs.append({
+			"clip_id": clip_id,
+			"look": clip["look"],
+			"action": clip["action"],
+			"full_character_mesh_count": mesh_nodes.size(),
+			"vat_mesh_count": vat_mesh_count,
+			"static_mesh_count": static_parts.size(),
+			"changed_sampled_pixels": changed_sampled_pixels,
+			"frame_a": OUTPUT_DIR.path_join(file_stem + "_frame_a.png"),
+			"frame_b": OUTPUT_DIR.path_join(file_stem + "_frame_b.png"),
+			"status": "FULL_CHARACTER_VISUAL_MOTION_CONFIRMED"
+		})
 		for vat_entry in vat_players:
 			vat_entry["player"].queue_free()
 		character.queue_free()
@@ -185,7 +223,27 @@ func _run() -> void:
 		push_error("C3 six-clip visual proof failed. Inspect reports/" + OUTPUT_DIR)
 		quit(1)
 		return
-	print("C3 SIX-CLIP VISUAL PROOF PASSED: male/female Idle, Walk, Run; 12 before/after screenshots saved.")
+	var proof_report := {
+		"expected_clip_count": 6,
+		"validated_clip_count": clip_proofs.size(),
+		"layout": "male/female; Idle, Walk, Run; individual before/after PNGs",
+		"artifact_directory": OUTPUT_DIR,
+		"clips": clip_proofs,
+		"status": "PASSED"
+	}
+	var poc_path := "res://reports/c3-motion-poc-validation.json"
+	var existing_report = JSON.parse_string(FileAccess.get_file_as_string(poc_path)) if FileAccess.file_exists(poc_path) else {}
+	if not (existing_report is Dictionary):
+		existing_report = {}
+	existing_report["vat_visual_proof"] = proof_report
+	var proof_file := FileAccess.open(poc_path, FileAccess.WRITE)
+	if proof_file == null:
+		push_error("C3 six-clip visual proof: could not write combined validation report.")
+		quit(1)
+		return
+	proof_file.store_string(JSON.stringify(existing_report, "\\t") + "\\n")
+	proof_file.close()
+	print("C3 SIX-CLIP VISUAL PROOF PASSED: ", JSON.stringify(proof_report))
 	stage.queue_free()
 	quit(0)
 
