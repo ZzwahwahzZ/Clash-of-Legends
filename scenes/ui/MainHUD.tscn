@@ -115,17 +115,26 @@ grow_horizontal = 0
 [node name="QuestTitle" type="Label" parent="TopRight/QuestBanner"]
 layout_mode = 1
 offset_left = 10.0
-offset_top = 5.0
+offset_top = 3.0
 offset_right = 270.0
-offset_bottom = 28.0
+offset_bottom = 20.0
 text = "تهديد الذئاب البرية"
+
+[node name="QuestDescription" type="Label" parent="TopRight/QuestBanner"]
+layout_mode = 1
+offset_left = 10.0
+offset_top = 20.0
+offset_right = 270.0
+offset_bottom = 42.0
+autowrap_mode = 3
+text = "وصف المهمة"
 
 [node name="QuestProgress" type="Label" parent="TopRight/QuestBanner"]
 layout_mode = 1
 offset_left = 10.0
-offset_top = 30.0
+offset_top = 42.0
 offset_right = 270.0
-offset_bottom = 53.0
+offset_bottom = 58.0
 text = "التقدم: 0 / 5 (انقر للملاحة)"
 
 [node name="AutoControls" type="HBoxContainer" parent="TopRight"]
