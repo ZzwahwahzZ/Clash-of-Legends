@@ -20,8 +20,8 @@ func _validate_packages() -> void:
 			quit(1)
 			return
 		loaded_count += 1
-	if loaded_count < 6:
-		push_error("PCK validation: expected at least six real category packages.")
+	if loaded_count < 11:
+		push_error("PCK validation: expected eleven non-empty category packages.")
 		quit(1)
 		return
 	var catalog_path := "res://resource_stage/world/resource_catalog.json"
@@ -69,7 +69,7 @@ func _validate_packages() -> void:
 			return
 		print("PCK model OK: ", model_category, " -> ", model_path, " | meshes: ", mesh_count)
 		model_instance.free()
-		var c3_found := false
+	var c3_found := false
 	for entry in assets.get("models", []):
 		if str(entry.get("extension", "")).to_lower() == ".c3":
 			var c3_path := "res://" + str(entry.get("path", ""))
@@ -81,7 +81,7 @@ func _validate_packages() -> void:
 		push_error("PCK validation: extracted original C3 model files are missing.")
 		quit(1)
 		return
-var audio_entries: Array = assets.get("audio", [])
+	var audio_entries: Array = assets.get("audio", [])
 	var audio_path := ""
 	for entry in audio_entries:
 		if str(entry.get("extension", "")).to_lower() == ".ogg":
