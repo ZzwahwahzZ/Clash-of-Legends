@@ -193,6 +193,7 @@ jobs:
             reports/gameplay-data-source-probe.json
             reports/gameplay-readable-catalog-report.json
             resource_stage/world/gameplay_reference/*.json
+            build/gameplay_decode_candidates/*.txt
           if-no-files-found: error
           retention-days: 30
       - name: Publish resource pack release
