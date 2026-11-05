@@ -65,6 +65,7 @@ func _ready() -> void:
 
 func _on_equipment_updated() -> void:
 	_apply_refinement_glow()
+	_apply_mount_model()
 
 func _apply_refinement_glow() -> void:
 	if not inventory:
@@ -288,13 +289,25 @@ func perform_jump() -> void:
 		velocity.y = jump_velocity
 
 func toggle_mount() -> void:
+	if not is_mounted:
+		if not inventory:
+			return
+		var equipped_mount: Variant = inventory.equipment.get("mount", null)
+		if not equipped_mount is Dictionary:
+			if GameManager:
+				GameManager.post_notification("لا توجد مطية مجهزة" if GameManager.current_language == "ar" else "No mount equipped", true)
+			return
+		if not mount_mesh or mount_mesh.get_node_or_null("ImportedMountRoot") == null:
+			if GameManager:
+				GameManager.post_notification("نموذج هذه المطية غير معتمد بعد" if GameManager.current_language == "ar" else "This mount model is not verified yet", true)
+			return
 	is_mounted = !is_mounted
 	if mount_mesh:
 		mount_mesh.visible = is_mounted
 	if torso_node:
 		torso_node.position.y = 1.35 if is_mounted else 0.9
 	if GameManager:
-		var msg = "تم امتطاء الحصان الحربي" if is_mounted else "تم الترجل عن الحصان"
+		var msg = "تم امتطاء المطية المجهزة" if is_mounted else "تم الترجل عن المطية"
 		GameManager.post_notification(msg if GameManager.current_language == "ar" else ("Mounted" if is_mounted else "Dismounted"), false)
 
 func execute_basic_attack() -> void:
@@ -347,19 +360,48 @@ func get_character_class() -> String:
 	return character_class
 
 func _apply_mount_model() -> void:
-	if not mount_mesh or not AssetCatalog:
+	if not mount_mesh or not AssetCatalog or not inventory:
+		return
+	var equipped_mount: Variant = inventory.equipment.get("mount", null)
+	if not equipped_mount is Dictionary:
+		return
+	var mount_item_id := str(equipped_mount.get("id", ""))
+	if mount_item_id.is_empty():
 		return
 	var mount_entries := AssetCatalog.get_asset_entries("mounts", [".glb", ".gltf"])
-	if mount_entries.is_empty():
+	var verified_index := -1
+	for index in range(mount_entries.size()):
+		var entry: Dictionary = mount_entries[index]
+		var mapped_id := str(entry.get("mount_id", entry.get("item_id", "")))
+		if str(entry.get("mapping_status", "")).to_lower() == "verified" and mapped_id == mount_item_id:
+			verified_index = index
+			break
+	if verified_index < 0:
+		return
+	var candidate_root := AssetCatalog.instantiate_fitted_model("mounts", verified_index, mount_mesh, 1.6, "MountCandidate")
+	if candidate_root == null:
+		return
+	var candidate_instance: Node = candidate_root.get_child(0) if candidate_root.get_child_count() > 0 else null
+	var mesh_count := 0
+	if candidate_instance:
+		for node in candidate_instance.find_children("*", "MeshInstance3D", true, false):
+			var mesh_node := node as MeshInstance3D
+			if mesh_node.mesh == null or mesh_node.mesh.get_surface_count() == 0:
+				continue
+			mesh_count += 1
+			for surface_index in range(mesh_node.mesh.get_surface_count()):
+				if mesh_node.get_active_material(surface_index) == null:
+					candidate_root.queue_free()
+					return
+	if mesh_count == 0:
+		candidate_root.queue_free()
 		return
 	var old_root := mount_mesh.get_node_or_null("ImportedMountRoot")
 	if old_root:
 		old_root.queue_free()
-	var imported_root := AssetCatalog.instantiate_fitted_model("mounts", 0, mount_mesh, 1.6, "ImportedMountRoot")
-	if imported_root == null:
-		return
+	candidate_root.name = "ImportedMountRoot"
 	for child in mount_mesh.get_children():
-		if child != imported_root and child is Node3D:
+		if child != candidate_root and child is Node3D:
 			child.visible = false
 
 func set_character_class(new_cls: String) -> void:
