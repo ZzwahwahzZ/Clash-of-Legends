@@ -93,7 +93,7 @@ jobs:
                   if quote:
                       if escaped:
                           escaped = False
-                      elif char == "\\\\":
+                      elif char == "\\":
                           escaped = True
                       elif char == quote:
                           quote = ""
@@ -108,9 +108,9 @@ jobs:
                       if depth == 2 and entry_start >= 0:
                           block = lua_text[entry_start:index + 1]
                           prefix = lua_text[max(outer_open, entry_start - 120):entry_start]
-                          key_match = re.search(r"(?:\\[([^]]+)\\]|([A-Za-z_][A-Za-z0-9_]*))\\s*=\\s*$", prefix)
+                          key_match = re.search(r"(?:\[([^]]+)\]|([A-Za-z_][A-Za-z0-9_]*))\s*=\s*$", prefix)
                           fields = {}
-                          for match in re.finditer(r"""^\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*=\\s*(?:['"]([^'"]*)['"]|(-?\\d+(?:\\.\\d+)?|true|false))""", block, re.MULTILINE):
+                          for match in re.finditer(r"""^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(?:['"]([^'"]*)['"]|(-?\d+(?:\.\d+)?|true|false))""", block, re.MULTILINE):
                               fields[match.group(1)] = match.group(2) if match.group(2) is not None else match.group(3)
                           if "armor" in fields:
                               records.append({
