@@ -104,6 +104,14 @@ jobs:
           use-dotnet: false
           include-templates: true
 
+      - name: Render launcher artwork for Android densities
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y librsvg2-bin
+          mkdir -p assets/icons
+          rsvg-convert -w 512 -h 512 public/clash_launcher_icon.svg -o assets/icons/clash_launcher_icon.png
+          test "$(identify -format '%wx%h' assets/icons/clash_launcher_icon.png 2>/dev/null || file assets/icons/clash_launcher_icon.png)" != ""
+
       - name: Import Godot project
         run: godot --headless --editor --path . --quit
 
