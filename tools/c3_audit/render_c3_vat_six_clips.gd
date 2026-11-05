@@ -134,7 +134,7 @@ func _run() -> void:
 				continue
 			vat_player.pause()
 			vat_player.set_frame(0.0)
-				vat_players.append({"player":vat_player,"middle_frame":float(maxi(1, int(metadata_value.get("height", 2)) / 2))})
+			vat_players.append({"player":vat_player,"middle_frame":float(maxi(1, int(int(metadata_value.get("height", 2)) / 2)))})
 			vat_mesh_count += 1
 		if vat_mesh_count == 0:
 			push_error("C3 six-clip visual proof: no moving VAT meshes for " + clip_id)
