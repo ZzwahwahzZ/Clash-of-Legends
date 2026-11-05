@@ -29,6 +29,8 @@ var attack_anim_timer: float = 0.0
 var input_direction: Vector2 = Vector2.ZERO
 var target_nav_position: Vector3 = Vector3.ZERO
 var is_moving_to_target: bool = false
+var imported_model_animation: AnimationPlayer = null
+var imported_animation_name: String = ""
 
 @onready var camera_pivot: Node3D = $CameraPivot
 @onready var free_camera: FreeCamera3D = $CameraPivot/FreeCamera3D
@@ -74,6 +76,8 @@ func _apply_character_model() -> void:
 		"WaterTaoist":9, "FireTaoist":10, "Taoist":0
 	}
 	var model_index := int(class_indices.get(character_class, 0)) % model_entries.size()
+	imported_model_animation = null
+	imported_animation_name = ""
 	var old_root := visual_root.get_node_or_null("ImportedModelRoot")
 	if old_root:
 		old_root.queue_free()
@@ -83,10 +87,8 @@ func _apply_character_model() -> void:
 	var instance: Node = imported_root.get_child(0)
 	var model_animation := instance.find_child("AnimationPlayer", true, false)
 	if model_animation is AnimationPlayer:
-		if model_animation.has_animation("idle"):
-			model_animation.play("idle")
-		elif model_animation.get_animation_list().size() > 0:
-			model_animation.play(model_animation.get_animation_list()[0])
+		imported_model_animation = model_animation as AnimationPlayer
+		_set_imported_animation_state("idle")
 	for child in visual_root.get_children():
 		if child != imported_root and child is Node3D:
 			child.visible = false
@@ -130,6 +132,7 @@ func _physics_process(delta: float) -> void:
 	velocity.x = move_vec.x
 	velocity.z = move_vec.z
 	var is_moving = move_vec.length_squared() > 0.01
+	_set_imported_animation_state("move" if is_moving else "idle")
 	if is_moving:
 		look_at(global_position + Vector3(move_vec.x, 0, move_vec.z), Vector3.UP)
 		walk_anim_time += delta * 12.0
@@ -145,6 +148,28 @@ func _physics_process(delta: float) -> void:
 		if left_arm: left_arm.rotation.x = lerp(left_arm.rotation.x, 0.0, delta * 10.0)
 		if right_arm and attack_anim_timer <= 0.0: right_arm.rotation.x = lerp(right_arm.rotation.x, 0.0, delta * 10.0)
 	move_and_slide()
+
+func _set_imported_animation_state(state: String) -> void:
+	if imported_model_animation == null or not is_instance_valid(imported_model_animation):
+		return
+	var preferred := ["idle", "stand"] if state == "idle" else ["run", "walk", "move"]
+	var selected := ""
+	for animation_name in imported_model_animation.get_animation_list():
+		var normalized := animation_name.to_lower()
+		for token in preferred:
+			if normalized.contains(token):
+				selected = animation_name
+				break
+		if not selected.is_empty():
+			break
+	if selected.is_empty() and imported_model_animation.get_animation_list().size() > 0:
+		selected = imported_model_animation.get_animation_list()[0]
+	if selected.is_empty():
+		return
+	imported_model_animation.speed_scale = 1.0 if state == "idle" else 1.2
+	if selected != imported_animation_name:
+		imported_animation_name = selected
+		imported_model_animation.play(selected)
 
 func set_joystick_input(vec: Vector2) -> void:
 	input_direction = vec
