@@ -239,8 +239,8 @@ func _validate() -> void:
 								break
 						var expected_referenced_count := int(metadata.get("referenced_vertex_count", -1))
 						vertex_order_matches = vertex_order_matches and expected_referenced_count > 0 and seen_source_indices.size() == expected_referenced_count
-			var weighted_affine := str(metadata.get("influence_semantics", "")).contains("all positive C3 bone_weights")
-			var valid_vat: bool = finite_values and changed and vertex_order_matches and str(metadata.get("format", "")) == "C3_VAT_RGBA32F" and str(metadata.get("classification", "")) == "deforming" and weighted_affine and bool(metadata.get("preserves_affine_shear", false)) and str(metadata.get("vertex_order", "")).begins_with("source C3 vertex index") and not clip_id.is_empty() and mesh_index >= 0 and not mesh_name.is_empty()
+			var c3_influence_rule_matches := str(metadata.get("source_influence_rule", "")).contains("stock C3 first-positive-influence rule")
+			var valid_vat: bool = finite_values and changed and vertex_order_matches and str(metadata.get("format", "")) == "C3_VAT_RGBA32F" and str(metadata.get("classification", "")) == "deforming" and c3_influence_rule_matches and bool(metadata.get("preserves_affine_shear", false)) and str(metadata.get("vertex_order", "")).begins_with("source C3 vertex index") and not clip_id.is_empty() and mesh_index >= 0 and not mesh_name.is_empty()
 			if valid_vat:
 				if not vat_clip_meshes.has(clip_id):
 					vat_clip_meshes[clip_id] = {}
@@ -254,7 +254,7 @@ func _validate() -> void:
 				"metadata": metadata_name, "clip_id": clip_id, "mesh_index": mesh_index, "mesh_name": mesh_name,
 				"width": width, "height": height, "bytes": data.size(), "finite": finite_values,
 				"frame_positions_change": changed, "source_vertex_order_matches_glb": vertex_order_matches,
-				"weighted_affine_influences": weighted_affine,
+				"c3_first_positive_influence_rule": c3_influence_rule_matches,
 				"preserves_affine_shear": metadata.get("preserves_affine_shear", false),
 				"status": "VAT_DATA_VALIDATED" if valid_vat else "FAILED"
 			})
