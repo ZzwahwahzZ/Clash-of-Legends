@@ -150,6 +150,8 @@ jobs:
             # Another workflow may have pushed while this long asset build was running.
             # Rebase the generated manifest commit instead of failing on a non-fast-forward push.
             git pull --rebase origin "${GITHUB_REF_NAME}"
+            # Another workflow may update main while this build is running.
+            git pull --rebase origin "${GITHUB_REF_NAME}"
             git push origin "HEAD:${GITHUB_REF_NAME}"
           fi
       - name: Upload PCKs and source index as workflow artifact
