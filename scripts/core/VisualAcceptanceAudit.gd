@@ -1,13 +1,5 @@
 extends Node
 
-func _ready() -> void:
-	print("=======================================================")
-	print("   CLASH OF LEGENDS — VISUAL & CONTENT AUDIT SUITE    ")
-	print("=======================================================")
-	
-	var pass_count = 0
-	var total_count = 0
-
 	# Presence of node names is not visual proof: every required part must own
 	# a real mesh with at least one surface and non-degenerate bounds.
 	func _has_renderable_mesh(root: Node, node_path: String) -> bool:
@@ -26,6 +18,15 @@ func _ready() -> void:
 				push_warning("VISUAL GEOMETRY MISSING OR EMPTY: " + node_path)
 				return false
 		return true
+
+func _ready() -> void:
+	print("=======================================================")
+	print("   CLASH OF LEGENDS — VISUAL & CONTENT AUDIT SUITE    ")
+	print("=======================================================")
+	
+	var pass_count = 0
+	var total_count = 0
+
 	
 	# Test 1: Player Visual Hierarchy
 	total_count += 1
