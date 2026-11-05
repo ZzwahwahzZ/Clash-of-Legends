@@ -76,3 +76,16 @@ These findings are recorded as implementation gaps, not fixed by suppressing val
 - Godot 4.3 supports importing glTF 2.0 scenes with mesh/material/animation data, but format support alone does not establish provenance or correct source mapping. The project must validate each source model, texture/material assignment, skeleton/action clip, scale and visual result before switching runtime visibility.
 
 Current decision remains **BLOCKED / NOT APPROVED** for quest parity and visual asset replacement.
+
+
+## Runtime correction and regression evidence (2026-11-05, latest implementation)
+
+The prototype now has a safer intermediate turn-in lifecycle, but the fidelity gate remains BLOCKED:
+
+- Objective completion enters a persisted ready-to-turn-in state; Gold/XP are not granted at the objective threshold.
+- A reward is claimed only after the player talks to the configured turn-in NPC. Wrong-NPC interactions do not grant the reward.
+- The next quest is not advanced until the turn-in reward is claimed. Completed-chain state is persisted and does not restart after reload.
+- Quest navigation now exposes a target for the active objective and routes a ready-to-turn-in quest back to its configured NPC; the terminal completed chain has no further navigation target.
+- Regression evidence from GitHub Actions run 42081515079: 135 total gameplay tests, 135 passed, 0 failed. This includes save/load of pending turn-in, wrong-NPC rejection, sage and blacksmith claim flows, level-gate handling, and navigation-target checks.
+
+Important limitation: the current sample NPC IDs and destinations (including npc_sage and npc_blacksmith) are implementation fixtures, not validated mappings from the Android 1.1.2.3 quest records. This correction fixes premature reward granting; it does not establish source parity, quest catalogue completeness, multiple simultaneous quests, accept/decline/abandon flows, dialogue branch selection, or the reference bubble/journal UI. Do not change the gate status to approved.
