@@ -31,6 +31,7 @@ The Android artifact is an internal debug build, not a production release. It is
 - Godot headless logs still show renderer warnings involving null mesh references during scene teardown. They remain open for diagnosis.
 - No side-by-side rendered comparison against the mobile reference has been accepted.
 - No installation, FPS, memory, thermal, loading-time, or stability measurements have been performed on the Redmi Note 11 itself.
+- PCK validation reported these category counts: characters 223, monsters 78, maps 5,069, equipment 124, mounts 48, effects 1,168, animations 58, interface 5,523, audio 323, models 3,634, world 1,309. It also reported 172/172 structurally valid model scenes, 96 converted C3 GLB models catalogued in the checked non-effect runtime categories, and 15/172 model scenes exposing imported animation tracks.
 
 ## 3. Original asset conversion evidence
 
@@ -49,7 +50,7 @@ Conversion/import success is not equivalent to in-game model assignment, animati
 
 Resource workflow: https://github.com/ZzwahwahzZ/Clash-of-Legends/actions/runs/41991454834
 
-At the time of this report update, extraction, readable gameplay catalog generation, PVR/MJP processing steps, C3 conversion/import, and DMap audit had completed. Category PCK export was still running; PCK runtime validation and final manifest generation were pending.
+The full resource pipeline completed successfully in run https://github.com/ZzwahwahzZ/Clash-of-Legends/actions/runs/41991454834: 11 category PCKs exported, runtime PCK/model catalog validation passed, collision validation passed, and `RESOURCE_MANIFEST` with sizes/SHA-256 was committed. The packages total 1,414,091,280 bytes (about 1.317 GiB). The upload/release steps were skipped because the redistribution permission gate remains false; no PCK download URLs are published.
 
 The explicit redistribution permission gate remains disabled. Do not publish original client assets or derivative copies publicly without separate rights clearance.
 
