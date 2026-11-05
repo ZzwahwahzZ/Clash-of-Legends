@@ -42,9 +42,27 @@ def main():
     data = json.loads(args.audit.read_text(encoding="utf-8"))
     converted = data.get("converted", [])
     model_by_path = {m.get("path", "").lower(): m for m in data.get("models", [])}
+    motion_catalog_path = args.project_root / "resource_stage/world/resource_mappings/motion_catalog.json"
+    motion_paths = set()
+    if motion_catalog_path.is_file():
+        motion_data = json.loads(motion_catalog_path.read_text(encoding="utf-8"))
+        motion_paths = {str(path).replace("\\", "/").lower() for path in motion_data.get("unique_motion_paths", [])}
     grouped = defaultdict(list)
+    motion_assets = []
     for row in converted:
         src = row.get("source", "")
+        if src.replace("\\", "/").lower() in motion_paths:
+            motion_model = model_by_path.get(src.lower(), {})
+            motion_assets.append({
+                "source_c3": src,
+                "converted_glb": row.get("output", ""),
+                "glb_bytes": row.get("glb_bytes", 0),
+                "mesh_count": row.get("mesh_count", motion_model.get("mesh_count", 0)),
+                "triangle_count": motion_model.get("triangle_count", 0),
+                "motion_chunk_count": row.get("motion_chunk_count", motion_model.get("motion_count", 0)),
+                "status": "MOTION_SOURCE_CONVERTED_REQUIRES_CLIP_AND_RIG_VALIDATION",
+            })
+            continue
         fam = family_for(src)
         if fam == "unclassified" and not row.get("output", "").startswith("equipment/"):
             continue
@@ -100,6 +118,8 @@ def main():
         "source_report": str(args.audit),
         "converted_record_count": len(converted),
         "equipment_candidate_count": sum(len(v) for v in grouped.values()),
+        "motion_asset_candidate_count": len(motion_assets),
+        "motion_assets": motion_assets,
         "family_counts": dict(Counter({k: len(v) for k, v in grouped.items()})),
         "families": summary,
         "unresolved_gates": [
@@ -109,7 +129,7 @@ def main():
             "Verify skeleton/socket attachment and actual in-game alignment on all relevant body rigs.",
             "Capture close-up runtime evidence and target-device performance before acceptance.",
         ],
-        "policy": "This is an inventory and prioritization report only. A successful C3 parse, GLB export, or texture file match does not approve an asset.",
+        "policy": "This is an inventory and prioritization report only. Motion-source C3 files are reported separately from static equipment so they are not incorrectly rejected by the static-mesh geometry gate. A successful C3 parse, GLB export, or texture file match does not approve an asset.",
         "production_acceptance": "BLOCKED_NOT_APPROVED",
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
