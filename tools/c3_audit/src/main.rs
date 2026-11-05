@@ -203,7 +203,31 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 let inner = c3_inner_path(rel_path);
                 if let Some(category) = category_for(&inner) {
                     let texture_path = pvr_root.join(rel_path.with_extension("png"));
-                    if texture_path.is_file() && !document.meshes.is_empty() {
+                    let renderable_meshes: Vec<_> = document.meshes.iter()
+                        .filter(|mesh| !mesh.vertices.is_empty() && (!mesh.opaque_indices.is_empty() || !mesh.alpha_indices.is_empty()))
+                        .collect();
+                    if document.meshes.is_empty() {
+                        skipped.push(json!({"source":relative,"reason":"C3 document has no PHY mesh chunks","texture_expected":texture_path.to_string_lossy()}));
+                    } else if renderable_meshes.is_empty() {
+                        skipped.push(json!({
+                            "source":relative,
+                            "reason":"C3 document has no renderable triangle mesh",
+                            "mesh_count":document.meshes.len(),
+                            "mesh_details":document.meshes.iter().map(|mesh| json!({
+                                "name":mesh.name,"vertices":mesh.vertices.len(),
+                                "opaque_indices":mesh.opaque_indices.len(),"alpha_indices":mesh.alpha_indices.len()
+                            })).collect::<Vec<_>>(),
+                            "texture_expected":texture_path.to_string_lossy()
+                        }));
+                    } else if !texture_path.is_file() {
+                        skipped.push(json!({
+                            "source":relative,
+                            "reason":"matching same-stem decoded PVR texture is missing",
+                            "texture_expected":texture_path.to_string_lossy(),
+                            "source_texture_names":document.meshes.iter().map(|mesh| mesh.texture_name.clone())
+                                .filter(|name| !name.is_empty()).collect::<std::collections::BTreeSet<_>>()
+                        }));
+                    } else {
                         let texture_bytes = fs::read(&texture_path)?;
                         let output_relative = Path::new(category).join("c3").join(inner.with_extension("glb"));
                         let output_path = glb_root.join(&output_relative);
@@ -220,10 +244,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                     "animated_mesh_count":animated_mesh_count
                                 }));
                             },
-                            Err(error) => skipped.push(json!({"source":relative,"reason":error.to_string()})),
+                            Err(error) => skipped.push(json!({"source":relative,"reason":error.to_string(),"texture":texture_path.to_string_lossy()})),
                         }
-                    } else {
-                        skipped.push(json!({"source":relative,"reason":"matching decoded PVR texture or renderable mesh is missing"}));
                     }
                 }
             }
