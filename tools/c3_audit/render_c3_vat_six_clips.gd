@@ -322,6 +322,8 @@ func _run() -> void:
 		"expected_clip_count": 6,
 		"validated_clip_count": clip_proofs.size(),
 		"layout": "male/female; Idle, Walk, Run; individual before/after PNGs",
+		"render_mode": "UNSHADED_DIAGNOSTIC_ONLY",
+		"approval": "NOT_ACCEPTED",
 		"artifact_directory": OUTPUT_DIR,
 		"before_contact_sheet": "reports/c3-vat-poc-frame-a.png",
 		"after_contact_sheet": "reports/c3-vat-poc-frame-b.png",
