@@ -58,6 +58,8 @@ jobs:
             build/pvr-png/**
             build/c3-glb/**/*.glb
             reports/c3-conversion-report.json
+            build/c3-glb/**/*.glb
+            reports/c3-conversion-report.json
             tools/c3_audit/THIRD_PARTY_NOTICES.md
           if-no-files-found: error
           retention-days: 30
