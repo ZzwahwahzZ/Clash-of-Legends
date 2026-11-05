@@ -61,6 +61,7 @@ func _ready() -> void:
 		anim_player.play("idle")
 	call_deferred("_apply_character_model")
 	call_deferred("_apply_mount_model")
+	call_deferred("_apply_refinement_glow")
 
 func _on_equipment_updated() -> void:
 	_apply_refinement_glow()
@@ -136,6 +137,7 @@ func _apply_character_model() -> void:
 	for child in visual_root.get_children():
 		if child != imported_root and child is Node3D:
 			child.visible = false
+	call_deferred("_apply_refinement_glow")
 
 func _physics_process(delta: float) -> void:
 	if is_dead:
