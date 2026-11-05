@@ -43,7 +43,11 @@ jobs:
           git clone --filter=blob:none https://github.com/deklol/Preservation-CO-Client.git build/preservation
           git -C build/preservation checkout 090541d10d8a7d001fe804dd1c23325c344f861d
       - name: Audit all original C3 models
-        run: cargo run --manifest-path tools/c3_audit/Cargo.toml --release -- build/c3-source reports/c3-model-audit.json
+        run: cargo run --manifest-path tools/c3_audit/Cargo.toml --release -- build/c3-source build/pvr-png build/c3-glb reports/c3-model-audit.json
+      - name: Import and validate converted C3 GLB models
+        run: |
+          godot --headless --editor --path . --quit
+          godot --headless --path . --script tools/c3_audit/validate_c3_glb.gd
       - uses: actions/upload-artifact@v4
         with:
           name: Original-C3-Model-Audit
@@ -52,6 +56,8 @@ jobs:
             reports/pvr-texture-audit.json
             reports/pvr-decode-report.json
             build/pvr-png/**
+            build/c3-glb/**/*.glb
+            reports/c3-conversion-report.json
             tools/c3_audit/THIRD_PARTY_NOTICES.md
           if-no-files-found: error
           retention-days: 30
