@@ -86,7 +86,7 @@ with zipfile.ZipFile(index_zip,"w",compression=zipfile.ZIP_DEFLATED,compressleve
         report={"tpi_source":tpi["source_path"],"tpd_source":tpd["source_path"],
                 "tpi_bytes":len(ti),"tpd_bytes":len(td),"entries_declared":0,
                 "entries_extracted":0,"entries_deduplicated":0,"entries_failed":0,
-                "entries_empty":0,"entries_multiblock_pending":0,"bytes_extracted":0,
+                "entries_empty":0,"entries_multiblock_pending":0,"entries_multiblock_reconstructed":0,"bytes_extracted":0,
                 "flag_counts":{},"extensions":{},"empty_entries":[],"multiblock_entries":[],"errors":[]}
         if len(ti)<0x30 or not ti.startswith(b"NetDragonDatPkg"):
             report["errors"].append("TPI magic header or header size mismatch")
@@ -144,8 +144,8 @@ with zipfile.ZipFile(index_zip,"w",compression=zipfile.ZIP_DEFLATED,compressleve
 
                     elif flags==2:
                         # Verified two-block layout: total sizes, block-1 sizes/offset,
-                        # then block-2 sizes/offset. Keep the blocks separate until the
-                        # mobile PVR reconstruction order is independently validated.
+                        # then block-2 sizes/offset. The decoded blocks are retained for
+                        # audit; PVR2 is staged only when its own header proves concatenation.
                         if pos+32>len(ti):
                             raise ValueError("two-block record header exceeds TPI bounds")
                         total_size,total_comp,block1_comp,block1_size,block1_off=struct.unpack_from("<5I",ti,pos)
@@ -166,15 +166,50 @@ with zipfile.ZipFile(index_zip,"w",compression=zipfile.ZIP_DEFLATED,compressleve
                         base=f"{stem}/{safe_name(normalized)}"
                         blocks_out.writestr(base+".block1.bin",decoded1)
                         blocks_out.writestr(base+".block2.bin",decoded2)
-                        pending={"index":idx,"path":normalized,"flags":flags,
-                                 "total_size":total_size,"total_compressed_size":total_comp,
-                                 "block1":{"compressed_size":block1_comp,"size":block1_size,"offset":block1_off,
-                                           "sha256":hashlib.sha256(decoded1).hexdigest(),"header_hex":decoded1[:64].hex(" ")},
-                                 "block2":{"compressed_size":block2_comp,"size":block2_size,"offset":block2_off,
-                                           "sha256":hashlib.sha256(decoded2).hexdigest(),"header_hex":decoded2[:64].hex(" ")},
-                                 "reconstruction_status":"PENDING_MOBILE_BLOCK_ORDER_VALIDATION"}
-                        report["entries_multiblock_pending"]+=1
-                        report["multiblock_entries"].append(pending)
+                        combined=decoded1+decoded2
+                        pvr_header=None
+                        if Path(normalized).suffix.lower()==".pvr" and len(combined)>=52 and combined[44:48]==b"PVR!":
+                            pvr_header=struct.unpack_from("<13I",combined,0)
+                        if pvr_header:
+                            header_size,height,width,mipmaps,flags_pvr,data_size,bpp,rmask,gmask,bmask,amask,magic,surfaces=pvr_header
+                            pvr_valid=(header_size>=52 and header_size<=len(combined) and width>0 and height>0
+                                       and bpp in (16,24,32) and magic==0x21525650
+                                       and surfaces>=1 and header_size+data_size==len(combined)
+                                       and len(combined)==total_size)
+                        else:
+                            pvr_valid=False
+                        if pvr_valid:
+                            digest=hashlib.sha256(combined).hexdigest()
+                            category=classify(normalized)
+                            dest=STAGE/category/"netdragon"/stem/safe_name(normalized)
+                            dest.parent.mkdir(parents=True,exist_ok=True)
+                            dest.write_bytes(combined)
+                            staged=dest.relative_to(ROOT).as_posix()
+                            new_rows.append({"category":category,"source_archive":tpi["source_archive"],
+                                             "source_path":tpi["source_path"]+"!"+normalized,
+                                             "staged_path":staged,"size_bytes":len(combined),"sha256":digest})
+                            seen.add(digest)
+                            report["entries_extracted"]+=1
+                            report["entries_multiblock_reconstructed"]+=1
+                            report["bytes_extracted"]+=len(combined)
+                            ext=Path(normalized).suffix.lower()
+                            report["extensions"][ext]=report["extensions"].get(ext,0)+1
+                            report["multiblock_entries"].append({"index":idx,"path":normalized,"flags":flags,
+                                "total_size":total_size,"reconstruction_status":"PVR2_CONCAT_VALIDATED",
+                                "pvr2_header":{"width":width,"height":height,"mipmaps":mipmaps,"bpp":bpp,
+                                               "header_size":header_size,"data_size":data_size,"surfaces":surfaces},
+                                "block1_sha256":hashlib.sha256(decoded1).hexdigest(),
+                                "block2_sha256":hashlib.sha256(decoded2).hexdigest()})
+                        else:
+                            pending={"index":idx,"path":normalized,"flags":flags,
+                                     "total_size":total_size,"total_compressed_size":total_comp,
+                                     "block1":{"compressed_size":block1_comp,"size":block1_size,"offset":block1_off,
+                                               "sha256":hashlib.sha256(decoded1).hexdigest(),"header_hex":decoded1[:64].hex(" ")},
+                                     "block2":{"compressed_size":block2_comp,"size":block2_size,"offset":block2_off,
+                                               "sha256":hashlib.sha256(decoded2).hexdigest(),"header_hex":decoded2[:64].hex(" ")},
+                                     "reconstruction_status":"PENDING_UNRECOGNIZED_TWO_BLOCK_FORMAT"}
+                            report["entries_multiblock_pending"]+=1
+                            report["multiblock_entries"].append(pending)
                         continue
                     else:
                         raise ValueError(f"unsupported TPI entry flags: {flags}")
@@ -203,7 +238,7 @@ with zipfile.ZipFile(index_zip,"w",compression=zipfile.ZIP_DEFLATED,compressleve
                     if len(report["errors"])<50:
                         report["errors"].append(f"entry {idx} at 0x{entry_start:x}: {str(error)[:180]}")
             if report["entries_extracted"]>0 or report["entries_multiblock_pending"]>0:
-                index_out.write(ti,arcname=f"{stem}.tpi")
+                index_out.writestr(f"{stem}.tpi",ti)
                 remove_paths.update([tpi["staged_path"],tpd["staged_path"]])
         except Exception as error:
             report["errors"].append(str(error)[:240])
@@ -243,6 +278,7 @@ AUDIT_JSON.write_text(json.dumps(audit,ensure_ascii=False,indent=2)+"\n",encodin
     "category_counts":dict(collections.Counter(r["category"] for r in new_rows)),
     "flag_counts":dict(collections.Counter(flag for pair in results for flag,count in pair.get("flag_counts",{}).items() for _ in range(count))),
     "multiblock_pending":sum(r["entries_multiblock_pending"] for r in results),
+    "multiblock_reconstructed":sum(r.get("entries_multiblock_reconstructed",0) for r in results),
     "empty_placeholders":sum(r["entries_empty"] for r in results),
     "failed_entries":sum(r["entries_failed"] for r in results)
 },ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
