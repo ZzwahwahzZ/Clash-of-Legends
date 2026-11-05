@@ -54,7 +54,8 @@ func _ready() -> void:
 			pass_count += 1
 		else:
 			print("[FAIL] Visual Check: 3D Player Missing Subcomponents")
-		p.free()
+		p.queue_free()
+		await get_tree().process_frame
 	else:
 		print("[FAIL] Visual Check: Player.tscn could not be loaded")
 		
@@ -74,7 +75,8 @@ func _ready() -> void:
 			pass_count += 1
 		else:
 			print("[FAIL] Visual Check: Wild Wolf Missing Subcomponents")
-		w.free()
+		w.queue_free()
+		await get_tree().process_frame
 	else:
 		print("[FAIL] Visual Check: WildWolf.tscn could not be loaded")
 		
@@ -94,7 +96,8 @@ func _ready() -> void:
 			pass_count += 1
 		else:
 			print("[FAIL] Visual Check: Boss Dragon Missing Subcomponents")
-		d.free()
+		d.queue_free()
+		await get_tree().process_frame
 	else:
 		print("[FAIL] Visual Check: BossDragon.tscn could not be loaded")
 
@@ -113,7 +116,8 @@ func _ready() -> void:
 			pass_count += 1
 		else:
 			print("[FAIL] Visual Check: NPC Missing Subcomponents")
-		n.free()
+		n.queue_free()
+		await get_tree().process_frame
 	else:
 		print("[FAIL] Visual Check: NPCBase.tscn could not be loaded")
 		
@@ -131,7 +135,8 @@ func _ready() -> void:
 			pass_count += 1
 		else:
 			print("[FAIL] Visual Check: Simulated Player Missing Subcomponents")
-		s.free()
+		s.queue_free()
+		await get_tree().process_frame
 	else:
 		print("[FAIL] Visual Check: SimulatedPlayer.tscn could not be loaded")
 
@@ -152,7 +157,8 @@ func _ready() -> void:
 			pass_count += 1
 		else:
 			print("[FAIL] Visual Check: MainGame.tscn Missing Environment Structures")
-		g.free()
+		g.queue_free()
+		await get_tree().process_frame
 	else:
 		print("[FAIL] Visual Check: MainGame.tscn could not be loaded")
 
