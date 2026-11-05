@@ -3,6 +3,7 @@ class_name NPCBase
 
 @export var npc_name_ar: String = "الحكيم القديم"
 @export var npc_name_en: String = "Ancient Sage"
+@export var npc_id: String = "npc_sage"
 @export var role: String = "sage" # "sage", "blacksmith", "merchant", "warden"
 @export var required_level: int = 1
 
@@ -50,6 +51,9 @@ func interact(player: CharacterBody3D) -> void:
 			GameManager.post_notification(msg, true)
 		return
 
+	for agent in get_tree().get_nodes_in_group("quest_agents"):
+		if agent.has_method("on_npc_talked"):
+			agent.on_npc_talked(npc_id)
 	match role:
 		"sage":
 			_open_dialogue()
