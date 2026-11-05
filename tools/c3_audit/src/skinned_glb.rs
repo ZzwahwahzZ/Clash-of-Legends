@@ -133,6 +133,7 @@ pub fn export_document(
         }
 
         let all_indices: Vec<u16> = mesh.opaque_indices.iter().chain(mesh.alpha_indices.iter()).copied().collect();
+        // C3 stores V upward from the bottom; C3 Operator's importer applies tv = 1 - source_v.
         let flat_uvs: Vec<f32> = mesh.vertices.iter().flat_map(|v| [v.texture_coordinate.x, 1.0 - v.texture_coordinate.y]).collect();
         let uv_view = builder.view(&bytes_f32(&flat_uvs), Some(34962));
         let uv_accessor = builder.accessor(uv_view, 5126, mesh.vertices.len(), "VEC2", None, None);
