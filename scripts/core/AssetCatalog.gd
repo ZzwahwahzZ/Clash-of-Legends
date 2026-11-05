@@ -72,6 +72,36 @@ func load_model_scene(category: String, index: int) -> PackedScene:
 		return resource
 	return null
 
+func instantiate_fitted_model(category: String, index: int, parent: Node3D, target_height: float = 1.7, node_name: String = "ImportedModel") -> Node3D:
+	if parent == null or target_height <= 0.0:
+		return null
+	var packed_model := load_model_scene(category, index)
+	if packed_model == null:
+		return null
+	var root := Node3D.new()
+	root.name = node_name
+	parent.add_child(root)
+	var instance := packed_model.instantiate()
+	root.add_child(instance)
+	var combined_bounds := AABB()
+	var has_bounds := false
+	for mesh_node in instance.find_children("*", "MeshInstance3D", true, false):
+		var mesh_instance := mesh_node as MeshInstance3D
+		if mesh_instance and mesh_instance.mesh:
+			var relative_transform := root.global_transform.affine_inverse() * mesh_instance.global_transform
+			var mesh_bounds := mesh_instance.get_aabb().transformed(relative_transform)
+			combined_bounds = mesh_bounds if not has_bounds else combined_bounds.merge(mesh_bounds)
+			has_bounds = true
+	if has_bounds and combined_bounds.size.y > 0.001:
+		var fit_scale := target_height / combined_bounds.size.y
+		root.scale = Vector3.ONE * fit_scale
+		root.position = Vector3(
+			-(combined_bounds.position.x + combined_bounds.size.x * 0.5) * fit_scale,
+			-combined_bounds.position.y * fit_scale,
+			-(combined_bounds.position.z + combined_bounds.size.z * 0.5) * fit_scale
+		)
+	return root
+
 func has_category(category: String) -> bool:
 	return assets_by_category.has(category) and assets_by_category[category] is Array and not assets_by_category[category].is_empty()
 
