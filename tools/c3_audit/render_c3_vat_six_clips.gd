@@ -208,9 +208,11 @@ func _run() -> void:
 		var bytes_a := image_a.get_data()
 		var bytes_b := image_b.get_data()
 		var changed_sampled_pixels := 0
+		var sampled_pixel_count := 0
 		if bytes_a.size() == bytes_b.size():
-			# One RGBA pixel every four pixels is enough to confirm visible motion.
+			# Scan the complete one-in-four pixel sample; never stop at an arbitrary success cap.
 			for pixel_offset in range(0, bytes_a.size(), 16):
+				sampled_pixel_count += 1
 				var pixel_changed := false
 				for channel in range(4):
 					if bytes_a[pixel_offset + channel] != bytes_b[pixel_offset + channel]:
@@ -218,12 +220,42 @@ func _run() -> void:
 						break
 				if pixel_changed:
 					changed_sampled_pixels += 1
-					if changed_sampled_pixels >= 100:
-						break
-		if changed_sampled_pixels < 100:
-			push_error("C3 six-clip visual proof: no meaningful rendered change for " + clip_id)
+		else:
+			push_error("C3 six-clip visual proof: frame buffers have different sizes for " + clip_id)
 			all_passed = false
-		print("C3 SIX-CLIP VISUAL: ", clip["look"], " ", clip["action"], " | full_meshes=", mesh_nodes.size(), " | VAT_moving_meshes=", vat_mesh_count, " | changed_sampled_pixels=", changed_sampled_pixels)
+
+		# Measure the rendered character against the uniform background sample.
+		var background_color := image_a.get_pixel(0, 0)
+		var background_vector := Vector3(background_color.r, background_color.g, background_color.b)
+		var foreground_min := Vector2i(image_a.get_width(), image_a.get_height())
+		var foreground_max := Vector2i(-1, -1)
+		var foreground_pixel_count := 0
+		for y in range(image_a.get_height()):
+			for x in range(image_a.get_width()):
+				var color := image_a.get_pixel(x, y)
+				var color_vector := Vector3(color.r, color.g, color.b)
+				if color_vector.distance_to(background_vector) > 0.12:
+					foreground_pixel_count += 1
+					foreground_min.x = mini(foreground_min.x, x)
+					foreground_min.y = mini(foreground_min.y, y)
+					foreground_max.x = maxi(foreground_max.x, x)
+					foreground_max.y = maxi(foreground_max.y, y)
+		var foreground_size := foreground_max - foreground_min + Vector2i.ONE
+		var foreground_height_ratio := float(foreground_size.y) / float(image_a.get_height())
+		var foreground_width_ratio := float(foreground_size.x) / float(image_a.get_width())
+		if foreground_pixel_count < 500 or foreground_height_ratio < 0.25 or foreground_width_ratio < 0.05:
+			push_error("C3 six-clip visual proof: character silhouette is absent, too small, or clipped for " + clip_id)
+			all_passed = false
+		if foreground_min.x <= 2 or foreground_min.y <= 2 or foreground_max.x >= image_a.get_width() - 3 or foreground_max.y >= image_a.get_height() - 3:
+			push_error("C3 six-clip visual proof: character silhouette touches the render boundary for " + clip_id)
+			all_passed = false
+		if changed_sampled_pixels < 100 or sampled_pixel_count == 0 or float(changed_sampled_pixels) / float(sampled_pixel_count) < 0.0001:
+			push_error("C3 six-clip visual proof: rendered animation difference is below threshold for " + clip_id)
+			all_passed = false
+		if hidden_attachment_socket_count != static_parts.size():
+			push_error("C3 six-clip visual proof: not every retained static helper is confirmed hidden for " + clip_id)
+			all_passed = false
+		print("C3 SIX-CLIP VISUAL: ", clip["look"], " ", clip["action"], " | full_meshes=", mesh_nodes.size(), " | VAT_moving_meshes=", vat_mesh_count, " | static_hidden=", hidden_attachment_socket_count, " | changed_sampled_pixels=", changed_sampled_pixels, "/", sampled_pixel_count, " | silhouette=", foreground_size)
 		clip_proofs.append({
 			"clip_id": clip_id,
 			"look": clip["look"],
@@ -235,6 +267,11 @@ func _run() -> void:
 			"visible_character_mesh_count": mesh_nodes.size() - hidden_helpers.size(),
 			"hidden_attachment_socket_count": hidden_attachment_socket_count,
 			"changed_sampled_pixels": changed_sampled_pixels,
+			"sampled_pixel_count": sampled_pixel_count,
+			"foreground_pixel_count": foreground_pixel_count,
+			"foreground_bounds": {"min": [foreground_min.x, foreground_min.y], "max": [foreground_max.x, foreground_max.y]},
+			"foreground_height_ratio": foreground_height_ratio,
+			"foreground_width_ratio": foreground_width_ratio,
 			"frame_a": OUTPUT_DIR.path_join(file_stem + "_frame_a.png"),
 			"frame_b": OUTPUT_DIR.path_join(file_stem + "_frame_b.png"),
 			"status": "FULL_CHARACTER_VISUAL_MOTION_CONFIRMED"
