@@ -218,7 +218,7 @@ jobs:
             "allowlist_file":"distribution/OWNED_ASSETS_ALLOWLIST.json",
             "build_note":"Only assets explicitly listed in the project-owned allowlist are included."
           }
-          Path("RESOURCE_MANIFEST").write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+"\\n",encoding="utf-8")
+          Path("RESOURCE_MANIFEST").write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
           print(json.dumps(manifest,ensure_ascii=False,indent=2))
           PY
       - name: Commit generated resource manifest
