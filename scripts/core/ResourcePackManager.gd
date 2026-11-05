@@ -41,7 +41,7 @@ func _bootstrap_installed_resources() -> void:
 				_accept_manifest(parser.data)
 	if packages.is_empty():
 		await refresh_manifest()
-	_load_installed_packages()
+	await _load_installed_packages()
 
 func refresh_manifest(url: String = MANIFEST_URL) -> bool:
 	if busy:
@@ -113,30 +113,62 @@ func _accept_manifest(candidate: Dictionary) -> bool:
 
 func _load_installed_packages() -> void:
 	installed_packages.clear()
-	for package_id in packages:
+	var package_ids: Array = packages.keys()
+	package_ids.sort()
+	for package_id in package_ids:
+		# Yield between packs so the opening screen can keep rendering on phones.
+		await get_tree().process_frame
 		var entry: Dictionary = packages[package_id]
-		# Large world/model packs are shipped inside the APK. Mount them first so
-		# the first playable launch never waits for these core resources.
 		var bundled_path := "res://bundled/" + str(entry.file_name)
 		if FileAccess.file_exists(bundled_path):
+			# Bundled packs are covered by the signed APK and the CI SHA-256 audit.
+			# Avoid hashing hundreds of MB again on every launch.
 			if ProjectSettings.load_resource_pack(bundled_path, true):
 				installed_packages[package_id] = true
 				package_installed.emit(package_id, bundled_path)
-				continue
-			push_warning("Bundled resource pack could not be mounted: " + bundled_path)
+			else:
+				push_warning("Bundled resource pack could not be mounted: " + bundled_path)
+			continue
 		var path := INSTALL_DIR.path_join(str(entry.file_name))
 		if not FileAccess.file_exists(path):
 			continue
+		var marker_path := path + ".verified"
+		var marker_valid := false
+		if FileAccess.file_exists(marker_path):
+			var marker := FileAccess.open(marker_path, FileAccess.READ)
+			if marker:
+				marker_valid = marker.get_as_text().strip_edges() == str(entry.sha256).to_lower() + ":" + str(entry.size_bytes)
+				marker.close()
 		var file := FileAccess.open(path, FileAccess.READ)
 		if file == null:
 			continue
 		var actual_size := file.get_length()
 		file.close()
-		if actual_size != int(entry.size_bytes) or _sha256_file(path) != str(entry.sha256).to_lower():
+		if actual_size != int(entry.size_bytes):
 			continue
+		if not marker_valid:
+			var verifier := Thread.new()
+			if verifier.start(Callable(self, "_verify_package_file").bind(path, int(entry.size_bytes), str(entry.sha256).to_lower())) != OK:
+				continue
+			while verifier.is_started():
+				await get_tree().process_frame
+			if not bool(verifier.wait_to_finish()):
+				continue
+			var marker_write := FileAccess.open(marker_path, FileAccess.WRITE)
+			if marker_write:
+				marker_write.store_string(str(entry.sha256).to_lower() + ":" + str(entry.size_bytes))
+				marker_write.close()
 		if ProjectSettings.load_resource_pack(path, true):
 			installed_packages[package_id] = true
 			package_installed.emit(package_id, path)
+
+func _verify_package_file(path: String, expected_size: int, expected_hash: String) -> bool:
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		return false
+	var actual_size := file.get_length()
+	file.close()
+	return actual_size == expected_size and _sha256_file(path) == expected_hash
 
 func is_package_installed(package_id: String) -> bool:
 	return bool(installed_packages.get(package_id, false))
@@ -261,6 +293,10 @@ func _on_download_completed(result: int, response_code: int, _headers: PackedStr
 	if not ProjectSettings.load_resource_pack(final_path, true):
 		_finish_failure(package_id, "Godot رفض تحميل حزمة PCK")
 		return
+	var marker := FileAccess.open(final_path + ".verified", FileAccess.WRITE)
+	if marker:
+		marker.store_string(expected_hash + ":" + str(expected_size))
+		marker.close()
 	installed_packages[package_id] = true
 	package_installed.emit(package_id, final_path)
 	_finish_success(package_id)
