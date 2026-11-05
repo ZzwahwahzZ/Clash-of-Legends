@@ -13,7 +13,7 @@ catalog_available = catalog_path.is_file()
 c3_paths = set()
 pvr_paths = set()
 source_by_inner = {}
-resource_stage_rehydrated = catalog_available
+resource_stage_rehydrated = any(Path(row.get('staged_path', '')).is_file() for row in rows if row.get('staged_path', '').startswith('resource_stage/'))
 
 def staged_path_available(path):
     return (not resource_stage_rehydrated) or Path(path).is_file()
@@ -50,8 +50,8 @@ for table_name, table in catalog.get("tables", {}).items():
             mix_texture_path = str(part.get("mix_texture_path") or "").replace("\\", "/").lower()
             if mesh_path:
                 referenced_mesh_paths.add(mesh_path)
-                rows = source_by_inner.get(mesh_path, [])
-                staged_files = [row.get("staged_path", "") for row in rows if row.get("staged_path")]
+                matched_rows = source_by_inner.get(mesh_path, [])
+                staged_files = [row.get("staged_path", "") for row in matched_rows if row.get("staged_path")]
                 present = next((path for path in staged_files if staged_path_available(path)), None)
                 if present:
                     c3_paths.add(present)
@@ -62,7 +62,7 @@ for table_name, table in catalog.get("tables", {}).items():
                         missing_samples.append({"family": family, "kind": "mesh", "path": mesh_path, "unique_id": record.get("unique_id")})
             if texture_path:
                 referenced_texture_paths.add(texture_path)
-                rows = source_by_inner.get(texture_path, [])
+                matched_rows = source_by_inner.get(texture_path, [])
                 staged_files = [row.get("staged_path", "") for row in rows if row.get("staged_path")]
                 present = next((path for path in staged_files if staged_path_available(path)), None)
                 if present:
@@ -74,7 +74,7 @@ for table_name, table in catalog.get("tables", {}).items():
                         missing_samples.append({"family": family, "kind": "texture", "path": texture_path, "unique_id": record.get("unique_id")})
             if mix_texture_path:
                 referenced_texture_paths.add(mix_texture_path)
-                rows = source_by_inner.get(mix_texture_path, [])
+                matched_rows = source_by_inner.get(mix_texture_path, [])
                 staged_files = [row.get("staged_path", "") for row in rows if row.get("staged_path")]
                 present = next((path for path in staged_files if Path(path).is_file()), None)
                 if present:
