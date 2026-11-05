@@ -3,18 +3,103 @@ extends Node
 ## instead of maintaining conflicting class, weapon, and skill lists.
 
 const CLASSES := {
- "Trojan":{"name_ar":"تروجان","name_en":"Trojan","weapons":["dual_swords","halberd"],"armor":"heavy"},
- "Warrior":{"name_ar":"محارب","name_en":"Warrior","weapons":["blade","shield"],"armor":"heavy"},
- "Archer":{"name_ar":"رامٍ","name_en":"Archer","weapons":["bow","flying_daggers"],"armor":"light"},
- "Ninja":{"name_ar":"نينجا","name_en":"Ninja","weapons":["katana","claws"],"armor":"light"},
- "Monk":{"name_ar":"راهب","name_en":"Monk","weapons":["staff","beads"],"armor":"medium"},
- "Pirate":{"name_ar":"قرصان","name_en":"Pirate","weapons":["pistol","cutlass"],"armor":"medium"},
- "DragonWarrior":{"name_ar":"محارب التنين","name_en":"Dragon Warrior","weapons":["dragon_blade","dragon_lance"],"armor":"heavy"},
- "Windwalker":{"name_ar":"سائر الرياح","name_en":"Windwalker","weapons":["twin_blades","wind_bow"],"armor":"light"},
- "Thunderstriker":{"name_ar":"صاعق الرعد","name_en":"Thunderstriker","weapons":["thunder_gauntlets","storm_staff"],"armor":"medium"},
- "WaterTaoist":{"name_ar":"طاوي الماء","name_en":"Water Taoist","weapons":["water_fan","jade_wand"],"armor":"cloth"},
- "FireTaoist":{"name_ar":"طاوي النار","name_en":"Fire Taoist","weapons":["fire_staff","flame_orb"],"armor":"cloth"},
- "Taoist":{"name_ar":"طاوي","name_en":"Taoist","weapons":["staff","fan"],"armor":"cloth"}
+	"Trojan": {
+		"name_ar":"تروجان", "name_en":"Trojan",
+		"weapons":["dual_wield", "cross_saber"], "armor":"heavy",
+		"source_family":"Trojan", "source_version":"1.1.2.3",
+		"source_reference":"selectcharacter.ini:info1",
+		"combat_styles":["dual_wield", "windigo"],
+		"reference_mechanics":["dual_weapon_wielding", "cross_saber_epic_weapon", "windigo_level_40"]
+	},
+	"Warrior": {
+		"name_ar":"محارب", "name_en":"Warrior",
+		"weapons":["blade", "shield"], "armor":"heavy",
+		"source_family":"Warrior", "source_version":"1.1.2.3",
+		"source_reference":"selectcharacter.ini:info3",
+		"combat_styles":["tank", "shield_defense", "xp_burst"],
+		"reference_mechanics":["shield_defense", "high_defense", "xp_skill_burst"]
+	},
+	"Archer": {
+		"name_ar":"رامٍ", "name_en":"Archer",
+		"weapons":["bow", "throwing_knives"], "armor":"light",
+		"source_family":"Archer", "source_version":"1.1.2.3",
+		"source_reference":"selectcharacter.ini:info2",
+		"combat_styles":["ranged", "flight", "oriental_assassin"],
+		"reference_mechanics":["ranged_bow", "flight_evasion", "throwing_knives_assassin_path"]
+	},
+	"Ninja": {
+		"name_ar":"نينجا", "name_en":"Ninja",
+		"weapons":["katana", "scythe", "nobunaga_claw"], "armor":"light",
+		"source_family":"Ninja", "source_version":"1.1.2.3",
+		"source_reference":"selectcharacter.ini:info4",
+		"combat_styles":["dual_katana", "single_target", "area_attack"],
+		"reference_mechanics":["dual_katana", "scythe_area_damage", "nobunaga_claw_epic_weapon"]
+	},
+	"Monk": {
+		"name_ar":"راهب", "name_en":"Monk",
+		"weapons":[], "armor":"medium",
+		"source_family":"Monk/Saint", "source_version":"1.1.2.3",
+		"source_reference":"selectcharacter.ini:info5",
+		"combat_styles":["martial", "spiritual", "ally_buffs"],
+		"reference_mechanics":["physical_martial_skills", "spiritual_skills", "team_buffs"],
+		"weapon_reference_status":"No specific weapon family is established by the inspected class-selection text."
+	},
+	"Pirate": {
+		"name_ar":"قرصان", "name_en":"Pirate",
+		"weapons":["rapier", "pistol"], "armor":"medium",
+		"source_family":"Pirate", "source_version":"1.1.2.3",
+		"source_reference":"selectcharacter.ini:info6",
+		"combat_styles":["ranged_lock_on", "loot_bonus"],
+		"reference_mechanics":["rapier_and_pistol", "increased_item_drops", "half_pk_points"]
+	},
+	"DragonWarrior": {
+		"name_ar":"محارب التنين", "name_en":"Dragon Warrior",
+		"weapons":["nunchaku"], "armor":"heavy",
+		"source_family":"Dragon-Warrior", "source_version":"1.1.2.3",
+		"source_reference":"selectcharacter.ini:info7",
+		"combat_styles":["free_style", "flash_shift", "chain_hits"],
+		"reference_mechanics":["nunchaku", "flash_shifting", "instant_striking", "range_sweeping", "chain_hits"]
+	},
+	"Windwalker": {
+		"name_ar":"سائر الرياح", "name_en":"Windwalker",
+		"weapons":["stomper", "chaser"], "armor":"light",
+		"source_family":"Windwalker", "source_version":"1.1.2.3",
+		"source_reference":"selectcharacter.ini:info8",
+		"combat_styles":["stomper", "chaser"],
+		"reference_mechanics":["stomper_melee_branch", "chaser_ranged_branch", "thundercloud_summoning"]
+	},
+	"Thunderstriker": {
+		"name_ar":"صاعق الرعد", "name_en":"Thunderstriker",
+		"weapons":["thunder_gauntlets", "storm_staff"], "armor":"medium",
+		"source_family":"Original project class", "source_version":"project-original",
+		"source_reference":"not present in supplied mobile 1.1.2.3 role-selection list",
+		"combat_styles":["chain_lightning", "storm_melee"],
+		"reference_mechanics":["original_class_identity", "requires_original_rig_and_skill_design"]
+	},
+	"WaterTaoist": {
+		"name_ar":"طاوي الماء", "name_en":"Water Taoist",
+		"weapons":["hossu", "polar_backsword"], "armor":"cloth",
+		"source_family":"Taoist", "source_version":"1.1.2.3",
+		"source_reference":"selectcharacter.ini:info0/infoII0",
+		"combat_styles":["healing", "support"],
+		"reference_mechanics":["water_branch_at_level_40", "healing_spells", "ally_buffs"]
+	},
+	"FireTaoist": {
+		"name_ar":"طاوي النار", "name_en":"Fire Taoist",
+		"weapons":["hossu", "polar_backsword"], "armor":"cloth",
+		"source_family":"Taoist", "source_version":"1.1.2.3",
+		"source_reference":"selectcharacter.ini:info0/infoII0",
+		"combat_styles":["ranged_magic", "area_damage"],
+		"reference_mechanics":["fire_branch_at_level_40", "destructive_spells", "ranged_area_attacks"]
+	},
+	"Taoist": {
+		"name_ar":"طاوي", "name_en":"Taoist",
+		"weapons":["hossu", "polar_backsword"], "armor":"cloth",
+		"source_family":"Taoist", "source_version":"1.1.2.3",
+		"source_reference":"selectcharacter.ini:info0",
+		"combat_styles":["magic", "level_40_branch_choice"],
+		"reference_mechanics":["choose_water_or_fire_at_level_40"]
+	}
 }
 
 const SKILLS := {
