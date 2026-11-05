@@ -74,14 +74,17 @@ func _apply_refinement_glow() -> void:
 	var weapon_nodes: Array[MeshInstance3D] = []
 	if weapon_mount:
 		for node in weapon_mount.find_children("*", "MeshInstance3D", true, false):
-			weapon_nodes.append(node as MeshInstance3D)
+			var mesh_node := node as MeshInstance3D
+			if _is_renderable_mesh_instance(mesh_node) and not weapon_nodes.has(mesh_node):
+				weapon_nodes.append(mesh_node)
 	if visual_root:
 		var imported := visual_root.get_node_or_null("ImportedModelRoot")
 		if imported:
 			for node in imported.find_children("*", "MeshInstance3D", true, false):
 				var node_name := str(node.name).to_lower()
-				if "weapon" in node_name or "sword" in node_name or "blade" in node_name or "dagger" in node_name or "axe" in node_name:
-					weapon_nodes.append(node as MeshInstance3D)
+				var mesh_node := node as MeshInstance3D
+				if ("weapon" in node_name or "sword" in node_name or "blade" in node_name or "dagger" in node_name or "axe" in node_name) and _is_renderable_mesh_instance(mesh_node) and not weapon_nodes.has(mesh_node):
+					weapon_nodes.append(mesh_node)
 	if weapon_nodes.is_empty():
 		return
 	var shader := load("res://assets/shaders/weapon_glow.gdshader") as Shader
@@ -96,6 +99,8 @@ func _apply_refinement_glow() -> void:
 		glow = Color(0.18, 0.85, 0.55)
 	var energy := 0.0 if refine_level <= 0 else 1.0 + float(refine_level) * 0.48
 	for mesh_node in weapon_nodes:
+		if not _is_renderable_mesh_instance(mesh_node):
+			continue
 		var material := ShaderMaterial.new()
 		material.shader = shader
 		material.set_shader_parameter("base_color", Color(0.72, 0.76, 0.82))
@@ -104,6 +109,9 @@ func _apply_refinement_glow() -> void:
 		material.set_shader_parameter("pulse_speed", 1.8 + float(refine_level) * 0.12)
 		material.set_shader_parameter("pulse_intensity", 0.12 + float(refine_level) * 0.025)
 		mesh_node.material_override = material
+
+func _is_renderable_mesh_instance(node: MeshInstance3D) -> bool:
+	return is_instance_valid(node) and node.mesh != null and node.mesh.get_surface_count() > 0
 
 func _on_asset_catalog_loaded(_asset_count: int) -> void:
 	_apply_character_model()
