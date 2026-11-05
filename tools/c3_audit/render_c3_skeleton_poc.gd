@@ -67,9 +67,9 @@ func _render() -> void:
 	camera.fov = 38.0
 	camera.near = 0.01
 	camera.far = maxf(100.0, extent * 20.0)
+	stage.add_child(camera)
 	camera.position = center + Vector3(extent * 0.55, extent * 0.25, extent * 2.6)
 	camera.look_at(center + Vector3(0.0, extent * 0.08, 0.0), Vector3.UP)
-	stage.add_child(camera)
 	camera.make_current()
 
 	var key_light := DirectionalLight3D.new()
