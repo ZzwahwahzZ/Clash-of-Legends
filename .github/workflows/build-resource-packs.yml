@@ -65,6 +65,8 @@ jobs:
         run: |
           git clone --filter=blob:none https://github.com/deklol/Preservation-CO-Client.git build/preservation
           git -C build/preservation checkout 090541d10d8a7d001fe804dd1c23325c344f861d
+      - name: Test C3 parser and per-mesh GLB animation exporter
+        run: cargo test --manifest-path tools/c3_audit/Cargo.toml --release
       - name: Convert original C3 models and validate Godot imports
         run: |
           cargo run --manifest-path tools/c3_audit/Cargo.toml --release --bin clash-c3-audit -- build/c3-source build/pvr-png build/c3-glb reports/c3-model-audit.json
