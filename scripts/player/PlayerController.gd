@@ -174,7 +174,8 @@ func _validate_character_candidate(candidate: Node, animation_node: Node) -> Dic
 		if not _is_renderable_mesh_instance(mesh_instance):
 			continue
 		mesh_count += 1
-		if mesh_instance.mesh.get_blend_shape_count() > 0:
+		var array_mesh := mesh_instance.mesh as ArrayMesh
+		if array_mesh != null and array_mesh.get_blend_shape_count() > 0:
 			morph_mesh_count += 1
 		if mesh_instance.skin != null and not mesh_instance.skeleton.is_empty():
 			skinned_mesh_count += 1
