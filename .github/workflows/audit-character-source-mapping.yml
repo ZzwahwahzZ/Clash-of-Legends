@@ -1,4 +1,4 @@
-name: Audit Android character source mappings
+name: Audit Android character source mappings (source-backed body and equipment lookup)
 on:
   workflow_dispatch:
   push:
