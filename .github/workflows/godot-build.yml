@@ -346,6 +346,9 @@ jobs:
           test -s builds/android/ClashOfLegends-emulator-x86_64.apk
           mkdir -p emulator-evidence
 
+      - name: Install Pillow for screenshot transition assertions
+        run: python3 -m pip install --user Pillow
+
       - name: Enable KVM acceleration for Android emulator
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -394,11 +397,12 @@ jobs:
             select = Image.open("emulator-evidence/character-select.png").convert("RGB")
             if launch.size != select.size:
                 raise SystemExit(f"Character-select screenshot size changed: {launch.size} -> {select.size}")
-            diff = ImageChops.difference(launch, select)
+            panel = (700, 0, 1700, 600)
+            diff = ImageChops.difference(launch.crop(panel), select.crop(panel))
             changed = sum(1 for pixel in diff.getdata() if max(pixel) > 12)
-            ratio = changed / (select.width * select.height)
-            print(f"OVERLAY DISMISS SCREEN CHANGE: {ratio:.3%}")
-            if ratio < 0.02:
+            ratio = changed / (diff.width * diff.height)
+            print(f"OVERLAY DISMISS PANEL CHANGE: {ratio:.3%}")
+            if ratio < 0.05:
                 raise SystemExit("Immersive-mode overlay is still visible; character selection was not reached.")
             PY
             # Enter the journey using the center of the actual start button.
