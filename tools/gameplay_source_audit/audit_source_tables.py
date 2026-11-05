@@ -65,7 +65,7 @@ def parse_ini_opaque(data: bytes) -> dict:
         sections = [{"section": s, "keys": list(parser[s].keys())} for s in parser.sections()]
         return {"parse_status": "INI_SECTIONS_AND_KEYS_PARSED_OPAQUE", "section_count": len(sections), "sections": sections}
     except configparser.Error as exc:
-        return {"parse_status": "TEXT_PRESENT_INI_PARSE_FAILED", "error": str(exc), "line_count": len(text.splitlines())}
+        return {"parse_status": "TEXT_PRESENT_INI_PARSE_FAILED", "error": str(exc), "line_count": len(text.splitlines()), "line_samples": [line[:300] for line in text.splitlines()[:20]]}
 
 def parse_itemtype(data: bytes, include_column_59_candidate: bool = False) -> dict:
     text = decode_text(data)
