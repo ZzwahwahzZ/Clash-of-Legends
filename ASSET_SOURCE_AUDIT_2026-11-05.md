@@ -78,3 +78,22 @@ The resource-pack audit therefore failed correctly at the missing runtime catalo
 Runtime consequence: the class-model lookup cannot resolve a verified runtime character model from these PCKs; the player keeps the existing fallback scene. The mount model lookup likewise has no verified runtime catalog to bind an equipped mount to its exact model. The recent runtime safety changes deliberately refuse arbitrary array-index selection and preserve the current visible model when a verified candidate is unavailable.
 
 Required next step: rebuild the runtime resource packages from a reviewed, rights-cleared asset bundle that includes the converted model outputs and generated catalog, then rerun the full PCK mount/catalog/identity/rig/material/animation audit. Do not copy the currently published source PCKs into a new release or expose proprietary source assets publicly as a shortcut.
+
+
+## 2026-11-05 rerun of the full C3 conversion and skeletal proof
+
+Workflow run: https://github.com/ZzwahwahzZ/Clash-of-Legends/actions/runs/42080862012  
+Artifact: C3-Model-Conversion-Reports
+
+The C3 pipeline completed successfully and Godot 4.3 imported the generated GLBs. Exact report values:
+
+- 1,904 C3 files parsed from 1,944 source files; 569 converted GLBs, 497 skipped for missing matching decoded texture or renderable geometry, and 40 parser failures.
+- Converted output categories: 24 character-category GLBs, 42 equipment GLBs, 1 monster GLB, 4 world GLBs, 492 effect GLBs, and 6 audit-only motion POCs. **No mount GLBs were converted.**
+- The 24 character-category files are not 24 complete characters. They include separate body/head/equipment components. The documented source mapping still identifies 7000000 as a separate head-like mesh and the 713xxxx/813xxxx assets as body/equipment assemblies requiring verified attachment rules.
+- Two separate skeletal proof GLBs imported with one skinned mesh each: 60 bones / 116 animation tracks for the female candidate and 66 bones / 128 tracks for the male candidate.
+- Six motion POC clips passed Godot import validation; six VAT clips passed data validation. The 558 motion-only source documents remain unpaired in runtime; only 15 are currently uniquely pairable by the structural candidate rules.
+- 1,060 PVR textures decoded successfully with zero decoder failures in this run.
+
+The two skeletal proof screenshots show a rendered armored body with limbs and equipment, but the head/face is absent in this assembled proof. This is useful conversion and rigging progress, not an approved playable character. The body/head/helmet/weapon attachment set and class/gender mapping still require completion and visual review. The 492 effect conversions must not be mistaken for 492 playable character/world assets.
+
+**Acceptance decision:** do not map any of these 24 character-category GLBs as complete playable classes yet; do not select a mount model because the conversion report contains zero mount GLBs; keep all converted entries as unreviewed candidates until full anatomy, correct textures/materials, skeleton, six-action coverage, equipment attachment transforms, and exact source identity are proven.
