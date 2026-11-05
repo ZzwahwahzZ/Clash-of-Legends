@@ -38,37 +38,6 @@ jobs:
         run: |
           cp reports/resource-source-index.csv resource-source-index.csv
           python3 tools/c3_audit/prepare_c3_paths.py
-      - name: Build temporary source model PCK for C3 extraction
-        run: |
-          cat > export_presets.cfg <<'EOF'
-          [preset.0]
-          name="C3Source"
-          platform="Linux"
-          runnable=false
-          dedicated_server=false
-          custom_features=""
-          export_filter="resources"
-          include_filter="resource_stage/models/**/*"
-          exclude_filter=""
-          export_path="build/models.pck"
-          encryption_include_filters=""
-          encryption_exclude_filters=""
-          encrypt_pck=false
-          encrypt_directory=false
-          export_files=PackedStringArray()
-          script_export_mode=2
-
-          [preset.0.options]
-          custom_template/debug=""
-          custom_template/release=""
-          debug/export_console_wrapper=1
-          binary_format/embed_pck=false
-          texture_format/s3tc_bptc=true
-          texture_format/etc2_astc=false
-          EOF
-          mkdir -p build
-          godot --headless --editor --path . --quit
-          godot --headless --path . --export-pack "C3Source" "build/models.pck"
       - name: Extract C3 and PVR sources for conversion
         run: |
           godot --headless --path . --script tools/c3_audit/extract_c3_for_audit.gd
