@@ -111,9 +111,11 @@ def file_record(suffix):
     path, row = choose_file(suffix, "en")
     if path is None:
         return {}, None
-    return parse_pairs(decode_text(path.read_bytes())), {
+    sections, pair_count = parse_pairs(decode_text(path.read_bytes()))
+    return sections, {
         "path": str(path), "source_path": row.get("source_path"),
         "sha256": row.get("sha256"), "size_bytes": row.get("size_bytes"),
+        "pair_count": pair_count,
     }
 
 mesh_catalog = json.loads(MESH_CATALOG.read_text(encoding="utf-8"))
