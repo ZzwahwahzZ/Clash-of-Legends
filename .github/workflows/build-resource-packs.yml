@@ -152,6 +152,75 @@ jobs:
           Path("RESOURCE_MANIFEST").write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
           print(json.dumps(manifest,ensure_ascii=False,indent=2))
           PY
+      - name: Build and validate project-owned public resource pack
+        run: |
+          set -euo pipefail
+          test -s assets/shaders/weapon_glow.gdshader
+          mkdir -p build/public-pcks
+          cat > export_presets.cfg <<'EOF'
+          [preset.0]
+          name="Linux"
+          platform="Linux"
+          runnable=true
+          dedicated_server=false
+          custom_features=""
+          export_filter="resources"
+          include_filter="assets/shaders/weapon_glow.gdshader"
+          exclude_filter=""
+          export_path="build/public-pcks/owned-core.pck"
+          encryption_include_filters=""
+          encryption_exclude_filters=""
+          encrypt_pck=false
+          encrypt_directory=false
+          export_files=PackedStringArray()
+          script_export_mode=2
+
+          [preset.0.options]
+          custom_template/debug=""
+          custom_template/release=""
+          debug/export_console_wrapper=1
+          binary_format/embed_pck=false
+          texture_format/s3tc_bptc=true
+          texture_format/etc2_astc=false
+          EOF
+          godot --headless --path . --export-pack "Linux" "build/public-pcks/owned-core.pck"
+          test -s build/public-pcks/owned-core.pck
+          godot --headless --path . --script tools/resource_packs/validate_owned_distribution.gd
+      - name: Create public manifest from allowlisted project-owned assets only
+        run: |
+          set -euo pipefail
+          cp RESOURCE_MANIFEST RESOURCE_MANIFEST_INTERNAL
+          python3 - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          p=Path("build/public-pcks/owned-core.pck")
+          data=p.read_bytes()
+          if len(data)<64: raise SystemExit("Owned resource PCK is unexpectedly small.")
+          manifest={
+            "manifest_version":"1.0.0",
+            "release_tag":"owned-resource-packs-v1",
+            "app_version":"1.0.3",
+            "package_id":"com.zwahwahzz.clashoflegends",
+            "status":"PUBLISHED",
+            "distribution_allowed":True,
+            "distribution_policy":"Only the explicit project-owned allowlist is published. Extracted Conquer source assets and converted derivatives are excluded.",
+            "resource_packages":[{
+              "package_id":"owned-core",
+              "file_name":"owned-core.pck",
+              "display_name_ar":"موارد اللعبة الأصلية",
+              "display_name_en":"Project-owned Core Resources",
+              "size_bytes":len(data),
+              "sha256":hashlib.sha256(data).hexdigest(),
+              "download_url":"https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/owned-resource-packs-v1/owned-core.pck",
+              "godot_version":"4.3",
+              "platform":"all"
+            }],
+            "allowlist_file":"distribution/OWNED_ASSETS_ALLOWLIST.json",
+            "build_note":"Only assets explicitly listed in the project-owned allowlist are included."
+          }
+          Path("RESOURCE_MANIFEST").write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+"\\n",encoding="utf-8")
+          print(json.dumps(manifest,ensure_ascii=False,indent=2))
+          PY
       - name: Commit generated resource manifest
         if: ${{ success() }}
         run: |
@@ -180,18 +249,6 @@ jobs:
           done
           echo "Unable to push manifest after 3 synchronized attempts."
           exit 1
-      - name: Upload PCKs and source index as workflow artifact
-        if: ${{ vars.ALLOW_C3_ASSET_REDISTRIBUTION == 'true' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: ClashOfLegends-Godot43-Resource-PCKs
-          path: |
-            build/pcks/*.pck
-            reports/resource-source-index.csv
-            reports/source-archive-extension-audit.json
-            RESOURCE_MANIFEST
-          if-no-files-found: error
-          retention-days: 30
       - name: Upload compact source audit reports
         uses: actions/upload-artifact@v4
         with:
@@ -216,20 +273,15 @@ jobs:
             resource_stage/world/gameplay_reference/*.json
           if-no-files-found: error
           retention-days: 30
-      - name: Publish resource pack release
-        if: ${{ vars.ALLOW_C3_ASSET_REDISTRIBUTION == 'true' }}
+      - name: Publish allowlisted project-owned resource release
+        if: ${{ success() }}
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: resource-packs-v4
-          name: Clash of Legends Resource Packs v4
-          body: "Godot 4.3 resource PCKs with validated C3-to-GLB conversions merged into the runtime catalog. See RESOURCE_MANIFEST for exact byte sizes and SHA-256 hashes."
+          tag_name: owned-resource-packs-v1
+          name: Clash of Legends — Project-owned Resources v1
+          body: "Only resources listed in distribution/OWNED_ASSETS_ALLOWLIST.json are included. No extracted Conquer source assets or converted derivatives are distributed in this release."
           files: |
-            build/pcks/*.pck
+            build/public-pcks/owned-core.pck
             RESOURCE_MANIFEST
-            reports/resource-source-index.csv
-            reports/source-archive-extension-audit.json
-            reports/source-format-samples.txt
-            reports/tpi-extraction-audit.json
-            reports/tpi-indexes.zip
           overwrite_files: true
           fail_on_unmatched_files: true
