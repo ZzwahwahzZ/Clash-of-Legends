@@ -1,0 +1,162 @@
+name: Audit Android character source mappings
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/audit-character-source-mapping.yml"
+permissions:
+  contents: read
+concurrency:
+  group: character-source-audit-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  audit-character-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and verify original mobile source archive
+        run: |
+          mkdir -p build/character_source
+          curl --fail --location --retry 5 --retry-all-errors \
+            "https://github.com/ZzwahwahzZ/Conquer-Mobile-Assets./releases/download/mobile-extracted-assets/extracted-assets-001.zip" \
+            -o build/character_source/extracted-assets-001.zip
+          echo "0d21a110c09b762ed5f1a5f4da022857b0534e489eb85052d15da460cb229d2a  build/character_source/extracted-assets-001.zip" | sha256sum -c -
+      - name: Inspect character creation and model mapping configuration
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, re, tempfile, zipfile
+          from pathlib import Path
+
+          archive = Path("build/character_source/extracted-assets-001.zip")
+          output = Path("build/character_source/role-model-mapping-report.json")
+          targets = [
+              "assets/ConquerRes/ini/3dsimplerole.ini",
+              "assets/ConquerRes/ini/rolechoose.ini",
+              "assets/ConquerRes/ini/rolechoose_js.ini",
+              "assets/ConquerRes/ini/rolepartsort.xml",
+              "assets/ConquerRes/ini/selectcharacter.ini",
+              "assets/ConquerRes/ini/hairface_storage_type.dat",
+              "assets/ConquerRes/ini/luacfg/cqm_createrole.dat",
+              "assets/ConquerRes/ini/luacfg/face.dat",
+              "assets/ConquerRes/ini/luacfg/hero.dat",
+              "assets/ConquerRes/ini/luacfg/i3drole.dat",
+              "assets/ConquerRes/ini/luacfg/player.dat",
+              "assets/ConquerRes/ini/luacfg/rolebuffdef.dat",
+              "assets/ConquerRes/ini/luacfg/roleselect.dat",
+              "assets/ConquerRes/ini/luacfg/wraphair.dat",
+              "assets/ConquerRes/ani/playerface.ani",
+          ]
+
+          def tq_candidate(data, seed):
+              state = seed & 0xffffffff
+              key = []
+              for _ in range(128):
+                  state = (state * 0x343fd + 0x269ec3) & 0xffffffff
+                  key.append(((state >> 16) & 0x7fff) & 0xff)
+              out = bytearray(len(data))
+              for i, value in enumerate(data):
+                  x = value ^ key[i % 128]
+                  shift = i % 8
+                  out[i] = x if shift == 0 else ((x >> shift) | (x << (8-shift))) & 0xff
+              return bytes(out)
+
+          def decode_text(data):
+              for encoding in ("utf-8-sig", "gb18030", "cp1252"):
+                  try:
+                      return data.decode(encoding), encoding
+                  except UnicodeDecodeError:
+                      pass
+              return data.decode("utf-8", errors="replace"), "utf-8-replacement"
+
+          with zipfile.ZipFile(archive) as outer:
+              apk_entries = [item for item in outer.infolist()
+                             if item.filename.replace("\\", "/").endswith("ConquerOnline-1.1.2.3.apk")]
+              if len(apk_entries) != 1:
+                  raise SystemExit(f"Expected one ConquerOnline-1.1.2.3.apk, found {len(apk_entries)}")
+              apk_info = apk_entries[0]
+              with tempfile.NamedTemporaryFile(suffix=".apk") as tmp:
+                  with outer.open(apk_info) as src, open(tmp.name, "wb") as dst:
+                      while True:
+                          chunk = src.read(1024 * 1024)
+                          if not chunk:
+                              break
+                          dst.write(chunk)
+                  records = []
+                  with zipfile.ZipFile(tmp.name) as apk:
+                      available = set(apk.namelist())
+                      missing = []
+                      for target in targets:
+                          if target not in available:
+                              missing.append(target)
+                              continue
+                          data = apk.read(target)
+                          text, encoding = decode_text(data)
+                          lines = text.splitlines()
+                          refs = sorted(set(re.findall(
+                              r"[A-Za-z0-9_./\\-]+\\.(?:c3|pvr|mjp|ani|tme|glb|gltf)",
+                              text, flags=re.IGNORECASE
+                          )))
+                          keys = sorted(set(re.findall(r"^\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*=", text, flags=re.MULTILINE)))
+                          sections = re.findall(r"^\\s*\\[([^]]+)\\]", text, flags=re.MULTILINE)
+                          candidates = []
+                          if target.lower().endswith(".dat"):
+                              for seed in (9527, 1234):
+                                  decoded = tq_candidate(data, seed)
+                                  sample = decoded[:min(len(decoded), 2*1024*1024)]
+                                  printable = sum(1 for b in sample if b in (9,10,13) or 32 <= b <= 126 or b >= 0xc0) / max(1,len(sample))
+                                  decoded_text = sample.decode("utf-8", errors="ignore")
+                                  candidates.append({
+                                      "seed": seed,
+                                      "printable_ratio": round(printable,4),
+                                      "lua_table_marker": bool(re.search(rb"local\\s+[A-Za-z_][A-Za-z0-9_]*\\s*=", decoded[:4096])),
+                                      "ini_section_count": len(re.findall(r"^\\s*\\[[^]]+\\]", decoded_text, flags=re.MULTILINE)),
+                                      "model_reference_count": len(set(re.findall(r"[A-Za-z0-9_./\\-]+\\.c3", decoded_text, flags=re.IGNORECASE))),
+                                      "accepted_as_mobile_format": False
+                                  })
+                          records.append({
+                              "source_path": target,
+                              "size_bytes": len(data),
+                              "sha256": hashlib.sha256(data).hexdigest(),
+                              "text_encoding_candidate": encoding,
+                              "line_count": len(lines),
+                              "section_count": len(sections),
+                              "key_names": keys[:300],
+                              "asset_reference_count": len(refs),
+                              "asset_references": refs[:500],
+                              "numeric_id_count": len(set(re.findall(r"(?<![A-Za-z0-9_])\\d{4,10}(?![A-Za-z0-9_])", text))),
+                              "tq_cipher_diagnostics": candidates
+                          })
+          report = {
+              "report_version": "1.0.0",
+              "purpose": "Source-backed character creation, body/gender and C3 model mapping audit for Conquer Online Mobile 1.1.2.3.",
+              "source_archive": archive.name,
+              "source_archive_sha256": hashlib.sha256(archive.read_bytes()).hexdigest(),
+              "embedded_apk_path": apk_info.filename,
+              "embedded_apk_size_bytes": apk_info.file_size,
+              "records_found": len(records),
+              "missing_paths": missing,
+              "records": records,
+              "policy": "This report contains hashes and structural metadata only. Candidate TQ decryptions are diagnostics, not accepted mobile data."
+          }
+          output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+          print(json.dumps({
+              "records_found": len(records),
+              "missing_paths": missing,
+              "record_summaries": [
+                  {"path": x["source_path"], "bytes": x["size_bytes"], "sha256": x["sha256"],
+                   "sections": x["section_count"], "references": x["asset_reference_count"],
+                   "key_names": x["key_names"][:25], "cipher": x["tq_cipher_diagnostics"]}
+                  for x in records
+              ]
+          }, ensure_ascii=False, indent=2))
+          if len(records) < 10 or missing:
+              raise SystemExit("Character source mapping audit is incomplete.")
+          PY
+      - name: Upload character source mapping audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: Character-Source-Mapping-Audit
+          path: build/character_source/role-model-mapping-report.json
+          if-no-files-found: error
+          retention-days: 30
