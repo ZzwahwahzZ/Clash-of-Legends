@@ -1,4 +1,4 @@
-[gd_scene load_steps=35 format=3 uid="uid://maingame001"]
+[gd_scene load_steps=36 format=3 uid="uid://maingame001"]
 
 [ext_resource type="PackedScene" uid="uid://player001" path="res://scenes/characters/Player.tscn" id="1_player"]
 [ext_resource type="PackedScene" uid="uid://npcbase001" path="res://scenes/npcs/NPCBase.tscn" id="2_npc"]
@@ -14,6 +14,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/ResourcePacksUI.tscn" id="12_resource_packs"]
 [ext_resource type="PackedScene" path="res://scenes/ui/NewPlayerGuide.tscn" id="13_new_player_guide"]
 [ext_resource type="Script" path="res://scripts/core/PerformanceAcceptanceProbe.gd" id="14_performance"]
+[ext_resource type="Script" path="res://scripts/world/WorldTravelManager.gd" id="15_world_travel"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
 size = Vector3(180, 1, 180)
@@ -224,6 +225,9 @@ mesh = SubResource("Mesh_TreeFoliage")
 
 [node name="QuestNavigationAgent" type="Node" parent="." groups=["quest_agents"]]
 script = ExtResource("11_quest")
+
+[node name="WorldTravelManager" type="Node" parent="." groups=["world_travel_manager"]]
+script = ExtResource("15_world_travel")
 
 [node name="Player" parent="." instance=ExtResource("1_player")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
