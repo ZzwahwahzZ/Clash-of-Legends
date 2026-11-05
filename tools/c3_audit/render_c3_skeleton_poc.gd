@@ -127,27 +127,76 @@ func _render() -> void:
 		" bones=", _count_bones(character),
 		" screenshots=reports/c3-skeletal-poc-frame-a.png,reports/c3-skeletal-poc-frame-b.png")
 
-	# Render a shear-containing walk clip through the new VAT shader, not merely
-	# validate the binary payload. The source mesh is reused; VAT replaces vertices.
+	# VAT is tested against the full imported character scene, not the v_body-only skeletal POC.
 	animation_player.stop()
-	var vat_mesh := mesh_nodes[0] as MeshInstance3D
-	var source_material := vat_mesh.get_active_material(0) as StandardMaterial3D
-	var source_albedo: Texture2D = source_material.albedo_texture if source_material != null else null
-	var vat_player_script = load("res://scripts/animation/C3VatPlayer.gd")
-	if vat_player_script == null:
-		push_error("C3 VAT visual proof: runtime player script could not load.")
+	character.queue_free()
+	await process_frame
+	const FULL_VAT_MODEL := "res://build/c3-glb/motion-poc/look7_model7130000_weapon500_action110.glb"
+	var vat_packed := ResourceLoader.load(FULL_VAT_MODEL) as PackedScene
+	if vat_packed == null:
+		push_error("C3 VAT visual proof: full multi-mesh character GLB failed to load: " + FULL_VAT_MODEL)
 		quit(1)
 		return
-	var vat_player = vat_player_script.new()
-	stage.add_child(vat_player)
-	var vat_metadata := "res://build/c3-glb/motion-poc-vat/look7_model7130000_weapon500_action110.json"
-	var vat_binary := "res://build/c3-glb/motion-poc-vat/look7_model7130000_weapon500_action110.rgba32f"
-	if not vat_player.configure(vat_mesh, vat_metadata, vat_binary, source_albedo):
-		push_error("C3 VAT visual proof: runtime VAT player rejected the validated walk clip.")
+	var vat_character := vat_packed.instantiate()
+	stage.add_child(vat_character)
+	await process_frame
+	await process_frame
+	var vat_mesh_nodes := vat_character.find_children("*", "MeshInstance3D", true, false)
+	var vat_mesh_by_name: Dictionary = {}
+	for candidate in vat_mesh_nodes:
+		var candidate_mesh := candidate as MeshInstance3D
+		if vat_mesh_by_name.has(candidate_mesh.name):
+			push_error("C3 VAT visual proof: duplicate imported mesh node name prevents exact mapping: " + candidate_mesh.name)
+			quit(1)
+			return
+		vat_mesh_by_name[candidate_mesh.name] = candidate_mesh
+	var vat_clip_id := "look7_model7130000_weapon500_action110"
+	var vat_directory := DirAccess.open("res://build/c3-glb/motion-poc-vat")
+	if vat_directory == null:
+		push_error("C3 VAT visual proof: VAT metadata directory is missing.")
 		quit(1)
 		return
-	vat_player.pause()
-	vat_player.set_frame(0.0)
+	var vat_metadata_files := vat_directory.get_files()
+	vat_metadata_files.sort()
+	var vat_applied_meshes := 0
+	var vat_expected_meshes := 0
+	var vat_players: Array = []
+	for metadata_name in vat_metadata_files:
+		if not metadata_name.ends_with(".json"):
+			continue
+		var metadata_path := "res://build/c3-glb/motion-poc-vat".path_join(metadata_name)
+		var metadata_file := FileAccess.open(metadata_path, FileAccess.READ)
+		if metadata_file == null:
+			continue
+		var metadata_value = JSON.parse_string(metadata_file.get_as_text())
+		metadata_file.close()
+		if not (metadata_value is Dictionary) or str(metadata_value.get("clip_id", "")) != vat_clip_id:
+			continue
+		vat_expected_meshes += 1
+		var target_name := str(metadata_value.get("mesh_name", ""))
+		if not vat_mesh_by_name.has(target_name):
+			push_error("C3 VAT visual proof: imported full character is missing VAT mesh " + target_name)
+			quit(1)
+			return
+		var target_mesh := vat_mesh_by_name[target_name] as MeshInstance3D
+		var target_material := target_mesh.get_active_material(0) as StandardMaterial3D
+		var target_albedo: Texture2D = target_material.albedo_texture if target_material != null else null
+		var player_script = load("res://scripts/animation/C3VatPlayer.gd")
+		var vat_player = player_script.new()
+		stage.add_child(vat_player)
+		var binary_path := metadata_path.trim_suffix(".json") + ".rgba32f"
+		if not vat_player.configure(target_mesh, metadata_path, binary_path, target_albedo):
+			push_error("C3 VAT visual proof: per-mesh VAT setup failed for " + target_name)
+			quit(1)
+			return
+		vat_player.pause()
+		vat_player.set_frame(0.0)
+		vat_players.append(vat_player)
+		vat_applied_meshes += 1
+	if vat_expected_meshes == 0 or vat_applied_meshes != vat_expected_meshes:
+		push_error("C3 VAT visual proof: incomplete multi-mesh mapping.")
+		quit(1)
+		return
 	await process_frame
 	await process_frame
 	var vat_first := get_root().get_texture().get_image()
@@ -155,7 +204,8 @@ func _render() -> void:
 		push_error("C3 VAT visual proof: could not save first VAT frame.")
 		quit(1)
 		return
-	vat_player.set_frame(14.0)
+	for vat_player in vat_players:
+		vat_player.set_frame(14.0)
 	await process_frame
 	await process_frame
 	var vat_second := get_root().get_texture().get_image()
@@ -171,14 +221,17 @@ func _render() -> void:
 			if first_pixels[pixel_byte] != second_pixels[pixel_byte]:
 				changed_pixels += 1
 	if changed_pixels < 100:
-		push_error("C3 VAT visual proof: rendered frames did not show a meaningful pixel change.")
+		push_error("C3 VAT visual proof: rendered full-character frames did not show meaningful movement.")
 		quit(1)
 		return
-	print("C3 VAT VISUAL PROOF: clip=look7 action110 vertices=2155 frames=15 changed_pixel_bytes=", changed_pixels,
+	print("C3 VAT FULL CHARACTER VISUAL PROOF: clip=", vat_clip_id,
+		" imported_meshes=", vat_mesh_nodes.size(), " VAT_meshes=", vat_applied_meshes,
+		" changed_pixel_bytes=", changed_pixels,
 		" screenshots=reports/c3-vat-poc-frame-a.png,reports/c3-vat-poc-frame-b.png")
-	character.queue_free()
+	vat_character.queue_free()
 	stage.queue_free()
 	quit(0)
+	return
 
 func _count_bones(root: Node) -> int:
 	var total := 0
