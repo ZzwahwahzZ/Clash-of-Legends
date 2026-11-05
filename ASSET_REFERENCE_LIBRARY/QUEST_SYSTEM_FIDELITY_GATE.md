@@ -57,3 +57,22 @@ Do not approve this gate because the sample chain runs or the project builds.
 - `NPCBase.gd` supplies three fixed lines per NPC role and the scene's NPC body is assembled from primitive cylinder/sphere meshes. Neither dialogue nor NPC appearance is accepted as reference content.
 
 These findings are recorded as implementation gaps, not fixed by suppressing validation. The current runtime must remain prototype-only until the mobile source reader and quest records are validated and the complete interaction is implemented and tested.
+
+
+## Follow-up source inspection: runtime and asset activation (2026-11-05)
+
+### Quest runtime verified against current `main`
+- `scripts/automation/QuestNavigationAgent.gd` is the active scene script. Its current database is a hard-coded sample chain; it has no source record keys or NPC giver/turn-in IDs.
+- `_advance_objective()` calls `_complete_quest()` as soon as the objective counter reaches its target. `_complete_quest()` immediately grants Gold/XP, appends completion, and advances to the next quest. There is no explicit return-to-NPC or claim action.
+- `on_npc_talked()` accepts only an NPC ID, and the NPC script emits this event before opening its generic dialogue. It cannot prove that the intended quest dialogue branch was completed.
+- Quest navigation uses hard-coded destinations and coordinates; these are not tied to validated source objective/map IDs.
+- Therefore the sample chain must not be treated as a valid reference implementation. Rework is blocked on validated Android 1.1.2.3 quest schema and source-to-runtime IDs; do not silently retrofit guessed turn-in NPCs.
+
+### Character and mount activation verified against current `main`
+- `AssetCatalog.gd` loads a project JSON catalog and only supports explicit class mappings through `CharacterModelMappingRules`; it does not prove that mapped files have source identity, correct textures, skeleton/action mapping, or visual approval.
+- `PlayerController._apply_character_model()` returns early if no verified mapping is found, leaving the original primitive character visible. If a model loads, it hides other visual children after instantiation; this is only safe once the mapped model passes provenance, materials, scale, rig/action and visual checks.
+- `PlayerController._apply_mount_model()` selects mount catalog index 0, which is not a verified per-mount identity mapping. Do not accept this as source fidelity; replace with explicit stable source-ID mapping before activation.
+- `MainGame.tscn` and `Player.tscn` still contain primitive placeholder geometry. Do not hide or remove it until verified replacement scenes and runtime validation exist.
+- Godot 4.3 supports importing glTF 2.0 scenes with mesh/material/animation data, but format support alone does not establish provenance or correct source mapping. The project must validate each source model, texture/material assignment, skeleton/action clip, scale and visual result before switching runtime visibility.
+
+Current decision remains **BLOCKED / NOT APPROVED** for quest parity and visual asset replacement.
