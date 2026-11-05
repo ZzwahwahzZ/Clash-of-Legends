@@ -58,6 +58,8 @@ jobs:
         run: python3 tools/resource_packs/extract_netdragon.py
       - name: Validate all MESH C3 and texture references against extracted TPI assets
         run: python3 tools/resource_packs/validate_c3_equipment_resource_links.py
+      - name: Join itemtype, mounttype, equipment MESH and original source assets
+        run: python3 tools/resource_packs/build_equipment_item_join_catalog.py
       - name: Probe original item, drop, quest and refinement data formats
         run: python3 tools/resource_packs/probe_gameplay_data.py
       - name: Build provenance-safe readable gameplay reference catalogs
@@ -298,7 +300,9 @@ jobs:
             reports/c3-motion-poc-validation.json
             reports/c3-wdb-audit.json
             reports/c3-equipment-resource-link-audit.json
+            reports/equipment-item-join-audit.json
             resource_stage/world/resource_mappings/mesh_equipment_catalog.json
+            resource_stage/world/resource_mappings/equipment_item_join_catalog.json
             reports/c3-conversion-report.json
             reports/c3-runtime-integration.json
             reports/pvr-texture-audit.json
