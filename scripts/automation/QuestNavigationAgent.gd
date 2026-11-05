@@ -34,7 +34,7 @@ var quest_database: Dictionary = {
 		"required_kills": 8,
 		"reward_gold": 850,
 		"reward_xp": 1200,
-		"next_quest": "quest_dragon"
+		"next_quest": "quest_meteor_gather"
 	},
 	"quest_dragon": {
 		"title_ar": "تحدي تنين اللهب",
@@ -45,7 +45,7 @@ var quest_database: Dictionary = {
 		"required_kills": 1,
 		"reward_gold": 2500,
 		"reward_xp": 3500,
-		"next_quest": "quest_guardian"
+		"next_quest": "quest_final_sage"
 	},
 	"quest_guardian": {
 		"title_ar": "حارس الأطلال",
@@ -56,7 +56,55 @@ var quest_database: Dictionary = {
 		"required_kills": 10,
 		"reward_gold": 1200,
 		"reward_xp": 1800,
-		"next_quest": ""
+		"next_quest": "quest_level_10"
+	},
+	"quest_meteor_gather": {
+		"title_ar":"أحجار من السماء",
+		"title_en":"Stones from the Sky",
+		"desc_ar":"اجمع 3 أحجار نيزك من الوحوش وأسقطها في الحقيبة.",
+		"desc_en":"Collect 3 Meteor Stones from monsters.",
+		"objective_type":"collect",
+		"objective_target":"meteor_stone",
+		"required_kills":3,
+		"reward_gold":700,
+		"reward_xp":900,
+		"next_quest":"quest_blacksmith_visit"
+	},
+	"quest_blacksmith_visit": {
+		"title_ar":"سر الحداد",
+		"title_en":"The Blacksmith's Secret",
+		"desc_ar":"تحدث إلى حداد الأساطير وتعرف على صقل العتاد.",
+		"desc_en":"Speak to the Master Blacksmith and learn equipment refinement.",
+		"objective_type":"talk",
+		"objective_target":"npc_blacksmith",
+		"required_kills":1,
+		"reward_gold":400,
+		"reward_xp":500,
+		"next_quest":"quest_guardian"
+	},
+	"quest_level_10": {
+		"title_ar":"اختبار البطل",
+		"title_en":"Hero's Trial",
+		"desc_ar":"واصل التدريب حتى تصل إلى المستوى 10.",
+		"desc_en":"Keep training until you reach level 10.",
+		"objective_type":"reach_level",
+		"objective_target":"10",
+		"required_kills":1,
+		"reward_gold":1000,
+		"reward_xp":1500,
+		"next_quest":"quest_dragon"
+	},
+	"quest_final_sage": {
+		"title_ar":"عودة إلى الحكيم",
+		"title_en":"Return to the Sage",
+		"desc_ar":"عد إلى حكيم التوأم وأبلغه بانتصارك على التنين.",
+		"desc_en":"Return to the Twin Sage and report the dragon's defeat.",
+		"objective_type":"talk",
+		"objective_target":"npc_sage",
+		"required_kills":1,
+		"reward_gold":3000,
+		"reward_xp":4500,
+		"next_quest":""
 	}
 }
 
@@ -68,10 +116,15 @@ func _validate_quest_database() -> bool:
 	for quest_id in quest_database:
 		var quest: Dictionary = quest_database[quest_id]
 		if int(quest.get("required_kills", 0)) <= 0:
-			push_error("Quest %s has an invalid required_kills value." % quest_id)
+			push_error("Quest %s has an invalid objective count." % quest_id)
 			return false
-		if str(quest.get("target_enemy_type", "")).is_empty():
-			push_error("Quest %s has no target enemy type." % quest_id)
+		var objective_type := str(quest.get("objective_type", "kill"))
+		if not ["kill", "collect", "talk", "reach_level"].has(objective_type):
+			push_error("Quest %s has an unsupported objective type." % quest_id)
+			return false
+		var target := str(quest.get("objective_target", quest.get("target_enemy_type", "")))
+		if target.is_empty():
+			push_error("Quest %s has no objective target." % quest_id)
 			return false
 		var next_id := str(quest.get("next_quest", ""))
 		if not next_id.is_empty() and not quest_database.has(next_id):
@@ -85,14 +138,31 @@ func get_active_quest() -> Dictionary:
 	return quest_database[active_quest_id].duplicate(true)
 
 func on_enemy_killed(enemy_type: String) -> void:
-	if is_quest_completed or not quest_database.has(active_quest_id):
+	_advance_objective("kill", enemy_type, 1)
+
+func on_item_collected(item_id: String, quantity: int = 1) -> void:
+	_advance_objective("collect", item_id, quantity)
+
+func on_npc_talked(npc_id: String) -> void:
+	_advance_objective("talk", npc_id, 1)
+
+func on_level_reached(level: int) -> void:
+	var quest: Dictionary = get_active_quest()
+	if quest.is_empty() or str(quest.get("objective_type", "")) != "reach_level":
+		return
+	var required_level := int(quest.get("objective_target", "1"))
+	if level >= required_level:
+		_advance_objective("reach_level", str(required_level), 1)
+
+func _advance_objective(event_type: String, target_id: String, amount: int) -> void:
+	if is_quest_completed or not quest_database.has(active_quest_id) or amount <= 0:
 		return
 	var quest: Dictionary = quest_database[active_quest_id]
-	var target_type := str(quest.get("target_enemy_type", ""))
-	if target_type != "any" and target_type != enemy_type:
+	var objective_type := str(quest.get("objective_type", "kill"))
+	var objective_target := str(quest.get("objective_target", quest.get("target_enemy_type", "")))
+	if objective_type != event_type or (objective_target != "any" and objective_target != target_id):
 		return
-
-	quest_progress = min(quest_progress + 1, int(quest["required_kills"]))
+	quest_progress = mini(quest_progress + amount, int(quest["required_kills"]))
 	if quest_progress >= int(quest["required_kills"]):
 		_complete_quest()
 	else:
