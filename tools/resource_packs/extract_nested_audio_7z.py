@@ -36,7 +36,14 @@ def main() -> None:
     if not AUDIO_ROOT.is_dir() or not INDEX.is_file():
         raise SystemExit("Audio staging directory or verified resource source index is missing.")
     rows = list(csv.DictReader(INDEX.open("r", encoding="utf-8-sig", newline="")))
-    seen_hashes = {str(row.get("sha256", "")).lower() for row in rows}
+    # The index also contains 904 source-only paths absent from the published
+    # baseline PCKs. Only files physically present in staging count as duplicates.
+    seen_hashes: set[str] = set()
+    for row in rows:
+        staged = str(row.get("staged_path", "")).replace("\\", "/")
+        staged_path = ROOT / Path(staged)
+        if staged_path.is_file():
+            seen_hashes.add(str(row.get("sha256", "")).lower())
     archives = sorted(path for path in AUDIO_ROOT.rglob("*") if path.is_file() and path.suffix.lower() == ".7z" and "nested_7z" not in path.parts)
     report = {
         "archives_found": len(archives),
