@@ -286,6 +286,11 @@ func test_quest_progression_lifecycle() -> void:
 	assert_true(event_quest.quest_progress == 2, "Quest: collected item quantity advances the objective")
 	event_quest.on_item_collected("meteor_stone", 1)
 	assert_true(event_quest.active_quest_id == "quest_meteor_gather" and event_quest.is_quest_completed, "Quest: collection completion waits for NPC turn-in")
+	var pending_copy = QuestNavigationAgentScript.new()
+	add_child(pending_copy)
+	pending_copy.deserialize(event_quest.serialize())
+	assert_true(pending_copy.active_quest_id == "quest_meteor_gather" and pending_copy.is_quest_completed, "Quest: pending turn-in state survives save/load")
+	pending_copy.queue_free()
 	var gold_before_turnin := GameManager.current_gold
 	event_quest.on_npc_talked("npc_blacksmith")
 	assert_true(event_quest.active_quest_id == "quest_meteor_gather" and GameManager.current_gold == gold_before_turnin, "Quest: wrong turn-in NPC cannot grant collection reward")
@@ -308,6 +313,13 @@ func test_quest_progression_lifecycle() -> void:
 	assert_true(event_quest.is_quest_completed and event_quest.active_quest_id == "quest_level_10", "Quest: reaching required level waits for sage turn-in")
 	event_quest.on_npc_talked("npc_sage")
 	assert_true(event_quest.active_quest_id == "quest_dragon", "Quest: sage turn-in grants level quest reward and advances chain")
+	event_quest.active_quest_id = ""
+	event_quest.is_quest_completed = true
+	var terminal_copy = QuestNavigationAgentScript.new()
+	add_child(terminal_copy)
+	terminal_copy.deserialize(event_quest.serialize())
+	assert_true(terminal_copy.active_quest_id.is_empty() and terminal_copy.is_quest_completed, "Quest: completed chain remains completed after save/load")
+	terminal_copy.queue_free()
 	event_quest.queue_free()
 	qa.queue_free()
 	restored_quest.queue_free()
