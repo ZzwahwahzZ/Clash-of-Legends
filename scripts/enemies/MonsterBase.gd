@@ -24,6 +24,8 @@ var target_player: CharacterBody3D = null
 var attack_cooldown: float = 0.0
 var state_timer: float = 0.0
 var anim_time: float = 0.0
+var imported_model_animation: AnimationPlayer = null
+var imported_animation_name: String = ""
 
 @onready var loot_scene: PackedScene = preload("res://scenes/world/LootDrop3D.tscn")
 @onready var health_bar: Label3D = get_node_or_null("HealthLabel")
@@ -63,6 +65,8 @@ func _apply_monster_model() -> void:
 		model_index = model_entries.size() - 1
 	elif enemy_type != "wolf":
 		model_index = abs(enemy_type.hash()) % model_entries.size()
+	imported_model_animation = null
+	imported_animation_name = ""
 	var old_root := visual_root.get_node_or_null("ImportedModelRoot")
 	if old_root:
 		old_root.queue_free()
@@ -76,10 +80,8 @@ func _apply_monster_model() -> void:
 	var instance: Node = imported_root.get_child(0)
 	var model_animation := instance.find_child("AnimationPlayer", true, false)
 	if model_animation is AnimationPlayer:
-		if model_animation.has_animation("idle"):
-			model_animation.play("idle")
-		elif model_animation.get_animation_list().size() > 0:
-			model_animation.play(model_animation.get_animation_list()[0])
+		imported_model_animation = model_animation as AnimationPlayer
+		_set_imported_animation_state("idle")
 
 func _physics_process(delta: float) -> void:
 	if current_state == State.DEAD:
@@ -127,6 +129,7 @@ func _physics_process(delta: float) -> void:
 					var diff = target_player.global_position - global_position
 					diff.y = 0.0
 					var dir = diff.normalized()
+					_set_imported_animation_state("move")
 					velocity.x = dir.x * move_speed
 					velocity.z = dir.z * move_speed
 					look_at(global_position + Vector3(dir.x, 0, dir.z), Vector3.UP)
@@ -141,6 +144,7 @@ func _physics_process(delta: float) -> void:
 				else:
 					velocity.x = 0
 					velocity.z = 0
+					_set_imported_animation_state("attack")
 					_animate_legs(delta, false)
 					if attack_cooldown <= 0.0:
 						_perform_attack()
@@ -152,16 +156,40 @@ func _physics_process(delta: float) -> void:
 			if diff.length() < 1.0:
 				velocity.x = 0
 				velocity.z = 0
+				_set_imported_animation_state("idle")
 				_animate_legs(delta, false)
 				current_state = State.IDLE
 			else:
 				var dir = diff.normalized()
+				_set_imported_animation_state("move")
 				velocity.x = dir.x * move_speed
 				velocity.z = dir.z * move_speed
 				look_at(global_position + Vector3(dir.x, 0, dir.z), Vector3.UP)
 				_animate_legs(delta, true)
 				
 	move_and_slide()
+
+func _set_imported_animation_state(state: String) -> void:
+	if imported_model_animation == null or not is_instance_valid(imported_model_animation):
+		return
+	var preferred := ["idle", "stand"] if state == "idle" else (["attack", "hit"] if state == "attack" else ["run", "walk", "move"])
+	var selected := ""
+	for animation_name in imported_model_animation.get_animation_list():
+		var normalized := animation_name.to_lower()
+		for token in preferred:
+			if normalized.contains(token):
+				selected = animation_name
+				break
+		if not selected.is_empty():
+			break
+	if selected.is_empty() and imported_model_animation.get_animation_list().size() > 0:
+		selected = imported_model_animation.get_animation_list()[0]
+	if selected.is_empty():
+		return
+	imported_model_animation.speed_scale = 1.0 if state == "idle" else (1.15 if state == "move" else 1.0)
+	if selected != imported_animation_name:
+		imported_animation_name = selected
+		imported_model_animation.play(selected)
 
 func _animate_legs(delta: float, is_moving: bool) -> void:
 	if fl_leg and fr_leg and rl_leg and rr_leg:
