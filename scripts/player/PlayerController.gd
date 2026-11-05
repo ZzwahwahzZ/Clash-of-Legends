@@ -201,7 +201,7 @@ func update_equipment_bonuses(atk_bonus: int, def_bonus: int) -> void:
 func take_damage(amount: int, attacker: Node3D) -> void:
 	if is_dead:
 		return
-	var reduced := max(1, amount - int(get_defense_power() / 2))
+	var reduced: int = maxi(1, amount - int(get_defense_power() / 2))
 	if has_node("PlayerInventory"):
 		var inventory: PlayerInventory = get_node("PlayerInventory")
 		reduced = maxi(1, int(round(float(reduced) * (1.0 - inventory.get_total_blessing_reduction()))))
