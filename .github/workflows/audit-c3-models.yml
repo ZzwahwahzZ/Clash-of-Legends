@@ -4,6 +4,7 @@ on:
     paths:
       - ".github/workflows/audit-c3-models.yml"
       - "tools/c3_audit/**"
+      - "tools/external_assets/audit_c3_equipment_families.py"
       - "scripts/animation/C3VatPlayer.gd"
       - "shaders/C3Vat.gdshader"
       - "shaders/C3VatAlpha.gdshader"
@@ -51,6 +52,9 @@ jobs:
         run: cargo test --manifest-path tools/c3_audit/Cargo.toml --release
       - name: Audit all original C3 models
         run: cargo run --manifest-path tools/c3_audit/Cargo.toml --release --bin clash-c3-audit -- build/c3-source build/pvr-png build/c3-glb reports/c3-model-audit.json
+      - name: Build per-family helmet, weapon and equipment candidate inventory
+        run: |
+          python3 tools/external_assets/audit_c3_equipment_families.py reports/c3-model-audit.json --project-root . --output reports/equipment/c3-equipment-family-audit.json
       - name: Import and validate converted C3 GLB models
         run: |
           godot --headless --editor --path . --import --quit
@@ -66,6 +70,7 @@ jobs:
           name: C3-Model-Conversion-Reports
           path: |
             reports/c3-model-audit.json
+            reports/equipment/c3-equipment-family-audit.json
             reports/c3-motion-poc-validation.json
             reports/c3-skeletal-poc-frame-a.png
             reports/c3-skeletal-poc-frame-b.png
