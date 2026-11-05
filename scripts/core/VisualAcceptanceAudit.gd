@@ -8,23 +8,41 @@ func _has_renderable_mesh(root: Node, node_path: String) -> bool:
 		return false
 	var mesh_instance := node as MeshInstance3D
 	var mesh_resource: Mesh = mesh_instance.mesh
-	if mesh_resource == null:
-		print("VISUAL MESH PROBE: ", node_path, " | mesh_resource=NULL")
-		return false
-	var surface_count := mesh_resource.get_surface_count()
-	print("VISUAL MESH PROBE: ", node_path, " | mesh_class=", mesh_resource.get_class(), " | surfaces=", surface_count)
-	if surface_count <= 0:
+	if mesh_resource == null or mesh_resource.get_surface_count() <= 0:
 		return false
 	var bounds := mesh_instance.get_aabb()
-	print("VISUAL BOUNDS PROBE: ", node_path, " | origin=", bounds.position, " | size=", bounds.size)
 	return is_finite(bounds.position.x) and is_finite(bounds.position.y) and is_finite(bounds.position.z) and is_finite(bounds.size.x) and is_finite(bounds.size.y) and is_finite(bounds.size.z) and bounds.size.length() > 0.001
+
+func _all_mesh_instances_renderable(root: Node) -> bool:
+	var mesh_nodes := root.find_children("*", "MeshInstance3D", true, false)
+	if mesh_nodes.is_empty():
+		push_warning("VISUAL GEOMETRY MISSING: scene has no MeshInstance3D nodes")
+		return false
+	for node in mesh_nodes:
+		var mesh_instance := node as MeshInstance3D
+		if mesh_instance == null or mesh_instance.mesh == null:
+			push_warning("VISUAL GEOMETRY MISSING: " + str(root.get_path_to(node)))
+			return false
+		var mesh_resource: Mesh = mesh_instance.mesh
+		if mesh_resource.get_surface_count() <= 0:
+			push_warning("VISUAL GEOMETRY EMPTY: " + str(root.get_path_to(node)))
+			return false
+		var bounds := mesh_instance.get_aabb()
+		if not is_finite(bounds.position.x) or not is_finite(bounds.position.y) or not is_finite(bounds.position.z):
+			return false
+		if not is_finite(bounds.size.x) or not is_finite(bounds.size.y) or not is_finite(bounds.size.z) or bounds.size.length() <= 0.001:
+			push_warning("VISUAL GEOMETRY DEGENERATE: " + str(root.get_path_to(node)))
+			return false
+	print("VISUAL FULL-MESH AUDIT PASSED: ", mesh_nodes.size(), " MeshInstance3D nodes")
+	return true
+
 
 func _all_required_meshes_exist(root: Node, paths: Array[String]) -> bool:
 	for node_path in paths:
 		if not _has_renderable_mesh(root, node_path):
 			push_warning("VISUAL GEOMETRY MISSING OR EMPTY: " + node_path)
 			return false
-	return true
+	return _all_mesh_instances_renderable(root)
 
 func _ready() -> void:
 	print("=======================================================")
