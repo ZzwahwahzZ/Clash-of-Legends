@@ -378,12 +378,7 @@ jobs:
             adb logcat -c
             adb shell monkey -p com.zwahwahzz.clashoflegends 1
             sleep 45
-            if ! adb shell pidof com.zwahwahzz.clashoflegends > emulator-evidence/game-pid.txt; then
-              adb logcat -d -t 12000 > emulator-evidence/logcat-failure.txt
-              echo "Game process exited after launch."
-              grep -Ei "FATAL EXCEPTION|SIGSEGV|Godot Engine|ERROR:" emulator-evidence/logcat-failure.txt | tail -n 120 || true
-              exit 1
-            fi
+            adb shell pidof com.zwahwahzz.clashoflegends > emulator-evidence/game-pid.txt || { adb logcat -d -t 12000 > emulator-evidence/logcat-failure.txt; echo "Game process exited after launch."; grep -Ei "FATAL EXCEPTION|SIGSEGV|Godot Engine|ERROR:" emulator-evidence/logcat-failure.txt | tail -n 120 || true; exit 1; }
             adb shell screencap -p /sdcard/clash-launch.png
             adb pull /sdcard/clash-launch.png emulator-evidence/launch-screen.png
             # Exercise common touch paths without assuming UI-specific button coordinates.
@@ -401,10 +396,7 @@ jobs:
             adb shell dumpsys meminfo com.zwahwahzz.clashoflegends > emulator-evidence/memory.txt
             adb shell dumpsys gfxinfo com.zwahwahzz.clashoflegends > emulator-evidence/graphics.txt
             adb logcat -d -t 16000 > emulator-evidence/logcat.txt
-            if grep -E "FATAL EXCEPTION|Fatal signal|SIGSEGV" emulator-evidence/logcat.txt; then
-              echo "Fatal Android runtime error detected."
-              exit 1
-            fi
+            grep -E "FATAL EXCEPTION|Fatal signal|SIGSEGV" emulator-evidence/logcat.txt && { echo "Fatal Android runtime error detected."; exit 1; } || true
             echo "ANDROID EMULATOR SMOKE TEST PASSED: installed, launched, survived touch/navigation inputs, and collected screen/performance evidence."
 
       - name: Upload Android emulator evidence
