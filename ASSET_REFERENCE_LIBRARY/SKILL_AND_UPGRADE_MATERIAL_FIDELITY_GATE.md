@@ -88,3 +88,12 @@ The corrected nested-APK source audit completed successfully in [run 42075363202
 - `mounttype.dat`, skill animation DAT files and the refinement attribute/cost/upgrade/effect DAT files remain binary/metadata-only.
 
 The source audit is an inventory result, not a semantic schema approval. In particular, the 57,940 IDs must not be treated as 57,940 fully understood item definitions; no field after the visible name is yet assigned gameplay meaning. The report is retained as [Gameplay-Source-Table-Audit artifact](https://github.com/ZzwahwahzZ/Clash-of-Legends/actions/runs/42075363202/artifacts/13438815306).
+
+### Second-pass source structure findings
+
+The corrected parser run [42076724797](https://github.com/ZzwahwahzZ/Clash-of-Legends/actions/runs/42076724797) distinguishes weapon proficiency data from active magic/skill data:
+
+- `weaponskillname.ini` has 69 comma-delimited rows and `weaponskilllevelexp.ini` has 21. These describe weapon-skill/proficiency categories and experience thresholds; they are not the active combat spell catalogue.
+- The actual active-skill data candidates are `magic.dat`, `newskill.dat`, `prize_newskill.dat`, `runemagic.dat`, `skilltag.dat`, `skilltip.dat`, `magic_group_rate.dat`, `magiceffect.dat`, `magictype.dat`, `magictypeex.dat`, and `magictypeop.dat`. All are present but still binary-only in this audit. Their schemas and exact skill-ID joins remain unresolved.
+- `action3deffect.ini` exposes separate `body`, `wing`, `cloak`, `mount`, `weapon`, and `armet` sections, while `weaponeffect.ini` has 111 weapon proficiency/effect sections with hit/block effect and sound keys. These are candidate effect mappings, not complete skill-to-VFX/audio approvals.
+- The 69/21 weapon proficiency tables must not be substituted for the missing active spell catalogue. No prototype skill definition is approved by this discovery alone.
