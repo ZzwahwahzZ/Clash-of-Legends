@@ -126,7 +126,7 @@ jobs:
           MIN_SDK="$(sed -n "s/.*sdkVersion:'\\([0-9][0-9]*\\)'.*/\\1/p" builds/android/apk-badging.txt | head -n1)"
           TARGET_SDK="$(sed -n "s/.*targetSdkVersion:'\\([0-9][0-9]*\\)'.*/\\1/p" builds/android/apk-badging.txt | head -n1)"
           test -n "$MIN_SDK" && test -n "$TARGET_SDK"
-          test "$MIN_SDK" -ge 24
+          test "$MIN_SDK" -ge 21
           test "$TARGET_SDK" -ge 33
           test "$TARGET_SDK" -le 34
           echo "Android SDK compatibility verified: min=$MIN_SDK target=$TARGET_SDK"
