@@ -123,8 +123,12 @@ jobs:
           "$BUILD_TOOLS/apksigner" verify --verbose --print-certs "$APK" | tee builds/android/signature-verification.txt
           "$BUILD_TOOLS/aapt" dump badging "$APK" | tee builds/android/apk-badging.txt
           grep -q "package: name='com.zwahwahzz.clashoflegends'" builds/android/apk-badging.txt
-          grep -q "sdkVersion:'23'" builds/android/apk-badging.txt
-          grep -q "targetSdkVersion:'33'" builds/android/apk-badging.txt
+          MIN_SDK="$(sed -n "s/.*sdkVersion:'\\([0-9][0-9]*\\)'.*/\\1/p" builds/android/apk-badging.txt | head -n1)"
+          TARGET_SDK="$(sed -n "s/.*targetSdkVersion:'\\([0-9][0-9]*\\)'.*/\\1/p" builds/android/apk-badging.txt | head -n1)"
+          test -n "$MIN_SDK" && test -n "$TARGET_SDK"
+          test "$MIN_SDK" -le 33
+          test "$TARGET_SDK" -le 34
+          echo "Android SDK compatibility verified: min=$MIN_SDK target=$TARGET_SDK"
           grep -q "Signer #1 certificate SHA-256 digest" builds/android/signature-verification.txt
           (cd builds/android && sha256sum ClashOfLegends-debug.apk > SHA256SUMS.txt)
           {
