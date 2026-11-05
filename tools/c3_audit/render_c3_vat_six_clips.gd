@@ -154,11 +154,20 @@ func _run() -> void:
 			applied_mesh_names[mesh_name] = true
 			vat_mesh_count += 1
 		var static_parts: Array = clip_report.get("static_meshes_retained_without_vat", [])
+		var hidden_attachment_socket_count := 0
 		for static_part in static_parts:
 			var static_name := str(static_part.get("mesh_name", ""))
 			if static_name.is_empty() or not mesh_by_name.has(static_name) or applied_mesh_names.has(static_name):
 				push_error("C3 six-clip visual proof: static part missing or incorrectly VAT-animated: " + static_name)
 				all_passed = false
+				continue
+			if str(static_part.get("render_role", "")) == "attachment_socket_helper":
+				var helper_mesh := mesh_by_name[static_name] as MeshInstance3D
+				if helper_mesh.visible:
+					push_error("C3 six-clip visual proof: attachment socket marker is still visible: " + static_name)
+					all_passed = false
+				else:
+					hidden_attachment_socket_count += 1
 		if vat_mesh_count != int(clip_report.get("mesh_count", 0)):
 			push_error("C3 six-clip visual proof: VAT part count differs from audit report for " + clip_id)
 			all_passed = false
@@ -209,6 +218,7 @@ func _run() -> void:
 			"full_character_mesh_count": mesh_nodes.size(),
 			"vat_mesh_count": vat_mesh_count,
 			"static_mesh_count": static_parts.size(),
+			"hidden_attachment_socket_count": hidden_attachment_socket_count,
 			"changed_sampled_pixels": changed_sampled_pixels,
 			"frame_a": OUTPUT_DIR.path_join(file_stem + "_frame_a.png"),
 			"frame_b": OUTPUT_DIR.path_join(file_stem + "_frame_b.png"),
