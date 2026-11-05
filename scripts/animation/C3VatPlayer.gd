@@ -34,6 +34,18 @@ func configure(mesh_instance: MeshInstance3D, metadata_path: String, binary_path
 	if raw.size() != width * _frame_count * 16:
 		push_error("C3 VAT: binary size does not match metadata dimensions.")
 		return false
+	var normal_file_name := str(parsed.get("normal_binary_file", ""))
+	if normal_file_name.is_empty():
+		push_error("C3 VAT: animated normal texture is missing from metadata.")
+		return false
+	var normal_path := metadata_path.get_base_dir().path_join(normal_file_name)
+	if not FileAccess.file_exists(normal_path):
+		push_error("C3 VAT: animated normal binary is missing.")
+		return false
+	var normal_raw := FileAccess.get_file_as_bytes(normal_path)
+	if normal_raw.size() != width * _frame_count * 4:
+		push_error("C3 VAT: animated normal binary size does not match metadata dimensions.")
+		return false
 	for surface in range(mesh_instance.mesh.get_surface_count()):
 		var arrays: Array = mesh_instance.mesh.surface_get_arrays(surface)
 		var imported_count: int = mesh_instance.mesh.surface_get_array_len(surface)
@@ -57,6 +69,11 @@ func configure(mesh_instance: MeshInstance3D, metadata_path: String, binary_path
 		push_error("C3 VAT: could not create RGBA32F animation texture.")
 		return false
 	var vat_texture := ImageTexture.create_from_image(image)
+	var normal_image := Image.create_from_data(width, _frame_count, false, Image.FORMAT_RGBA8, normal_raw)
+	if normal_image == null or normal_image.is_empty():
+		push_error("C3 VAT: could not create animated RGBA8 normal texture.")
+		return false
+	var normal_texture := ImageTexture.create_from_image(normal_image)
 	_materials.clear()
 	var shader_opaque := load("res://shaders/C3Vat.gdshader") as Shader
 	var shader_alpha := load("res://shaders/C3VatAlpha.gdshader") as Shader
@@ -79,6 +96,7 @@ func configure(mesh_instance: MeshInstance3D, metadata_path: String, binary_path
 		var surface_material := ShaderMaterial.new()
 		surface_material.shader = shader_alpha if alpha_enabled else shader_opaque
 		surface_material.set_shader_parameter("vat_texture", vat_texture)
+		surface_material.set_shader_parameter("vat_normal_texture", normal_texture)
 		surface_material.set_shader_parameter("vat_width", float(width))
 		surface_material.set_shader_parameter("vat_height", float(_frame_count))
 		if source_texture != null:
