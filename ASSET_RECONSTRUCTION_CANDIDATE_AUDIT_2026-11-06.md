@@ -67,3 +67,28 @@ These results identify repair work, not automatic rejection of every surface: op
 - Source URL/hash inventory: `original_images/sources_manifest.csv`.
 
 **Acceptance status remains BLOCKED / NOT APPROVED.** The audit adds five traceable mount reconstruction candidates to the repair queue; it does not change any production asset status.
+
+## External repair-tool research (2026-11-06)
+
+### Blender is the selected repair/inspection host for the five GLBs
+
+- Blender's official remeshing guidance explains that voxel remesh can eliminate internal/self-intersecting geometry, but explicitly warns that voxel remesh is not suitable for final deforming character topology. Therefore this pipeline does **not** blindly voxel-remesh mounts or characters; it uses a conservative BMesh pass and preserves disconnected components for visual review. Source: https://docs.blender.org/manual/en/dev/modeling/meshes/retopology.html
+- Blender's official support page points to the maintained manual, developer docs, Python API, Blender Studio training, and Blender Stack Exchange for troubleshooting: https://www.blender.org/support/
+- The official TripoSR guidance confirms that single-view reconstructions infer unseen backs and concavities and are less reliable for thin, transparent, and reflective structures. This is why the current one-view mount candidates cannot be accepted as complete models. Source: https://triposr.org/docs/image-to-3d
+- The upstream TripoSR research repository documents a GPU-heavy single-image reconstruction pipeline and its install/runtime constraints. Source: https://github.com/VAST-AI-Research/TripoSR
+
+### C3 Operator: useful, but not a universal fix
+
+The external C3 Operator 2.3.1 Blender add-on supports C3 model import/export and weapon export. Its own README says it was tested on garments, and lists unresolved scale/orientation normalization, bone-system translation, UV conversion, and hair/effect support. Its workaround for the `required argument is not a float` error is applying transformations and merging near-duplicate vertices by distance. This is useful for diagnosing original C3 conversion failures, but it is not evidence that it can correctly rig or export the AI-generated mount GLBs. Source: https://github.com/Tachyon-S/C3-Operator
+
+### Rigging reference
+
+The Roblox Creator Hub Blender rigging guides are used only as general technical references for armature binding, automatic weights, and pose testing—not as a compatible game rig. They emphasize testing the deformations after binding and correcting weights when necessary:
+- https://create.roblox.com/docs/art/modeling/rig-a-simple-mesh
+- https://create.roblox.com/docs/art/modeling/skin-a-simple-mesh
+
+### New automated candidate-repair path
+
+Added `tools/external_assets/repair_mount_glbs.py` and `.github/workflows/external-mount-repair.yml`. The workflow downloads the five source GLBs and their indexed source images from the external asset archive, runs Blender BMesh inspection, applies only near-coincident vertex welding and degenerate-edge cleanup, recalculates face normals, exports separate repair candidates, and emits before/after component/topology metrics. It deliberately does not delete disconnected islands or overwrite original files.
+
+**Important:** A successful Blender run only validates that the toolchain imported, inspected, and re-exported the files. It does not visually approve them. The resulting candidates remain blocked until image-to-model silhouette comparison, texture/material review, underside/back inspection, rider-saddle attachment, rigging, riding animation, and in-game performance tests pass.
