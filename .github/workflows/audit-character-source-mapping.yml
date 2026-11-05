@@ -146,11 +146,17 @@ jobs:
                                       ini_sections[current_section][key.strip()] = value.strip()
                           matching_role_sections = {}
                           for section_name, fields in ini_sections.items():
-                              searchable = section_name + " " + " ".join(str(value) for value in fields.values())
+                              searchable = section_name + " " + " ".join(str(key) + " " + str(value) for key, value in fields.items())
                               if any(re.search(r"(?<![0-9])" + re.escape(model_id) + r"(?![0-9])", searchable) for model_id in known_role_model_ids):
                                   matching_role_sections[section_name] = fields
+                          relevant_source_lines = [
+                              line.strip() for line in lines
+                              if any(re.search(r"(?<![0-9])" + re.escape(model_id) + r"(?![0-9])", line) for model_id in known_role_model_ids)
+                          ][:100]
                           is_bulk_itemtype = "/itemtype/" in target.lower()
-                          stored_ini_sections = matching_role_sections if is_bulk_itemtype or target.lower().endswith(("_trans.ini", "weaponmatch.ini", "weaponshow.ini")) else ini_sections
+                          is_equipment_map = target.lower().endswith(("_trans.ini", "weaponmatch.ini", "weaponshow.ini"))
+                          stored_ini_sections = matching_role_sections if is_bulk_itemtype or is_equipment_map else ini_sections
+                          sample_lines = [line.strip() for line in lines if line.strip()][:20] if is_bulk_itemtype or is_equipment_map else []
                           xml_structure = {}
                           if target.lower().endswith(".xml"):
                               try:
@@ -176,6 +182,8 @@ jobs:
                               "matching_role_section_count": len(matching_role_sections),
                               "key_names": keys[:300],
                               "ini_sections": stored_ini_sections,
+                              "relevant_source_lines": relevant_source_lines,
+                              "sample_lines": sample_lines,
                               "xml_structure": xml_structure,
                               "asset_reference_count": len(refs),
                               "asset_references": refs[:500],
