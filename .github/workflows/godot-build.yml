@@ -333,6 +333,11 @@ jobs:
             APK="builds/android/ClashOfLegends-debug.apk"
             PACKAGE="com.zwahwahzz.clashoflegends"
             adb wait-for-device
+            # Approximate Redmi Note 11's 1080x2400 portrait display and density.
+            adb shell wm size 1080x2400
+            adb shell wm density 395
+            adb shell wm size | tee emulator-evidence/display-size.txt
+            adb shell wm density | tee emulator-evidence/display-density.txt
             adb shell getprop ro.build.version.sdk | tee emulator-evidence/android-api.txt
             test "$(adb shell getprop ro.build.version.sdk | tr -d '\r')" = "33"
             adb install -r "$APK"
