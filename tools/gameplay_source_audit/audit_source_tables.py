@@ -259,7 +259,7 @@ def main() -> None:
             c3_model_paths = []
             for rel, candidates in sources.items():
                 low = rel.lower().replace("\\", "/")
-                if low.startswith("netdragon/c31/c3/") and low.endswith(".c3"):
+                if "!c3/" in low and low.endswith(".c3"):
                     for source_zip, member, display in candidates:
                         c3_model_paths.append({
                             "relative_path": rel, "source_member": display,
