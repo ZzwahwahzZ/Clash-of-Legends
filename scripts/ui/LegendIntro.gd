@@ -352,7 +352,30 @@ func _on_aggregate_download_progress(received: int, total: int, _completed: int,
 	splash_progress_bar.value = ratio * 100.0
 
 
+func _missing_verified_character_classes() -> Array[String]:
+	var missing: Array[String] = []
+	if not GameContentDatabase or not AssetCatalog:
+		return ["resource catalog unavailable"]
+	for class_id in GameContentDatabase.get_selectable_class_ids():
+		if AssetCatalog.get_verified_character_model_index(class_id) < 0:
+			missing.append(class_id)
+	return missing
+
+func _show_production_content_block(missing: Array[String]) -> void:
+	if is_instance_valid(intro_overlay):
+		intro_overlay.queue_free()
+	intro_overlay = null
+	splash_progress_bar = null
+	if class_status:
+		class_status.visible = true
+		var detail := "، ".join(PackedStringArray(missing))
+		class_status.text = "لن أبدأ العالم بنماذج مؤقتة. ما زالت نماذج الشخصيات التالية غير موثّقة: %s" % detail
+
 func _enter_world() -> void:
+	var missing_classes := _missing_verified_character_classes()
+	if not missing_classes.is_empty():
+		_show_production_content_block(missing_classes)
+		return
 	if is_instance_valid(intro_overlay):
 		intro_overlay.queue_free()
 	intro_overlay = null
