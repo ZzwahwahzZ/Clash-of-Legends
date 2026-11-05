@@ -38,12 +38,13 @@ func setup_loot(data: Dictionary) -> void:
 func get_loot_category() -> String:
 	if item_payload.is_empty():
 		return "gold"
-	var item_type := str(item_payload.get("type", "material"))
-	if item_type == "equipment":
-		return "equipment"
-	if item_type in ["gem", "quest"]:
+	var item_type := str(item_payload.get("type", "unknown")).to_lower()
+	if item_type in [
+		"gold", "equipment", "material", "gem", "quest",
+		"consumable", "refinement_material", "crafting_material", "cosmetic"
+	]:
 		return item_type
-	return "material"
+	return "unknown"
 
 func _apply_drop_visual() -> void:
 	if not mesh_instance:
