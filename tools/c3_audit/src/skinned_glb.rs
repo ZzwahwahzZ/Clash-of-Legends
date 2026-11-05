@@ -532,10 +532,13 @@ pub fn export_vat(mesh: &C3Mesh, motion: &C3Motion, output_prefix: &Path, clip_i
     }
     let referenced_vertex_count = referenced_vertices.iter().filter(|used| **used).count();
     let frame_count = motion.frame_count as usize;
+    let all_indices: Vec<u16> = mesh.opaque_indices.iter().chain(mesh.alpha_indices.iter()).copied().collect();
     let mut bytes = Vec::<u8>::with_capacity(vertex_count * frame_count * 16);
+    let mut normal_bytes = Vec::<u8>::with_capacity(vertex_count * frame_count * 4);
     let mut min = [f32::INFINITY; 3];
     let mut max = [f32::NEG_INFINITY; 3];
     for frame in 0..frame_count {
+        let mut frame_positions = Vec::<[f32; 3]>::with_capacity(vertex_count);
         for vertex_index in 0..vertex_count {
             let point = c3_vertex_position(mesh, motion, vertex_index, frame as f32)?;
             let p = [point.x * 0.01, -point.z * 0.01, point.y * 0.01];
@@ -543,19 +546,34 @@ pub fn export_vat(mesh: &C3Mesh, motion: &C3Motion, output_prefix: &Path, clip_i
                 if !p[axis].is_finite() { return Err(format!("non-finite VAT position at frame {frame}").into()); }
                 min[axis] = min[axis].min(p[axis]);
                 max[axis] = max[axis].max(p[axis]);
-                bytes.extend_from_slice(&p[axis].to_le_bytes());
             }
+            frame_positions.push(p);
+        }
+        // Static GLB normals are invalid once VAT moves the vertices. Rebuild
+        // per-frame vertex normals from the same C3 triangle topology.
+        let frame_normals = normals(&frame_positions, &all_indices);
+        for (p, n) in frame_positions.iter().zip(frame_normals.iter()) {
+            for axis in 0..3 { bytes.extend_from_slice(&p[axis].to_le_bytes()); }
             bytes.extend_from_slice(&1.0_f32.to_le_bytes());
+            for component in n {
+                normal_bytes.push((((*component * 0.5 + 0.5) * 255.0).round().clamp(0.0, 255.0)) as u8);
+            }
+            normal_bytes.push(255);
         }
     }
     let binary_path = output_prefix.with_extension("rgba32f");
+    let normal_path = output_prefix.with_extension("normalrgba8");
     let metadata_path = output_prefix.with_extension("json");
     if let Some(parent) = binary_path.parent() { fs::create_dir_all(parent)?; }
     fs::write(&binary_path, &bytes)?;
+    fs::write(&normal_path, &normal_bytes)?;
     let metadata = json!({
-        "format":"C3_VAT_RGBA32F","version":1,"clip_id":clip_id,"mesh_index":mesh_index,"mesh_name":mesh.name,"width":vertex_count,"height":frame_count,
+        "format":"C3_VAT_RGBA32F","version":2,"clip_id":clip_id,"mesh_index":mesh_index,"mesh_name":mesh.name,"width":vertex_count,"height":frame_count,
         "vertex_count":vertex_count,"referenced_vertex_count":referenced_vertex_count,"frame_count":frame_count,"fps":30,
         "bytes_per_texel":16,"binary_bytes":bytes.len(),
+        "normal_format":"C3_VAT_NORMAL_RGBA8","normal_bytes_per_texel":4,"normal_binary_bytes":normal_bytes.len(),
+        "normal_binary_file":normal_path.file_name().unwrap_or_default().to_string_lossy(),
+        "normal_sampling":"one normalized RGBA8 normal texel per source vertex per frame; RGB maps [-1,1] to [0,1]",
         "sampling":"one texel per source vertex per frame; RGBA=(x,y,z,1)",
         "matrix_semantics":"mesh.initial_matrix * motion.matrix_at(first_positive_influence_bone, frame); full affine transform",
         "influence_semantics":"first positive C3 bone_weights slot selects the bone; second slot is consulted only when the first weight is non-positive; weight magnitudes are not blended",
@@ -568,5 +586,5 @@ pub fn export_vat(mesh: &C3Mesh, motion: &C3Motion, output_prefix: &Path, clip_i
         "binary_file":binary_path.file_name().unwrap_or_default().to_string_lossy()
     });
     fs::write(&metadata_path, serde_json::to_vec_pretty(&metadata)?)?;
-    Ok((bytes.len() as u64, vertex_count, frame_count))
+    Ok(((bytes.len() + normal_bytes.len()) as u64, vertex_count, frame_count))
 }
