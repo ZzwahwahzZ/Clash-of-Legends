@@ -382,15 +382,43 @@ jobs:
             adb shell screencap -p /sdcard/clash-launch.png
             adb pull /sdcard/clash-launch.png emulator-evidence/launch-screen.png
             # Dismiss Android's one-time immersive-mode education overlay.
-            adb shell input tap 1460 430
-            sleep 2
+            # The game is landscape (2400x1080 after orientation), so tap the
+            # actual "Got it" button rather than the portrait-coordinate guess.
+            adb shell input tap 1500 380
+            sleep 3
             adb shell screencap -p /sdcard/clash-character-select.png
             adb pull /sdcard/clash-character-select.png emulator-evidence/character-select.png
-            # Select the currently highlighted class and enter the journey.
-            adb shell input tap 1200 845
-            sleep 10
+            python3 - <<'PY'
+            from PIL import Image, ImageChops
+            launch = Image.open("emulator-evidence/launch-screen.png").convert("RGB")
+            select = Image.open("emulator-evidence/character-select.png").convert("RGB")
+            if launch.size != select.size:
+                raise SystemExit(f"Character-select screenshot size changed: {launch.size} -> {select.size}")
+            diff = ImageChops.difference(launch, select)
+            changed = sum(1 for pixel in diff.getdata() if max(pixel) > 12)
+            ratio = changed / (select.width * select.height)
+            print(f"OVERLAY DISMISS SCREEN CHANGE: {ratio:.3%}")
+            if ratio < 0.02:
+                raise SystemExit("Immersive-mode overlay is still visible; character selection was not reached.")
+            PY
+            # Enter the journey using the center of the actual start button.
+            adb shell input tap 1200 975
+            sleep 15
             adb shell screencap -p /sdcard/clash-world-entry.png
             adb pull /sdcard/clash-world-entry.png emulator-evidence/world-entry.png
+            python3 - <<'PY'
+            from PIL import Image, ImageChops
+            select = Image.open("emulator-evidence/character-select.png").convert("RGB")
+            world = Image.open("emulator-evidence/world-entry.png").convert("RGB")
+            if select.size != world.size:
+                raise SystemExit(f"World-entry screenshot size changed: {select.size} -> {world.size}")
+            diff = ImageChops.difference(select, world)
+            changed = sum(1 for pixel in diff.getdata() if max(pixel) > 12)
+            ratio = changed / (world.width * world.height)
+            print(f"WORLD-ENTRY SCREEN CHANGE: {ratio:.3%}")
+            if ratio < 0.05:
+                raise SystemExit("Start-button input did not transition from character selection into the world.")
+            PY
             # Exercise the landscape movement area and capture the resulting scene.
             adb shell input swipe 280 900 420 900 700
             sleep 3
