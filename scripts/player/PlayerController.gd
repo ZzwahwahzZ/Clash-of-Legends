@@ -88,12 +88,6 @@ func _apply_character_model() -> void:
 	for child in visual_root.get_children():
 		if child != imported_root and child is Node3D:
 			child.visible = false
-	var model_animation := instance.find_child("AnimationPlayer", true, false)
-	if model_animation is AnimationPlayer:
-		if model_animation.has_animation("idle"):
-			model_animation.play("idle")
-		elif model_animation.get_animation_list().size() > 0:
-			model_animation.play(model_animation.get_animation_list()[0])
 
 func _physics_process(delta: float) -> void:
 	if is_dead:
