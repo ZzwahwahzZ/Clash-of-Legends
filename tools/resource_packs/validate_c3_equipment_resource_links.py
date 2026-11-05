@@ -27,8 +27,10 @@ all_missing_mesh = []
 all_missing_texture = []
 for table_name, table in catalog.get("tables", {}).items():
     mesh_refs = texture_refs = mesh_found = texture_found = fully_found = 0
+    motion_refs = motion_found = 0
     missing_mesh = []
     missing_texture = []
+    missing_motion = []
     for record in table.get("records", []):
         for part in record.get("parts", []):
             mesh_path = str(part.get("mesh_path") or "").replace("\\", "/").lower()
@@ -46,6 +48,16 @@ for table_name, table in catalog.get("tables", {}).items():
                 missing_mesh.append({"unique_id": record.get("unique_id"), "path": mesh_path, "source_index_matches": len(mesh_rows)})
             if texture_path and not texture_exists and len(missing_texture) < 100:
                 missing_texture.append({"unique_id": record.get("unique_id"), "path": texture_path, "source_index_matches": len(texture_rows)})
+        for motion in record.get("motion_records", []):
+            motion_path = str(motion.get("motion_path") or "").replace("\\", "/").lower()
+            if not motion_path:
+                continue
+            motion_refs += 1
+            motion_rows = source_paths.get(motion_path, [])
+            motion_exists = any(row["staged_path"] and Path(row["staged_path"]).is_file() for row in motion_rows)
+            motion_found += motion_exists
+            if not motion_exists and len(missing_motion) < 100:
+                missing_motion.append({"unique_id": record.get("unique_id"), "motion_key": motion.get("motion_key"), "path": motion_path, "source_index_matches": len(motion_rows)})
     summary[table_name] = {
         "record_count": table.get("record_count", 0),
         "mesh_path_reference_count": mesh_refs,
@@ -53,8 +65,11 @@ for table_name, table in catalog.get("tables", {}).items():
         "texture_path_reference_count": texture_refs,
         "texture_file_found_count": texture_found,
         "fully_present_part_count": fully_found,
+        "motion_path_reference_count": motion_refs,
+        "motion_file_found_count": motion_found,
         "missing_mesh_path_samples": missing_mesh,
         "missing_texture_path_samples": missing_texture,
+        "missing_motion_path_samples": missing_motion,
         "status": "SOURCE_FILES_PRESENT_REQUIRES_VISUAL_REVIEW" if mesh_found and texture_found else "SOURCE_FILE_GAPS_REMAIN",
     }
     all_missing_mesh.extend(missing_mesh)
@@ -78,6 +93,7 @@ print("C3_EQUIPMENT_RESOURCE_LINK_AUDIT", json.dumps({
         "records": value["record_count"],
         "mesh_found": value["mesh_file_found_count"],
         "texture_found": value["texture_file_found_count"],
+        "motion_found": value["motion_file_found_count"],
         "status": value["status"],
     }
     for key, value in summary.items()
