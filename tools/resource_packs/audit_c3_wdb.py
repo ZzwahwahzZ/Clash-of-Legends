@@ -157,6 +157,45 @@ def parse_rsdb(data: bytes, stem: str) -> dict:
             "sample_records": records[:20], "_records": records}
 
 
+def parse_mesh(data: bytes) -> dict:
+    """Parse TQ MESH/MESZ records: unique model ID + linked mesh/texture parts."""
+    if len(data) < 8:
+        raise ValueError("MESH table is shorter than its header")
+    magic = data[:4]
+    if magic not in (b"MESH", b"MESZ"):
+        raise ValueError(f"Unsupported MESH identifier: {magic!r}")
+    count = struct.unpack_from("<I", data, 4)[0]
+    offset = 8
+    records = []
+    for index in range(count):
+        if offset + 8 > len(data):
+            raise ValueError(f"MESH record {index} header exceeds table size")
+        unique_id, part_count = struct.unpack_from("<II", data, offset)
+        offset += 8
+        if part_count > 64 or offset + part_count * 16 > len(data):
+            raise ValueError(f"MESH record {unique_id} has invalid part count {part_count}")
+        parts = []
+        for part_index in range(part_count):
+            mesh_id, texture_id, mix_texture_id = struct.unpack_from("<III", data, offset)
+            mix_opt, asb, adb, material = struct.unpack_from("<BBBB", data, offset + 12)
+            offset += 16
+            parts.append({
+                "part_index": part_index, "mesh_id": mesh_id,
+                "texture_id": texture_id, "mix_texture_id": mix_texture_id,
+                "mix_option": mix_opt, "alpha_source_blend": asb,
+                "alpha_destination_blend": adb, "material_id": material,
+            })
+        records.append({"id": unique_id, "part_count": part_count, "parts": parts})
+    trailing = len(data) - offset
+    if trailing:
+        raise ValueError(f"MESH table has {trailing} trailing byte(s)")
+    return {
+        "format": magic.decode("ascii", errors="replace"),
+        "record_count": count, "parse_status": "PARSED",
+        "sample_records": records[:20], "_records": records,
+    }
+
+
 def parse_simo(data: bytes) -> dict:
     count = struct.unpack_from("<I", data, 4)[0]
     offset = 8
@@ -210,6 +249,8 @@ def parse_wdb(data: bytes) -> dict:
             parsed = parse_rsdb(blob, stem)
         elif magic == b"SIMO":
             parsed = parse_simo(blob)
+        elif magic in (b"MESH", b"MESZ"):
+            parsed = parse_mesh(blob)
         elif magic == b"SIM5":
             parsed = {
                 "format": "SIM5", "record_count": struct.unpack_from("<I", blob, 4)[0] if len(blob) >= 8 else None,
@@ -238,6 +279,12 @@ def parse_wdb(data: bytes) -> dict:
     object_rows = take_rows("ini/3DObj.dbc")
     texture_rows = take_rows("ini/3DTexture.dbc")
     simple_rows = take_rows("ini/3DSimpleObj.dbc")
+    mount_motion_rows = take_rows("ini/mountmotion.dbc")
+    mesh_table_names = (
+        "ini/mount.dbc", "ini/armet.dbc", "ini/armor.dbc",
+        "ini/weapon.dbc", "ini/head.dbc", "ini/misc.dbc", "ini/shield.dbc",
+    )
+    mesh_table_rows = {name: take_rows(name) for name in mesh_table_names}
     object_map = {int(row["id"]): str(row["path"]) for row in object_rows}
     texture_map = {int(row["id"]): str(row["path"]) for row in texture_rows}
 
@@ -295,6 +342,77 @@ def parse_wdb(data: bytes) -> dict:
             "parts": catalog_parts,
         })
 
+    # Resolve MESH family records against the 3DObj / 3DTexture path tables.
+    mesh_family_catalog = {}
+    for table_name, rows in mesh_table_rows.items():
+        resolved_records = []
+        part_total = object_resolved = texture_resolved = fully_resolved = 0
+        missing_mesh_ids = set()
+        missing_texture_ids = set()
+        for row in rows:
+            resolved_parts = []
+            for part in row.get("parts", []):
+                part_total += 1
+                mesh_id = int(part["mesh_id"])
+                texture_id = int(part["texture_id"])
+                mesh_path = object_map.get(mesh_id)
+                texture_path = texture_map.get(texture_id)
+                if mesh_path is None:
+                    missing_mesh_ids.add(mesh_id)
+                else:
+                    object_resolved += 1
+                if texture_path is None:
+                    missing_texture_ids.add(texture_id)
+                else:
+                    texture_resolved += 1
+                if mesh_path is not None and texture_path is not None:
+                    fully_resolved += 1
+                resolved_parts.append({
+                    **part, "mesh_path": mesh_path, "texture_path": texture_path,
+                    "mesh_path_resolved": mesh_path is not None,
+                    "texture_path_resolved": texture_path is not None,
+                })
+            if len(resolved_records) < 60:
+                resolved_records.append({
+                    "unique_id": int(row["id"]), "part_count": int(row["part_count"]),
+                    "parts": resolved_parts,
+                })
+        mesh_family_catalog[table_name] = {
+            "record_count": len(rows), "part_count": part_total,
+            "mesh_id_matches": object_resolved, "texture_id_matches": texture_resolved,
+            "fully_resolved_part_count": fully_resolved,
+            "missing_mesh_id_count": len(missing_mesh_ids),
+            "missing_texture_id_count": len(missing_texture_ids),
+            "missing_mesh_id_samples": sorted(missing_mesh_ids)[:30],
+            "missing_texture_id_samples": sorted(missing_texture_ids)[:30],
+            "sample_records": resolved_records,
+            "status": "ID_PATH_JOINED_REQUIRES_FILE_PRESENCE_AND_VISUAL_REVIEW" if rows else "TABLE_NOT_PARSED",
+        }
+
+    mount_motion_by_base = {}
+    for row in mount_motion_rows:
+        key = int(row["id"])
+        base = key // 1000
+        mount_motion_by_base.setdefault(base, []).append({
+            "motion_key": key, "motion_path": str(row["path"])
+        })
+    mount_table = mesh_family_catalog.get("ini/mount.dbc", {})
+    mount_motion_matches = 0
+    mount_motion_unmatched = []
+    for sample in mount_table.get("sample_records", []):
+        base = int(sample["unique_id"])
+        motions = mount_motion_by_base.get(base, [])
+        sample["motion_records"] = motions[:30]
+        if motions:
+            mount_motion_matches += 1
+        elif len(mount_motion_unmatched) < 60:
+            mount_motion_unmatched.append(base)
+    mount_table["mount_motion_base_divisor"] = 1000
+    mount_table["mount_motion_matched_sample_count"] = mount_motion_matches
+    mount_table["mount_motion_unmatched_sample_ids"] = mount_motion_unmatched
+    mount_table["mount_motion_record_count"] = len(mount_motion_rows)
+    mount_table["mount_motion_status"] = "PREFIX_JOIN_CANDIDATE_REQUIRES_RUNTIME_CONFIRMATION"
+
     catalog_dir = Path("resource_stage/world/resource_mappings")
     catalog_dir.mkdir(parents=True, exist_ok=True)
     catalog_path = catalog_dir / "simple_object_catalog.json"
@@ -346,6 +464,16 @@ def parse_wdb(data: bytes) -> dict:
         "magic": "BDMG", "file_size_bytes": len(data), "declared_size_bytes": total_size,
         "table_offset": table_offset, "entry_count": entry_count,
         "table_end": table_offset + entry_count * WDB_ENTRY_SIZE,
+        "mesh_family_catalog": mesh_family_catalog,
+        "mount_model_motion_audit": {
+            "mount_mesh_record_count": mesh_family_catalog.get("ini/mount.dbc", {}).get("record_count", 0),
+            "mount_mesh_part_count": mesh_family_catalog.get("ini/mount.dbc", {}).get("part_count", 0),
+            "mount_motion_record_count": len(mount_motion_rows),
+            "mount_motion_join_rule": "mountmotion key // 1000 == mount.dbc unique ID; candidate join only until validated against exact Mobile client runtime",
+            "mount_motion_matched_sample_count": mount_motion_matches,
+            "mount_motion_unmatched_sample_ids": mount_motion_unmatched,
+            "note": "MESH records resolve part mesh/texture IDs through 3DObj and 3DTexture path tables. File existence and rendered fit remain separate gates."
+        },
         "resource_reference_audit": resource_reference_audit,
         "entries": entries
     }
