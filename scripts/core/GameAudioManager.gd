@@ -63,7 +63,6 @@ var music_enabled := true
 var sfx_enabled := true
 var music_volume_db := -12.0
 var sfx_volume_db := -6.0
-var _footstep_cooldowns: Dictionary = {}
 
 func _ready() -> void:
 	_index_audio_files()
@@ -121,7 +120,7 @@ func play_sfx(cue_id: String, source: Node3D = null, volume_offset_db: float = 0
 	var stream := _load_stream(stem)
 	if stream == null:
 		return
-	var player: Node
+	var player: Variant
 	if source != null and is_instance_valid(source):
 		var spatial := AudioStreamPlayer3D.new()
 		spatial.max_distance = 28.0
@@ -144,7 +143,7 @@ func play_sfx(cue_id: String, source: Node3D = null, volume_offset_db: float = 0
 	player.play()
 
 func play_player_attack(player: Node3D, target: Node3D = null) -> void:
-	var class_id := str(player.get("character_class")) if player and player.has_method("get") else "Trojan"
+	var class_id := str(player.get("character_class")) if player != null else "Trojan"
 	var cue := str(CLASS_ATTACK_CUES.get(class_id, "attack_sword"))
 	play_sfx(cue, target if target and is_instance_valid(target) else player)
 
