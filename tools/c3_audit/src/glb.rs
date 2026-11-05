@@ -53,8 +53,9 @@ fn transformed_positions(mesh: &sandbox_data::c3::C3Mesh, motion: Option<&sandbo
             // Match the C3 runtime's documented behavior: the first positive
             // influence selects the vertex's bone; the stored weight is a
             // presence/selection value here, not a conventional GPU blend.
-            // Both C3Studio and the independent C3 Blender Add-On implement
-            // this same first-positive-influence rule.
+            // The C3Studio reference renderer and the pinned Preservation CO
+            // runtime both select the first positive influence for this vertex.
+            // Keep this compatibility path separate from the skeletal exporter.
             let mut point = mesh.initial_matrix.transform_point(vertex.position);
             for influence in 0..2 {
                 let weight = vertex.bone_weights[influence];
