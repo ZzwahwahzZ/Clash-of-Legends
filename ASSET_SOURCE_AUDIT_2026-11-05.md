@@ -16,12 +16,12 @@ https://github.com/ZzwahwahzZ/Clash-of-Legends/actions/runs/41991461493
 
 - 563 C3-to-GLB scenes imported and passed geometry checks.
 - 2,454 mesh surfaces; 936,015 triangles; 709,677 vertices.
-- 497 models expose imported animation tracks; 18,029 motion tracks reported.
+- 18,029 C3 MOTI chunks were parsed; this is not equivalent to 18,029 imported animation clips. The previous GLB exporter reused the first MOTI chunk for every mesh, freezing many parts. A per-mesh motion exporter and strict Godot morph/track validation are under CI.
 - 1,060 PVR textures decoded with zero decoder failures.
 - 40 C3 parser failures remain in effect paths due to 4/8-byte unparsed tails.
 - Further source models were skipped when their matching decoded PVR texture or renderable geometry was unavailable.
 
-These results prove conversion/import, not class mapping, live-game attachment, rendered quality, or mobile performance.
+These results prove geometry conversion/import, not class mapping, live-game attachment, animation correctness, rendered quality, or mobile performance.
 
 ## Packaging and distribution state
 
