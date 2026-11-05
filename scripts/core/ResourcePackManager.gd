@@ -6,6 +6,7 @@ signal manifest_loaded(package_count: int)
 signal download_progress(package_id: String, received_bytes: int, total_bytes: int)
 signal package_installed(package_id: String, path: String)
 signal package_failed(package_id: String, reason: String)
+signal package_finished(package_id: String, success: bool, reason: String)
 
 const MANIFEST_URL := "https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/resource-packs-v1/RESOURCE_MANIFEST"
 const INSTALL_DIR := "user://resource_packs"
@@ -126,14 +127,33 @@ func _load_installed_packages() -> void:
 func is_package_installed(package_id: String) -> bool:
 	return bool(installed_packages.get(package_id, false))
 
+func download_all_packages() -> bool:
+	if packages.is_empty() and not await refresh_manifest():
+		return false
+	var package_ids: Array = packages.keys()
+	package_ids.sort()
+	for package_id in package_ids:
+		if is_package_installed(str(package_id)):
+			continue
+		if not await download_package(str(package_id)):
+			return false
+		var result: Array = await package_finished
+		if result.size() < 2 or str(result[0]) != str(package_id):
+			return false
+		if not bool(result[1]):
+			return false
+	return true
+
 func download_package(package_id: String) -> bool:
 	if busy:
 		return false
 	if packages.is_empty() and not await refresh_manifest():
 		package_failed.emit(package_id, "تعذر تحميل بيان الموارد")
+		package_finished.emit(package_id, false, "تعذر تحميل بيان الموارد")
 		return false
 	if not packages.has(package_id):
 		package_failed.emit(package_id, "حزمة الموارد غير منشورة في البيان")
+		package_finished.emit(package_id, false, "حزمة الموارد غير منشورة في البيان")
 		return false
 	if is_package_installed(package_id):
 		return true
@@ -194,12 +214,14 @@ func _on_download_completed(result: int, response_code: int, _headers: PackedStr
 		return
 	installed_packages[package_id] = true
 	package_installed.emit(package_id, final_path)
+	package_finished.emit(package_id, true, "")
 	_clear_request()
 
 func _finish_failure(package_id: String, reason: String, path: String) -> void:
 	if FileAccess.file_exists(path):
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
 	package_failed.emit(package_id, reason)
+	package_finished.emit(package_id, false, reason)
 	_clear_request()
 
 func _clear_request() -> void:
