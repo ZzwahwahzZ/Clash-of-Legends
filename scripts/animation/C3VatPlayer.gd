@@ -119,7 +119,21 @@ func _hide_c3_attachment_socket_markers(mesh_instance: MeshInstance3D) -> void:
 	var scene_root: Node = mesh_instance
 	while scene_root.get_parent() != null and scene_root.get_parent() is Node3D:
 		scene_root = scene_root.get_parent()
+	# Every v_* node except v_body is a virtual equipment/socket marker.
+	# Keep the nodes and transforms for attachment lookup, but never render
+	# their tiny reference meshes as visible body parts (helmet/weapon blocks).
 	var helper_names := {
+		"v_armet": true,
+		"v_l_weapon": true,
+		"v_r_weapon": true,
+		"v_l_forearm": true,
+		"v_l_shoulder": true,
+		"v_r_forearm": true,
+		"v_r_shoulder": true,
+		"v_back": true,
+		"v_l_foot": true,
+		"v_r_foot": true,
+		"v_pelvis": true,
 		"v_zero": true,
 		"v_slot": true,
 		"v_l_slot01": true,
