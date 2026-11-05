@@ -352,9 +352,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             // Rigid/static pieces deliberately remain in the complete GLB
                             // with their original geometry and material; they do not get VAT.
                             if !deforming {
+                                let attachment_socket = matches!(mesh.name.as_str(),
+                                    "v_zero" | "v_slot" | "v_l_slot01" | "v_l_slot02" | "v_r_slot01" | "v_r_slot02");
                                 vat_static_meshes.push(json!({
                                     "mesh_index":mesh_index,"mesh_name":mesh.name,
                                     "vertex_count":mesh.vertices.len(),
+                                    "render_role":if attachment_socket {"attachment_socket_helper"} else {"visible_static_geometry"},
                                     "status":"STATIC_RETAINED_IN_COMPLETE_GLB_NO_VAT"
                                 }));
                                 continue;
