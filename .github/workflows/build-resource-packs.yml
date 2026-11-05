@@ -147,21 +147,31 @@ jobs:
       - name: Commit generated resource manifest
         if: ${{ success() }}
         run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add RESOURCE_MANIFEST
-          if git diff --cached --quiet; then
-            echo "RESOURCE_MANIFEST already matches this build."
-          else
+          manifest_backup="${RUNNER_TEMP}/RESOURCE_MANIFEST.generated"
+          cp RESOURCE_MANIFEST "$manifest_backup"
+          # Rebase conflicts on a generated manifest are avoided by starting from
+          # the latest remote branch and then applying this run's freshly verified
+          # manifest. Source-code changes from the remote are preserved.
+          for attempt in 1 2 3; do
+            git fetch origin "${GITHUB_REF_NAME}"
+            git reset --hard FETCH_HEAD
+            cp "$manifest_backup" RESOURCE_MANIFEST
+            git add RESOURCE_MANIFEST
+            if git diff --cached --quiet; then
+              echo "RESOURCE_MANIFEST already matches the latest remote branch."
+              exit 0
+            fi
             git commit -m "Update resource manifest from verified PCK build"
-            # Godot import and resource staging can leave tracked working-tree changes.
-            # They are build by-products, not part of the manifest commit. Stash them
-            # before rebasing, then discard the stash after the manifest is pushed.
-            git stash push -m "resource-pack-build-worktree" -- .
-            git pull --rebase origin "${GITHUB_REF_NAME}"
-            git push origin "HEAD:${GITHUB_REF_NAME}"
-            git stash drop || true
-          fi
+            if git push origin "HEAD:${GITHUB_REF_NAME}"; then
+              exit 0
+            fi
+            echo "Push raced with another update; retrying from the latest remote branch (attempt $attempt)."
+          done
+          echo "Unable to push manifest after 3 synchronized attempts."
+          exit 1
       - name: Upload PCKs and source index as workflow artifact
         if: ${{ vars.ALLOW_C3_ASSET_REDISTRIBUTION == 'true' }}
         uses: actions/upload-artifact@v4
