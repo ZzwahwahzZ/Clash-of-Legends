@@ -44,3 +44,18 @@ The game must keep resource distribution blocked until rights-cleared assets are
 - C3: 707 GLB models converted; 69 parser failures (all in effect paths); 638 skipped due missing matching decoded texture or renderable geometry.
 
 The package build and structural validation are complete, but the above unresolved source records and the unverified visual/model mappings remain open.
+## 2026-11-05 follow-up: C3 WDB and publication status
+
+The source index contains the original mobile `c3.wdb` at:
+
+`resource_stage/world/apk_assets/ConquerOnline-1.1.2.3/assets/ConquerRes/ini/c3.wdb`
+
+- Size: 19,734,073 bytes
+- SHA-256: `5e2412beb9000d38578f88f7ba68ce17c17448f376d13e8fd5f36d9234a35f80`
+- Header sample: `BDMG`
+- Header table offset: 19,731,721
+- WDB table entry count: 28
+
+A metadata-only WDB/DBC parser was added at `tools/resource_packs/audit_c3_wdb.py`. Its source-staging audit step passed in workflow run `42000137006`; the full workflow is still processing C3 conversion, DMap validation and PCK checks before it uploads the compact report. It does not place original DBC blobs in the report or public resource packs.
+
+**Publication correction:** the current workflow gate blocks new PCK publication when `ALLOW_C3_ASSET_REDISTRIBUTION` is false, but the existing public release tag `resource-packs-v4` already exposes 11 PCK assets, including `models.pck` and `world.pck`. The gate does not retract that historical release. No release deletion or access change has been made.
