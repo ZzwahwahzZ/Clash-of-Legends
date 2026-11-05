@@ -1,13 +1,14 @@
 extends SceneTree
 
+const MODEL_CATEGORIES := ["characters", "monsters", "mounts", "equipment"]
+
 func _initialize() -> void:
 	call_deferred("_validate_packages")
 
 func _validate_packages() -> void:
 	var directory := DirAccess.open("res://build/pcks")
 	if directory == null:
-		push_error("PCK validation: build/pcks directory is missing.")
-		quit(1)
+		_fail("build/pcks directory is missing.")
 		return
 	var pack_files := directory.get_files()
 	var loaded_count := 0
@@ -16,24 +17,21 @@ func _validate_packages() -> void:
 			continue
 		var pack_path := "res://build/pcks/" + filename
 		if not ProjectSettings.load_resource_pack(pack_path, true):
-			push_error("PCK validation: Godot rejected " + filename)
-			quit(1)
+			_fail("Godot rejected " + filename)
 			return
 		loaded_count += 1
 	if loaded_count < 11:
-		push_error("PCK validation: expected eleven non-empty category packages.")
-		quit(1)
+		_fail("Expected eleven non-empty category packages; loaded %d." % loaded_count)
 		return
+
 	var catalog_path := "res://resource_stage/world/resource_catalog.json"
 	if not FileAccess.file_exists(catalog_path):
-		push_error("PCK validation: runtime resource catalog is missing from world PCK.")
-		quit(1)
+		_fail("Runtime resource catalog is missing from world PCK.")
 		return
 	var catalog_file := FileAccess.open(catalog_path, FileAccess.READ)
 	var parser := JSON.new()
 	if catalog_file == null or parser.parse(catalog_file.get_as_text()) != OK:
-		push_error("PCK validation: runtime catalog cannot be parsed.")
-		quit(1)
+		_fail("Runtime catalog cannot be parsed.")
 		return
 	catalog_file.close()
 	var catalog: Dictionary = parser.data
@@ -41,56 +39,107 @@ func _validate_packages() -> void:
 	for required_category in ["characters", "monsters", "maps", "equipment", "mounts", "effects", "animations", "interface", "audio", "models", "world"]:
 		var entries: Array = assets.get(required_category, [])
 		if entries.is_empty():
-			push_error("PCK validation: category is empty: " + required_category)
-			quit(1)
+			_fail("Category is empty: " + required_category)
 			return
 		print("PCK category OK: ", required_category, " (", entries.size(), " entries)")
-	for model_category in ["characters", "monsters", "mounts", "equipment"]:
-		var model_entries: Array = []
+
+	# Inspect every supported model scene, not just the first entry in each category.
+	var total_models := 0
+	var valid_models := 0
+	var invalid_models: Array[String] = []
+	for model_category in MODEL_CATEGORIES:
+		var category_entries: Array = []
 		for entry in assets.get(model_category, []):
 			var ext := str(entry.get("extension", "")).to_lower()
 			if ext == ".glb" or ext == ".gltf":
-				model_entries.append(entry)
-		if model_entries.is_empty():
-			push_error("PCK validation: no GLB/glTF models in " + model_category)
-			quit(1)
+				category_entries.append(entry)
+		if category_entries.is_empty():
+			_fail("No GLB/glTF models in " + model_category)
 			return
-		var model_path := "res://" + str(model_entries[0].get("path", ""))
-		var model_resource := ResourceLoader.load(model_path) as PackedScene
-		if model_resource == null:
-			push_error("PCK validation: GLB model failed to load as PackedScene: " + model_path)
-			quit(1)
+
+		var category_valid := 0
+		for entry in category_entries:
+			total_models += 1
+			var relative_path := str(entry.get("path", ""))
+			var model_path := "res://" + relative_path
+			var packed_model := ResourceLoader.load(model_path) as PackedScene
+			if packed_model == null:
+				invalid_models.append(model_category + ":" + relative_path + " (not a PackedScene)")
+				continue
+			var instance := packed_model.instantiate()
+			var mesh_nodes := _collect_mesh_instances(instance)
+			var model_ok := not mesh_nodes.is_empty()
+			var surface_total := 0
+			for mesh_node in mesh_nodes:
+				var mesh_instance := mesh_node as MeshInstance3D
+				if mesh_instance == null or mesh_instance.mesh == null:
+					model_ok = false
+					continue
+				var surfaces := mesh_instance.mesh.get_surface_count()
+				if surfaces <= 0:
+					model_ok = false
+					continue
+				surface_total += surfaces
+				var bounds := mesh_instance.get_aabb()
+				if not _valid_vector3(bounds.position) or not _valid_vector3(bounds.size):
+					model_ok = false
+				if bounds.size.x <= 0.0001 or bounds.size.y <= 0.0001 or bounds.size.z <= 0.0001:
+					model_ok = false
+			if model_ok:
+				category_valid += 1
+				valid_models += 1
+				print("MODEL VISUAL OK: ", model_category, " | ", relative_path, " | mesh_nodes=", mesh_nodes.size(), " | surfaces=", surface_total)
+			else:
+				invalid_models.append(model_category + ":" + relative_path + " (empty mesh, surface, or invalid bounds)")
+			instance.free()
+
+		print("MODEL CATEGORY SUMMARY: ", model_category, " | valid=", category_valid, "/", category_entries.size())
+		if category_valid == 0:
+			_fail("No renderable GLB/glTF models passed visual geometry checks in " + model_category)
 			return
-		var model_instance := model_resource.instantiate()
-		var mesh_count := model_instance.find_children("*", "MeshInstance3D", true, false).size()
-		if mesh_count < 1:
-			push_error("PCK validation: model has no renderable meshes: " + model_path)
-			quit(1)
-			return
-		print("PCK model OK: ", model_category, " -> ", model_path, " | meshes: ", mesh_count)
-		model_instance.free()
+
+	print("MODEL VISUAL SUMMARY: ", valid_models, "/", total_models, " valid scenes; ", invalid_models.size(), " rejected.")
+	for issue in invalid_models:
+		push_warning("MODEL VISUAL REJECTED: " + issue)
+
+	# Confirm at least one real original C3 source file is retained for future conversion.
 	var c3_found := false
 	for entry in assets.get("models", []):
 		if str(entry.get("extension", "")).to_lower() == ".c3":
 			var c3_path := "res://" + str(entry.get("path", ""))
 			if FileAccess.file_exists(c3_path):
 				c3_found = true
-				print("PCK original C3 model OK: ", c3_path)
+				print("PCK original C3 source retained: ", c3_path)
 				break
 	if not c3_found:
-		push_error("PCK validation: extracted original C3 model files are missing.")
-		quit(1)
+		_fail("Extracted original C3 model files are missing.")
 		return
-	var audio_entries: Array = assets.get("audio", [])
+
 	var audio_path := ""
-	for entry in audio_entries:
+	for entry in assets.get("audio", []):
 		if str(entry.get("extension", "")).to_lower() == ".ogg":
 			audio_path = "res://" + str(entry.get("path", ""))
-			break
-	if audio_path.is_empty() or not FileAccess.file_exists(audio_path):
-		push_error("PCK validation: playable audio source file is missing.")
-		quit(1)
+			if FileAccess.file_exists(audio_path):
+				break
+			audio_path = ""
+	if audio_path.is_empty():
+		_fail("Playable OGG audio source file is missing.")
 		return
-	print("PCK audio file OK: ", audio_path)
-	print("PCK VALIDATION PASSED: ", loaded_count, " category packages loaded and indexed.")
+	print("PCK audio source OK: ", audio_path)
+	print("PCK VALIDATION PASSED: ", loaded_count, " packages; ", valid_models, "/", total_models, " supported model scenes have renderable geometry.")
 	quit(0)
+
+func _collect_mesh_instances(root: Node) -> Array[MeshInstance3D]:
+	var found: Array[MeshInstance3D] = []
+	if root is MeshInstance3D:
+		found.append(root as MeshInstance3D)
+	for child in root.get_children():
+		found.append_array(_collect_mesh_instances(child))
+	return found
+
+func _valid_vector3(value: Vector3) -> bool:
+	return is_finite(value.x) and is_finite(value.y) and is_finite(value.z)
+
+func _fail(message: String) -> void:
+	push_error("PCK VISUAL VALIDATION FAILED: " + message)
+	quit(1)
