@@ -2,8 +2,10 @@
 """Regression tests for raw-mask and PVRTC1 PVR v2 decoding."""
 import struct
 import unittest
+import sys
+from pathlib import Path
 
-from PIL import Image
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 from decode_pvr_textures import decode_pvr_v2
 
 
