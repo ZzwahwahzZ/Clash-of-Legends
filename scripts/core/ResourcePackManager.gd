@@ -318,7 +318,16 @@ func _on_download_completed(result: int, response_code: int, _headers: PackedStr
 	if actual_size != expected_size:
 		_finish_failure(package_id, "حجم الحزمة لا يطابق البيان")
 		return
-	if _sha256_file(temp_path) != expected_hash:
+	# Hash large packs away from the UI thread; keep the title/download screen responsive.
+	var verifier := Thread.new()
+	var thread_error := verifier.start(Callable(self, "_verify_package_file").bind(temp_path, expected_size, expected_hash))
+	if thread_error != OK:
+		_finish_failure(package_id, "تعذر بدء فحص سلامة الحزمة")
+		return
+	while verifier.is_started():
+		await get_tree().process_frame
+	var verified: bool = verifier.wait_to_finish()
+	if not verified:
 		_finish_failure(package_id, "فشل التحقق من SHA-256")
 		return
 	var absolute_temp := ProjectSettings.globalize_path(temp_path)
