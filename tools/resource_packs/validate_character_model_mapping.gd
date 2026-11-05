@@ -3,6 +3,9 @@ extends SceneTree
 const AssetCatalogScript = preload("res://scripts/core/AssetCatalog.gd")
 
 func _initialize() -> void:
+	call_deferred("_run")
+
+func _run() -> void:
 	var entries := [
 		{"asset_role": "body_part", "character_class": "Trojan", "mapping_status": "verified", "gender": "male"},
 		{"asset_role": "complete_character", "character_class": "Trojan", "mapping_status": "candidate", "gender": "male"},
