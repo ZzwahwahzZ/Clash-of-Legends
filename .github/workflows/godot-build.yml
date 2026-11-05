@@ -253,7 +253,7 @@ jobs:
         run: |
           set -euo pipefail
           BUILD_TOOLS="$ANDROID_HOME/build-tools/34.0.0"
-          APK="builds/android/ClashOfLegends-emulator-x86_64.apk"
+          APK="builds/android/ClashOfLegends-debug.apk"
           unzip -t "$APK"
           "$BUILD_TOOLS/apksigner" verify --verbose --print-certs "$APK" | tee builds/android/signature-verification.txt
           APK_ANALYZER="$ANDROID_HOME/cmdline-tools/latest/bin/apkanalyzer"
@@ -305,6 +305,11 @@ jobs:
           godot --headless --path . --export-debug "Android" builds/android/ClashOfLegends-emulator-x86_64.apk
           test -s builds/android/ClashOfLegends-emulator-x86_64.apk
           "$ANDROID_HOME/build-tools/34.0.0/apksigner" verify builds/android/ClashOfLegends-emulator-x86_64.apk
+          EMULATOR_APK="builds/android/ClashOfLegends-emulator-x86_64.apk"
+          unzip -t "$EMULATOR_APK"
+          "$ANDROID_HOME/build-tools/34.0.0/apksigner" verify --verbose "$EMULATOR_APK"
+          unzip -l "$EMULATOR_APK" | grep -q "lib/x86_64/"
+          echo "EMULATOR APK VERIFIED: valid archive, signed, and contains x86_64 native libraries."
           echo "EMULATOR APK EXPORTED: x86_64 test build; ARM64 phone APK remains unchanged."
           restore_preset
           trap - EXIT
@@ -338,6 +343,7 @@ jobs:
       - name: Verify APK exists
         run: |
           test -s builds/android/ClashOfLegends-debug.apk
+          test -s builds/android/ClashOfLegends-emulator-x86_64.apk
           mkdir -p emulator-evidence
 
       - name: Enable KVM acceleration for Android emulator
@@ -360,7 +366,7 @@ jobs:
           disable-animations: true
           script: |
             set -eu
-            APK="builds/android/ClashOfLegends-debug.apk"
+            APK="builds/android/ClashOfLegends-emulator-x86_64.apk"
             PACKAGE="com.zwahwahzz.clashoflegends"
             adb wait-for-device
             # Approximate Redmi Note 11's 1080x2400 portrait display and density.
