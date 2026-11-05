@@ -87,7 +87,7 @@ func _run() -> void:
 		for helper_node in mesh_nodes:
 			var helper_mesh := helper_node as MeshInstance3D
 			if HIDDEN_C3_HELPERS.has(helper_mesh.name):
-				helper_mesh.visible = false
+				# Presence is checked here; C3VatPlayer must hide them at runtime.
 				hidden_helpers.append(helper_mesh.name)
 		if hidden_helpers.size() != HIDDEN_C3_HELPERS.size():
 			push_error("C3 six-clip visual proof: expected all six C3 helper/socket meshes in GLB for " + clip_id)
