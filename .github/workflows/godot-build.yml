@@ -78,7 +78,7 @@ jobs:
           packages: platform-tools
 
       - name: Install Android SDK packages
-        run: sdkmanager "platform-tools" "platforms;android-33" "build-tools;34.0.0"
+        run: sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" "cmdline-tools;latest"
 
       # This stable CI-only debug key is cached so successive debug APKs keep
       # the same signer. It is not a production/release signing identity.
@@ -121,10 +121,17 @@ jobs:
           APK="builds/android/ClashOfLegends-debug.apk"
           unzip -t "$APK"
           "$BUILD_TOOLS/apksigner" verify --verbose --print-certs "$APK" | tee builds/android/signature-verification.txt
-          "$BUILD_TOOLS/aapt" dump badging "$APK" | tee builds/android/apk-badging.txt
-          grep -q "package: name='com.zwahwahzz.clashoflegends'" builds/android/apk-badging.txt
-          MIN_SDK="$(sed -n "s/.*sdkVersion:'\\([0-9][0-9]*\\)'.*/\\1/p" builds/android/apk-badging.txt | head -n1)"
-          TARGET_SDK="$(sed -n "s/.*targetSdkVersion:'\\([0-9][0-9]*\\)'.*/\\1/p" builds/android/apk-badging.txt | head -n1)"
+          APK_ANALYZER="$ANDROID_HOME/cmdline-tools/latest/bin/apkanalyzer"
+          test -x "$APK_ANALYZER"
+          PACKAGE_ID="$("$APK_ANALYZER" manifest application-id "$APK")"
+          MIN_SDK="$("$APK_ANALYZER" manifest min-sdk "$APK")"
+          TARGET_SDK="$("$APK_ANALYZER" manifest target-sdk "$APK")"
+          {
+            echo "package: name='$PACKAGE_ID'"
+            echo "sdkVersion:'$MIN_SDK'"
+            echo "targetSdkVersion:'$TARGET_SDK'"
+          } | tee builds/android/apk-badging.txt
+          test "$PACKAGE_ID" = "com.zwahwahzz.clashoflegends"
           test -n "$MIN_SDK" && test -n "$TARGET_SDK"
           test "$MIN_SDK" -ge 21
           test "$TARGET_SDK" -ge 33
