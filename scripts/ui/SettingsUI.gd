@@ -101,7 +101,7 @@ func _setup_progression_options() -> void:
 		return
 	progression_option.clear()
 	var player = GameManager.player_reference if GameManager else null
-	var choices: Array[String] = player.get_available_progression_choices() if player and player.has_method("get_available_progression_choices") else []
+	var choices: Array = player.get_available_progression_choices() if player and player.has_method("get_available_progression_choices") else []
 	if choices.size() <= 1:
 		progression_option.visible = false
 		if progression_label:
