@@ -60,6 +60,15 @@ fn deduplicate_game_map_records(bytes: &[u8]) -> Result<(Vec<u8>, usize), String
     Ok((output, duplicates))
 }
 
+fn normalized_path_stem(value: &str) -> String {
+    let normalized = value.replace('\\', "/").to_ascii_lowercase();
+    Path::new(&normalized)
+        .file_stem()
+        .and_then(|stem| stem.to_str())
+        .unwrap_or("")
+        .to_owned()
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = std::env::args().collect();
     if args.len() < 3 {
@@ -119,13 +128,36 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     *surface_totals.entry(cell.surface.to_string()).or_default() += 1;
                 }
                 total_cells += map.cells.len() as u64;
-                let map_id = catalog.as_ref().and_then(|c| c.records().find(|r| {
-                    let wanted = r.dmap_path.as_str().to_ascii_lowercase();
-                    relative.to_ascii_lowercase().ends_with(&wanted)
-                }).map(|r| r.id));
+                let relative_normalized = relative.replace('\\', "/").to_ascii_lowercase();
+                let mut exact_map_ids: Vec<u32> = catalog.as_ref().map(|c| c.records().filter(|r| {
+                    let wanted = r.dmap_path.as_str().replace('\\', "/").to_ascii_lowercase();
+                    relative_normalized.ends_with(&wanted)
+                }).map(|r| r.id).collect()).unwrap_or_default();
+                exact_map_ids.sort_unstable();
+                exact_map_ids.dedup();
+                let (map_id, map_id_match_method) = if exact_map_ids.len() == 1 {
+                    (Some(exact_map_ids[0]), "exact_path")
+                } else if exact_map_ids.len() > 1 {
+                    (None, "ambiguous_exact_path")
+                } else {
+                    let relative_stem = normalized_path_stem(&relative);
+                    let mut stem_map_ids: Vec<u32> = catalog.as_ref().map(|c| c.records().filter(|r| {
+                        normalized_path_stem(r.dmap_path.as_str()) == relative_stem
+                    }).map(|r| r.id).collect()).unwrap_or_default();
+                    stem_map_ids.sort_unstable();
+                    stem_map_ids.dedup();
+                    if stem_map_ids.len() == 1 {
+                        (Some(stem_map_ids[0]), "unique_filename_stem")
+                    } else if stem_map_ids.len() > 1 {
+                        (None, "ambiguous_filename_stem")
+                    } else {
+                        (None, "unmatched")
+                    }
+                };
                 records.push(json!({
                     "path": relative,
                     "map_id": map_id,
+                    "map_id_match_method": map_id_match_method,
                     "width": map.width,
                     "height": map.height,
                     "cell_count": map.cells.len(),
