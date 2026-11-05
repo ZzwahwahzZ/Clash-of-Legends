@@ -19,6 +19,15 @@ fn collect_files(root: &Path, out: &mut Vec<PathBuf>) -> std::io::Result<()> {
     Ok(())
 }
 
+fn c3_inner_path(path: &Path) -> PathBuf {
+    let components: Vec<_> = path.components().collect();
+    if let Some(index) = components.iter().rposition(|component| component.as_os_str() == "c3") {
+        components[index + 1..].iter().collect()
+    } else {
+        path.to_path_buf()
+    }
+}
+
 fn category_for(path: &Path) -> Option<&'static str> {
     match path.components().next()?.as_os_str().to_str()? {
         "body" | "npc" => Some("characters"),
@@ -94,8 +103,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     "unknown_chunks": document.unknown_chunks.iter().map(|c| String::from_utf8_lossy(&c.tag).to_string()).collect::<Vec<_>>()
                 }));
                 let rel_path = Path::new(&relative);
-                let inner = rel_path.strip_prefix("netdragon/c31/c3").unwrap_or(rel_path);
-                if let Some(category) = category_for(inner) {
+                let inner = c3_inner_path(rel_path);
+                if let Some(category) = category_for(&inner) {
                     let texture_path = pvr_root.join(rel_path.with_extension("png"));
                     if texture_path.is_file() && !document.meshes.is_empty() {
                         let texture_bytes = fs::read(&texture_path)?;
