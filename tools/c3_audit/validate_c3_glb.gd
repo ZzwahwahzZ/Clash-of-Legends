@@ -34,6 +34,8 @@ func _validate() -> void:
 	var morph_mesh_nodes := 0
 	var motion_poc_results: Array[Dictionary] = []
 	var motion_poc_failed := false
+	var skeletal_poc_results: Array[Dictionary] = []
+	var skeletal_poc_failed := false
 	for path in files:
 		var packed := ResourceLoader.load(path) as PackedScene
 		if packed == null:
@@ -102,6 +104,32 @@ func _validate() -> void:
 			motion_poc_results.append(clip_result)
 			if not clip_ok:
 				motion_poc_failed = true
+
+		if path.contains("/motion-poc-skinned/"):
+			var skeleton_nodes := instance.find_children("*", "Skeleton3D", true, false)
+			var skinned_mesh_count := 0
+			var skeleton_bone_count := 0
+			for skeleton_node in skeleton_nodes:
+				skeleton_bone_count += (skeleton_node as Skeleton3D).get_bone_count()
+			for mesh_node in meshes:
+				var mesh_instance := mesh_node as MeshInstance3D
+				if mesh_instance.skin != null and not mesh_instance.skeleton.is_empty():
+					skinned_mesh_count += 1
+			var skeletal_ok := model_surfaces > 0 and skeleton_nodes.size() > 0 and skinned_mesh_count > 0 and skeleton_bone_count > 0 and model_animation_tracks > 0 and model_animation_keys > 1
+			var skeletal_result := {
+				"path": path,
+				"mesh_instance_count": meshes.size(),
+				"surface_count": model_surfaces,
+				"skeleton_count": skeleton_nodes.size(),
+				"skeleton_bone_count": skeleton_bone_count,
+				"skinned_mesh_count": skinned_mesh_count,
+				"animation_track_count": model_animation_tracks,
+				"animation_key_count": model_animation_keys,
+				"status": "GODOT_SKELETON_VALIDATED" if skeletal_ok else "FAILED"
+			}
+			skeletal_poc_results.append(skeletal_result)
+			if not skeletal_ok:
+				skeletal_poc_failed = true
 		print("C3 GLB OK: ", path, " | MeshInstance3D: ", meshes.size(), " | surfaces: ", model_surfaces, " | morph meshes: ", model_morph_meshes, " | animation tracks: ", model_animation_tracks, " | animation keys: ", model_animation_keys)
 		instance.free()
 		valid += 1
@@ -109,7 +137,11 @@ func _validate() -> void:
 		"expected_clip_count": 6,
 		"validated_clip_count": motion_poc_results.filter(func(row): return row.get("status") == "GODOT_IMPORT_VALIDATED").size(),
 		"status": "PASSED" if motion_poc_results.size() == 6 and not motion_poc_failed else "FAILED",
-		"clips": motion_poc_results
+		"clips": motion_poc_results,
+		"expected_skeletal_clip_count": 6,
+		"validated_skeletal_clip_count": skeletal_poc_results.filter(func(row): return row.get("status") == "GODOT_SKELETON_VALIDATED").size(),
+		"skeletal_status": "PASSED" if skeletal_poc_results.size() == 6 and not skeletal_poc_failed else "FAILED",
+		"skeletal_clips": skeletal_poc_results
 	}
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://reports"))
 	var poc_file := FileAccess.open("res://reports/c3-motion-poc-validation.json", FileAccess.WRITE)
@@ -122,6 +154,10 @@ func _validate() -> void:
 	print("C3 MOTION POC VALIDATION: ", poc_report["validated_clip_count"], "/", poc_report["expected_clip_count"], " clips passed Godot import and animation-track checks.")
 	if motion_poc_results.size() != 6 or motion_poc_failed:
 		push_error("C3 motion POC validation failed: expected six fully animated imported clips.")
+		quit(1)
+		return
+	if skeletal_poc_results.size() != 6 or skeletal_poc_failed:
+		push_error("C3 skeletal POC validation failed: expected six GLB skin/armature clips with imported bones and animation.")
 		quit(1)
 		return
 	if animated == 0 or morph_mesh_nodes == 0 or total_animation_tracks == 0:
