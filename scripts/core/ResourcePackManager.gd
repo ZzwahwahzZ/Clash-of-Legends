@@ -343,23 +343,10 @@ func _download_package_chunks(package_id: String) -> void:
 			)
 			return
 		var body: PackedByteArray = chunk_result.get("body", PackedByteArray())
-		if not FileAccess.file_exists(temp_path):
-			var create_file := FileAccess.open(temp_path, FileAccess.WRITE)
-			if create_file == null:
-				_finish_failure(package_id, "تعذر إنشاء ملف التنزيل المؤقت", true)
-				return
-			create_file.close()
-		var output := FileAccess.open(temp_path, FileAccess.READ_WRITE)
-		if output == null:
-			_finish_failure(package_id, "تعذر فتح ملف التنزيل لاستكمال الكتابة", true)
+		if not _append_verified_chunk(temp_path, body, end_byte + 1):
+			_finish_failure(package_id, "تعذر حفظ جزء التنزيل في موضعه الصحيح", false)
 			return
-		output.seek_end()
-		output.store_buffer(body)
-		var written_size := output.get_length()
-		output.close()
-		if written_size != end_byte + 1:
-			_finish_failure(package_id, "حجم الجزء المكتوب لا يطابق نطاق التنزيل", false)
-			return
+		var written_size := end_byte + 1
 		offset = written_size
 		info["received_bytes"] = offset
 		_active_downloads[package_id] = info
@@ -421,6 +408,21 @@ func _fetch_range_chunk(
 			"preserve_partial": false
 		}
 	return {"success": true, "body": body}
+
+func _append_verified_chunk(temp_path: String, body: PackedByteArray, expected_file_size: int) -> bool:
+	if not FileAccess.file_exists(temp_path):
+		var create_file := FileAccess.open(temp_path, FileAccess.WRITE)
+		if create_file == null:
+			return false
+		create_file.close()
+	var output := FileAccess.open(temp_path, FileAccess.READ_WRITE)
+	if output == null:
+		return false
+	output.seek_end()
+	output.store_buffer(body)
+	var actual_size := output.get_length()
+	output.close()
+	return actual_size == expected_file_size
 
 func _response_header(headers: PackedStringArray, header_name: String) -> String:
 	for header in headers:
