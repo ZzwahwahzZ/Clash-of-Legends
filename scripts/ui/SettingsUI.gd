@@ -107,7 +107,7 @@ func _build_loot_filter_controls() -> void:
 		{"key":"cosmetics","ar":"المظاهر","en":"Cosmetics"}
 	]
 	var settings: Dictionary = AutoLootManager.get_filter_settings()
-	var is_ar := GameManager and GameManager.current_language == "ar"
+	var is_ar: bool = GameManager != null and GameManager.current_language == "ar"
 	for definition in definitions:
 		var filter_key := str(definition.key)
 		var checkbox := CheckBox.new()
