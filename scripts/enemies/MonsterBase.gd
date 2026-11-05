@@ -60,11 +60,11 @@ func _apply_monster_model() -> void:
 	var model_entries := AssetCatalog.get_asset_entries("monsters", [".glb", ".gltf"])
 	if model_entries.is_empty():
 		return
-	var model_index := 0
-	if is_boss:
-		model_index = model_entries.size() - 1
-	elif enemy_type != "wolf":
-		model_index = abs(enemy_type.hash()) % model_entries.size()
+	# A category index is not a monster identity. Do not bind a random GLB
+	# to an enemy type; scenes may opt in only after a source-verified mapping.
+	var model_index := int(get_meta("verified_monster_model_index", -1))
+	if model_index < 0 or model_index >= model_entries.size():
+		return
 	imported_model_animation = null
 	imported_animation_name = ""
 	var old_root := visual_root.get_node_or_null("ImportedModelRoot")
@@ -182,8 +182,8 @@ func _set_imported_animation_state(state: String) -> void:
 				break
 		if not selected.is_empty():
 			break
-	if selected.is_empty() and imported_model_animation.get_animation_list().size() > 0:
-		selected = imported_model_animation.get_animation_list()[0]
+	# Imported action clips are not semantically mapped yet. Never play
+	# the first clip merely because it exists; wait for a verified alias.
 	if selected.is_empty():
 		return
 	imported_model_animation.speed_scale = 1.0 if state == "idle" else (1.15 if state == "move" else 1.0)
