@@ -48,6 +48,8 @@ var is_moving_to_target: bool = false
 func _ready() -> void:
 	if GameManager:
 		GameManager.register_player(self)
+	if ClassProgressionManager:
+		ClassProgressionManager.configure_for_character(character_class)
 	sync_stats_to_hud()
 	if anim_player and anim_player.has_animation("idle"):
 		anim_player.play("idle")
@@ -57,8 +59,6 @@ func _physics_process(delta: float) -> void:
 		if visual_root:
 			visual_root.rotation.x = lerp_angle(visual_root.rotation.x, deg_to_rad(-85.0), delta * 8.0)
 		return
-		
-	# Update timers
 	if basic_attack_cooldown > 0.0:
 		basic_attack_cooldown = max(0.0, basic_attack_cooldown - delta)
 	if temp_defense_buff_timer > 0.0:
@@ -69,15 +69,12 @@ func _physics_process(delta: float) -> void:
 			weapon_mount.rotation.x = sin(attack_anim_timer * 15.0) * 0.8
 	elif weapon_mount:
 		weapon_mount.rotation.x = lerp(weapon_mount.rotation.x, 0.0, delta * 10.0)
-		
-	# Apply single gravity
+
 	if not is_on_floor():
 		velocity.y += get_gravity().y * delta
-		
-	# Movement calculation: combine joystick / manual / auto-hunt
+
 	var move_vec = Vector3.ZERO
 	var current_speed = base_speed * (mount_speed_multiplier if is_mounted else 1.0)
-	
 	if input_direction != Vector2.ZERO:
 		var cam_yaw = free_camera.get_camera_yaw() if free_camera else 0.0
 		var forward = Vector3(0, 0, -1).rotated(Vector3.UP, cam_yaw)
@@ -92,16 +89,12 @@ func _physics_process(delta: float) -> void:
 			move_vec = diff.normalized() * current_speed
 		else:
 			is_moving_to_target = false
-			
+
 	velocity.x = move_vec.x
 	velocity.z = move_vec.z
-	
 	var is_moving = move_vec.length_squared() > 0.01
 	if is_moving:
-		var look_target = global_position + Vector3(move_vec.x, 0, move_vec.z)
-		look_at(look_target, Vector3.UP)
-		
-		# Animate limbs for walk stride
+		look_at(global_position + Vector3(move_vec.x, 0, move_vec.z), Vector3.UP)
 		walk_anim_time += delta * 12.0
 		var stride = sin(walk_anim_time) * 0.45
 		if left_leg: left_leg.rotation.x = stride
@@ -109,14 +102,11 @@ func _physics_process(delta: float) -> void:
 		if left_arm: left_arm.rotation.x = -stride * 0.7
 		if right_arm and attack_anim_timer <= 0.0: right_arm.rotation.x = stride * 0.7
 	else:
-		# Return limbs to neutral
 		walk_anim_time = 0.0
 		if left_leg: left_leg.rotation.x = lerp(left_leg.rotation.x, 0.0, delta * 10.0)
 		if right_leg: right_leg.rotation.x = lerp(right_leg.rotation.x, 0.0, delta * 10.0)
 		if left_arm: left_arm.rotation.x = lerp(left_arm.rotation.x, 0.0, delta * 10.0)
 		if right_arm and attack_anim_timer <= 0.0: right_arm.rotation.x = lerp(right_arm.rotation.x, 0.0, delta * 10.0)
-		
-	# Single authoritative move_and_slide call
 	move_and_slide()
 
 func set_joystick_input(vec: Vector2) -> void:
@@ -145,20 +135,15 @@ func execute_basic_attack() -> void:
 		return
 	basic_attack_cooldown = 0.75
 	attack_anim_timer = 0.35
-	
 	var target = GameManager.current_target if GameManager else null
 	if not target or not is_instance_valid(target) or (target.has_method("is_dead_state") and target.is_dead_state()):
 		return
-		
-	var dist = global_position.distance_to(target.global_position)
-	if dist > 3.2:
+	if global_position.distance_to(target.global_position) > 3.2:
 		return
-		
 	var dmg = get_attack_power()
 	var is_crit = randf() < 0.15
 	if is_crit:
 		dmg = int(dmg * 1.5)
-		
 	if target.has_method("take_damage"):
 		target.take_damage(dmg, self)
 		if CombatEngine:
@@ -196,8 +181,18 @@ func get_character_class() -> String:
 
 func set_character_class(new_cls: String) -> void:
 	character_class = new_cls
+	if ClassProgressionManager:
+		ClassProgressionManager.configure_for_character(character_class)
 	if GameManager:
 		GameManager.post_notification("تم تغيير فئة البطل إلى " + new_cls, false)
+
+func select_archer_weapon_style(style_id: String) -> bool:
+	if character_class != "Archer" or not ClassProgressionManager:
+		return false
+	return ClassProgressionManager.select_weapon_style(style_id)
+
+func get_archer_weapon_style() -> String:
+	return ClassProgressionManager.selected_weapon_style if ClassProgressionManager else ""
 
 func update_equipment_bonuses(atk_bonus: int, def_bonus: int) -> void:
 	equipment_attack_bonus = atk_bonus
@@ -209,7 +204,6 @@ func take_damage(amount: int, attacker: Node3D) -> void:
 	var reduced = max(1, amount - (get_defense_power() / 2))
 	current_hp = max(0, current_hp - reduced)
 	sync_stats_to_hud()
-	
 	if current_hp <= 0:
 		_on_death(attacker)
 
@@ -229,6 +223,9 @@ func _level_up() -> void:
 	base_attack += 8
 	base_defense += 4
 	max_xp = int(max_xp * 1.35)
+	if ClassProgressionManager:
+		if ClassProgressionManager.refresh_level_unlocks(current_level) and GameManager:
+			GameManager.post_notification("تم فتح مسار السفاح الشرقي! يمكنك الآن الاختيار بين القوس والخناجر الطائرة." if GameManager.current_language == "ar" else "Oriental Assassin path unlocked! Choose between bow and flying daggers.", false)
 	if GameManager:
 		var txt = "تهانينا! ارتقيت إلى المستوى %d!" % current_level
 		GameManager.post_notification(txt if GameManager.current_language == "ar" else ("Level Up! Level %d" % current_level), false)
