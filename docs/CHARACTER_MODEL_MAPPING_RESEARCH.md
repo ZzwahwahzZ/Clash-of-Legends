@@ -144,3 +144,9 @@ The path-key audit also established two distinct body slot signatures:
 This order matters: applying the look-7 MOTI order to the look-8 mesh list would animate the wrong slot. The male/female interpretation remains a candidate until the class/gender records in WDB are decoded and checked. The exact ordered signatures and matching numeric look tokens reduce the body candidates to 11 look-7 models and 4 look-8 models in this source set. These are structural candidates, not class identity proof.
 
 An audit-only proof-of-concept exporter has now been added to generate StandBy/Walk/Run candidate clips (action tokens 100/110/120, weapon token 500) for one male and one female base body. The outputs are kept under `build/c3-glb/motion-poc`, outside the runtime category folders, so they cannot silently enter the shipped PCK catalog. CI is currently responsible for confirming the six GLBs import and expose usable animation tracks before this experiment is accepted.
+
+### 8.2 Candidate motion key formula
+
+The community desktop reference's `C3Role.CalculateMotionKey` combines the values as `look × 10,000,000 + weapon_token × 10,000 + action_token`. The mobile path `c3/0007/500/100.c3` decomposes to the same tuple `(look=7, weapon=500, action=100)`. This is a strong cross-check of the path parser, but the Android WDB `weaponmotion` records are still the source of truth for the mobile build.
+
+The desktop reference labels common action tokens as 100 StandBy, 101 Rest, 110/111 Walk, 120/121 Run, 130 Jump and 190 Wave. The numeric tokens are observed in the mobile C3 paths; the semantic labels remain reference candidates pending the WDB cross-check.
