@@ -299,6 +299,81 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+  android-emulator-smoke:
+    name: Android 13 Emulator - Player Experience Smoke Test
+    needs: android-apk
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Download signed Android APK
+        uses: actions/download-artifact@v4
+        with:
+          name: ClashOfLegends-Android13-SIGNED-VERIFIED
+          path: builds/android
+
+      - name: Verify APK exists
+        run: |
+          test -s builds/android/ClashOfLegends-debug.apk
+          mkdir -p emulator-evidence
+
+      - name: Boot Android 13 phone emulator and exercise the game
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 33
+          target: google_apis
+          arch: x86_64
+          profile: pixel_2
+          ram-size: 4096M
+          heap-size: 512M
+          disk-size: 8192M
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
+          disable-animations: true
+          script: |
+            set -euo pipefail
+            APK="builds/android/ClashOfLegends-debug.apk"
+            PACKAGE="com.zwahwahzz.clashoflegends"
+            adb wait-for-device
+            adb shell getprop ro.build.version.sdk | tee emulator-evidence/android-api.txt
+            test "$(adb shell getprop ro.build.version.sdk | tr -d '\r')" = "33"
+            adb install -r "$APK"
+            adb logcat -c
+            adb shell monkey -p "$PACKAGE" 1
+            sleep 45
+            if ! adb shell pidof "$PACKAGE" > emulator-evidence/game-pid.txt; then
+              adb logcat -d -t 12000 > emulator-evidence/logcat-failure.txt
+              echo "Game process exited after launch."
+              grep -Ei "FATAL EXCEPTION|SIGSEGV|Godot Engine|ERROR:" emulator-evidence/logcat-failure.txt | tail -n 120 || true
+              exit 1
+            fi
+            adb shell screencap -p /sdcard/clash-launch.png
+            adb pull /sdcard/clash-launch.png emulator-evidence/launch-screen.png
+            # Exercise common touch paths without assuming UI-specific button coordinates.
+            adb shell input tap 540 2100
+            sleep 2
+            adb shell input swipe 850 1200 250 1200 450
+            sleep 2
+            adb shell input keyevent 4
+            sleep 2
+            adb shell screencap -p /sdcard/clash-interaction.png
+            adb pull /sdcard/clash-interaction.png emulator-evidence/interaction-screen.png
+            adb shell dumpsys meminfo "$PACKAGE" > emulator-evidence/memory.txt
+            adb shell dumpsys gfxinfo "$PACKAGE" > emulator-evidence/graphics.txt
+            adb logcat -d -t 16000 > emulator-evidence/logcat.txt
+            if grep -E "FATAL EXCEPTION|Fatal signal|SIGSEGV" emulator-evidence/logcat.txt; then
+              echo "Fatal Android runtime error detected."
+              exit 1
+            fi
+            echo "ANDROID EMULATOR SMOKE TEST PASSED: installed, launched, survived touch/navigation inputs, and collected screen/performance evidence."
+
+      - name: Upload Android emulator evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ClashOfLegends-Android13-Emulator-Evidence
+          path: emulator-evidence/
+          if-no-files-found: warn
+          retention-days: 30
+
   studio-build:
     name: React Studio Build
     runs-on: ubuntu-latest
