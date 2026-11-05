@@ -222,7 +222,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             model_motion_signatures.iter()
                 .filter(|(_, model_signature, body_look)| {
                     motion_signature_matches(model_signature, signature)
-                        && body_look.is_some_and(|look| *look == *motion_look || *motion_look % 1000 == *look)
+                        && body_look.is_some_and(|look| *look == *motion_look || *motion_look % 1000 == look)
                 })
                 .map(|(model_path, _, body_look)| {
                     let relation = if body_look == &Some(path_key.unwrap().0) { "direct_numeric_look_match" } else { "suffix_look_candidate_unverified" };
