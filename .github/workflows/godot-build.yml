@@ -21,6 +21,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Enforce original-reference acceptance ledger
+        run: python3 tools/quality/validate_acceptance_ledger.py
+
       - name: Setup Godot
         uses: chickensoft-games/setup-godot@v2
         with:
