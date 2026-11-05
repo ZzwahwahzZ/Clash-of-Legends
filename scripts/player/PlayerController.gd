@@ -333,7 +333,11 @@ func respawn() -> void:
 		visual_root.rotation.x = 0.0
 	current_hp = max_hp
 	current_mp = max_mp
-	global_position = Vector3(0, 1.0, 0)
+	var travel_manager := get_tree().get_first_node_in_group("world_travel_manager")
+	if travel_manager and travel_manager.has_method("travel_to"):
+		travel_manager.travel_to("twin_city", "respawn")
+	else:
+		global_position = Vector3(0, 1.0, 0)
 	sync_stats_to_hud()
 
 func sync_stats_to_hud() -> void:
