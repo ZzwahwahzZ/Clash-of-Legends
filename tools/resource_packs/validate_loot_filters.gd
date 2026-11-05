@@ -83,6 +83,9 @@ func _run() -> void:
 	if manager._category_enabled_for(drop):
 		failures.append("unknown loot category must default to disabled")
 
+	# Capture a known enabled preference, change it, then restore it.
+	# Earlier category-isolation checks intentionally leave gems disabled.
+	manager.set_category_enabled("gems", true)
 	var saved_filters: Dictionary = manager.get_filter_settings()
 	manager.set_category_enabled("gems", false)
 	manager.apply_filter_settings(saved_filters)
