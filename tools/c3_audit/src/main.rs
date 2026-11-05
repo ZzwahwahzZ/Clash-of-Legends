@@ -331,6 +331,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             if mesh.vertices.is_empty() || (mesh.opaque_indices.is_empty() && mesh.alpha_indices.is_empty()) {
                                 continue;
                             }
+                            let deforming = mesh.vertices.iter().any(|v| v.bone_weights[0] > 0.0 || v.bone_weights[1] > 0.0);
+                            if mesh_motion.bone_count == 0 || mesh_motion.keys.is_empty() || !deforming { continue; }
                             let safe_mesh_name: String = mesh.name.chars().map(|c| if c.is_ascii_alphanumeric() || c == '_' || c == '-' { c } else { '_' }).collect();
                             let vat_prefix = vat_dir.join(format!("{clip_id}_mesh{mesh_index}_{safe_mesh_name}"));
                             match skinned_glb::export_vat(mesh, mesh_motion, &vat_prefix, &clip_id, mesh_index) {
