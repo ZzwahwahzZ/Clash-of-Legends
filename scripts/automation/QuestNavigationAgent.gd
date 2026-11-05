@@ -206,9 +206,13 @@ func navigate_to_quest_target() -> void:
 	var destination := Vector3(18.0, 0.0, 15.0)
 	match active_quest_id:
 		"quest_dragon":
-			destination = Vector3(35.0, 0.0, -30.0)
+			destination = Vector3(40.0, 0.0, -35.0)
 		"quest_guardian":
 			destination = Vector3(25.0, 0.0, 20.0)
+		"quest_blacksmith_visit":
+			destination = Vector3(-5.0, 0.0, 4.0)
+		"quest_final_sage":
+			destination = Vector3(4.0, 0.0, 3.0)
 	if GameManager.player_reference.has_method("move_towards_target_position"):
 		GameManager.player_reference.move_towards_target_position(destination, 0.0)
 		var message := "الملاحة التلقائية إلى موقع المهمة..." if GameManager.current_language == "ar" else "Navigating to quest objective..."
@@ -229,6 +233,8 @@ func _notify_game_manager() -> void:
 		int(quest["required_kills"]),
 		is_quest_completed
 	)
+	var description := str(quest.get("desc_ar", "")) if GameManager.current_language == "ar" else str(quest.get("desc_en", ""))
+	GameManager.emit_signal("quest_description_changed", description)
 
 func serialize() -> Dictionary:
 	return {
