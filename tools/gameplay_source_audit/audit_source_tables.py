@@ -11,6 +11,8 @@ import configparser
 import hashlib
 import json
 import re
+import shutil
+import tempfile
 import zipfile
 from pathlib import Path
 
@@ -97,54 +99,66 @@ def main() -> None:
     args = ap.parse_args()
     if not args.archive.is_file():
         raise SystemExit(f"Archive not found: {args.archive}")
-    with zipfile.ZipFile(args.archive) as zf:
-        names = zf.namelist()
-        version_members = [n for n in names if VERSION in n and ROOT_MARKER in n]
-        by_suffix = {}
-        for name in version_members:
-            rel = name.split(ROOT_MARKER, 1)[1].replace("\\\\", "/")
-            by_suffix.setdefault(rel, []).append(name)
+    with zipfile.ZipFile(args.archive) as outer:
         results = {}
-        for category, targets in TARGETS.items():
-            entries = []
-            for rel in targets:
-                for member in by_suffix.get(rel, []):
-                    data = zf.read(member)
-                    record = {"source_member": member, "relative_path": rel, "size_bytes": len(data),
-                              "sha256": hashlib.sha256(data).hexdigest(), "parse_status": "BINARY_OR_METADATA_ONLY"}
-                    if rel.lower().endswith(".ini"):
-                        record.update(parse_ini_opaque(data))
-                    elif rel.lower().startswith("ini/itemtype/") and rel.lower().endswith(".ini"):
-                        record.update(parse_itemtype(data))
-                    entries.append(record)
-            if category == "equipment":
-                for rel, members in by_suffix.items():
-                    if rel.lower().startswith("ini/itemtype/itemtype") and rel.lower().endswith(".ini"):
-                        for member in members:
-                            data = zf.read(member)
-                            record = {"source_member": member, "relative_path": rel, "size_bytes": len(data),
-                                      "sha256": hashlib.sha256(data).hexdigest(), **parse_itemtype(data)}
-                            entries.append(record)
-            results[category] = entries
-        itemtype_entries = results["equipment"]
-        itemtypes = [e for e in itemtype_entries if e["relative_path"].lower().startswith("ini/itemtype/")]
-        summary = {
-            "schema_version": "1.0.0",
-            "source_version": VERSION,
-            "archive_name": args.archive.name,
-            "archive_size_bytes": args.archive.stat().st_size,
-            "archive_sha256": sha256_file(args.archive),
-            "version_matched_member_count": len(version_members),
-            "categories": {k: {"file_count": len(v), "files": v} for k, v in results.items()},
-            "itemtype_catalog": {
-                "file_count": len(itemtypes),
-                "record_count": sum(int(e.get("record_count", 0)) for e in itemtypes),
-                "malformed_or_duplicate_lines": sum(int(e.get("malformed_or_duplicate_lines", 0)) for e in itemtypes),
-                "schema_policy": "Only numeric record ID and visible name are parsed; every remaining positional field remains opaque."
-            },
-            "acceptance": "SOURCE_INVENTORY_ONLY_NOT_RUNTIME_APPROVED",
-            "policy": "No undocumented binary fields are decoded or guessed. No proprietary source blobs are included in this JSON report."
-        }
+        with tempfile.TemporaryDirectory(prefix="co-source-audit-") as temp_dir:
+            # The supplied bundle stores the Android client as a nested APK.
+            # Index both direct archive members and files inside the exact-version APK.
+            sources = {}
+            nested_archives = []
+            for outer_name in outer.namelist():
+                if VERSION in outer_name and ROOT_MARKER in outer_name:
+                    rel = outer_name.split(ROOT_MARKER, 1)[1].replace("\\\\", "/")
+                    sources.setdefault(rel, []).append((outer, outer_name, outer_name))
+                elif VERSION in outer_name and outer_name.lower().endswith(".apk"):
+                    nested_path = Path(temp_dir) / (str(len(nested_archives)) + ".apk")
+                    with outer.open(outer_name) as src, nested_path.open("wb") as dst:
+                        shutil.copyfileobj(src, dst, length=1024 * 1024)
+                    nested = zipfile.ZipFile(nested_path)
+                    nested_archives.append(nested)
+                    for inner_name in nested.namelist():
+                        if inner_name.startswith(ROOT_MARKER):
+                            rel = inner_name.split(ROOT_MARKER, 1)[1].replace("\\\\", "/")
+                            sources.setdefault(rel, []).append((nested, inner_name, outer_name + "!" + inner_name))
+            for category, targets in TARGETS.items():
+                entries = []
+                for rel in targets:
+                    for source_zip, member, display in sources.get(rel, []):
+                        data = source_zip.read(member)
+                        record = {"source_member": display, "relative_path": rel, "size_bytes": len(data),
+                                  "sha256": hashlib.sha256(data).hexdigest(), "parse_status": "BINARY_OR_METADATA_ONLY"}
+                        if rel.lower().endswith(".ini"):
+                            record.update(parse_ini_opaque(data))
+                        entries.append(record)
+                if category == "equipment":
+                    for rel, candidates in sources.items():
+                        if rel.lower().startswith("ini/itemtype/itemtype") and rel.lower().endswith(".ini"):
+                            for source_zip, member, display in candidates:
+                                data = source_zip.read(member)
+                                record = {"source_member": display, "relative_path": rel, "size_bytes": len(data),
+                                          "sha256": hashlib.sha256(data).hexdigest(), **parse_itemtype(data)}
+                                entries.append(record)
+                results[category] = entries
+            itemtypes = [e for e in results["equipment"] if e["relative_path"].lower().startswith("ini/itemtype/")]
+            summary = {
+                "schema_version": "1.0.0",
+                "source_version": VERSION,
+                "archive_name": args.archive.name,
+                "archive_size_bytes": args.archive.stat().st_size,
+                "archive_sha256": sha256_file(args.archive),
+                "version_matched_member_count": sum(len(v) for v in sources.values()),
+                "categories": {k: {"file_count": len(v), "files": v} for k, v in results.items()},
+                "itemtype_catalog": {
+                    "file_count": len(itemtypes),
+                    "record_count": sum(int(e.get("record_count", 0)) for e in itemtypes),
+                    "malformed_or_duplicate_lines": sum(int(e.get("malformed_or_duplicate_lines", 0)) for e in itemtypes),
+                    "schema_policy": "Only numeric record ID and visible name are parsed; every remaining positional field remains opaque."
+                },
+                "acceptance": "SOURCE_INVENTORY_ONLY_NOT_RUNTIME_APPROVED",
+                "policy": "No undocumented binary fields are decoded or guessed. No proprietary source blobs are included in this JSON report."
+            }
+            for nested in nested_archives:
+                nested.close()
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
     print(json.dumps({k: ({"file_count": v["file_count"]} if isinstance(v, dict) and "file_count" in v else v)
