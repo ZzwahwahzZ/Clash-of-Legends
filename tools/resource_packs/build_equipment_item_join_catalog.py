@@ -117,6 +117,23 @@ def file_record(suffix):
     }
 
 mesh_catalog = json.loads(MESH_CATALOG.read_text(encoding="utf-8"))
+MOTION_CATALOG = Path("resource_stage/world/resource_mappings/motion_catalog.json")
+motion_catalog = json.loads(MOTION_CATALOG.read_text(encoding="utf-8")) if MOTION_CATALOG.is_file() else {"tables": {}}
+motion_lookups = {
+    table_name: {str(record.get("motion_id")): str(record.get("motion_path", "")) for record in table.get("records", [])}
+    for table_name, table in motion_catalog.get("tables", {}).items()
+}
+def find_motion(motion_id):
+    if not motion_id:
+        return []
+    target = str(motion_id)
+    matches = []
+    for table_name, lookup in motion_lookups.items():
+        path = lookup.get(target)
+        if path:
+            matches.append({"table": table_name, "motion_id": target, "motion_path": path})
+    return matches
+
 tables = mesh_catalog.get("tables", {})
 def record_map(table_name):
     return {str(record.get("unique_id")): record for record in tables.get(table_name, {}).get("records", [])}
@@ -243,7 +260,11 @@ for section, props in default_res.items():
         rec, join_kind = lookup_record(table_name, (model_id,))
         if rec:
             matches.append({"table": table_name, "mesh_record_id": rec.get("unique_id"), "join_kind": join_kind, "mesh_parts": part_paths(rec)})
-    default_resources.append({"section": section, "properties": props, "model_id": model_id or None, "matches": matches})
+    motion_id = str(props.get("motionid", "")).strip()
+    default_resources.append({
+        "section": section, "properties": props, "model_id": model_id or None,
+        "matches": matches, "motion_matches": find_motion(motion_id),
+    })
 
 # Keep only source itemtype records referenced by translation maps, MESH IDs/part IDs, or mount IDs.
 candidate_ids = set()
@@ -277,6 +298,7 @@ catalog = {
         "weapontrans": weapon_type_meta, "defaultres": default_res_meta,
         "mountinfo": mount_info_meta,
         "mounttype": {"path": str(mounttype_path), "source_path": mounttype_source.get("source_path"), "sha256": hashlib.sha256(mounttype_path.read_bytes()).hexdigest(), "cipher_seed_candidate": 9527},
+        "motion_catalog": {"path": str(MOTION_CATALOG) if MOTION_CATALOG.is_file() else None, "sha256": hashlib.sha256(MOTION_CATALOG.read_bytes()).hexdigest() if MOTION_CATALOG.is_file() else None},
     },
     "weapon_items": weapon_items,
     "armet_translation_items": armet_items,
@@ -317,6 +339,8 @@ summary = {
         "unmatched_mount_samples": [r for r in mount_items if r["status"] == "MOUNT_MESH_ID_NOT_FOUND"][:50],
     },
     "default_resource_section_count": len(default_resources),
+    "default_resource_motion_match_count": sum(len(r.get("motion_matches", [])) for r in default_resources),
+    "motion_catalog_unique_path_count": motion_catalog.get("unique_motion_path_count", 0),
     "itemtype_join_record_count": len(itemtype_records),
     "catalog_path": str(out),
     "catalog_sha256": hashlib.sha256(out.read_bytes()).hexdigest(),
