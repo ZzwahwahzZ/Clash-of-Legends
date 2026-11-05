@@ -77,3 +77,14 @@ The source-index artifact from run 42000137006 confirms the following version-ma
 - Fashion/equipment progression candidates include `suittype.dat`, `wenzhang_suit_effect.ini`, `weapon_trans.ini`, and `armor_trans.ini`; source presence is not a complete fashion or paid-equipment catalogue.
 
 A dedicated CI audit was added at `.github/workflows/audit-gameplay-source-tables.yml`, using `tools/gameplay_source_audit/audit_source_tables.py`. It downloads and checksum-verifies the exact mobile source archive, parses only visible INI section/key structure and itemtype record IDs/names, records source hashes, and leaves undocumented binary fields opaque. Its output is inventory evidence only, not runtime approval. The audit must complete and its artifact must be reviewed before any newly discovered record is promoted to `SCHEMA_VERIFIED`.
+
+### Dedicated mobile table audit result
+
+The corrected nested-APK source audit completed successfully in [run 42075363202](https://github.com/ZzwahwahzZ/Clash-of-Legends/actions/runs/42075363202), using the checksum-verified 1.1.2.3 source archive. It indexed 4,238 version-matched client members. Of direct relevance:
+
+- 89 `itemtype*.ini` files yielded 57,940 unique record IDs and visible names, with zero malformed/duplicate rows under the conservative parser. All positional columns after ID/name remain opaque.
+- `gemtip.ini` yielded 52 sections; `weaponeffect.ini` 111 sections; `actionlee3deffect.ini` 8; `3deffectinfo.ini` 3; `equiphole.ini` 2.
+- `mountinfo.ini`, `weaponskillname.ini`, `weaponskilllevelexp.ini`, several equipment transforms and some fashion/socket INIs are present but did not pass the generic INI parser. Their parse status remains failed/unresolved.
+- `mounttype.dat`, skill animation DAT files and the refinement attribute/cost/upgrade/effect DAT files remain binary/metadata-only.
+
+The source audit is an inventory result, not a semantic schema approval. In particular, the 57,940 IDs must not be treated as 57,940 fully understood item definitions; no field after the visible name is yet assigned gameplay meaning. The report is retained as [Gameplay-Source-Table-Audit artifact](https://github.com/ZzwahwahzZ/Clash-of-Legends/actions/runs/42075363202/artifacts/13438815306).
