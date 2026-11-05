@@ -18,8 +18,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p build/recovered build/audit release-assets
-          gh run download 41973023226 --repo ZzwahwahzZ/Clash-of-Legends --name ClashOfLegends-Godot43-Resource-PCKs --dir build/recovered
-          gh run download 41973023226 --repo ZzwahwahzZ/Clash-of-Legends --name ClashOfLegends-Source-Audit-Reports --dir build/audit
+          gh run download 41974985214 --repo ZzwahwahzZ/Clash-of-Legends --name ClashOfLegends-Godot43-Resource-PCKs --dir build/recovered
+          gh run download 41974985214 --repo ZzwahwahzZ/Clash-of-Legends --name ClashOfLegends-Source-Audit-Reports --dir build/audit
       - name: Verify package bytes and prepare v4 manifest
         run: |
           python3 - <<'PY'
