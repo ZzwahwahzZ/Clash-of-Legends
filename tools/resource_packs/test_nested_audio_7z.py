@@ -1,4 +1,5 @@
 import csv
+import hashlib
 import importlib.util
 import tempfile
 import unittest
@@ -45,6 +46,14 @@ class NestedAudioExtractionTests(unittest.TestCase):
                     "size_bytes": archive_path.stat().st_size,
                     "sha256": "0" * 64,
                 })
+                writer.writerow({
+                    "category": "audio",
+                    "source_archive": "original-source-index",
+                    "source_path": "music/theme.ogg",
+                    "staged_path": "resource_stage/audio/not-in-baseline/theme.ogg",
+                    "size_bytes": source_audio.stat().st_size,
+                    "sha256": hashlib.sha256(source_audio.read_bytes()).hexdigest(),
+                })
             old = (EXTRACTOR.ROOT, EXTRACTOR.AUDIO_ROOT, EXTRACTOR.INDEX, EXTRACTOR.REPORT)
             EXTRACTOR.ROOT = root
             EXTRACTOR.AUDIO_ROOT = audio_root
@@ -58,7 +67,7 @@ class NestedAudioExtractionTests(unittest.TestCase):
             self.assertEqual(len(outputs), 1)
             self.assertEqual(outputs[0].read_bytes(), source_audio.read_bytes())
             rows = list(csv.DictReader(index_path.open("r", encoding="utf-8", newline="")))
-            self.assertEqual(len(rows), 2)
+            self.assertEqual(len(rows), 3)
             self.assertTrue(rows[-1]["source_path"].endswith("sample.7z!music/theme.ogg"))
             self.assertEqual(rows[-1]["category"], "audio")
 
