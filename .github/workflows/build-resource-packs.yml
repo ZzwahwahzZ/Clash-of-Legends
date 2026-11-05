@@ -54,6 +54,16 @@ jobs:
           encryption_exclude_filters=""
           encrypt_pck=false
           encrypt_directory=false
+          export_files=PackedStringArray()
+          script_export_mode=2
+
+          [preset.0.options]
+          custom_template/debug=""
+          custom_template/release=""
+          debug/export_console_wrapper=1
+          binary_format/embed_pck=false
+          texture_format/s3tc_bptc=true
+          texture_format/etc2_astc=false
           EOF
             godot --headless --path . --export-pack "Linux" "build/pcks/$category.pck"
             if [ ! -s "build/pcks/$category.pck" ]; then
