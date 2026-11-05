@@ -55,8 +55,6 @@ jobs:
             reports/c3-model-audit.json
             reports/pvr-texture-audit.json
             reports/pvr-decode-report.json
-            build/pvr-png/**
-            build/c3-glb/**/*.glb
             reports/c3-conversion-report.json
             build/c3-glb/**/*.glb
             reports/c3-conversion-report.json
