@@ -1,6 +1,6 @@
-extends SceneTree
+extends Node
 
-func _initialize() -> void:
+func _ready() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
@@ -8,14 +8,14 @@ func _run() -> void:
 	var drop_scene = load("res://scenes/world/LootDrop3D.tscn")
 	var manager = manager_script.new()
 	var drop = drop_scene.instantiate()
-	root.add_child(manager)
-	root.add_child(drop)
+	get_tree().root.add_child(manager)
+	get_tree().root.add_child(drop)
 	var failures: Array[String] = []
 
 	var settings_scene = load("res://scenes/ui/SettingsUI.tscn")
 	var settings_ui = settings_scene.instantiate()
-	root.add_child(settings_ui)
-	await process_frame
+	get_tree().root.add_child(settings_ui)
+	await get_tree().process_frame
 	var filter_grid: GridContainer = settings_ui.get_node_or_null("Panel/LootFiltersGrid")
 	if filter_grid == null or filter_grid.get_child_count() != 9:
 		failures.append("settings UI must expose all nine independent loot filters")
@@ -91,9 +91,9 @@ func _run() -> void:
 
 	if failures.is_empty():
 		print("LOOT FILTER AUDIT PASSED: independent category toggles, unknown-item safety and settings persistence verified")
-		quit(0)
+		get_tree().quit(0)
 	else:
 		for failure in failures:
 			push_error(failure)
 		print("LOOT FILTER AUDIT FAILED: %d issue(s)" % failures.size())
-		quit(1)
+		get_tree().quit(1)
