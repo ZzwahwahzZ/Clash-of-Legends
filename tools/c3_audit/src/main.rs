@@ -317,20 +317,39 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             motions: vec![motion_document.motions[body_mesh_index].clone()],
                             unknown_chunks: Vec::new(),
                         };
-                        let vat_prefix = glb_root.join("motion-poc-vat").join(format!("look{look}_model{model_id}_weapon{weapon}_action{action}"));
-                        match skinned_glb::export_vat(&body_document.meshes[body_mesh_index], &motion_document.motions[body_mesh_index], &vat_prefix) {
-                            Ok((vat_bytes, vertex_count, frame_count)) => vat_motion_poc.push(json!({
-                                "model_id":model_id,"look":look,"weapon":weapon,"action":action,
-                                "data":vat_prefix.with_extension("rgba32f").to_string_lossy().replace('\\',"/"),
-                                "metadata":vat_prefix.with_extension("json").to_string_lossy().replace('\\',"/"),
-                                "bytes":vat_bytes,"vertex_count":vertex_count,"frame_count":frame_count,
-                                "status":"EXPORTED_EXACT_AFFINE_VAT_PENDING_GODOT_VALIDATION"
-                            })),
-                            Err(error) => vat_motion_poc.push(json!({
-                                "model_id":model_id,"look":look,"weapon":weapon,"action":action,
-                                "status":"REJECTED","reason":error.to_string()
-                            }))
+                        let clip_id = format!("look{look}_model{model_id}_weapon{weapon}_action{action}");
+                        let mut vat_mesh_results = Vec::<Value>::new();
+                        let mut vat_mesh_failures = Vec::<String>::new();
+                        let vat_dir = glb_root.join("motion-poc-vat");
+                        for (mesh_index, mesh) in body_document.meshes.iter().enumerate() {
+                            let Some(mesh_motion) = motion_document.motions.get(mesh_index) else {
+                                if !mesh.vertices.is_empty() && (!mesh.opaque_indices.is_empty() || !mesh.alpha_indices.is_empty()) {
+                                    vat_mesh_failures.push(format!("mesh {mesh_index} ({}) has no paired motion", mesh.name));
+                                }
+                                continue;
+                            };
+                            if mesh.vertices.is_empty() || (mesh.opaque_indices.is_empty() && mesh.alpha_indices.is_empty()) {
+                                continue;
+                            }
+                            let safe_mesh_name: String = mesh.name.chars().map(|c| if c.is_ascii_alphanumeric() || c == '_' || c == '-' { c } else { '_' }).collect();
+                            let vat_prefix = vat_dir.join(format!("{clip_id}_mesh{mesh_index}_{safe_mesh_name}"));
+                            match skinned_glb::export_vat(mesh, mesh_motion, &vat_prefix, &clip_id, mesh_index) {
+                                Ok((vat_bytes, vertex_count, frame_count)) => vat_mesh_results.push(json!({
+                                    "mesh_index":mesh_index,"mesh_name":mesh.name,
+                                    "data":vat_prefix.with_extension("rgba32f").to_string_lossy().replace('\\',"/"),
+                                    "metadata":vat_prefix.with_extension("json").to_string_lossy().replace('\\',"/"),
+                                    "bytes":vat_bytes,"vertex_count":vertex_count,"frame_count":frame_count
+                                })),
+                                Err(error) => vat_mesh_failures.push(format!("mesh {mesh_index} ({}): {error}", mesh.name))
+                            }
                         }
+                        let vat_clip_ok = !vat_mesh_results.is_empty() && vat_mesh_failures.is_empty();
+                        vat_motion_poc.push(json!({
+                            "model_id":model_id,"look":look,"weapon":weapon,"action":action,
+                            "clip_id":clip_id,"mesh_count":vat_mesh_results.len(),
+                            "meshes":vat_mesh_results,"failures":vat_mesh_failures,
+                            "status":if vat_clip_ok {"EXPORTED_ALL_MESH_VAT_PENDING_GODOT_VALIDATION"} else {"REJECTED_INCOMPLETE_MESH_VAT"}
+                        }));
                         let skinned_relative = Path::new("motion-poc-skinned").join(format!("look{look}_model{model_id}_weapon{weapon}_action{action}.glb"));
                         let skinned_path = glb_root.join(&skinned_relative);
                         let skinned_source = format!("{body_relative} + {motion_relative} [v_body only]");
