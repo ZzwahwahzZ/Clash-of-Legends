@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - "tools/resource_packs/**"
+      - "tools/quality/**"
       - ".github/workflows/build-resource-packs.yml"
 permissions:
   contents: write
