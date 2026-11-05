@@ -93,7 +93,7 @@ const CLASSES := {
 		"reference_mechanics":["fire_branch_at_level_40", "destructive_spells", "ranged_area_attacks"]
 	},
 	"Taoist": {
-		"name_ar":"طاوي", "name_en":"Taoist",
+		"name_ar":"طاوي", "name_en":"Taoist", "selectable":false,
 		"weapons":["hossu", "polar_backsword"], "armor":"cloth",
 		"source_family":"Taoist", "source_version":"1.1.2.3",
 		"source_reference":"selectcharacter.ini:info0",
@@ -119,7 +119,9 @@ const SKILLS := {
 
 func get_class_ids() -> Array[String]:
  var result: Array[String] = []
- for id in CLASSES.keys(): result.append(str(id))
+ for id in CLASSES.keys():
+  if bool(CLASSES[id].get("selectable", true)):
+   result.append(str(id))
  return result
 
 func get_class_definition(class_id: String) -> Dictionary:
