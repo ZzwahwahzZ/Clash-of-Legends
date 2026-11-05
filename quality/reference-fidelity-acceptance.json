@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0.0",
+  "policy": "A component is not complete merely because it runs. It remains IN_DEVELOPMENT until its original-source specification, in-game implementation, visual comparison, functional tests, and device/performance checks are evidenced.",
+  "reference": "Conquer Online Mobile only; original source assets/data are evidence, not permission for public redistribution.",
+  "acceptance_states": ["NOT_AUDITED", "IN_DEVELOPMENT", "BLOCKED_MISSING_SOURCE", "READY_FOR_VISUAL_REVIEW", "ACCEPTED_WITH_EVIDENCE"],
+  "components": {
+    "characters_and_classes": {"status":"IN_DEVELOPMENT","required_evidence":["source model and skeleton mapping","class-specific equipment and animations","in-scene screenshots","scale and clipping audit"]},
+    "equipment_and_attachments": {"status":"IN_DEVELOPMENT","required_evidence":["source item/model mapping","correct bone/socket attachment","all equipment slots verified","in-scene comparison screenshots"]},
+    "refinement_glow": {"status":"IN_DEVELOPMENT","required_evidence":["decoded original refine effect records","per-level mapping +1 through +12","weapon and armor visual comparison","runtime screenshots for each effect family"]},
+    "items_and_inventory": {"status":"IN_DEVELOPMENT","required_evidence":["decoded itemcfg records","source icons and item types","inventory/use/equip behavior tests","UI comparison"]},
+    "monster_drops": {"status":"IN_DEVELOPMENT","required_evidence":["decoded copydrop records","monster ID to drop mapping","source drop probabilities","drop simulation tests"]},
+    "quests_and_materials": {"status":"IN_DEVELOPMENT","required_evidence":["decoded questinfo and taskitem_info","required material mapping","quest progression tests","NPC/UI comparison"]},
+    "maps_and_world": {"status":"IN_DEVELOPMENT","required_evidence":["decoded DMap/TME source mapping","terrain and object placement","collision/navigation validation","runtime scene screenshots"]},
+    "effects_animations_audio": {"status":"IN_DEVELOPMENT","required_evidence":["source effect/motion/audio mapping","runtime playback validation","timing and attachment comparison"]},
+    "interface_and_hud": {"status":"IN_DEVELOPMENT","required_evidence":["source UI/icon reference inventory","functional RTL layout","interaction tests","screen comparison"]},
+    "performance_android": {"status":"IN_DEVELOPMENT","required_evidence":["Redmi Note 11 real-device FPS capture","memory/thermal/stutter measurements","long-session stability test"]}
+  }
+}
