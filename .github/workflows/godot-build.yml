@@ -83,6 +83,13 @@ jobs:
           grep -q "CHARACTER MODEL MAPPING AUDIT PASSED" ci-logs/character-model-mapping.log
           if grep -Eq "SCRIPT ERROR:|Parse Error:|Compile Error:|CHARACTER MODEL MAPPING AUDIT FAILED" ci-logs/character-model-mapping.log; then echo "Character model mapping audit failed"; exit 1; fi
 
+      - name: Validate source-backed class identities and weapon families
+        run: |
+          set -o pipefail
+          godot --headless --path . --script tools/quality/validate_class_source_parity.gd --quit-after 3 2>&1 | tee ci-logs/class-source-parity.log
+          grep -q "CLASS SOURCE PARITY PASSED" ci-logs/class-source-parity.log
+          if grep -Eq "SCRIPT ERROR:|Parse Error:|Compile Error:|CLASS SOURCE PARITY FAILED" ci-logs/class-source-parity.log; then echo "Class source parity audit failed"; exit 1; fi
+
       - name: Run visual audit
         run: |
           set -o pipefail
