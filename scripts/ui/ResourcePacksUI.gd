@@ -5,6 +5,7 @@ class_name ResourcePacksUI
 @onready var status_label: Label = get_node_or_null("Panel/Status")
 @onready var list_container: VBoxContainer = get_node_or_null("Panel/Scroll/PackageList")
 @onready var close_button: Button = get_node_or_null("Panel/Close")
+@onready var download_all_button: Button = get_node_or_null("Panel/DownloadAll")
 
 var row_controls: Dictionary = {}
 
@@ -13,6 +14,8 @@ func _ready() -> void:
 	visible = false
 	if close_button:
 		close_button.pressed.connect(close_ui)
+	if download_all_button:
+		download_all_button.pressed.connect(_on_download_all_pressed)
 	if ResourcePackManager:
 		ResourcePackManager.manifest_loaded.connect(_on_manifest_loaded)
 		ResourcePackManager.download_progress.connect(_on_download_progress)
@@ -41,6 +44,8 @@ func _refresh_text() -> void:
 		title_label.text = "تنزيل موارد اللعبة" if _is_ar() else "Game Resource Downloads"
 	if close_button:
 		close_button.text = "إغلاق" if _is_ar() else "Close"
+	if download_all_button:
+		download_all_button.text = "تنزيل كل الموارد" if _is_ar() else "Download All Resources"
 
 func _set_status(value: String) -> void:
 	if status_label:
@@ -87,6 +92,13 @@ func _build_package_rows() -> void:
 		list_container.add_child(row)
 		row_controls[package_id] = {"progress":progress,"action":action,"name":name_label}
 	_set_status("اختر الحزم التي تريد تنزيلها. يمكن اللعب دون اتصال بعد اكتمال التنزيل." if _is_ar() else "Choose the packs to download. The game can run offline after downloads finish.")
+	if download_all_button:
+		var all_installed := true
+		for package_id in ResourcePackManager.packages:
+			if not ResourcePackManager.is_package_installed(str(package_id)):
+				all_installed = false
+				break
+		download_all_button.disabled = all_installed
 
 func _on_download_pressed(package_id: String) -> void:
 	var controls: Dictionary = row_controls.get(package_id, {})
@@ -118,6 +130,21 @@ func _on_package_installed(package_id: String, _path: String) -> void:
 	if progress:
 		progress.value = 100.0
 	_set_status(("تم تثبيت حزمة %s والتحقق منها بنجاح" if _is_ar() else "Package %s installed and verified") % package_id)
+
+func _on_download_all_pressed() -> void:
+	if not ResourcePackManager or ResourcePackManager.packages.is_empty():
+		_set_status("بيان الموارد غير متاح" if _is_ar() else "Resource manifest is unavailable")
+		return
+	if download_all_button:
+		download_all_button.disabled = true
+		download_all_button.text = "جارٍ تنزيل الحزم..." if _is_ar() else "Downloading Packs..."
+	var success := await ResourcePackManager.download_all_packages()
+	if success:
+		_set_status("اكتمل تنزيل كل الموارد والتحقق منها. يمكنك اللعب دون اتصال." if _is_ar() else "All resources downloaded and verified. You can play offline.")
+	else:
+		_set_status("توقف التنزيل عند حزمة لم تكتمل؛ يمكنك إعادة المحاولة." if _is_ar() else "A pack failed. You can retry the download.")
+	_build_package_rows()
+	_refresh_text()
 
 func _on_package_failed(package_id: String, reason: String) -> void:
 	var controls: Dictionary = row_controls.get(package_id, {})
