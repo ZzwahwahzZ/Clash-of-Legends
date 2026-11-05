@@ -1,45 +1,33 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
 <defs>
- <radialGradient id="sky" cx="50%" cy="36%" r="72%"><stop stop-color="#3f6fa7"/><stop offset=".48" stop-color="#101c3e"/><stop offset="1" stop-color="#070b1d"/></radialGradient>
- <linearGradient id="gold" x2="0" y2="1"><stop stop-color="#fff0a8"/><stop offset=".35" stop-color="#e8a82f"/><stop offset=".7" stop-color="#8c4b12"/><stop offset="1" stop-color="#ffe18a"/></linearGradient>
- <linearGradient id="blue" x2="1" y2="1"><stop stop-color="#d6f7ff"/><stop offset=".45" stop-color="#3189ff"/><stop offset="1" stop-color="#102c75"/></linearGradient>
- <linearGradient id="red" x2="1" y2="1"><stop stop-color="#ffb1a4"/><stop offset=".5" stop-color="#d52743"/><stop offset="1" stop-color="#5e0927"/></linearGradient>
- <filter id="glow"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
- <clipPath id="clip"><circle cx="256" cy="256" r="224"/></clipPath>
+ <radialGradient id="bg"><stop stop-color="#365a8e"/><stop offset=".62" stop-color="#111a39"/><stop offset="1" stop-color="#070b1b"/></radialGradient>
+ <linearGradient id="gold" x2="0" y2="1"><stop stop-color="#fff4bd"/><stop offset=".42" stop-color="#e8b344"/><stop offset="1" stop-color="#7c3c12"/></linearGradient>
+ <linearGradient id="steel" x2="1" y2="1"><stop stop-color="#e5f8ff"/><stop offset=".5" stop-color="#438bda"/><stop offset="1" stop-color="#142e6b"/></linearGradient>
+ <linearGradient id="crimson" x2="1" y2="1"><stop stop-color="#ffc0ad"/><stop offset=".5" stop-color="#c52a4c"/><stop offset="1" stop-color="#59112a"/></linearGradient>
+ <filter id="shine"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+ <clipPath id="c"><circle cx="256" cy="256" r="220"/></clipPath>
 </defs>
-<circle cx="256" cy="256" r="250" fill="#080b1b"/>
-<circle cx="256" cy="256" r="239" fill="url(#gold)"/>
-<circle cx="256" cy="256" r="226" fill="#10162b"/>
-<g clip-path="url(#clip)">
- <rect width="512" height="512" fill="url(#sky)"/>
- <circle cx="256" cy="160" r="100" fill="#fff2bc" opacity=".9" filter="url(#glow)"/>
- <circle cx="256" cy="160" r="83" fill="#ffe8a0"/>
- <path d="M0 300 Q80 235 145 286 T290 278 T512 260 V512 H0Z" fill="#101b36"/>
- <path d="M0 350 L70 280 112 332 175 255 225 334 290 255 350 334 415 275 512 350 V512 H0Z" fill="#182c4a"/>
- <g fill="#0b1630" stroke="url(#gold)" stroke-width="5">
-  <path d="M330 145h90v13h-90z M345 115h60v28h-60z M355 94h40l-20-30z M338 145l-18 18h126l-18-18"/>
-  <path d="M350 90h30v20h-30z"/>
- </g>
- <g fill="#121b35" stroke="#e9b84d" stroke-width="4">
-  <path d="M70 248h110v13H70z M88 218h75v30H88z M99 195h53l-27-28z M80 248l-20 18h150l-20-18"/>
- </g>
- <path d="M-20 425 Q110 350 220 408 T540 390 V540 H-20Z" fill="#080e22"/>
- <!-- archer silhouette -->
- <path d="M152 365 Q122 318 147 270 Q165 235 199 238 Q232 241 239 280 L258 350 220 395 178 395Z" fill="url(#blue)" stroke="#f5d477" stroke-width="6"/>
- <path d="M174 251 Q194 215 222 237 Q240 253 224 278 L190 289Z" fill="#17152a" stroke="#f7d98a" stroke-width="5"/>
- <path d="M153 286 Q108 258 100 213 Q98 186 117 166 Q109 213 143 235" fill="none" stroke="#8adfff" stroke-width="9" filter="url(#glow)"/>
- <path d="M118 166 Q80 264 153 318" fill="none" stroke="#f2d18a" stroke-width="5"/>
- <path d="M142 280 L89 225" stroke="#9cecff" stroke-width="8" stroke-linecap="round"/>
- <!-- assassin silhouette -->
- <path d="M292 367 Q276 321 300 282 Q321 247 356 253 Q390 260 394 300 L412 383 350 405Z" fill="url(#red)" stroke="#f5d477" stroke-width="6"/>
- <path d="M306 264 Q329 222 363 244 Q382 257 370 284 L331 292Z" fill="#241326" stroke="#f7d98a" stroke-width="5"/>
- <path d="M382 298 L438 253 M380 307 L450 330" stroke="#fff0b4" stroke-width="7" stroke-linecap="round" filter="url(#glow)"/>
- <!-- central golden dragon crest -->
- <path d="M198 394 Q220 350 255 369 Q278 380 295 361 Q313 344 333 363 Q312 371 305 390 Q330 402 350 385 Q342 421 304 418 Q280 414 260 433 Q242 411 215 420 Q197 424 184 412Z" fill="url(#gold)" stroke="#fff0ad" stroke-width="5"/>
- <path d="M226 389 Q250 377 268 391 Q283 404 302 385 M253 401 Q272 414 290 402" fill="none" stroke="#6e310d" stroke-width="6" stroke-linecap="round"/>
- <path d="M256 425 L256 470" stroke="url(#gold)" stroke-width="10"/>
+<circle cx="256" cy="256" r="250" fill="#080b19"/><circle cx="256" cy="256" r="241" fill="url(#gold)"/><circle cx="256" cy="256" r="228" fill="#10152b"/>
+<g clip-path="url(#c)">
+<rect width="512" height="512" fill="url(#bg)"/>
+<circle cx="256" cy="150" r="82" fill="#ffe7a0" opacity=".72" filter="url(#shine)"/>
+<path d="M0 320 74 254 121 310 188 236 238 320 307 238 363 316 432 254 512 321V512H0Z" fill="#1a2c49"/>
+<path d="M0 384Q120 328 220 382T512 370V512H0Z" fill="#090f24"/>
+<!-- palace silhouette -->
+<g fill="#111b35" stroke="url(#gold)" stroke-width="5"><path d="M38 251h112v15H38zM53 220h82v31H53zM67 198h54l-27-32zM31 251l-16 18h144l-16-18z"/><path d="M354 238h115v15H354zM369 205h84v33h-84zM383 182h56l-28-33zM347 238l-17 18h149l-17-18z"/></g>
+<!-- left hero -->
+<path d="M118 391q-14-64 14-116 18-35 55-32 38 4 47 49l22 99-62 35-61-14z" fill="url(#steel)" stroke="#f4d58b" stroke-width="6"/>
+<path d="M151 264q5-47 43-48 34 0 42 33l-31 26z" fill="#18223d" stroke="#ffe4a0" stroke-width="5"/>
+<path d="M129 288q-39-37-26-85 7-26 29-38-14 48 24 75" fill="none" stroke="#9be7ff" stroke-width="9" filter="url(#shine)"/>
+<!-- right heroine -->
+<path d="M286 393q-10-64 20-111 20-32 54-28 39 5 45 49l18 91-63 37-60-16z" fill="url(#crimson)" stroke="#f4d58b" stroke-width="6"/>
+<path d="M314 267q9-47 45-45 33 2 39 36l-32 23z" fill="#25152d" stroke="#ffe4a0" stroke-width="5"/>
+<path d="M383 294l58-54m-57 64 70 22" stroke="#fff0b4" stroke-width="7" stroke-linecap="round" filter="url(#shine)"/>
+<!-- dragon crest -->
+<path d="M170 405q34-49 76-26 28 16 49-5 22-22 45 0-28 7-34 29 27 17 53-2-9 43-53 36-27-5-51 18-23-27-51-15-21 8-34-11z" fill="url(#gold)" stroke="#fff0b2" stroke-width="5"/>
+<path d="M214 393q31-22 54 1 17 17 40-2m-74 15q25 20 51 1" fill="none" stroke="#71340f" stroke-width="6" stroke-linecap="round"/>
 </g>
-<circle cx="256" cy="256" r="226" fill="none" stroke="#fff0a0" stroke-width="5"/>
-<circle cx="256" cy="256" r="238" fill="none" stroke="#713d14" stroke-width="4"/>
-<path d="M256 12 L270 34 256 28 242 34Z M256 500 L270 478 256 484 242 478Z M12 256 L34 242 28 256 34 270Z M500 256 L478 242 484 256 478 270Z" fill="#fff0a0"/>
+<circle cx="256" cy="256" r="221" fill="none" stroke="#fff0b1" stroke-width="6"/><circle cx="256" cy="256" r="237" fill="none" stroke="#63340e" stroke-width="4"/>
+<path d="M256 12l16 24-16-7-16 7zM256 500l16-24-16 7-16-7zM12 256l24-16-7 16 7 16zM500 256l-24-16 7 16-7 16z" fill="#fff0b1"/>
+<text x="256" y="474" text-anchor="middle" font-family="serif" font-size="31" font-weight="bold" fill="#ffe6a0" stroke="#4b250d" stroke-width="1.5">صراع الأساطير</text>
 </svg>
