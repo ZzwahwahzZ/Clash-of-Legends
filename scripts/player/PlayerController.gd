@@ -207,8 +207,9 @@ func _set_imported_animation_state(state: String) -> void:
 				break
 		if not selected.is_empty():
 			break
-	if selected.is_empty() and imported_model_animation.get_animation_list().size() > 0:
-		selected = imported_model_animation.get_animation_list()[0]
+	# Never guess an animation from import order: C3 action clips may be
+	# present without semantic names. Keep the current safe pose until a
+	# verified idle/walk alias is available in the model metadata.
 	if selected.is_empty():
 		return
 	imported_model_animation.speed_scale = 1.0 if state == "idle" else 1.2
