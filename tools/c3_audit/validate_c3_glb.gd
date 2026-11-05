@@ -128,6 +128,7 @@ func _validate() -> void:
 				"status": "GODOT_SKELETON_VALIDATED" if skeletal_ok else "FAILED"
 			}
 			skeletal_poc_results.append(skeletal_result)
+			print("C3 SKELETAL POC: ", JSON.stringify(skeletal_result))
 			if not skeletal_ok:
 				skeletal_poc_failed = true
 		print("C3 GLB OK: ", path, " | MeshInstance3D: ", meshes.size(), " | surfaces: ", model_surfaces, " | morph meshes: ", model_morph_meshes, " | animation tracks: ", model_animation_tracks, " | animation keys: ", model_animation_keys)
@@ -151,6 +152,7 @@ func _validate() -> void:
 		return
 	poc_file.store_string(JSON.stringify(poc_report, "\t") + "\n")
 	poc_file.close()
+	print("C3 SKELETAL POC SUMMARY: ", JSON.stringify(poc_report))
 	print("C3 MOTION POC VALIDATION: ", poc_report["validated_clip_count"], "/", poc_report["expected_clip_count"], " clips passed Godot import and animation-track checks.")
 	if motion_poc_results.size() != 6 or motion_poc_failed:
 		push_error("C3 motion POC validation failed: expected six fully animated imported clips.")
