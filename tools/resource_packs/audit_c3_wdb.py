@@ -390,7 +390,6 @@ def parse_wdb(data: bytes) -> dict:
             full_record = {
                 "unique_id": int(row["id"]), "part_count": int(row["part_count"]),
                 "parts": resolved_parts,
-                "record_extension_f32": row.get("record_extension_f32", []),
             }
             full_records.append(full_record)
             if len(resolved_records) < 60:
