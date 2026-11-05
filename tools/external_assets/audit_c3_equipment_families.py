@@ -51,29 +51,48 @@ def main():
         model = model_by_path.get(src.lower(), {})
         texture = row.get("texture", "")
         texture_path = args.project_root / texture if texture else None
+        mesh_details = model.get("meshes", [])
+        extents = []
+        texture_names = []
+        for mesh in mesh_details:
+            lo = mesh.get("bounds_minimum", [0, 0, 0])
+            hi = mesh.get("bounds_maximum", [0, 0, 0])
+            if len(lo) == 3 and len(hi) == 3:
+                extents.append([round(float(hi[i]) - float(lo[i]), 6) for i in range(3)])
+            if mesh.get("texture_name"):
+                texture_names.append(mesh["texture_name"])
+        max_extent_axes = sum(1 for axis in range(3) if any(e[axis] > 0.0001 for e in extents))
+        triangles = int(model.get("triangle_count", 0))
+        vertices = int(model.get("vertex_count", 0))
+        geometry_ok = triangles >= 8 and vertices >= 12 and max_extent_axes >= 2
         grouped[fam].append({
             "source_c3": src,
             "source_model_id": Path(src).stem,
             "converted_glb": row.get("output", ""),
             "glb_bytes": row.get("glb_bytes", 0),
             "mesh_count": row.get("mesh_count", model.get("mesh_count", 0)),
-            "triangle_count": model.get("triangle_count", 0),
-            "vertex_count": model.get("vertex_count", 0),
+            "triangle_count": triangles,
+            "vertex_count": vertices,
+            "source_mesh_bounds_extents": extents,
+            "source_texture_names": texture_names,
             "motion_chunk_count": row.get("motion_chunk_count", model.get("motion_count", 0)),
             "texture_path": texture,
             "decoded_texture_file_present": bool(texture_path and texture_path.is_file()),
+            "geometry_gate": "PASS_BASIC_NONDEGENERATE" if geometry_ok else "REJECT_DEGENERATE_OR_INSUFFICIENT_GEOMETRY",
             "texture_binding_verified": False,
             "item_id_join_verified": False,
             "source_identity_verified": False,
-            "status": "CONVERTED_CANDIDATE_REQUIRES_ITEM_JOIN_AND_VISUAL_REVIEW",
+            "status": "CONVERTED_CANDIDATE_REQUIRES_ITEM_JOIN_AND_VISUAL_REVIEW" if geometry_ok else "REJECTED_GEOMETRY_GATE",
         })
     summary = []
     for family in FAMILIES:
         records = grouped.get(family, [])
+        rejected = sum(1 for record in records if record["geometry_gate"] != "PASS_BASIC_NONDEGENERATE")
         summary.append({
             "family": family,
             "converted_candidate_count": len(records),
-            "status": "CANDIDATES_REQUIRE_MAPPING_AND_VISUAL_REVIEW" if records else "NO_CONVERTED_CANDIDATE_FOUND",
+            "basic_geometry_rejected_count": rejected,
+            "status": "CANDIDATES_REQUIRE_MAPPING_AND_VISUAL_REVIEW" if records and rejected == 0 else ("CANDIDATES_WITH_GEOMETRY_REJECTIONS" if records else "NO_CONVERTED_CANDIDATE_FOUND"),
             "records": records,
         })
     result = {
