@@ -254,6 +254,47 @@ def main() -> None:
                                 entries.append(record)
                 results[category] = entries
             itemtypes = [e for e in results["equipment"] if e["relative_path"].lower().startswith("ini/itemtype/")]
+            # Discover exact version-matched C3 and equipment-mapping paths without
+            # guessing the Mobile client's folder layout or decoding opaque fields.
+            c3_model_paths = []
+            for rel, candidates in sources.items():
+                low = rel.lower().replace("\\", "/")
+                if low.startswith("netdragon/c31/c3/") and low.endswith(".c3"):
+                    for source_zip, member, display in candidates:
+                        c3_model_paths.append({
+                            "relative_path": rel, "source_member": display,
+                            "size_bytes": source_zip.getinfo(member).file_size
+                        })
+            path_patterns = {
+                "mount_related": re.compile(r"(mount|mountsaddle|mountinfo|mounttype|ride|horse|steed)", re.I),
+                "helmet_headgear": re.compile(r"(armet|helmet|headgear)", re.I),
+                "body_armor": re.compile(r"(armor|armour|garment|suit)", re.I),
+                "weapon": re.compile(r"(weapon|weaponeffect|weaponmotion)", re.I),
+                "item_catalog": re.compile(r"(itemtype|item_type)", re.I),
+                "model_texture_mapping": re.compile(r"(3dobj|3dtexture|res\.ini|armor\.ini|armet\.ini)", re.I),
+            }
+            ini_asset_mapping_inventory = {key: [] for key in path_patterns}
+            for rel, candidates in sources.items():
+                if not rel.lower().startswith("ini/"):
+                    continue
+                for label, pattern in path_patterns.items():
+                    if not pattern.search(rel):
+                        continue
+                    for source_zip, member, display in candidates:
+                        data = source_zip.read(member)
+                        record = {
+                            "relative_path": rel, "source_member": display,
+                            "size_bytes": len(data), "sha256": hashlib.sha256(data).hexdigest(),
+                            "extension": Path(rel).suffix.lower()
+                        }
+                        if rel.lower().endswith(".ini"):
+                            parsed = parse_ini_opaque(data)
+                            record["parse_status"] = parsed.get("parse_status")
+                            record["section_count"] = parsed.get("section_count")
+                            record["sections"] = parsed.get("sections", [])[:80]
+                        elif rel.lower().endswith(".dat"):
+                            record["cipher_probe"] = probe_tq_candidates(data)
+                        ini_asset_mapping_inventory[label].append(record)
             summary = {
                 "schema_version": "1.0.0",
                 "source_version": VERSION,
@@ -262,6 +303,14 @@ def main() -> None:
                 "archive_sha256": sha256_file(args.archive),
                 "version_matched_member_count": sum(len(v) for v in sources.values()),
                 "categories": {k: {"file_count": len(v), "files": v} for k, v in results.items()},
+                "asset_path_inventory": {
+                    "c3_model_path_count": len(c3_model_paths),
+                    "c3_model_paths": c3_model_paths,
+                    "c3_mount_related_path_count": sum(1 for x in c3_model_paths if path_patterns["mount_related"].search(x["relative_path"])),
+                    "c3_mount_related_paths": [x for x in c3_model_paths if path_patterns["mount_related"].search(x["relative_path"])],
+                    "ini_asset_mapping_inventory": ini_asset_mapping_inventory,
+                    "policy": "Path discovery only. File names and opaque table sections do not prove undocumented model joins."
+                },
                 "itemtype_catalog": {
                     "file_count": len(itemtypes),
                     "record_count": sum(int(e.get("record_count", 0)) for e in itemtypes),
