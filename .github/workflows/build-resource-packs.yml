@@ -75,11 +75,6 @@ jobs:
           Path("RESOURCE_MANIFEST").write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
           print(json.dumps(manifest,ensure_ascii=False,indent=2))
           PY
-      - name: Commit generated resource manifest to main
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "Publish verified generated resource pack manifest"
-          file_pattern: RESOURCE_MANIFEST reports/resource-source-index.csv reports/source-archive-extension-audit.json
       - name: Upload PCKs and source index as workflow artifact
         uses: actions/upload-artifact@v4
         with:
