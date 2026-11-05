@@ -50,34 +50,23 @@ fn u16_bytes(values: &[u16]) -> Vec<u8> {
 fn transformed_positions(mesh: &sandbox_data::c3::C3Mesh, motion: Option<&sandbox_data::c3::C3Motion>, frame: f32) -> Vec<[f32; 3]> {
     mesh.vertices.iter().map(|vertex| {
         let point = if let Some(motion) = motion {
-            // Preserve both C3 vertex influences when sampling the diagnostic
-            // morph animation. The upstream reference helper currently applies
-            // only the first positive influence, which can visibly tear joints
-            // on vertices weighted across two bones.
-            let mut weighted = [0.0_f32; 3];
-            let mut total_weight = 0.0_f32;
+            // Match the C3 runtime's documented behavior: the first positive
+            // influence selects the vertex's bone; the stored weight is a
+            // presence/selection value here, not a conventional GPU blend.
+            // Both C3Studio and the independent C3 Blender Add-On implement
+            // this same first-positive-influence rule.
+            let mut point = mesh.initial_matrix.transform_point(vertex.position);
             for influence in 0..2 {
                 let weight = vertex.bone_weights[influence];
                 let bone = vertex.bone_indices[influence];
-                if !weight.is_finite() || weight <= 0.0 || bone >= motion.bone_count {
-                    continue;
+                if weight > 0.0 && bone < motion.bone_count {
+                    point = mesh.initial_matrix
+                        .multiply(motion.matrix_at(bone, frame))
+                        .transform_point(vertex.position);
+                    break;
                 }
-                let transform = mesh.initial_matrix.multiply(motion.matrix_at(bone, frame));
-                let transformed = transform.transform_point(vertex.position);
-                weighted[0] += transformed.x * weight;
-                weighted[1] += transformed.y * weight;
-                weighted[2] += transformed.z * weight;
-                total_weight += weight;
             }
-            if total_weight > 0.000001 {
-                sandbox_data::c3::Vector3 {
-                    x: weighted[0] / total_weight,
-                    y: weighted[1] / total_weight,
-                    z: weighted[2] / total_weight,
-                }
-            } else {
-                mesh.initial_matrix.transform_point(vertex.position)
-            }
+            point
         } else {
             mesh.initial_matrix.transform_point(vertex.position)
         };
@@ -85,7 +74,6 @@ fn transformed_positions(mesh: &sandbox_data::c3::C3Mesh, motion: Option<&sandbo
         [point.x * 0.01, -point.z * 0.01, point.y * 0.01]
     }).collect()
 }
-
 fn morph_deltas(base: &[[f32; 3]], frame: &[[f32; 3]]) -> Vec<f32> {
     base.iter().zip(frame.iter()).flat_map(|(a, b)| [
         b[0] - a[0], b[1] - a[1], b[2] - a[2]
@@ -401,8 +389,8 @@ mod tests {
     }
 
     #[test]
-    fn sampled_deformation_blends_both_positive_vertex_influences() {
-        let mut source = mesh("two_bone_blend");
+    fn sampled_deformation_matches_first_positive_c3_influence() {
+        let mut source = mesh("two_slot_vertex");
         source.vertices[0].bone_indices = [0, 1];
         source.vertices[0].bone_weights = [0.25, 0.75];
         let mut first = Matrix4::IDENTITY;
@@ -417,9 +405,8 @@ mod tests {
             morph_values: Vec::new(),
         };
         let result = transformed_positions(&source, Some(&motion), 0.0);
-        // Weighted X = (4 * .25) + (40 * .75) = 31 source units,
-        // then C3 centimeters are converted to glTF meters.
-        assert!((result[0][0] - 0.31).abs() < 0.00001);
+        // The C3 runtime selects the first positive influence (bone 0).
+        assert!((result[0][0] - 0.04).abs() < 0.00001);
     }
 
     #[test]
