@@ -35,7 +35,7 @@ jobs:
           set -euo pipefail
           mkdir -p build/pcks
           for category in world maps characters monsters equipment mounts effects audio; do
-            mkdir -p "resource_stage/$category"
+            if [ ! -d "resource_stage/$category" ]; then echo "No files for $category; it will be omitted rather than publishing an empty PCK."; continue; fi
             cat > "export_presets.cfg" <<EOF
           [preset.0]
           name="Linux"
