@@ -392,7 +392,7 @@ mod tests {
     }
 
     #[test]
-    fn classifies_static_meshes_from_evaluated_weighted_affine_positions() {
+    fn classifies_static_meshes_from_stock_c3_affine_positions() {
         let static_motion = C3Motion {
             bone_count: 1,
             frame_count: 2,
@@ -488,4 +488,83 @@ pub fn c3_vertex_position(mesh: &C3Mesh, motion: &C3Motion, vertex_index: usize,
     }
     // Vertices without a positive bone influence remain in bind pose.
     Ok(mesh.initial_matrix.transform_point(vertex.position))
+}
+
+/// A mesh is VAT-animated only when its evaluated vertex positions actually
+/// change over the clip. Weighted affine matrices, not bone-name heuristics,
+/// decide whether it is static.
+pub fn is_deforming(mesh: &C3Mesh, motion: &C3Motion) -> Result<bool, String> {
+    if mesh.vertices.is_empty() || motion.bone_count == 0 || motion.frame_count <= 1 || motion.keys.is_empty() {
+        return Ok(false);
+    }
+    let baseline: Vec<_> = (0..mesh.vertices.len())
+        .map(|i| c3_vertex_position(mesh, motion, i, 0.0))
+        .collect::<Result<_, _>>()?;
+    for frame in 1..motion.frame_count {
+        for (vertex_index, base) in baseline.iter().enumerate() {
+            let current = c3_vertex_position(mesh, motion, vertex_index, frame as f32)?;
+            if (current.x - base.x).abs() > 1e-5
+                || (current.y - base.y).abs() > 1e-5
+                || (current.z - base.z).abs() > 1e-5 {
+                return Ok(true);
+            }
+        }
+    }
+    Ok(false)
+}
+
+pub fn export_vat(mesh: &C3Mesh, motion: &C3Motion, output_prefix: &Path, clip_id: &str, mesh_index: usize) -> Result<(u64, usize, usize), Box<dyn std::error::Error>> {
+    if mesh.vertices.is_empty() || motion.bone_count == 0 || motion.frame_count <= 1 || motion.keys.is_empty() {
+        return Err("VAT requires vertices and a multi-frame C3 motion".into());
+    }
+    if !is_deforming(mesh, motion)? {
+        return Err("VAT export rejected: the mesh has no evaluated affine vertex deformation".into());
+    }
+    let vertex_count = mesh.vertices.len();
+    let mut referenced_vertices = vec![false; vertex_count];
+    for source_index in mesh.opaque_indices.iter().chain(mesh.alpha_indices.iter()) {
+        let index = *source_index as usize;
+        if index >= vertex_count {
+            return Err(format!("C3 index {index} is outside VAT vertex count {vertex_count}").into());
+        }
+        referenced_vertices[index] = true;
+    }
+    let referenced_vertex_count = referenced_vertices.iter().filter(|used| **used).count();
+    let frame_count = motion.frame_count as usize;
+    let mut bytes = Vec::<u8>::with_capacity(vertex_count * frame_count * 16);
+    let mut min = [f32::INFINITY; 3];
+    let mut max = [f32::NEG_INFINITY; 3];
+    for frame in 0..frame_count {
+        for vertex_index in 0..vertex_count {
+            let point = c3_vertex_position(mesh, motion, vertex_index, frame as f32)?;
+            let p = [point.x * 0.01, -point.z * 0.01, point.y * 0.01];
+            for axis in 0..3 {
+                if !p[axis].is_finite() { return Err(format!("non-finite VAT position at frame {frame}").into()); }
+                min[axis] = min[axis].min(p[axis]);
+                max[axis] = max[axis].max(p[axis]);
+                bytes.extend_from_slice(&p[axis].to_le_bytes());
+            }
+            bytes.extend_from_slice(&1.0_f32.to_le_bytes());
+        }
+    }
+    let binary_path = output_prefix.with_extension("rgba32f");
+    let metadata_path = output_prefix.with_extension("json");
+    if let Some(parent) = binary_path.parent() { fs::create_dir_all(parent)?; }
+    fs::write(&binary_path, &bytes)?;
+    let metadata = json!({
+        "format":"C3_VAT_RGBA32F","version":1,"clip_id":clip_id,"mesh_index":mesh_index,"mesh_name":mesh.name,"width":vertex_count,"height":frame_count,
+        "vertex_count":vertex_count,"referenced_vertex_count":referenced_vertex_count,"frame_count":frame_count,"fps":30,
+        "bytes_per_texel":16,"binary_bytes":bytes.len(),
+        "sampling":"one texel per source vertex per frame; RGBA=(x,y,z,1)",
+        "matrix_semantics":"weighted blend of initial_matrix * motion.matrix_at(each_positive_influence, frame)",
+        "influence_semantics":"all positive C3 bone_weights are used and normalized",
+        "classification":"deforming",
+        "vertex_order":"source C3 vertex index; one RGBA texel per original vertex index",
+        "preserves_affine_shear":true,
+        "coordinate_conversion":"C3 centimeters Z-down to meters Y-up: (x*0.01,-z*0.01,y*0.01)",
+        "bounds_min":min,"bounds_max":max,
+        "binary_file":binary_path.file_name().unwrap_or_default().to_string_lossy()
+    });
+    fs::write(&metadata_path, serde_json::to_vec_pretty(&metadata)?)?;
+    Ok((bytes.len() as u64, vertex_count, frame_count))
 }
