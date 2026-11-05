@@ -60,6 +60,19 @@ jobs:
         run: python3 tools/resource_packs/validate_c3_equipment_resource_links.py
       - name: Join itemtype, mounttype, equipment MESH and original source assets
         run: python3 tools/resource_packs/build_equipment_item_join_catalog.py
+      - name: Upload immediate joined equipment source catalog
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Equipment-Item-Mount-MESH-Join-Audit
+          path: |
+            reports/equipment-item-join-audit.json
+            reports/c3-equipment-resource-link-audit.json
+            reports/c3-equipment-source-path-coverage.json
+            resource_stage/world/resource_mappings/mesh_equipment_catalog.json
+            resource_stage/world/resource_mappings/equipment_item_join_catalog.json
+          if-no-files-found: warn
+          retention-days: 30
       - name: Probe original item, drop, quest and refinement data formats
         run: python3 tools/resource_packs/probe_gameplay_data.py
       - name: Build provenance-safe readable gameplay reference catalogs
