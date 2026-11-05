@@ -200,6 +200,7 @@ jobs:
             reports/map-audit.json
             reports/tpi-extraction-audit.json
             reports/tpi-indexes.zip
+            reports/tpi-multiblock-blocks.zip
             reports/gameplay-data-source-probe.json
             reports/gameplay-readable-catalog-report.json
             resource_stage/world/gameplay_reference/*.json
