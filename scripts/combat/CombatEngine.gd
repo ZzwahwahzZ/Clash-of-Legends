@@ -63,11 +63,15 @@ func execute_skill(skill_id: String, caster: CharacterBody3D, target: Node3D) ->
 		var heal_val = def.get("heal_amount", 200)
 		if caster.has_method("apply_healing"):
 			caster.apply_healing(heal_val)
+		if GameAudioManager:
+			GameAudioManager.play_skill(skill_id, caster, caster)
 		emit_signal("skill_executed", skill_id, caster, caster, heal_val, false)
 		return true
 	if def["effect"] == "buff_defense":
 		if caster.has_method("apply_defense_buff"):
 			caster.apply_defense_buff(12.0)
+		if GameAudioManager:
+			GameAudioManager.play_skill(skill_id, caster, caster)
 		emit_signal("skill_executed", skill_id, caster, caster, 0, false)
 		return true
 	if target and is_instance_valid(target) and target.has_method("take_damage"):
@@ -78,6 +82,8 @@ func execute_skill(skill_id: String, caster: CharacterBody3D, target: Node3D) ->
 		var crit_mult = 1.75 if is_critical else 1.0
 		var final_dmg = int(base_dmg * def["damage_multiplier"] * crit_mult)
 		target.take_damage(final_dmg, caster)
+		if GameAudioManager:
+			GameAudioManager.play_skill(skill_id, caster, target)
 		emit_signal("damage_dealt", target, final_dmg, is_critical, target.global_position + Vector3(0, 1.2, 0))
 		emit_signal("skill_executed", skill_id, caster, target, final_dmg, is_critical)
 		if def.get("is_aoe", false):
