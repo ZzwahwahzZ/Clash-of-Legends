@@ -29,10 +29,16 @@ func _startup_resource_check() -> void:
 		if not ResourcePackManager.busy:
 			break
 		await get_tree().process_frame
+	await get_tree().process_frame
 	if ResourcePackManager.packages.is_empty():
 		_set_status("جارٍ فحص موارد اللعبة..." if _is_ar() else "Checking game resources...")
 		await ResourcePackManager.refresh_manifest()
 	if ResourcePackManager.packages.is_empty():
+		visible = true
+		_set_status("تعذر الوصول إلى بيان الموارد. افحص اتصال الإنترنت واضغط إعادة المحاولة." if _is_ar() else "Could not reach the resource manifest. Check your connection and retry.")
+		if download_all_button:
+			download_all_button.disabled = false
+			download_all_button.text = "إعادة المحاولة" if _is_ar() else "Retry"
 		return
 	var missing := false
 	for package_id in ResourcePackManager.packages:
@@ -154,8 +160,16 @@ func _on_package_installed(package_id: String, _path: String) -> void:
 	_set_status(("تم تثبيت حزمة %s والتحقق منها بنجاح" if _is_ar() else "Package %s installed and verified") % package_id)
 
 func _on_download_all_pressed() -> void:
-	if not ResourcePackManager or ResourcePackManager.packages.is_empty():
-		_set_status("بيان الموارد غير متاح" if _is_ar() else "Resource manifest is unavailable")
+	if not ResourcePackManager:
+		_set_status("مدير الموارد غير متاح" if _is_ar() else "Resource manager is unavailable")
+		return
+	if ResourcePackManager.packages.is_empty():
+		_set_status("جارٍ إعادة محاولة الاتصال..." if _is_ar() else "Retrying manifest connection...")
+		var refreshed := await ResourcePackManager.refresh_manifest()
+		if refreshed:
+			_build_package_rows()
+		else:
+			_set_status("لم نتمكن من الوصول إلى الموارد. حاول مرة أخرى." if _is_ar() else "Could not reach resources. Please retry.")
 		return
 	if download_all_button:
 		download_all_button.disabled = true
