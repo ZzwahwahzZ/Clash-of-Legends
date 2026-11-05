@@ -38,10 +38,10 @@ func travel_to(destination_id: String, reason: String = "manual") -> bool:
 		_notify("وجهة الانتقال غير معروفة" if str(game_manager.get("current_language")) == "ar" else "Unknown travel destination", true)
 		return false
 	if not is_instance_valid(game_manager.get("player_reference")):
-		_notify("لا يوجد بطل مسجل للانتقال" if GameManager.current_language == "ar" else "No active hero to travel", true)
+		_notify("لا يوجد بطل مسجل للانتقال" if str(game_manager.get("current_language")) == "ar" else "No active hero to travel", true)
 		return false
 	if destination_id == current_destination_id:
-		_notify("أنت موجود بالفعل في هذه المنطقة" if GameManager.current_language == "ar" else "You are already in this area", false)
+		_notify("أنت موجود بالفعل في هذه المنطقة" if str(game_manager.get("current_language")) == "ar" else "You are already in this area", false)
 		return true
 
 	travel_in_progress = true
