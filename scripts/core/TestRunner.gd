@@ -280,6 +280,8 @@ func test_quest_progression_lifecycle() -> void:
 	event_quest.add_to_group("quest_agents")
 	assert_true(event_quest._validate_quest_database(), "Quest: expanded objective catalogue has valid links and targets")
 	event_quest.active_quest_id = "quest_meteor_gather"
+	var objective_route: Dictionary = event_quest._get_navigation_target()
+	assert_true(objective_route.travel_id == "twin_plains" and objective_route.destination == Vector3(18.0, 0.0, 15.0), "Quest: active collection objective navigates to its map target")
 	event_quest.on_enemy_killed("wolf")
 	assert_true(event_quest.quest_progress == 0, "Quest: kill event cannot advance a collection objective")
 	event_quest.on_item_collected("meteor_stone", 2)
@@ -290,6 +292,8 @@ func test_quest_progression_lifecycle() -> void:
 	add_child(pending_copy)
 	pending_copy.deserialize(event_quest.serialize())
 	assert_true(pending_copy.active_quest_id == "quest_meteor_gather" and pending_copy.is_quest_completed, "Quest: pending turn-in state survives save/load")
+	var sage_route: Dictionary = event_quest._get_navigation_target()
+	assert_true(sage_route.turn_in and sage_route.turn_in_npc_id == "npc_sage" and sage_route.destination == Vector3(4.0, 0.0, 3.0), "Quest: completed objective routes back to its designated sage")
 	pending_copy.queue_free()
 	var gold_before_turnin := GameManager.current_gold
 	event_quest.on_npc_talked("npc_blacksmith")
@@ -300,6 +304,8 @@ func test_quest_progression_lifecycle() -> void:
 	assert_true(event_quest.quest_progress == 0, "Quest: wrong NPC cannot complete dialogue objective")
 	event_quest.on_npc_talked("npc_blacksmith")
 	assert_true(event_quest.active_quest_id == "quest_blacksmith_visit" and event_quest.is_quest_completed, "Quest: dialogue objective becomes ready for turn-in")
+	var blacksmith_route: Dictionary = event_quest._get_navigation_target()
+	assert_true(blacksmith_route.turn_in_npc_id == "npc_blacksmith" and blacksmith_route.destination == Vector3(-5.0, 0.0, 4.0), "Quest: blacksmith objective routes back to the blacksmith for turn-in")
 	event_quest.on_npc_talked("npc_sage")
 	assert_true(event_quest.active_quest_id == "quest_blacksmith_visit", "Quest: wrong turn-in NPC cannot claim blacksmith reward")
 	event_quest.on_npc_talked("npc_blacksmith")
