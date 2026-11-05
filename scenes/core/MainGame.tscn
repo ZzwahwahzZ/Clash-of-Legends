@@ -230,24 +230,28 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.1, 3)
 npc_name_ar = "حكيم التوأم"
 npc_name_en = "Twin Sage"
+npc_id = "npc_sage"
 role = "sage"
 
 [node name="NPC_Blacksmith" parent="." instance=ExtResource("2_npc")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.1, 4)
 npc_name_ar = "حداد الأساطير"
 npc_name_en = "Master Blacksmith"
+npc_id = "npc_blacksmith"
 role = "blacksmith"
 
 [node name="NPC_Merchant" parent="." instance=ExtResource("2_npc")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0.1, -4)
 npc_name_ar = "تاجر القوافل"
 npc_name_en = "General Merchant"
+npc_id = "npc_merchant"
 role = "merchant"
 
 [node name="NPC_Warden" parent="." instance=ExtResource("2_npc")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0.1, -5)
 npc_name_ar = "حارس البوابة"
 npc_name_en = "Dungeon Warden"
+npc_id = "npc_warden"
 role = "warden"
 
 [node name="WildWolf_1" parent="." instance=ExtResource("3_wolf")]
