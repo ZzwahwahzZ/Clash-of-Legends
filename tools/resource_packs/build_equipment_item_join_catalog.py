@@ -248,7 +248,7 @@ for item_id, props in mounttype_sections.items():
         "properties": props,
         "mesh_parts": part_paths(rec),
         "motion_records": rec.get("motion_records", []) if rec else [],
-        "status": "MESH_SOURCE_JOINED_REQUIRES_RUNTIME_VISUAL_REVIEW" if rec else "MOUNT_MESH_ID_NOT_FOUND",
+        "status": ("MESH_AND_MOTION_SOURCE_JOINED_REQUIRES_RUNTIME_PLAYBACK" if rec and rec.get("motion_records") else ("MESH_SOURCE_JOINED_MOTION_NOT_MAPPED" if rec else "MOUNT_MESH_ID_NOT_FOUND")),
     })
 
 default_resources = []
