@@ -73,7 +73,7 @@ func _setup_options() -> void:
 			class_option.set_item_metadata(class_option.get_item_count() - 1, class_id)
 		var player = GameManager.player_reference if GameManager else null
 		if player and player.has_method("get_character_class"):
-			var current_class := player.get_character_class()
+			var current_class: String = str(player.get_character_class())
 			for i in range(class_option.get_item_count()):
 				if class_option.get_item_metadata(i) == current_class:
 					class_option.select(i)
