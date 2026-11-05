@@ -127,11 +127,16 @@ func remove_item_at(index: int, quantity: int = 1) -> bool:
 func equip_item_from_slot(index: int) -> bool:
 	if index < 0 or index >= MAX_SLOTS or slots[index] == null:
 		return false
-	var item = slots[index]
+	var item: Dictionary = slots[index]
 	if item.get("type") != "equipment" or not item.has("slot"):
 		return false
-		
-	var target_slot = item["slot"]
+	if not _is_item_compatible(item):
+		if GameManager:
+			GameManager.post_notification("هذا العتاد غير متوافق مع فئة البطل أو أسلوب سلاحه" if GameManager.current_language == "ar" else "This gear is incompatible with the hero class or weapon style", true)
+		return false
+	var target_slot := str(item["slot"])
+	if not equipment.has(target_slot):
+		return false
 	var old_eq = equipment.get(target_slot, null)
 	equipment[target_slot] = item
 	slots[index] = old_eq
@@ -142,13 +147,25 @@ func equip_item_from_slot(index: int) -> bool:
 	return true
 
 func equip_item(item: Dictionary) -> bool:
-	var slot_name = item.get("slot", "")
-	if equipment.has(slot_name):
+	var slot_name := str(item.get("slot", ""))
+	if equipment.has(slot_name) and _is_item_compatible(item):
 		equipment[slot_name] = item
 		emit_signal("equipment_updated")
 		_recalculate_player_stats()
 		return true
 	return false
+
+func _is_item_compatible(item: Dictionary) -> bool:
+	var player := get_parent()
+	var required_class := str(item.get("class_req", ""))
+	if not required_class.is_empty() and player and player.has_method("get_character_class"):
+		if str(player.get_character_class()) != required_class:
+			return false
+	var required_style := str(item.get("weapon_style", ""))
+	if not required_style.is_empty() and ClassProgressionManager:
+		if str(ClassProgressionManager.selected_weapon_style) != required_style:
+			return false
+	return true
 
 func unequip_item(slot_name: String) -> bool:
 	if not equipment.has(slot_name) or equipment[slot_name] == null:
