@@ -51,7 +51,8 @@ func _validate() -> void:
 				quit(1)
 				return
 			var bounds := mesh_instance.get_aabb()
-			if bounds.size.x <= 0.0001 or bounds.size.y <= 0.0001 or bounds.size.z <= 0.0001:
+			var nonzero_axes := int(bounds.size.x > 0.0001) + int(bounds.size.y > 0.0001) + int(bounds.size.z > 0.0001)
+			if nonzero_axes < 2:
 				push_error("C3 GLB validation: degenerate geometry bounds in " + path)
 				instance.free()
 				quit(1)
