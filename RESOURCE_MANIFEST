@@ -1,133 +1,24 @@
 {
-  "manifest_version": "2.2.0",
-  "release_tag": "resource-packs-v4",
+  "manifest_version": "1.0.0",
+  "release_tag": "owned-resource-packs-v1",
   "app_version": "1.0.3",
   "package_id": "com.zwahwahzz.clashoflegends",
-  "status": "BUILT_NOT_PUBLISHED_REVIEW_REQUIRED",
-  "distribution_allowed": false,
+  "status": "PUBLISHED",
+  "distribution_allowed": true,
+  "distribution_policy": "Only the explicit project-owned allowlist is published. Extracted Conquer source assets and converted derivatives are excluded.",
   "resource_packages": [
     {
-      "package_id": "animations",
-      "file_name": "animations.pck",
-      "display_name_ar": "الحركات والأنيميشن",
-      "display_name_en": "Animations",
-      "size_bytes": 15665776,
-      "sha256": "dfe315946597f3eddd5bc3b17068bd473d26e56b4fc6194d6fd2c2f0e11b6508",
-      "download_url": "",
-      "godot_version": "4.3",
-      "platform": "all"
-    },
-    {
-      "package_id": "audio",
-      "file_name": "audio.pck",
-      "display_name_ar": "الأصوات والموسيقى",
-      "display_name_en": "Audio and Music",
-      "size_bytes": 13912960,
-      "sha256": "a0325550b5e19a7af302629b1a2f8a83a614d0499e336c60fbde7b5cf771d540",
-      "download_url": "",
-      "godot_version": "4.3",
-      "platform": "all"
-    },
-    {
-      "package_id": "characters",
-      "file_name": "characters.pck",
-      "display_name_ar": "الشخصيات والفئات",
-      "display_name_en": "Characters and Classes",
-      "size_bytes": 109473104,
-      "sha256": "5fd5711db2675c774373f03965f8e8d5054479643e4e033cddf74e1452c75b4a",
-      "download_url": "",
-      "godot_version": "4.3",
-      "platform": "all"
-    },
-    {
-      "package_id": "effects",
-      "file_name": "effects.pck",
-      "display_name_ar": "المهارات والمؤثرات",
-      "display_name_en": "Skills and Effects",
-      "size_bytes": 55191472,
-      "sha256": "3e824ad1d3170c72b3a6a62fac2fbb3ad70f5e9d4b1ae40f98e255c0f4768bea",
-      "download_url": "",
-      "godot_version": "4.3",
-      "platform": "all"
-    },
-    {
-      "package_id": "equipment",
-      "file_name": "equipment.pck",
-      "display_name_ar": "الأسلحة والمعدات",
-      "display_name_en": "Weapons and Equipment",
-      "size_bytes": 11603680,
-      "sha256": "1afb697e74fc9058ae35afa6c743adfa4f43b86bc61ee9ba45323abc4c827af4",
-      "download_url": "",
-      "godot_version": "4.3",
-      "platform": "all"
-    },
-    {
-      "package_id": "interface",
-      "file_name": "interface.pck",
-      "display_name_ar": "موارد الواجهة",
-      "display_name_en": "Interface Resources",
-      "size_bytes": 75735712,
-      "sha256": "d0e26bac6cc67870a6f2f3f2a4814585c94240807915b1702f8656f3dd30afc6",
-      "download_url": "",
-      "godot_version": "4.3",
-      "platform": "all"
-    },
-    {
-      "package_id": "maps",
-      "file_name": "maps.pck",
-      "display_name_ar": "الخرائط والمناطق",
-      "display_name_en": "Maps and Regions",
-      "size_bytes": 468531792,
-      "sha256": "422a3256a8bfea766b72817eba58bb0caa04bc2544074641d8be1676ca0f2918",
-      "download_url": "",
-      "godot_version": "4.3",
-      "platform": "all"
-    },
-    {
-      "package_id": "models",
-      "file_name": "models.pck",
-      "display_name_ar": "نماذج C3 الأصلية",
-      "display_name_en": "Original C3 Models",
-      "size_bytes": 366202560,
-      "sha256": "1a1966553e49188c926ecb8fcaf4bc9f7af3f5d9486ad6d29ce8cc56921936ba",
-      "download_url": "",
-      "godot_version": "4.3",
-      "platform": "all"
-    },
-    {
-      "package_id": "monsters",
-      "file_name": "monsters.pck",
-      "display_name_ar": "الوحوش والأعداء",
-      "display_name_en": "Monsters and Enemies",
-      "size_bytes": 66997152,
-      "sha256": "c8ed2ab06cf354673b404d1e6a06fc08f0008d6cee7118e19962595c9064ad2a",
-      "download_url": "",
-      "godot_version": "4.3",
-      "platform": "all"
-    },
-    {
-      "package_id": "mounts",
-      "file_name": "mounts.pck",
-      "display_name_ar": "المطايا والمرافقون",
-      "display_name_en": "Mounts and Companions",
-      "size_bytes": 34605248,
-      "sha256": "47d0d4cd77e64fc4db1764adf6bc777cef5419f44230f8401e1004f87191861a",
-      "download_url": "",
-      "godot_version": "4.3",
-      "platform": "all"
-    },
-    {
-      "package_id": "world",
-      "file_name": "world.pck",
-      "display_name_ar": "العالم والأصول العامة",
-      "display_name_en": "World and Core Data",
-      "size_bytes": 202975200,
-      "sha256": "301a1fb070f4e3d134b9914956a520c7ac487ce5a3695645b0d6172d11d39cde",
-      "download_url": "",
+      "package_id": "owned-core",
+      "file_name": "owned-core.pck",
+      "display_name_ar": "موارد اللعبة الأصلية",
+      "display_name_en": "Project-owned Core Resources",
+      "size_bytes": 869296,
+      "sha256": "7777037eaf130d6a686e1380c2f67b23f139b92a6a55c51789313ffa4868b9cd",
+      "download_url": "https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/owned-resource-packs-v1/owned-core.pck",
       "godot_version": "4.3",
       "platform": "all"
     }
   ],
-  "source_release": "https://github.com/ZzwahwahzZ/Conquer-Mobile-Assets./releases/tag/mobile-extracted-assets",
-  "build_note": "Generated by Godot 4.3 export-pack from deduplicated source archives; hashes and sizes computed from final PCK bytes."
+  "allowlist_file": "distribution/OWNED_ASSETS_ALLOWLIST.json",
+  "build_note": "Only assets explicitly listed in the project-owned allowlist are included."
 }
