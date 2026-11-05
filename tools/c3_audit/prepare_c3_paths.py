@@ -11,7 +11,11 @@ catalog_available = catalog_path.is_file()
 c3_paths = set()
 pvr_paths = set()
 source_by_inner = {}
-resource_stage_rehydrated = Path("resource_stage").is_dir()
+resource_stage_rehydrated = any(
+    Path(row.get("staged_path", "")).is_file()
+    for row in rows
+    if row.get("staged_path", "").startswith("resource_stage/")
+)
 
 def staged_path_available(path):
     return (not resource_stage_rehydrated) or Path(path).is_file()
