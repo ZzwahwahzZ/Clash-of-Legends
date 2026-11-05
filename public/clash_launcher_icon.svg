@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+<defs>
+ <radialGradient id="sky" cx="50%" cy="36%" r="72%"><stop stop-color="#3f6fa7"/><stop offset=".48" stop-color="#101c3e"/><stop offset="1" stop-color="#070b1d"/></radialGradient>
+ <linearGradient id="gold" x2="0" y2="1"><stop stop-color="#fff0a8"/><stop offset=".35" stop-color="#e8a82f"/><stop offset=".7" stop-color="#8c4b12"/><stop offset="1" stop-color="#ffe18a"/></linearGradient>
+ <linearGradient id="blue" x2="1" y2="1"><stop stop-color="#d6f7ff"/><stop offset=".45" stop-color="#3189ff"/><stop offset="1" stop-color="#102c75"/></linearGradient>
+ <linearGradient id="red" x2="1" y2="1"><stop stop-color="#ffb1a4"/><stop offset=".5" stop-color="#d52743"/><stop offset="1" stop-color="#5e0927"/></linearGradient>
+ <filter id="glow"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+ <clipPath id="clip"><circle cx="256" cy="256" r="224"/></clipPath>
+</defs>
+<circle cx="256" cy="256" r="250" fill="#080b1b"/>
+<circle cx="256" cy="256" r="239" fill="url(#gold)"/>
+<circle cx="256" cy="256" r="226" fill="#10162b"/>
+<g clip-path="url(#clip)">
+ <rect width="512" height="512" fill="url(#sky)"/>
+ <circle cx="256" cy="160" r="100" fill="#fff2bc" opacity=".9" filter="url(#glow)"/>
+ <circle cx="256" cy="160" r="83" fill="#ffe8a0"/>
+ <path d="M0 300 Q80 235 145 286 T290 278 T512 260 V512 H0Z" fill="#101b36"/>
+ <path d="M0 350 L70 280 112 332 175 255 225 334 290 255 350 334 415 275 512 350 V512 H0Z" fill="#182c4a"/>
+ <g fill="#0b1630" stroke="url(#gold)" stroke-width="5">
+  <path d="M330 145h90v13h-90z M345 115h60v28h-60z M355 94h40l-20-30z M338 145l-18 18h126l-18-18"/>
+  <path d="M350 90h30v20h-30z"/>
+ </g>
+ <g fill="#121b35" stroke="#e9b84d" stroke-width="4">
+  <path d="M70 248h110v13H70z M88 218h75v30H88z M99 195h53l-27-28z M80 248l-20 18h150l-20-18"/>
+ </g>
+ <path d="M-20 425 Q110 350 220 408 T540 390 V540 H-20Z" fill="#080e22"/>
+ <!-- archer silhouette -->
+ <path d="M152 365 Q122 318 147 270 Q165 235 199 238 Q232 241 239 280 L258 350 220 395 178 395Z" fill="url(#blue)" stroke="#f5d477" stroke-width="6"/>
+ <path d="M174 251 Q194 215 222 237 Q240 253 224 278 L190 289Z" fill="#17152a" stroke="#f7d98a" stroke-width="5"/>
+ <path d="M153 286 Q108 258 100 213 Q98 186 117 166 Q109 213 143 235" fill="none" stroke="#8adfff" stroke-width="9" filter="url(#glow)"/>
+ <path d="M118 166 Q80 264 153 318" fill="none" stroke="#f2d18a" stroke-width="5"/>
+ <path d="M142 280 L89 225" stroke="#9cecff" stroke-width="8" stroke-linecap="round"/>
+ <!-- assassin silhouette -->
+ <path d="M292 367 Q276 321 300 282 Q321 247 356 253 Q390 260 394 300 L412 383 350 405Z" fill="url(#red)" stroke="#f5d477" stroke-width="6"/>
+ <path d="M306 264 Q329 222 363 244 Q382 257 370 284 L331 292Z" fill="#241326" stroke="#f7d98a" stroke-width="5"/>
+ <path d="M382 298 L438 253 M380 307 L450 330" stroke="#fff0b4" stroke-width="7" stroke-linecap="round" filter="url(#glow)"/>
+ <!-- central golden dragon crest -->
+ <path d="M198 394 Q220 350 255 369 Q278 380 295 361 Q313 344 333 363 Q312 371 305 390 Q330 402 350 385 Q342 421 304 418 Q280 414 260 433 Q242 411 215 420 Q197 424 184 412Z" fill="url(#gold)" stroke="#fff0ad" stroke-width="5"/>
+ <path d="M226 389 Q250 377 268 391 Q283 404 302 385 M253 401 Q272 414 290 402" fill="none" stroke="#6e310d" stroke-width="6" stroke-linecap="round"/>
+ <path d="M256 425 L256 470" stroke="url(#gold)" stroke-width="10"/>
+</g>
+<circle cx="256" cy="256" r="226" fill="none" stroke="#fff0a0" stroke-width="5"/>
+<circle cx="256" cy="256" r="238" fill="none" stroke="#713d14" stroke-width="4"/>
+<path d="M256 12 L270 34 256 28 242 34Z M256 500 L270 478 256 484 242 478Z M12 256 L34 242 28 256 34 270Z M500 256 L478 242 484 256 478 270Z" fill="#fff0a0"/>
+</svg>
