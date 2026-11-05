@@ -42,11 +42,16 @@ func _setup_options() -> void:
 	var slots_display = [
 		{"key": "weapon", "label": "السلاح الرئيسي" if is_ar else "Main Weapon"},
 		{"key": "armor", "label": "الدرع الجسدي" if is_ar else "Body Armor"},
-		{"key": "head", "label": "خوذة الرأس" if is_ar else "Helmet"},
+		{"key": "head", "label": "خوذة الرأس" if is_ar else "Headgear"},
 		{"key": "shield", "label": "الترس / السلاح الثانوي" if is_ar else "Shield / Offhand"},
-		{"key": "boots", "label": "الأحذية الحربية" if is_ar else "War Boots"}
+		{"key": "boots", "label": "الأحذية الحربية" if is_ar else "War Boots"},
+		{"key": "necklace", "label": "القلادة" if is_ar else "Necklace"},
+		{"key": "ring", "label": "الخاتم" if is_ar else "Ring"},
+		{"key": "garment", "label": "الزي الخارجي" if is_ar else "Garment"},
+		{"key": "fan", "label": "المروحة" if is_ar else "Fan"},
+		{"key": "tower", "label": "البرج الدفاعي" if is_ar else "Tower"},
+		{"key": "mount", "label": "المطية" if is_ar else "Mount"}
 	]
-	
 	for s in slots_display:
 		slot_option.add_item(s["label"])
 		slot_option.set_item_metadata(slot_option.get_item_count() - 1, s["key"])
