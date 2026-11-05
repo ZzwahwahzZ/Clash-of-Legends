@@ -16,7 +16,8 @@ jobs:
       - name: Install Blender and Python tooling
         run: |
           sudo apt-get update
-          sudo apt-get install -y blender
+          sudo apt-get install -y blender python3-numpy
+          blender --background --factory-startup --python-expr "import numpy; print('BLENDER_NUMPY_OK', numpy.__version__)"
       - name: Download five source mount GLBs and reference images
         run: |
           set -euo pipefail
