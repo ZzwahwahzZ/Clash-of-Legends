@@ -10,6 +10,7 @@ signal boss_defeated(boss_name: String, killer_name: String)
 signal notification_posted(text: String, is_alert: bool)
 
 var current_language: String = "ar"
+var selected_class: String = "Warrior"
 var player_reference: CharacterBody3D = null
 var current_target: Node3D = null
 var nearby_npc: Node3D = null
