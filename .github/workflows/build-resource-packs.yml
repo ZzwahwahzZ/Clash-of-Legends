@@ -3,7 +3,15 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - "tools/resource_packs/**"
+      - "tools/resource_packs/audit_c3_wdb.py"
+      - "tools/resource_packs/build_gameplay_reference_catalog.py"
+      - "tools/resource_packs/decode_mjp_assets.py"
+      - "tools/resource_packs/extract_netdragon.py"
+      - "tools/resource_packs/prepare_assets.py"
+      - "tools/resource_packs/probe_gameplay_data.py"
+      - "tools/resource_packs/validate_pcks.gd"
+      - "tools/resource_packs/validate_owned_distribution.gd"
+      - "tools/c3_audit/**"
       - "tools/quality/audit_resource_pack_contents.gd"
       - ".github/workflows/build-resource-packs.yml"
 permissions:
