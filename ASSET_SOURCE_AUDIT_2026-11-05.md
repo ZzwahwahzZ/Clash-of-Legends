@@ -28,6 +28,19 @@ These results prove conversion/import, not class mapping, live-game attachment, 
 The Godot 4.3 category PCK builder, manifest generation, SHA-256 verification, and in-game resource downloader are implemented in the game repository. The current resource build run is:
 https://github.com/ZzwahwahzZ/Clash-of-Legends/actions/runs/41991454834
 
-At the time of this update, category PCK export was still running; runtime PCK validation and final manifest publication were pending. The explicit redistribution permission gate remains disabled. Do not publish original client assets or derivative copies publicly without separate rights clearance.
+The resource workflow completed successfully: 11 category PCKs were exported and passed PCK runtime/model-catalog validation. Their combined size is 1,414,091,280 bytes (about 1.317 GiB). The generated `RESOURCE_MANIFEST` records exact sizes and SHA-256 hashes for all 11 packages.
+
+The manifest status is `BUILT_NOT_PUBLISHED_REVIEW_REQUIRED`; `distribution_allowed` is false and every `download_url` is empty. The PCK artifact upload and GitHub release publication were intentionally skipped by the explicit redistribution gate. The packages exist only in the completed CI build workspace and are not currently downloadable by the game. Do not publish original client assets or derivative copies publicly without separate rights clearance.
 
 The game must keep resource distribution blocked until rights-cleared assets are identified. Private technical conversion and public redistribution are separate decisions.
+
+## Full source processing results (2026-11-05)
+
+- 13,494 unique supported files staged (1,250,494,111 bytes) across 11 categories.
+- TPI/TPD extraction: 7,461 unique files; 0 failed entries; 9 multi-block entries reconstructed; 1 empty source placeholder.
+- MJP: 3,355 of 3,358 decoded to PNG; 3 rejected because the header did not match the current decoder.
+- PVR: 1,373 of 1,376 decoded to PNG; 3 failures.
+- DMap: 209 of 209 parsed; 0 failed; 37,924,892 terrain cells; 411 game-map catalog records.
+- C3: 707 GLB models converted; 69 parser failures (all in effect paths); 638 skipped due missing matching decoded texture or renderable geometry.
+
+The package build and structural validation are complete, but the above unresolved source records and the unverified visual/model mappings remain open.
