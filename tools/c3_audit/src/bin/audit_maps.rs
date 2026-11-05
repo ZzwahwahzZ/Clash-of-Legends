@@ -29,13 +29,24 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     dmaps.sort();
 
     let mut catalog: Option<GameMapCatalog> = None;
+    let mut catalog_source: Option<String> = None;
+    let mut catalog_error: Option<String> = None;
     let mut dat_files = Vec::new();
     collect_files(&root, "dat", &mut dat_files)?;
-    for path in dat_files {
-        if path.file_name().and_then(|x| x.to_str()).is_some_and(|x| x.eq_ignore_ascii_case("gamemap.dat")) {
-            if let Ok(parsed) = GameMapCatalog::parse(&fs::read(&path)?) {
-                catalog = Some(parsed);
-                break;
+    let mut catalog_candidates: Vec<String> = Vec::new();
+    for path in &dat_files {
+        let file_name = path.file_name().and_then(|x| x.to_str()).unwrap_or("").to_ascii_lowercase();
+        if file_name.contains("gamemap") || file_name.contains("mapid") {
+            catalog_candidates.push(path.strip_prefix(&root).unwrap_or(path).to_string_lossy().replace('\\', "/"));
+        }
+        if file_name == "gamemap.dat" {
+            match GameMapCatalog::parse(&fs::read(path)?) {
+                Ok(parsed) => {
+                    catalog_source = Some(path.strip_prefix(&root).unwrap_or(path).to_string_lossy().replace('\\', "/"));
+                    catalog = Some(parsed);
+                    break;
+                }
+                Err(error) => catalog_error = Some(error.to_string()),
             }
         }
     }
@@ -93,6 +104,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "parsed_maps":records.len(),
         "failed_maps":failed.len(),
         "game_map_catalog_records":catalog.as_ref().map_or(0, |c| c.len()),
+        "game_map_catalog_source":catalog_source,
+        "game_map_catalog_error":catalog_error,
+        "game_map_catalog_candidates":catalog_candidates,
         "total_cells":total_cells,
         "surface_totals":surface_totals,
         "maps":records,
@@ -114,6 +128,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         dmaps.len(), report["parsed_maps"].as_u64().unwrap_or(0),
         report["failed_maps"].as_u64().unwrap_or(0), total_cells,
         report["game_map_catalog_records"].as_u64().unwrap_or(0));
+    println!("GameMap catalog source={:?} parse_error={:?} candidates={:?}", catalog_source, catalog_error, catalog_candidates);
     if records.is_empty() { return Err("no DMap files parsed successfully".into()); }
     Ok(())
 }
