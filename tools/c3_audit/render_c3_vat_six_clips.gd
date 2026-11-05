@@ -159,15 +159,23 @@ func _run() -> void:
 			all_passed = false
 		var bytes_a := image_a.get_data()
 		var bytes_b := image_b.get_data()
-		var changed_bytes := 0
+		var changed_sampled_pixels := 0
 		if bytes_a.size() == bytes_b.size():
-			for index in range(bytes_a.size()):
-				if bytes_a[index] != bytes_b[index]:
-					changed_bytes += 1
-		if changed_bytes < 100:
+			# One RGBA pixel every four pixels is enough to confirm visible motion.
+			for pixel_offset in range(0, bytes_a.size(), 16):
+				var pixel_changed := false
+				for channel in range(4):
+					if bytes_a[pixel_offset + channel] != bytes_b[pixel_offset + channel]:
+						pixel_changed = true
+						break
+				if pixel_changed:
+					changed_sampled_pixels += 1
+					if changed_sampled_pixels >= 100:
+						break
+		if changed_sampled_pixels < 100:
 			push_error("C3 six-clip visual proof: no meaningful rendered change for " + clip_id)
 			all_passed = false
-		print("C3 SIX-CLIP VISUAL: ", clip["look"], " ", clip["action"], " | full_meshes=", mesh_nodes.size(), " | VAT_moving_meshes=", vat_mesh_count, " | changed_pixel_bytes=", changed_bytes)
+		print("C3 SIX-CLIP VISUAL: ", clip["look"], " ", clip["action"], " | full_meshes=", mesh_nodes.size(), " | VAT_moving_meshes=", vat_mesh_count, " | changed_sampled_pixels=", changed_sampled_pixels)
 		for vat_entry in vat_players:
 			vat_entry["player"].queue_free()
 		character.queue_free()
