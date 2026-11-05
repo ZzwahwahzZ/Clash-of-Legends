@@ -35,7 +35,7 @@ func configure(mesh_instance: MeshInstance3D, metadata_path: String, binary_path
 		push_error("C3 VAT: binary size does not match metadata dimensions.")
 		return false
 	for surface in range(mesh_instance.mesh.get_surface_count()):
-		var imported_count := mesh_instance.mesh.surface_get_array_len(surface)
+		var imported_count: int = mesh_instance.mesh.surface_get_array_len(surface)
 		if imported_count != width:
 			push_error("C3 VAT: imported surface vertex count %d does not match VAT width %d." % [imported_count, width])
 			return false
