@@ -422,7 +422,7 @@ mod tests {
 
 /// Exact C3 Vertex Animation Texture payload. RGBA32F rows preserve full affine
 /// transforms (including shear) without forcing matrices through glTF TRS.
-pub fn export_vat(mesh: &C3Mesh, motion: &C3Motion, output_prefix: &Path) -> Result<(u64, usize, usize), Box<dyn std::error::Error>> {
+pub fn export_vat(mesh: &C3Mesh, motion: &C3Motion, output_prefix: &Path, clip_id: &str, mesh_index: usize) -> Result<(u64, usize, usize), Box<dyn std::error::Error>> {
     if mesh.vertices.is_empty() || motion.bone_count == 0 || motion.frame_count == 0 {
         return Err("VAT requires vertices and a non-empty C3 motion".into());
     }
@@ -462,7 +462,7 @@ pub fn export_vat(mesh: &C3Mesh, motion: &C3Motion, output_prefix: &Path) -> Res
     if let Some(parent) = binary_path.parent() { fs::create_dir_all(parent)?; }
     fs::write(&binary_path, &bytes)?;
     let metadata = json!({
-        "format":"C3_VAT_RGBA32F","version":1,"width":vertex_count,"height":frame_count,
+        "format":"C3_VAT_RGBA32F","version":1,"clip_id":clip_id,"mesh_index":mesh_index,"mesh_name":mesh.name,"width":vertex_count,"height":frame_count,
         "vertex_count":vertex_count,"frame_count":frame_count,"fps":30,
         "bytes_per_texel":16,"binary_bytes":bytes.len(),
         "sampling":"one texel per source vertex per frame; RGBA=(x,y,z,1)",
