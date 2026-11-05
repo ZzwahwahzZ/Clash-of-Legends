@@ -99,26 +99,26 @@ jobs:
       - name: Validate automatic loot category filters
         run: |
           set -o pipefail
-          godot --headless --path . --script tools/resource_packs/validate_loot_filters.gd 2>&1 | tee ci-logs/loot-filters.log
+          ALSOFT_DRIVERS=null xvfb-run -a godot --path . --rendering-method gl_compatibility --script tools/resource_packs/validate_loot_filters.gd 2>&1 | tee ci-logs/loot-filters.log
           grep -q "LOOT FILTER AUDIT PASSED" ci-logs/loot-filters.log
           if grep -Eq "SCRIPT ERROR:|Parse Error:|Compile Error:|LOOT FILTER AUDIT FAILED" ci-logs/loot-filters.log; then echo "Loot filter audit failed"; exit 1; fi
 
       - name: Validate gameplay collision shapes
         run: |
           set -o pipefail
-          godot --headless --path . --script tools/resource_packs/validate_physics_shapes.gd 2>&1 | tee ci-logs/physics-audit.log
+          ALSOFT_DRIVERS=null xvfb-run -a godot --path . --rendering-method gl_compatibility --script tools/resource_packs/validate_physics_shapes.gd 2>&1 | tee ci-logs/physics-audit.log
           if grep -Eq "SCRIPT ERROR:|Parse Error:|Compile Error:|PHYSICS SHAPE AUDIT FAILED" ci-logs/physics-audit.log; then echo "Physics acceptance audit failed"; exit 1; fi
 
       - name: Test real Player versus WildWolf collision
         run: |
           set -o pipefail
-          godot --headless --path . --script tools/resource_packs/validate_runtime_collisions.gd 2>&1 | tee ci-logs/runtime-collision.log
+          ALSOFT_DRIVERS=null xvfb-run -a godot --path . --rendering-method gl_compatibility --script tools/resource_packs/validate_runtime_collisions.gd 2>&1 | tee ci-logs/runtime-collision.log
           if grep -Eq "SCRIPT ERROR:|Parse Error:|Compile Error:|RUNTIME COLLISION AUDIT FAILED" ci-logs/runtime-collision.log; then echo "Runtime collision test failed"; exit 1; fi
 
       - name: Test manual and quest instant travel
         run: |
           set -o pipefail
-          godot --headless --path . --script tools/resource_packs/validate_world_travel.gd 2>&1 | tee ci-logs/world-travel.log
+          ALSOFT_DRIVERS=null xvfb-run -a godot --path . --rendering-method gl_compatibility --script tools/resource_packs/validate_world_travel.gd 2>&1 | tee ci-logs/world-travel.log
           if grep -Eq "SCRIPT ERROR:|Parse Error:|Compile Error:|WORLD TRAVEL AUDIT FAILED" ci-logs/world-travel.log; then echo "World travel test failed"; exit 1; fi
 
       - name: Enforce production visual assets (no primitive blockouts)
