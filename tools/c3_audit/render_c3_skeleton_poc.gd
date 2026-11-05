@@ -58,8 +58,11 @@ func _render() -> void:
 		quit(1)
 		return
 
-	var center := bounds.get_center()
-	var extent := maxf(bounds.size.x, maxf(bounds.size.y, bounds.size.z))
+	var raw_center := bounds.get_center()
+	# C3 vertices are centimetres in Z-up coordinates; the skin matrices convert
+	# them to metres and Godot's Y-up convention.
+	var center := Vector3(raw_center.x * 0.01, -raw_center.z * 0.01, raw_center.y * 0.01)
+	var extent := maxf(bounds.size.x, maxf(bounds.size.y, bounds.size.z)) * 0.01
 	var camera := Camera3D.new()
 	camera.name = "Proof_Camera"
 	camera.fov = 38.0
