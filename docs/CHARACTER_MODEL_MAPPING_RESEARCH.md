@@ -150,3 +150,25 @@ An audit-only proof-of-concept exporter generates StandBy/Walk/Run candidate cli
 The community desktop reference's `C3Role.CalculateMotionKey` combines the values as `look × 10,000,000 + weapon_token × 10,000 + action_token`. The mobile path `c3/0007/500/100.c3` decomposes to the same tuple `(look=7, weapon=500, action=100)`. This is a strong cross-check of the path parser, but the Android WDB `weaponmotion` records are still the source of truth for the mobile build.
 
 The desktop reference labels common action tokens as 100 StandBy, 101 Rest, 110/111 Walk, 120/121 Run, 130 Jump and 190 Wave. The numeric tokens are observed in the mobile C3 paths; the semantic labels remain reference candidates pending the WDB cross-check.
+
+## 9. Complete itemtype13 candidate inventory — 2026-11-05
+
+The dedicated nested-APK audit now parses all 3,638 records in the exact-version `itemtype13.ini` file. Every record has 69 `@@`-delimited fields. The audit preserves record ID, visible record name, source line, field count, and zero-based column 59 as an **unlabelled candidate**. It does not assign undocumented meaning to that column.
+
+Observed column-59 candidate distribution:
+
+| Candidate value | Record count |
+|---:|---:|
+| 0 | 1,430 |
+| 3000 | 456 |
+| 3040 | 255 |
+| 3010 | 249 |
+| 3060 | 248 |
+| 3050 | 248 |
+| 3020 | 248 |
+| 3030 | 248 |
+| 3080 | 228 |
+| 14040 | 14 |
+| 3070 | 14 |
+
+The candidate values overlap the previously documented starter-body Look candidates (3000–3060), but this overlap alone does not prove the field's meaning or a complete item-to-model mapping. Keep it labelled `column_59_candidate` until the exact mobile model resolver and item rendering path confirm the semantics. Full record-level data is retained in the private [Gameplay-Source-Table-Audit artifact](https://github.com/ZzwahwahzZ/Clash-of-Legends/actions/runs/42076016258/artifacts/13438116697), not copied into the public repository.
