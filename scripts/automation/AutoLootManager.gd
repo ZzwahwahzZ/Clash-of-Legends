@@ -37,10 +37,26 @@ func _process(delta: float) -> void:
 	var drops = tree.get_nodes_in_group("loot_drops")
 	for drop in drops:
 		if is_instance_valid(drop) and not drop.is_queued_for_deletion():
+			if not _category_enabled_for(drop):
+				continue
 			var dist = player.global_position.distance_to(drop.global_position)
 			if dist <= loot_radius:
 				_collect_drop(drop, player)
 
+func _category_enabled_for(drop: Node) -> bool:
+	if drop == null or not is_instance_valid(drop):
+		return false
+	if not drop.has_method("get_loot_category"):
+		return loot_materials
+	var category := str(drop.get_loot_category())
+	match category:
+		"gold": return loot_gold
+		"equipment": return loot_equipment
+		"material", "gem", "quest": return loot_materials
+		_: return loot_materials
+
 func _collect_drop(drop: Area3D, player: CharacterBody3D) -> void:
+	if not _category_enabled_for(drop):
+		return
 	if drop.has_method("collect_by_player"):
 		drop.collect_by_player(player)
