@@ -94,11 +94,11 @@ jobs:
                           text, encoding = decode_text(data)
                           lines = text.splitlines()
                           refs = sorted(set(re.findall(
-                              r"[A-Za-z0-9_./\\-]+\\.(?:c3|pvr|mjp|ani|tme|glb|gltf)",
+                              r"[A-Za-z0-9_./\-]+\.(?:c3|pvr|mjp|ani|tme|glb|gltf)",
                               text, flags=re.IGNORECASE
                           )))
-                          keys = sorted(set(re.findall(r"^\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*=", text, flags=re.MULTILINE)))
-                          sections = re.findall(r"^\\s*\\[([^]]+)\\]", text, flags=re.MULTILINE)
+                          keys = sorted(set(re.findall(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=", text, flags=re.MULTILINE)))
+                          sections = re.findall(r"^\s*\[([^]]+)\]", text, flags=re.MULTILINE)
                           candidates = []
                           if target.lower().endswith(".dat"):
                               for seed in (9527, 1234):
@@ -109,9 +109,9 @@ jobs:
                                   candidates.append({
                                       "seed": seed,
                                       "printable_ratio": round(printable,4),
-                                      "lua_table_marker": bool(re.search(rb"local\\s+[A-Za-z_][A-Za-z0-9_]*\\s*=", decoded[:4096])),
+                                      "lua_table_marker": bool(re.search(rb"local\s+[A-Za-z_][A-Za-z0-9_]*\s*=", decoded[:4096])),
                                       "ini_section_count": len(re.findall(r"^\\s*\\[[^]]+\\]", decoded_text, flags=re.MULTILINE)),
-                                      "model_reference_count": len(set(re.findall(r"[A-Za-z0-9_./\\-]+\\.c3", decoded_text, flags=re.IGNORECASE))),
+                                      "model_reference_count": len(set(re.findall(r"[A-Za-z0-9_./\-]+\.c3", decoded_text, flags=re.IGNORECASE))),
                                       "accepted_as_mobile_format": False
                                   })
                           records.append({
@@ -124,7 +124,7 @@ jobs:
                               "key_names": keys[:300],
                               "asset_reference_count": len(refs),
                               "asset_references": refs[:500],
-                              "numeric_id_count": len(set(re.findall(r"(?<![A-Za-z0-9_])\\d{4,10}(?![A-Za-z0-9_])", text))),
+                              "numeric_id_count": len(set(re.findall(r"(?<![A-Za-z0-9_])\d{4,10}(?![A-Za-z0-9_])", text))),
                               "tq_cipher_diagnostics": candidates
                           })
           report = {
@@ -139,7 +139,7 @@ jobs:
               "records": records,
               "policy": "This report contains hashes and structural metadata only. Candidate TQ decryptions are diagnostics, not accepted mobile data."
           }
-          output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+          output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
           print(json.dumps({
               "records_found": len(records),
               "missing_paths": missing,
