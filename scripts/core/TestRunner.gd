@@ -10,11 +10,9 @@ var failed_tests: int = 0
 var test_log: Array[String] = []
 
 func _ready() -> void:
-	print("
-=======================================================")
+	print("\n=======================================================")
 	print("   CLASH OF LEGENDS — AUTOMATED SUITE AUDIT & TEST RUNNER   ")
-	print("=======================================================
-")
+	print("=======================================================\n")
 	run_all_tests()
 
 func run_all_tests() -> Dictionary:
