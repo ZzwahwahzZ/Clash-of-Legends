@@ -266,6 +266,21 @@ for section, props in default_res.items():
         "matches": matches, "motion_matches": find_motion(motion_id),
     })
 
+default_mount = next((row for row in default_resources if row.get("section", "").lower() == "mount"), None)
+default_mount_model_id = str(default_mount.get("model_id", "")) if default_mount else ""
+default_mount_motion_id = str(default_mount.get("properties", {}).get("motionid", "")) if default_mount else ""
+default_mount_mesh_record, default_mount_mesh_join_kind = lookup_record("ini/mount.dbc", (default_mount_model_id,))
+default_mount_motion_matches = find_motion(default_mount_motion_id)
+default_mountmotion_paths = [
+    str(row.get("motion_path", ""))
+    for row in (default_mount_mesh_record or {}).get("motion_records", [])
+    if row.get("motion_path")
+]
+default_3dmotion_paths = [row["motion_path"] for row in default_mount_motion_matches if row.get("motion_path")]
+default_mount_cross_table_match = bool(set(default_mountmotion_paths) & set(default_3dmotion_paths))
+mount_items_with_motion = sum(1 for row in mount_items if row.get("motion_records"))
+mount_motion_paths = sorted({str(m.get("motion_path")) for row in mount_items for m in row.get("motion_records", []) if m.get("motion_path")})
+
 # Keep only source itemtype records referenced by translation maps, MESH IDs/part IDs, or mount IDs.
 candidate_ids = set()
 for mapping in (weapon_map, armet_map, armor_map):
@@ -309,8 +324,20 @@ catalog = {
         "armor_mesh_reference_count": mount_armor_ref_count,
         "armor_mesh_record_match_count": mount_armor_match_count,
         "armor_mesh_join_ratio": round(mount_join_ratio, 6),
+        "mount_items_with_motion_records": mount_items_with_motion,
+        "unique_mount_motion_path_count": len(mount_motion_paths),
         "cipher_printable_ratio": round(printable_ratio, 6),
         "cipher_validation": mount_cipher_status,
+        "default_mount_cross_table_check": {
+            "defaultres_mount_model_id": default_mount_model_id,
+            "defaultres_motion_id": default_mount_motion_id,
+            "mount_mesh_record_id": default_mount_mesh_record.get("unique_id") if default_mount_mesh_record else None,
+            "mount_mesh_join_kind": default_mount_mesh_join_kind,
+            "mountmotion_paths": default_mountmotion_paths,
+            "defaultres_3dmotion_paths": default_3dmotion_paths,
+            "same_motion_path_across_tables": default_mount_cross_table_match,
+            "status": "DEFAULTRES_MESH_MOUNTMOTION_AND_3DMOTION_AGREE" if default_mount_cross_table_match else "CROSS_TABLE_MOTION_CHECK_INCOMPLETE",
+        },
         "records": mount_items,
     },
     "default_resources": default_resources,
@@ -336,6 +363,16 @@ summary = {
         "armor_mesh_reference_count": mount_armor_ref_count, "armor_mesh_record_match_count": mount_armor_match_count,
         "armor_mesh_join_ratio": round(mount_join_ratio, 6), "cipher_printable_ratio": round(printable_ratio, 6),
         "cipher_validation": mount_cipher_status,
+        "mount_items_with_motion_records": mount_items_with_motion,
+        "unique_mount_motion_path_count": len(mount_motion_paths),
+        "default_mount_cross_table_check": {
+            "defaultres_mount_model_id": default_mount_model_id,
+            "defaultres_motion_id": default_mount_motion_id,
+            "mount_mesh_record_id": default_mount_mesh_record.get("unique_id") if default_mount_mesh_record else None,
+            "same_motion_path_across_tables": default_mount_cross_table_match,
+            "mountmotion_paths": default_mountmotion_paths,
+            "defaultres_3dmotion_paths": default_3dmotion_paths,
+        },
         "unmatched_mount_samples": [r for r in mount_items if r["status"] == "MOUNT_MESH_ID_NOT_FOUND"][:50],
     },
     "default_resource_section_count": len(default_resources),
