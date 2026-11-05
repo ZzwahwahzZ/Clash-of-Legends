@@ -46,6 +46,7 @@ func _validate_packages() -> void:
 	# Inspect every supported model scene, not just the first entry in each category.
 	var total_models := 0
 	var valid_models := 0
+	var animated_models := 0
 	var invalid_models: Array[String] = []
 	for model_category in MODEL_CATEGORIES:
 		var category_entries: Array = []
@@ -85,10 +86,16 @@ func _validate_packages() -> void:
 					model_ok = false
 				if bounds.size.x <= 0.0001 or bounds.size.y <= 0.0001 or bounds.size.z <= 0.0001:
 					model_ok = false
+			var animation_player := instance.find_child("*", "AnimationPlayer", true, false)
+			var animation_count := 0
+			if animation_player is AnimationPlayer:
+				animation_count = animation_player.get_animation_list().size()
+				if animation_count > 0:
+					animated_models += 1
 			if model_ok:
 				category_valid += 1
 				valid_models += 1
-				print("MODEL VISUAL OK: ", model_category, " | ", relative_path, " | mesh_nodes=", mesh_nodes.size(), " | surfaces=", surface_total)
+				print("MODEL VISUAL OK: ", model_category, " | ", relative_path, " | mesh_nodes=", mesh_nodes.size(), " | surfaces=", surface_total, " | animations=", animation_count)
 			else:
 				invalid_models.append(model_category + ":" + relative_path + " (empty mesh, surface, or invalid bounds)")
 			instance.free()
@@ -126,6 +133,10 @@ func _validate_packages() -> void:
 		_fail("Playable OGG audio source file is missing.")
 		return
 	print("PCK audio source OK: ", audio_path)
+	if animated_models == 0:
+		_fail("No supported GLB/glTF model exposes an imported animation track.")
+		return
+	print("PCK ANIMATION SUMMARY: ", animated_models, "/", total_models, " model scenes expose imported animation tracks.")
 	print("PCK VALIDATION PASSED: ", loaded_count, " packages; ", valid_models, "/", total_models, " supported model scenes have renderable geometry.")
 	quit(0)
 
