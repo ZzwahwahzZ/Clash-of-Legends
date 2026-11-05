@@ -24,7 +24,7 @@ for source in sorted(source_root.rglob("*.glb")):
     if len(relative.parts) < 2:
         continue
     category = relative.parts[0]
-    if category not in {"characters", "monsters", "equipment", "world"}:
+    if category not in {"characters", "monsters", "equipment", "mounts", "effects", "world"}:
         continue
     digest = hashlib.sha256(source.read_bytes()).hexdigest()
     if digest in existing_hashes:
