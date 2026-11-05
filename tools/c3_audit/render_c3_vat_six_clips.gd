@@ -168,8 +168,8 @@ func _run() -> void:
 			push_error("C3 six-clip visual proof: no meaningful rendered change for " + clip_id)
 			all_passed = false
 		print("C3 SIX-CLIP VISUAL: ", clip["look"], " ", clip["action"], " | full_meshes=", mesh_nodes.size(), " | VAT_moving_meshes=", vat_mesh_count, " | changed_pixel_bytes=", changed_bytes)
-		for vat_player in vat_players:
-			vat_player.queue_free()
+		for vat_entry in vat_players:
+			vat_entry["player"].queue_free()
 		character.queue_free()
 		await process_frame
 
