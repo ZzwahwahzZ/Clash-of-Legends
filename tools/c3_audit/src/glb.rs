@@ -238,7 +238,7 @@ pub fn export_document(document: &C3Document, texture_png: &[u8], source: &str, 
         if !mesh.alpha_indices.is_empty() {
             let view = builder.add_view(&u16_bytes(&mesh.alpha_indices), Some(34963));
             let accessor = builder.add_accessor(view, 5123, mesh.alpha_indices.len(), "SCALAR", None, None);
-            let mut primitive = json!({"attributes":{"POSITION":pos_accessor,"NORMAL":normal_accessor,"TEXCOORD_0":uv_accessor},"indices":accessor,"material":1,"mode":4});
+            let mut primitive = json!({"attributes":{"POSITION":pos_accessor,"NORMAL":normal_accessor,"TEXCOORD_0":uv_accessor,"TEXCOORD_1":source_index_accessor},"indices":accessor,"material":1,"mode":4});
             if animated { primitive["targets"] = json!(targets); }
             primitives.push(primitive);
         }
