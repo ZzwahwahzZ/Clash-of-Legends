@@ -99,7 +99,7 @@ jobs:
       - name: Validate automatic loot category filters
         run: |
           set -o pipefail
-          ALSOFT_DRIVERS=null xvfb-run -a godot --path . --rendering-method gl_compatibility --script tools/resource_packs/validate_loot_filters.gd 2>&1 | tee ci-logs/loot-filters.log
+          ALSOFT_DRIVERS=null xvfb-run -a godot --path . --rendering-method gl_compatibility --scene res://tools/resource_packs/validate_loot_filters.tscn 2>&1 | tee ci-logs/loot-filters.log
           grep -q "LOOT FILTER AUDIT PASSED" ci-logs/loot-filters.log
           if grep -Eq "SCRIPT ERROR:|Parse Error:|Compile Error:|LOOT FILTER AUDIT FAILED" ci-logs/loot-filters.log; then echo "Loot filter audit failed"; exit 1; fi
 
