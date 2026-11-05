@@ -84,7 +84,9 @@ KEY_TABLE = (
 
 BIG_TABLES = {"3dmotion", "armetmotion", "armormotion", "capemotion", "headmotion",
               "miscmotion", "mountmotion", "weaponmotion", "pelvismotion", "spiritmotion"}
-SMALL_TABLES = {"3dobj", "3deffectobj"}
+# 3DTexture is tested as the same 32-bit ID + string-offset RSDB layout
+# used by 3DObj/3DEffectObj; CI bounds-checks every record before accepting it.
+SMALL_TABLES = {"3dobj", "3deffectobj", "3dtexture"}
 
 
 def decrypt_entry_block(ciphertext: bytes) -> bytes:
