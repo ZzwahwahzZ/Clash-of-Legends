@@ -7,6 +7,8 @@ on:
       - "scripts/animation/C3VatPlayer.gd"
       - "shaders/C3Vat.gdshader"
       - "shaders/C3VatAlpha.gdshader"
+      - "shaders/C3VatUnlit.gdshader"
+      - "shaders/C3VatAlphaUnlit.gdshader"
   workflow_dispatch:
 permissions:
   contents: read
