@@ -9,3 +9,8 @@ coverage/
 .godot/
 bin/
 
+# Do not re-add extracted third-party source-game audio to public project commits.
+assets/audio/extracted/
+resource_stage/
+build/source_archives/
+build/pcks/
