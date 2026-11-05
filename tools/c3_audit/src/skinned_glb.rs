@@ -131,7 +131,11 @@ pub fn export_document(
         }
 
         let all_indices: Vec<u16> = mesh.opaque_indices.iter().chain(mesh.alpha_indices.iter()).copied().collect();
-        let (positions, normal_values, joints_accessor, weights_accessor, skin_index, skeleton_root, mesh_animated) =
+        let flat_uvs: Vec<f32> = mesh.vertices.iter().flat_map(|v| [v.texture_coordinate.x, v.texture_coordinate.y]).collect();
+        let uv_view = builder.view(&bytes_f32(&flat_uvs), Some(34962));
+        let uv_accessor = builder.accessor(uv_view, 5126, mesh.vertices.len(), "VEC2", None, None);
+        let channel_start = channels.len();
+        let (positions, normal_values, joints_accessor, weights_accessor, skin_index, skeleton_root) =
             if skinned {
                 let motion = motion.expect("skinned mesh has motion");
                 let raw_positions: Vec<[f32; 3]> = mesh.vertices.iter().map(|v| [v.position.x, v.position.y, v.position.z]).collect();
@@ -142,10 +146,6 @@ pub fn export_document(
                 let pos_accessor = builder.accessor(pos_view, 5126, raw_positions.len(), "VEC3", Some(min), Some(max));
                 let normal_view = builder.view(&bytes_f32(&flat3(&normal_values)), Some(34962));
                 let normal_accessor = builder.accessor(normal_view, 5126, normal_values.len(), "VEC3", None, None);
-                let flat_uvs: Vec<f32> = mesh.vertices.iter().flat_map(|v| [v.texture_coordinate.x, v.texture_coordinate.y]).collect();
-                let uv_view = builder.view(&bytes_f32(&flat_uvs), Some(34962));
-                let uv_accessor = builder.accessor(uv_view, 5126, mesh.vertices.len(), "VEC2", None, None);
-
                 let frame_count = motion.frame_count.max(1).min(10000) as usize;
                 let bone_count = motion.bone_count as usize;
                 let mut root_joint_nodes = Vec::<usize>::new();
@@ -204,7 +204,6 @@ pub fn export_document(
                                 samplers.push(json!({"input":time_accessor,"output":accessor,"interpolation":"LINEAR"}));
                                 channels.push(json!({"sampler":sampler,"target":{"node":joint_node,"path":path}}));
                             }
-                            animated_mesh_count += 1;
                         }
                     }
                 }
@@ -252,7 +251,7 @@ pub fn export_document(
                     "inverseBindMatrices":ibm_accessor
                 }));
                 skin_count += 1;
-                (pos_accessor, normal_accessor, Some(joints_accessor), Some(weights_accessor), Some(skin_index), Some(skeleton_root), frame_count > 1)
+                (pos_accessor, normal_accessor, Some(joints_accessor), Some(weights_accessor), Some(skin_index), Some(skeleton_root))
             } else {
                 let transformed: Vec<[f32; 3]> = mesh.vertices.iter().map(|v| {
                     let p = mesh.initial_matrix.transform_point(v.position);
@@ -264,20 +263,9 @@ pub fn export_document(
                 let pos_accessor = builder.accessor(pos_view, 5126, transformed.len(), "VEC3", Some(min), Some(max));
                 let normal_view = builder.view(&bytes_f32(&flat3(&normal_values)), Some(34962));
                 let normal_accessor = builder.accessor(normal_view, 5126, normal_values.len(), "VEC3", None, None);
-                let flat_uvs: Vec<f32> = mesh.vertices.iter().flat_map(|v| [v.texture_coordinate.x, v.texture_coordinate.y]).collect();
-                let uv_view = builder.view(&bytes_f32(&flat_uvs), Some(34962));
-                let uv_accessor = builder.accessor(uv_view, 5126, mesh.vertices.len(), "VEC2", None, None);
-                (pos_accessor, normal_accessor, None, None, None, None, false)
+                (pos_accessor, normal_accessor, None, None, None, None)
             };
 
-        let flat_uvs: Vec<f32> = mesh.vertices.iter().flat_map(|v| [v.texture_coordinate.x, v.texture_coordinate.y]).collect();
-        let uv_accessor = if skinned {
-            // The skinned branch already created this accessor. Reuse it by locating the last VEC2 accessor.
-            builder.accessors.len() - 1
-        } else {
-            // The static branch also created it immediately after position and normal.
-            builder.accessors.len() - 1
-        };
         let mut primitives = Vec::<Value>::new();
         for (indices, material) in [(&mesh.opaque_indices, 0_u32), (&mesh.alpha_indices, 1_u32)] {
             if indices.is_empty() { continue; }
@@ -298,7 +286,7 @@ pub fn export_document(
         root_children.push(node_index);
         if let Some(skeleton_root) = skeleton_root { root_children.push(skeleton_root); }
         mesh_count += 1;
-        let _ = (skin_count, mesh_animated);
+        if channels.len() > channel_start { animated_mesh_count += 1; }
     }
 
     if mesh_count == 0 { return Err("C3 document contains no renderable triangle meshes".into()); }
