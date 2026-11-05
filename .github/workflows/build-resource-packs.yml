@@ -60,6 +60,8 @@ jobs:
               echo "Missing or empty PCK for $category"; exit 1
             fi
           done
+      - name: Validate PCK runtime loading and model catalog
+        run: godot --headless --path . --script tools/resource_packs/validate_pcks.gd
       - name: Generate manifest with actual sizes and SHA-256
         run: |
           python3 - <<'PY'
