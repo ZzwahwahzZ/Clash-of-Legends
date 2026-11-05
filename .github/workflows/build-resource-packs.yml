@@ -31,6 +31,8 @@ jobs:
         run: python3 -m pip install --break-system-packages py7zr
       - name: Prepare deduplicated category staging tree
         run: python3 tools/resource_packs/prepare_assets.py
+      - name: Audit C3 WDB motion, object and texture tables
+        run: python3 tools/resource_packs/audit_c3_wdb.py
       - name: Extract NetDragon TPI/TPD resources
         run: python3 tools/resource_packs/extract_netdragon.py
       - name: Probe original item, drop, quest and refinement data formats
@@ -199,6 +201,7 @@ jobs:
             reports/source-archive-extension-audit.json
             reports/source-format-samples.txt
             reports/c3-model-audit.json
+            reports/c3-wdb-audit.json
             reports/c3-conversion-report.json
             reports/c3-runtime-integration.json
             reports/pvr-texture-audit.json
