@@ -34,6 +34,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p build/pcks
+          godot --headless --editor --path . --quit
           for category in world maps characters monsters equipment mounts effects audio; do
             if [ ! -d "resource_stage/$category" ]; then echo "No files for $category; it will be omitted rather than publishing an empty PCK."; continue; fi
             cat > "export_presets.cfg" <<EOF
@@ -52,7 +53,6 @@ jobs:
           encrypt_pck=false
           encrypt_directory=false
           EOF
-            godot --headless --editor --path . --quit
             godot --headless --path . --export-pack "Linux" "build/pcks/$category.pck"
             if [ ! -s "build/pcks/$category.pck" ]; then
               echo "Missing or empty PCK for $category"; exit 1
