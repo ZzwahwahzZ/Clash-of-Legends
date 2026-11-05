@@ -158,51 +158,63 @@ def parse_rsdb(data: bytes, stem: str) -> dict:
 
 
 def parse_mesh(data: bytes) -> dict:
-    """Parse TQ MESH/MESZ records: unique model ID + linked mesh/texture parts."""
+    """Parse legacy MESH and probe the Mobile MESZ variant without unsafe assumptions."""
     if len(data) < 8:
         raise ValueError("MESH table is shorter than its header")
     magic = data[:4]
-    if magic == b"MESZ":
-        words = [struct.unpack_from("<I", data, off)[0] for off in range(4, min(len(data) - 3, 68), 4)]
-        floats = [struct.unpack_from("<f", data, off)[0] for off in range(4, min(len(data) - 3, 68), 4)]
-        return {
-            "format": "MESZ", "record_count": None,
-            "parse_status": "MESZ_LAYOUT_UNRESOLVED",
-            "header_hex": data[:128].hex(" "),
-            "u32_probe": words, "f32_probe": floats,
-            "_records": [],
-        }
-    if magic != b"MESH":
+    if magic not in (b"MESH", b"MESZ"):
         raise ValueError(f"Unsupported MESH identifier: {magic!r}")
     count = struct.unpack_from("<I", data, 4)[0]
-    offset = 8
-    records = []
-    for index in range(count):
-        if offset + 8 > len(data):
-            raise ValueError(f"MESH record {index} header exceeds table size")
-        unique_id, part_count = struct.unpack_from("<II", data, offset)
-        offset += 8
-        if part_count > 64 or offset + part_count * 16 > len(data):
-            raise ValueError(f"MESH record {unique_id} has invalid part count {part_count}")
-        parts = []
-        for part_index in range(part_count):
-            mesh_id, texture_id, mix_texture_id = struct.unpack_from("<III", data, offset)
-            mix_opt, asb, adb, material = struct.unpack_from("<BBBB", data, offset + 12)
-            offset += 16
-            parts.append({
-                "part_index": part_index, "mesh_id": mesh_id,
-                "texture_id": texture_id, "mix_texture_id": mix_texture_id,
-                "mix_option": mix_opt, "alpha_source_blend": asb,
-                "alpha_destination_blend": adb, "material_id": material,
-            })
-        records.append({"id": unique_id, "part_count": part_count, "parts": parts})
-    trailing = len(data) - offset
-    if trailing:
-        raise ValueError(f"MESH table has {trailing} trailing byte(s)")
+
+    def parse_records(start_offset: int):
+        offset = start_offset
+        records = []
+        for index in range(count):
+            if offset + 8 > len(data):
+                raise ValueError(f"record {index} header exceeds table size")
+            unique_id, part_count = struct.unpack_from("<II", data, offset)
+            offset += 8
+            if part_count > 64 or offset + part_count * 16 > len(data):
+                raise ValueError(f"record {unique_id} has invalid part count {part_count}")
+            parts = []
+            for part_index in range(part_count):
+                mesh_id, texture_id, mix_texture_id = struct.unpack_from("<III", data, offset)
+                mix_opt, asb, adb, material = struct.unpack_from("<BBBB", data, offset + 12)
+                offset += 16
+                parts.append({
+                    "part_index": part_index, "mesh_id": mesh_id,
+                    "texture_id": texture_id, "mix_texture_id": mix_texture_id,
+                    "mix_option": mix_opt, "alpha_source_blend": asb,
+                    "alpha_destination_blend": adb, "material_id": material,
+                })
+            records.append({"id": unique_id, "part_count": part_count, "parts": parts})
+        if offset != len(data):
+            raise ValueError(f"{len(data) - offset} trailing byte(s)")
+        return records
+
+    offsets = (8, 16) if magic == b"MESZ" else (8,)
+    errors = []
+    for start_offset in offsets:
+        try:
+            records = parse_records(start_offset)
+            return {
+                "format": magic.decode("ascii", errors="replace"),
+                "record_count": count, "parse_status": "PARSED",
+                "header_extension_hex": data[8:start_offset].hex(" "),
+                "sample_records": records[:20], "_records": records,
+                "record_start_offset": start_offset,
+            }
+        except ValueError as exc:
+            errors.append(f"offset {start_offset}: {exc}")
+    words = [struct.unpack_from("<I", data, off)[0] for off in range(4, min(len(data) - 3, 68), 4)]
+    floats = [struct.unpack_from("<f", data, off)[0] for off in range(4, min(len(data) - 3, 68), 4)]
     return {
         "format": magic.decode("ascii", errors="replace"),
-        "record_count": count, "parse_status": "PARSED",
-        "sample_records": records[:20], "_records": records,
+        "record_count": count, "parse_status": "LAYOUT_UNRESOLVED",
+        "parse_errors": errors,
+        "header_hex": data[:128].hex(" "),
+        "u32_probe": words, "f32_probe": floats,
+        "_records": [],
     }
 
 
