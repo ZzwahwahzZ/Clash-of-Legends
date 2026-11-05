@@ -6,8 +6,7 @@ source = Path("resource-source-index.csv")
 catalog_path = Path("resource_stage/world/resource_mappings/mesh_equipment_catalog.json")
 if not source.is_file():
     raise SystemExit("resource-source-index.csv is missing.")
-if not catalog_path.is_file():
-    raise SystemExit("MESH equipment catalog is missing; run the C3 WDB audit first.")
+catalog_available = catalog_path.is_file()
 
 c3_paths = set()
 pvr_paths = set()
@@ -29,7 +28,7 @@ with source.open("r", encoding="utf-8-sig", newline="") as stream:
         if category == "models" and inner.endswith(".pvr") and inner.startswith("c3/") and staged.startswith("resource_stage/models/") and Path(staged).is_file():
             pvr_paths.add(staged)
 
-catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+catalog = json.loads(catalog_path.read_text(encoding="utf-8")) if catalog_available else {"tables": {}}
 family_coverage = {}
 missing_samples = []
 referenced_mesh_paths = set()
@@ -100,14 +99,15 @@ Path("build/pvr-paths.json").write_text(json.dumps(sorted(pvr_paths), ensure_asc
 coverage = {
     "schema_version": "1.0.0",
     "source_index": str(source),
-    "mesh_equipment_catalog": str(catalog_path),
+    "mesh_equipment_catalog": str(catalog_path) if catalog_available else None,
+    "mesh_catalog_available": catalog_available,
     "unique_mesh_path_reference_count": len(referenced_mesh_paths),
     "unique_texture_path_reference_count": len(referenced_texture_paths),
     "final_c3_path_count": len(c3_paths),
     "final_pvr_path_count": len(pvr_paths),
     "family_coverage": family_coverage,
     "missing_reference_samples": missing_samples,
-    "status": "SOURCE_PATHS_EXPANDED_FROM_MESH_TABLES_REQUIRES_CONVERSION_AND_VISUAL_REVIEW",
+    "status": "SOURCE_PATHS_EXPANDED_FROM_MESH_TABLES_REQUIRES_CONVERSION_AND_VISUAL_REVIEW" if catalog_available else "SOURCE_INDEX_ONLY_MESH_CATALOG_NOT_AVAILABLE",
     "note": "Only paths found as actual staged files are added. Missing paths remain reported and are never fabricated."
 }
 Path("reports").mkdir(exist_ok=True)
