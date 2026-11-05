@@ -97,3 +97,24 @@ The C3 pipeline completed successfully and Godot 4.3 imported the generated GLBs
 The two skeletal proof screenshots show a rendered armored body with limbs and equipment, but the head/face is absent in this assembled proof. This is useful conversion and rigging progress, not an approved playable character. The body/head/helmet/weapon attachment set and class/gender mapping still require completion and visual review. The 492 effect conversions must not be mistaken for 492 playable character/world assets.
 
 **Acceptance decision:** do not map any of these 24 character-category GLBs as complete playable classes yet; do not select a mount model because the conversion report contains zero mount GLBs; keep all converted entries as unreviewed candidates until full anatomy, correct textures/materials, skeleton, six-action coverage, equipment attachment transforms, and exact source identity are proven.
+
+
+## 2026-11-05 generated runtime catalog and category-PCK audit
+
+Workflow run: https://github.com/ZzwahwahzZ/Clash-of-Legends/actions/runs/42081213344  
+Artifact: ClashOfLegends-Runtime-PCK-Audit
+
+The new provenance-preserving runtime catalog builder succeeded. All 11 generated category PCKs were exported and mounted successfully in Godot 4.3. The audit then correctly stopped before release/manifest publication because no playable character mapping is verified.
+
+Exact runtime audit results:
+- Catalog found; no catalog paths missing.
+- Catalog category entries: animations 58, audio 25, characters 54, effects 1,049, equipment 116, interface 5,358, maps 4,422, models 3,006, monsters 18, mounts 18, world 1,140.
+- 24 GLB character-category models loaded; all 24 had renderable mesh surfaces and none had degenerate geometry. Only 9 exposed animation resources.
+- **Zero Skeleton3D nodes** were present in those 24 runtime character GLBs; zero verified character mappings were accepted.
+- All 11 target classes remained missing from verified character coverage: Trojan, Warrior, Archer, Ninja, Monk, Pirate, DragonWarrior, Windwalker, Thunderstriker, WaterTaoist, FireTaoist.
+- The separate skeletal POC from the C3 audit is not among the 24 runtime character models and cannot be counted as a complete playable character.
+- The mounted PCKs include a mounts category with 18 catalog entries, but these are not 18 converted complete-mount GLBs. The C3 conversion report contains zero GLBs in the mounts output category.
+
+The resource catalog and PCK export pipeline now works end-to-end through package creation and runtime mounting. The release gate remains blocked for the right reasons: there are no verified complete character class/gender models, the 24 character-category conversions have no imported Skeleton3D nodes, and no complete mount models were converted. The audit artifact reports 253 renderable mesh instances / 253 surfaces and zero degenerate meshes, but renderable geometry alone is not playable character acceptance.
+
+The workflow intentionally skipped the later validation, manifest generation and publication steps after the visual-coverage audit failed. Do not publish these PCKs or weaken the class/mount acceptance rules to make the run green.
