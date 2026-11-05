@@ -51,6 +51,13 @@ jobs:
           godot --headless --path . --scene res://scenes/core/VisualAuditScene.tscn 2>&1 | tee ci-logs/visual-audit.log
           if grep -Eq "SCRIPT ERROR:|Parse Error:|Compile Error:|ERROR: Failed to load script|ERROR: Failed to instantiate an autoload" ci-logs/visual-audit.log; then echo "Visual audit emitted script errors"; exit 1; fi
 
+      - name: Validate automatic loot category filters
+        run: |
+          set -o pipefail
+          godot --headless --path . --script tools/resource_packs/validate_loot_filters.gd 2>&1 | tee ci-logs/loot-filters.log
+          grep -q "LOOT FILTER AUDIT PASSED" ci-logs/loot-filters.log
+          if grep -Eq "SCRIPT ERROR:|Parse Error:|Compile Error:|LOOT FILTER AUDIT FAILED" ci-logs/loot-filters.log; then echo "Loot filter audit failed"; exit 1; fi
+
       - name: Validate gameplay collision shapes
         run: |
           set -o pipefail
