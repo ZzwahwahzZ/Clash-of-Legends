@@ -27,7 +27,7 @@ FIELDS = ["category", "source_archive", "source_path", "staged_path", "size_byte
 def safe_member(name: str) -> str | None:
     normalized = name.replace("\\", "/")
     path = PurePosixPath(normalized)
-    if path.is_absolute() or any(part in ("", ".", "..") for part in path.parts):
+    if path.is_absolute() or (path.parts and path.parts[0].endswith(":")) or any(part in ("", ".", "..") for part in path.parts):
         return None
     return path.as_posix()
 
@@ -37,7 +37,7 @@ def main() -> None:
         raise SystemExit("Audio staging directory or verified resource source index is missing.")
     rows = list(csv.DictReader(INDEX.open("r", encoding="utf-8-sig", newline="")))
     seen_hashes = {str(row.get("sha256", "")).lower() for row in rows}
-    archives = sorted(path for path in AUDIO_ROOT.rglob("*.7z") if "nested_7z" not in path.parts)
+    archives = sorted(path for path in AUDIO_ROOT.rglob("*") if path.is_file() and path.suffix.lower() == ".7z" and "nested_7z" not in path.parts)
     report = {
         "archives_found": len(archives),
         "archives_with_audio": 0,
