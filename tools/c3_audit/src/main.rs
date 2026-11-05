@@ -235,6 +235,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // build/c3-glb/motion-poc and are intentionally excluded from runtime PCK merge.
     let mut external_motion_poc: Vec<Value> = Vec::new();
     let mut skeletal_motion_poc: Vec<Value> = Vec::new();
+    let mut vat_motion_poc: Vec<Value> = Vec::new();
     for (model_id, look) in [(7130000_u32, 7_u32), (8133010_u32, 8_u32)] {
         let body_suffix = format!("/c3/body/{model_id}.c3");
         let Some(body_path) = files.iter().find(|path| path.to_string_lossy().replace('\\', "/").ends_with(&body_suffix)) else {
@@ -316,6 +317,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             motions: vec![motion_document.motions[body_mesh_index].clone()],
                             unknown_chunks: Vec::new(),
                         };
+                        let vat_prefix = glb_root.join("motion-poc-vat").join(format!("look{look}_model{model_id}_weapon{weapon}_action{action}"));
+                        match skinned_glb::export_vat(&body_document.meshes[body_mesh_index], &motion_document.motions[body_mesh_index], &vat_prefix) {
+                            Ok((vat_bytes, vertex_count, frame_count)) => vat_motion_poc.push(json!({
+                                "model_id":model_id,"look":look,"weapon":weapon,"action":action,
+                                "data":vat_prefix.with_extension("rgba32f").to_string_lossy().replace('\\',"/"),
+                                "metadata":vat_prefix.with_extension("json").to_string_lossy().replace('\\',"/"),
+                                "bytes":vat_bytes,"vertex_count":vertex_count,"frame_count":frame_count,
+                                "status":"EXPORTED_EXACT_AFFINE_VAT_PENDING_GODOT_VALIDATION"
+                            })),
+                            Err(error) => vat_motion_poc.push(json!({
+                                "model_id":model_id,"look":look,"weapon":weapon,"action":action,
+                                "status":"REJECTED","reason":error.to_string()
+                            }))
+                        }
                         let skinned_relative = Path::new("motion-poc-skinned").join(format!("look{look}_model{model_id}_weapon{weapon}_action{action}.glb"));
                         let skinned_path = glb_root.join(&skinned_relative);
                         let skinned_source = format!("{body_relative} + {motion_relative} [v_body only]");
@@ -350,6 +365,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     println!("C3 SKELETAL EXPORT RESULTS: {}", serde_json::to_string(&skeletal_motion_poc)?);
+    println!("C3 VAT EXPORT RESULTS: {}", serde_json::to_string(&vat_motion_poc)?);
 
     // Motion-only C3 documents contain action data but no PHY geometry. Match them
     // conservatively against renderable model files by exact per-mesh bone-count
@@ -417,6 +433,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "external_motion_poc_count": external_motion_poc.iter().filter(|row| row["status"] == "EXPORTED_PENDING_GODOT_IMPORT_VALIDATION").count(),
         "external_motion_poc": external_motion_poc,
         "skeletal_motion_poc": skeletal_motion_poc,
+        "vat_motion_poc": vat_motion_poc,
         "motion_only_pairing_status": "PATH_KEY_AND_BONE_SIGNATURE_CANDIDATES_ONLY_NOT_RUNTIME_PAIRED",
         "motion_only_pairing": motion_pairing_report,
         "converted_models": converted.len(),
