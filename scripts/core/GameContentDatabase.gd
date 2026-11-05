@@ -18,6 +18,8 @@ const CLASSES := {
 }
 
 const SKILLS := {
+ "archer_shadow_dagger":{"name_ar":"خنجر الظل","name_en":"Shadow Dagger","class_req":"Archer","weapon_style":"flying_daggers","cooldown":2.5,"mp_cost":18,"damage_multiplier":1.8,"range":4.0,"is_aoe":false,"effect":"damage"},
+ "archer_eastern_tempest":{"name_ar":"عاصفة الشرق","name_en":"Eastern Tempest","class_req":"Archer","weapon_style":"flying_daggers","cooldown":7.0,"mp_cost":38,"damage_multiplier":2.0,"range":5.0,"is_aoe":true,"aoe_radius":5.5,"effect":"damage"},
  "dragon_warrior_dragon_surge":{"name_ar":"اندفاع التنين","name_en":"Dragon Surge","class_req":"DragonWarrior","cooldown":5.0,"mp_cost":32,"damage_multiplier":2.25,"range":5.0,"is_aoe":true,"aoe_radius":4.5,"effect":"damage"},
  "dragon_warrior_scale_guard":{"name_ar":"درع الحراشف","name_en":"Scale Guard","class_req":"DragonWarrior","cooldown":12.0,"mp_cost":24,"damage_multiplier":0.0,"range":0.0,"effect":"buff_defense"},
  "windwalker_gale_step":{"name_ar":"خطوة العاصفة","name_en":"Gale Step","class_req":"Windwalker","cooldown":4.0,"mp_cost":18,"damage_multiplier":1.7,"range":8.0,"is_aoe":false,"effect":"damage"},
