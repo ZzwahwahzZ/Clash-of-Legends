@@ -6,6 +6,7 @@ class_name SettingsUI
 @onready var save_button: Button = get_node_or_null("Panel/SaveButton")
 @onready var load_button: Button = get_node_or_null("Panel/LoadButton")
 @onready var close_button: Button = get_node_or_null("Panel/CloseButton")
+@onready var resource_packs_button: Button = get_node_or_null("Panel/ResourcePacksButton")
 @onready var title_label: Label = get_node_or_null("Panel/TitleLabel")
 
 func _ready() -> void:
@@ -13,6 +14,8 @@ func _ready() -> void:
 	visible = false
 	if close_button:
 		close_button.pressed.connect(close_ui)
+	if resource_packs_button:
+		resource_packs_button.pressed.connect(_on_resource_packs_pressed)
 	if save_button:
 		save_button.pressed.connect(_on_save_pressed)
 	if load_button:
@@ -47,6 +50,8 @@ func _setup_options() -> void:
 		load_button.text = "استرجاع الحفظ" if is_ar else "Load Saved Game"
 	if close_button:
 		close_button.text = "إغلاق" if is_ar else "Close"
+	if resource_packs_button:
+		resource_packs_button.text = "تنزيل موارد اللعبة" if is_ar else "Download Game Resources"
 		
 	if lang_option:
 		lang_option.clear()
@@ -147,3 +152,8 @@ func _on_load_pressed() -> void:
 		if data.has("quest_agents") and typeof(data["quest_agents"]) == TYPE_DICTIONARY:
 			LocalSaveEngine.restore_quest_states(data["quest_agents"])
 		player.sync_stats_to_hud()
+
+func _on_resource_packs_pressed() -> void:
+	var panel := get_tree().get_first_node_in_group("resource_packs_ui")
+	if panel and panel.has_method("open_ui"):
+		panel.open_ui()
