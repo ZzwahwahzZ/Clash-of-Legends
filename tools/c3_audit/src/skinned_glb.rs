@@ -513,6 +513,15 @@ pub fn export_vat(mesh: &C3Mesh, motion: &C3Motion, output_prefix: &Path, clip_i
         return Err("VAT export rejected: the mesh has no evaluated affine vertex deformation".into());
     }
     let vertex_count = mesh.vertices.len();
+    let mut referenced_vertices = vec![false; vertex_count];
+    for source_index in mesh.opaque_indices.iter().chain(mesh.alpha_indices.iter()) {
+        let index = *source_index as usize;
+        if index >= vertex_count {
+            return Err(format!("C3 index {index} is outside VAT vertex count {vertex_count}").into());
+        }
+        referenced_vertices[index] = true;
+    }
+    let referenced_vertex_count = referenced_vertices.iter().filter(|used| **used).count();
     let frame_count = motion.frame_count as usize;
     let mut bytes = Vec::<u8>::with_capacity(vertex_count * frame_count * 16);
     let mut min = [f32::INFINITY; 3];
@@ -536,7 +545,7 @@ pub fn export_vat(mesh: &C3Mesh, motion: &C3Motion, output_prefix: &Path, clip_i
     fs::write(&binary_path, &bytes)?;
     let metadata = json!({
         "format":"C3_VAT_RGBA32F","version":1,"clip_id":clip_id,"mesh_index":mesh_index,"mesh_name":mesh.name,"width":vertex_count,"height":frame_count,
-        "vertex_count":vertex_count,"frame_count":frame_count,"fps":30,
+        "vertex_count":vertex_count,"referenced_vertex_count":referenced_vertex_count,"frame_count":frame_count,"fps":30,
         "bytes_per_texel":16,"binary_bytes":bytes.len(),
         "sampling":"one texel per source vertex per frame; RGBA=(x,y,z,1)",
         "matrix_semantics":"weighted blend of initial_matrix * motion.matrix_at(each_positive_influence, frame)",
