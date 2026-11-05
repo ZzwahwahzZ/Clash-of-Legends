@@ -111,12 +111,19 @@ jobs:
                           key_match = re.search(r"(?:\[([^]]+)\]|([A-Za-z_][A-Za-z0-9_]*))\s*=\s*$", prefix)
                           fields = {}
                           for match in re.finditer(r"""^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(?:['"]([^'"]*)['"]|(-?\d+(?:\.\d+)?|true|false))""", block, re.MULTILINE):
-                              fields[match.group(1)] = match.group(2) if match.group(2) is not None else match.group(3)
+                              fields.setdefault(match.group(1), match.group(2) if match.group(2) is not None else match.group(3))
                           if "armor" in fields:
                               records.append({
                                   "table_key": (key_match.group(1) or key_match.group(2)) if key_match else "",
                                   "armor_id": fields.get("armor", ""),
                                   "hair_id": fields.get("hair", ""),
+                                  "role_name": fields.get("Name", ""),
+                                  "role_title": fields.get("title", ""),
+                                  "profession_id": fields.get("pro", ""),
+                                  "right_weapon_id": fields.get("rw", ""),
+                                  "left_weapon_id": fields.get("lw", ""),
+                                  "head_model_id": fields.get("armet", ""),
+                                  "sex_code": fields.get("nSex", ""),
                                   "role_text": fields.get("text", ""),
                                   "sound_male": fields.get("sound0106", ""),
                                   "sound_female": fields.get("sound1106", ""),
