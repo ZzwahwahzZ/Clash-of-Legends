@@ -3,6 +3,7 @@ extends Node
 const PlayerInventoryScript = preload("res://scripts/player/PlayerInventory.gd")
 const QuestNavigationAgentScript = preload("res://scripts/automation/QuestNavigationAgent.gd")
 const SimulatedPlayerScript = preload("res://scripts/ai/SimulatedPlayer.gd")
+const MountModelMappingRulesScript = preload("res://scripts/core/MountModelMappingRules.gd")
 
 var total_tests: int = 0
 var passed_tests: int = 0
@@ -29,6 +30,7 @@ func run_all_tests() -> Dictionary:
 	test_offline_social_and_population_rules()
 	test_arabic_localization_integrity()
 	test_inventory_and_equipment_refinement()
+	test_mount_identity_mapping_rules()
 	test_inventory_capacity_is_transactional()
 	test_local_save_and_backup_recovery()
 	test_quest_progression_lifecycle()
@@ -40,6 +42,17 @@ func run_all_tests() -> Dictionary:
 	print("-------------------------------------------------------
 ")
 	return {"total":total_tests,"passed":passed_tests,"failed":failed_tests,"log":test_log}
+
+func test_mount_identity_mapping_rules() -> void:
+	var entries: Array = [
+		{"asset_role": "mount_part", "mapping_status": "verified", "mount_item_id": "mount_wolf"},
+		{"asset_role": "complete_mount", "mapping_status": "candidate", "mount_item_id": "mount_wolf"},
+		{"asset_role": "complete_mount", "mapping_status": "verified", "mount_item_id": "mount_wolf"},
+		{"asset_role": "complete_mount", "mapping_status": "verified", "mount_item_id": "mount_dragon"}
+	]
+	assert_true(MountModelMappingRulesScript.find_verified_mount_model_index(entries, "mount_wolf") == 2, "Mount: only the exact verified complete-mount identity is eligible")
+	assert_true(MountModelMappingRulesScript.find_verified_mount_model_index(entries, "mount_unknown") == -1, "Mount: unknown item identity cannot select an arbitrary model")
+	assert_true(MountModelMappingRulesScript.find_verified_mount_model_index(entries, "") == -1, "Mount: empty item identity is rejected")
 
 func assert_true(condition: bool, test_name: String) -> void:
 	total_tests += 1
