@@ -56,6 +56,8 @@ func test_autoload_presence() -> void:
 	assert_true(GameManager != null, "Autoload: GameManager is loaded and active")
 	assert_true(ClassProgressionManager != null, "Autoload: ClassProgressionManager is loaded and active")
 	assert_true(GameContentDatabase != null, "Autoload: shared content database is loaded and active")
+	assert_true(AssetCatalog != null, "Autoload: runtime resource catalog is loaded")
+	assert_true(AssetCatalog.get_asset_entries("missing_category").is_empty(), "Asset Catalog: missing categories return safe empty lists")
 	assert_true(FeatureGuidanceManager != null, "Autoload: FeatureGuidanceManager is loaded and active")
 	assert_true(LocalSaveEngine != null, "Autoload: LocalSaveEngine is loaded and active")
 	assert_true(CombatEngine != null, "Autoload: CombatEngine is loaded and active")
