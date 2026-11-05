@@ -156,7 +156,7 @@ func _run() -> void:
 			var vat_player = load("res://scripts/animation/C3VatPlayer.gd").new()
 			stage.add_child(vat_player)
 			var binary_path := metadata_path.trim_suffix(".json") + ".rgba32f"
-			if not vat_player.configure(target_mesh, metadata_path, binary_path, albedo):
+			if not vat_player.configure(target_mesh, metadata_path, binary_path, albedo, 0.0, true):
 				push_error("C3 six-clip visual proof: VAT could not be applied to " + mesh_name + " for " + clip_id)
 				all_passed = false
 				vat_player.queue_free()
