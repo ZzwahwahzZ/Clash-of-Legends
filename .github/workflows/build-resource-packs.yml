@@ -27,19 +27,24 @@ jobs:
       - uses: actions/checkout@v4
       - name: Enforce reference acceptance ledger
         run: python3 tools/quality/validate_acceptance_ledger.py
-      - name: Download verified source release bundles
-        run: |
-          mkdir -p build/source_archives
-          base="https://github.com/ZzwahwahzZ/Conquer-Mobile-Assets./releases/download/mobile-extracted-assets"
-          for f in extracted-assets-001.zip conquer-mobile-prepared-assets.zip conquer-mobile-supplemental-assets.zip; do
-            curl --fail --location --retry 5 --retry-all-errors "$base/$f" -o "build/source_archives/$f"
-          done
-          echo "Downloaded source archives:"
-          sha256sum build/source_archives/*
+      - name: Download verified resource-packs-v4 baseline
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 tools/resource_packs/download_resource_pcks.py
       - name: Install 7z archive extractor
         run: python3 -m pip install --break-system-packages py7zr
-      - name: Prepare deduplicated category staging tree
-        run: python3 tools/resource_packs/prepare_assets.py
+      - name: Prepare checksum-verified PCK extraction paths
+        run: python3 tools/resource_packs/prepare_pck_paths.py
+      - name: Configure Godot 4.3
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.3.0
+          use-dotnet: false
+          include-templates: false
+      - name: Rehydrate and verify all source assets from resource PCKs
+        run: |
+          rm -rf resource_stage
+          godot --headless --path . --script tools/resource_packs/extract_resource_packs.gd
       - name: Audit C3 WDB motion, object and texture tables
         run: python3 tools/resource_packs/audit_c3_wdb.py
       - name: Extract NetDragon TPI/TPD resources
@@ -48,12 +53,6 @@ jobs:
         run: python3 tools/resource_packs/probe_gameplay_data.py
       - name: Build provenance-safe readable gameplay reference catalogs
         run: python3 tools/resource_packs/build_gameplay_reference_catalog.py
-      - name: Configure Godot 4.3
-        uses: chickensoft-games/setup-godot@v2
-        with:
-          version: 4.3.0
-          use-dotnet: false
-          include-templates: false
       - name: Prepare source model path lists
         run: |
           cp reports/resource-source-index.csv resource-source-index.csv
