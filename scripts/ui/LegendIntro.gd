@@ -26,6 +26,13 @@ var class_grid: GridContainer
 var intro_overlay: Control
 var intro_tween: Tween
 var intro_finished := false
+var download_overlay: Control
+var download_progress_bar: ProgressBar
+var download_status_label: Label
+var download_detail_label: Label
+var download_start_button: Button
+var download_running := false
+var download_done := false
 
 func _ready() -> void:
 	_build_screen()
@@ -144,7 +151,7 @@ func _build_screen() -> void:
 	enter_style.set_border_width_all(2)
 	enter_style.set_corner_radius_all(12)
 	enter_button.add_theme_stylebox_override("normal", enter_style)
-	enter_button.pressed.connect(_enter_world)
+	enter_button.pressed.connect(_request_world_entry)
 	content.add_child(enter_button)
 
 	var footer := Label.new()
@@ -247,7 +254,175 @@ func _select_class(index: int) -> void:
 	if class_status:
 		class_status.text = "الفئة المختارة: %s  —  %s" % [data.ar, data.tag]
 
+
+func _request_world_entry() -> void:
+	if download_running:
+		return
+	var manager := get_node_or_null("/root/ResourcePackManager")
+	if manager == null:
+		_enter_world()
+		return
+	if manager.packages.is_empty():
+		await manager.refresh_manifest()
+	if manager.get_missing_package_count() <= 0:
+		_enter_world()
+		return
+	_show_unified_download_prompt()
+
+func _show_unified_download_prompt() -> void:
+	if is_instance_valid(download_overlay):
+		return
+	var manager := get_node("/root/ResourcePackManager")
+	download_overlay = Control.new()
+	download_overlay.name = "UnifiedResourceDownload"
+	download_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	download_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(download_overlay)
+
+	var shade := ColorRect.new()
+	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	shade.color = Color(0.015, 0.02, 0.045, 0.94)
+	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	download_overlay.add_child(shade)
+
+	var panel := PanelContainer.new()
+	panel.anchor_left = 0.07
+	panel.anchor_top = 0.30
+	panel.anchor_right = 0.93
+	panel.anchor_bottom = 0.70
+	panel.offset_left = 0
+	panel.offset_top = 0
+	panel.offset_right = 0
+	panel.offset_bottom = 0
+	var panel_style := StyleBoxFlat.new()
+	panel_style.bg_color = Color("#101a31")
+	panel_style.border_color = Color("#d4aa62")
+	panel_style.set_border_width_all(2)
+	panel_style.set_corner_radius_all(18)
+	panel_style.content_margin_left = 22
+	panel_style.content_margin_right = 22
+	panel_style.content_margin_top = 22
+	panel_style.content_margin_bottom = 22
+	panel.add_theme_stylebox_override("panel", panel_style)
+	download_overlay.add_child(panel)
+
+	var layout := VBoxContainer.new()
+	layout.alignment = BoxContainer.ALIGNMENT_CENTER
+	layout.add_theme_constant_override("separation", 14)
+	panel.add_child(layout)
+
+	var heading := Label.new()
+	heading.text = "بوابةُ العالَمِ الأَسطوريّ"
+	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	heading.add_theme_font_size_override("font_size", 27)
+	heading.add_theme_color_override("font_color", Color("#ffe2a0"))
+	layout.add_child(heading)
+
+	var explanation := Label.new()
+	explanation.text = "يلزم تنزيل موارد العالم كاملةً مرةً واحدة قبل بدء المغامرة"
+	explanation.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	explanation.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	explanation.add_theme_font_size_override("font_size", 15)
+	explanation.add_theme_color_override("font_color", Color("#d4def0"))
+	layout.add_child(explanation)
+
+	download_status_label = Label.new()
+	download_status_label.text = "جاهز لتنزيل %d حزمة موارد" % manager.get_missing_package_count()
+	download_status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	download_status_label.add_theme_color_override("font_color", Color("#f0d08b"))
+	layout.add_child(download_status_label)
+
+	download_progress_bar = ProgressBar.new()
+	download_progress_bar.min_value = 0
+	download_progress_bar.max_value = 100
+	download_progress_bar.value = 0
+	download_progress_bar.show_percentage = false
+	download_progress_bar.custom_minimum_size = Vector2(0, 24)
+	var track := StyleBoxFlat.new()
+	track.bg_color = Color("#263653")
+	track.set_corner_radius_all(12)
+	download_progress_bar.add_theme_stylebox_override("background", track)
+	var fill := StyleBoxFlat.new()
+	fill.bg_color = Color("#d6a64d")
+	fill.set_corner_radius_all(12)
+	download_progress_bar.add_theme_stylebox_override("fill", fill)
+	layout.add_child(download_progress_bar)
+
+	download_detail_label = Label.new()
+	download_detail_label.text = "سيتم التحقق من كل ملف قبل تثبيته"
+	download_detail_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	download_detail_label.add_theme_font_size_override("font_size", 13)
+	download_detail_label.add_theme_color_override("font_color", Color("#aebed8"))
+	layout.add_child(download_detail_label)
+
+	download_start_button = Button.new()
+	download_start_button.text = "ابدأ تنزيل موارد العالم"
+	download_start_button.custom_minimum_size = Vector2(0, 52)
+	download_start_button.add_theme_font_size_override("font_size", 19)
+	download_start_button.pressed.connect(_start_unified_download)
+	layout.add_child(download_start_button)
+
+	var cancel := Button.new()
+	cancel.text = "العودة"
+	cancel.custom_minimum_size = Vector2(0, 40)
+	cancel.pressed.connect(func(): download_overlay.queue_free(); download_overlay = null)
+	layout.add_child(cancel)
+
+	manager.aggregate_progress.connect(_on_aggregate_download_progress)
+	_on_aggregate_download_progress(0, manager.get_total_package_bytes() - _get_bundled_bytes(manager), manager.packages.size() - manager.get_missing_package_count(), manager.packages.size(), 0)
+
+func _get_bundled_bytes(manager: Node) -> int:
+	var total := 0
+	for package_id in manager.packages.keys():
+		if manager.is_package_installed(str(package_id)):
+			var path := "res://bundled/" + str(manager.packages[package_id].file_name)
+			if FileAccess.file_exists(path):
+				total += int(manager.packages[package_id].size_bytes)
+	return total
+
+func _on_aggregate_download_progress(received: int, total: int, completed: int, count: int, active: int) -> void:
+	if not is_instance_valid(download_progress_bar):
+		return
+	var ratio := 0.0 if total <= 0 else clampf(float(received) / float(total), 0.0, 1.0)
+	download_progress_bar.value = ratio * 100.0
+	download_status_label.text = "اكتمل %d من %d حزمة" % [completed, count]
+	download_detail_label.text = "%s / %s  •  %d تنزيلات متزامنة" % [_format_bytes(received), _format_bytes(total), active]
+
+func _format_bytes(value: int) -> String:
+	if value >= 1073741824:
+		return "%.2f GB" % (float(value) / 1073741824.0)
+	return "%.1f MB" % (float(value) / 1048576.0)
+
+func _start_unified_download() -> void:
+	if download_running:
+		return
+	download_running = true
+	download_start_button.disabled = true
+	download_start_button.text = "جارٍ تنزيل موارد العالم…"
+	download_status_label.text = "يتم تنزيل جميع الموارد والتحقق منها"
+	var manager := get_node("/root/ResourcePackManager")
+	var success: bool = await manager.download_all_packages()
+	download_running = false
+	if success and manager.get_missing_package_count() == 0:
+		download_done = true
+		download_status_label.text = "اكتملت جميع الموارد بنجاح"
+		download_detail_label.text = "تم التحقق من الملفات كاملةً — عالم الأساطير جاهز"
+		download_start_button.text = "ادخل إلى عالم الأساطير"
+		download_start_button.disabled = false
+		for connection in manager.aggregate_progress.get_connections():
+			if connection.callable.get_method() == "_on_aggregate_download_progress":
+				manager.aggregate_progress.disconnect(connection.callable)
+		download_start_button.pressed.disconnect(_start_unified_download)
+		download_start_button.pressed.connect(_enter_world)
+	else:
+		download_status_label.text = "لم تكتمل كل الموارد — لم يتم اعتماد الملفات الناقصة"
+		download_detail_label.text = "تحقق من الاتصال ثم اضغط إعادة المحاولة؛ الملفات السليمة محفوظة"
+		download_start_button.text = "إعادة محاولة التنزيل"
+		download_start_button.disabled = false
+
 func _enter_world() -> void:
+	if is_instance_valid(download_overlay):
+		download_overlay.queue_free()
 	GameManager.set("selected_class", str(CLASSES[selected_class].en))
 	get_tree().change_scene_to_file(GAME_SCENE)
 
