@@ -325,6 +325,7 @@ func test_quest_progression_lifecycle() -> void:
 	add_child(terminal_copy)
 	terminal_copy.deserialize(event_quest.serialize())
 	assert_true(terminal_copy.active_quest_id.is_empty() and terminal_copy.is_quest_completed, "Quest: completed chain remains completed after save/load")
+	assert_true(terminal_copy._get_navigation_target().is_empty(), "Quest: completed chain has no further navigation target")
 	terminal_copy.queue_free()
 	event_quest.queue_free()
 	qa.queue_free()
