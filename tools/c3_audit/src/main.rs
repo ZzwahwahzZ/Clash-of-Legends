@@ -349,6 +349,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
+    println!("C3 SKELETAL EXPORT RESULTS: {}", serde_json::to_string(&skeletal_motion_poc)?);
+
     // Motion-only C3 documents contain action data but no PHY geometry. Match them
     // conservatively against renderable model files by exact per-mesh bone-count
     // signature and valid vertex bone indices. This is a structural candidate list,
