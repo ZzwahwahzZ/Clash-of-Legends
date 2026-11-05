@@ -365,11 +365,18 @@ func _show_unified_download_prompt() -> void:
 	var cancel := Button.new()
 	cancel.text = "العودة"
 	cancel.custom_minimum_size = Vector2(0, 40)
-	cancel.pressed.connect(func(): download_overlay.queue_free(); download_overlay = null)
+	cancel.pressed.connect(_close_download_prompt)
 	layout.add_child(cancel)
 
 	manager.aggregate_progress.connect(_on_aggregate_download_progress)
-	_on_aggregate_download_progress(0, manager.get_total_package_bytes() - _get_bundled_bytes(manager), manager.packages.size() - manager.get_missing_package_count(), manager.packages.size(), 0)
+	manager.emit_current_progress()
+
+func _close_download_prompt() -> void:
+	if download_running:
+		return
+	if is_instance_valid(download_overlay):
+		download_overlay.queue_free()
+	download_overlay = null
 
 func _get_bundled_bytes(manager: Node) -> int:
 	var total := 0
@@ -409,9 +416,6 @@ func _start_unified_download() -> void:
 		download_detail_label.text = "تم التحقق من الملفات كاملةً — عالم الأساطير جاهز"
 		download_start_button.text = "ادخل إلى عالم الأساطير"
 		download_start_button.disabled = false
-		for connection in manager.aggregate_progress.get_connections():
-			if connection.callable.get_method() == "_on_aggregate_download_progress":
-				manager.aggregate_progress.disconnect(connection.callable)
 		download_start_button.pressed.disconnect(_start_unified_download)
 		download_start_button.pressed.connect(_enter_world)
 	else:
