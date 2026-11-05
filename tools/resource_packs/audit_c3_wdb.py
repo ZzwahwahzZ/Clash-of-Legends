@@ -556,6 +556,8 @@ def main() -> None:
     for entry in report["entries"]:
         parsed = entry["parsed"]
         print(f"  {entry['name']}: {entry['magic']} records={parsed.get('record_count')} status={parsed.get('parse_status')}")
+        if entry["magic"] == "MESZ":
+            print(f"    MESZ_PROBE header={parsed.get('header_hex')} errors={parsed.get('parse_errors')} u32={parsed.get('u32_probe')} f32={parsed.get('f32_probe')}")
     print(f"WDB metadata report written: {out}")
 
 
