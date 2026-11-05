@@ -300,6 +300,7 @@ jobs:
             reports/c3-motion-poc-validation.json
             reports/c3-wdb-audit.json
             reports/c3-equipment-resource-link-audit.json
+            reports/c3-equipment-source-path-coverage.json
             reports/equipment-item-join-audit.json
             resource_stage/world/resource_mappings/mesh_equipment_catalog.json
             resource_stage/world/resource_mappings/equipment_item_join_catalog.json
