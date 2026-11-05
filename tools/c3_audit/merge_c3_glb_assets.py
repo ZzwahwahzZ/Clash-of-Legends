@@ -38,6 +38,9 @@ for source in sorted(source_root.rglob("*.glb")):
         "extension": ".glb",
         "size_bytes": destination.stat().st_size,
         "sha256": digest,
+        # Conversion and import do not prove character/mount identity or visual approval.
+        "asset_role": "unclassified",
+        "mapping_status": "unreviewed",
     }
     assets.setdefault(category, []).append(entry)
     existing_hashes.add(digest)
