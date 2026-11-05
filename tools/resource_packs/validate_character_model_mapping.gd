@@ -1,7 +1,5 @@
 extends SceneTree
 
-const AssetCatalogScript = preload("res://scripts/core/AssetCatalog.gd")
-
 func _initialize() -> void:
 	call_deferred("_run")
 
@@ -12,7 +10,7 @@ func _run() -> void:
 		{"asset_role": "complete_character", "character_class": "Trojan", "mapping_status": "verified", "gender": "male"},
 		{"asset_role": "complete_character", "character_class": "Warrior", "mapping_status": "verified", "gender": "female"}
 	]
-	var male_trojan := AssetCatalogScript.find_verified_character_model_index(entries, "Trojan", "male")
+	var male_trojan := AssetCatalog.find_verified_character_model_index(entries, "Trojan", "male")
 	var female_warrior := AssetCatalogScript.find_verified_character_model_index(entries, "Warrior", "female")
 	var unknown := AssetCatalogScript.find_verified_character_model_index(entries, "Thunderstriker", "male")
 	var wrong_gender := AssetCatalogScript.find_verified_character_model_index(entries, "Trojan", "female")
