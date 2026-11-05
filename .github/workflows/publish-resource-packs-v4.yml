@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Download previously verified PCK build artifact
         env:
-          GH_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p build/recovered build/audit release-assets
           gh run download 41973023226 --repo ZzwahwahzZ/Clash-of-Legends --name ClashOfLegends-Godot43-Resource-PCKs --dir build/recovered
