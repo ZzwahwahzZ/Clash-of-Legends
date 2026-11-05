@@ -159,20 +159,27 @@ pub fn export_document(document: &C3Document, texture_png: &[u8], source: &str, 
             continue;
         }
         let motion = document.motions.get(mesh_index);
-        let mut sample_frames: Vec<f32> = Vec::new();
+        // VAT stores frame zero as its base row. The GLB morph base must use
+        // that exact same C3 sample even when a mesh's first MOTI key starts
+        // later than frame zero; otherwise source vertex-order validation
+        // correctly detects different base positions for large body meshes.
+        let mut sample_frames: Vec<f32> = vec![0.0];
         if let Some(motion) = motion {
             if motion.keys.len() > 1 {
-                let sample_count = motion.keys.len().min(12);
+                let sample_count = motion.keys.len().min(11);
                 for sample_index in 0..sample_count {
                     let key_index = sample_index * (motion.keys.len() - 1) / (sample_count - 1);
-                    sample_frames.push(motion.keys[key_index].frame as f32);
+                    let frame = motion.keys[key_index].frame as f32;
+                    if !sample_frames.iter().any(|existing| (*existing - frame).abs() < 0.0001) {
+                        sample_frames.push(frame);
+                    }
                 }
             } else if let Some(key) = motion.keys.first() {
-                sample_frames.push(key.frame as f32);
+                let frame = key.frame as f32;
+                if !sample_frames.iter().any(|existing| (*existing - frame).abs() < 0.0001) {
+                    sample_frames.push(frame);
+                }
             }
-        }
-        if sample_frames.is_empty() {
-            sample_frames.push(0.0);
         }
         let animated = sample_frames.len() > 1;
         let target_count = if animated { sample_frames.len() - 1 } else { 0 };
