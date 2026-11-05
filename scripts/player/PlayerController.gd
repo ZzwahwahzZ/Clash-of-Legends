@@ -226,6 +226,9 @@ func _level_up() -> void:
 	if ClassProgressionManager:
 		if ClassProgressionManager.refresh_level_unlocks(current_level) and GameManager:
 			GameManager.post_notification("تم فتح مسار السفاح الشرقي! يمكنك الآن الاختيار بين القوس والخناجر الطائرة." if GameManager.current_language == "ar" else "Oriental Assassin path unlocked! Choose between bow and flying daggers.", false)
+	for agent in get_tree().get_nodes_in_group("quest_agents"):
+		if agent.has_method("on_level_reached"):
+			agent.on_level_reached(current_level)
 	if GameManager:
 		var txt = "تهانينا! ارتقيت إلى المستوى %d!" % current_level
 		GameManager.post_notification(txt if GameManager.current_language == "ar" else ("Level Up! Level %d" % current_level), false)
