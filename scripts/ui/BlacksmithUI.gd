@@ -19,6 +19,7 @@ func _ready() -> void:
 	_setup_options()
 
 func open_ui() -> void:
+	FeatureGuidanceManager.show_feature_intro("blacksmith")
 	visible = true
 	_setup_options()
 	_update_info()
