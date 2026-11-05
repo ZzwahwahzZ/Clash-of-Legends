@@ -28,6 +28,8 @@ jobs:
         run: python3 tools/resource_packs/prepare_assets.py
       - name: Extract NetDragon TPI/TPD resources
         run: python3 tools/resource_packs/extract_netdragon.py
+      - name: Probe original item, drop, quest and refinement data formats
+        run: python3 tools/resource_packs/probe_gameplay_data.py
       - name: Configure Godot 4.3
         uses: chickensoft-games/setup-godot@v2
         with:
