@@ -51,7 +51,7 @@ offset_bottom = 110.0
 [node name="InfoLabel" type="Label" parent="Panel"]
 layout_mode = 1
 offset_left = 32.0
-offset_top = 130.0
+offset_top = 175.0
 offset_right = 648.0
 offset_bottom = 350.0
 text = "اختر خانة عتاد لبدء الصقل..."
@@ -59,8 +59,30 @@ autowrap_mode = 3
 
 [node name="RefineButton" type="Button" parent="Panel"]
 layout_mode = 1
-offset_left = 180.0
+offset_left = 32.0
 offset_top = 380.0
-offset_right = 500.0
+offset_right = 320.0
 offset_bottom = 430.0
 text = "صقل العتاد (1 حجر نيزك + ذهب)"
+
+[node name="UpgradeOption" type="OptionButton" parent="Panel"]
+layout_mode = 1
+offset_left = 32.0
+offset_top = 120.0
+offset_right = 430.0
+offset_bottom = 160.0
+
+[node name="StatOption" type="OptionButton" parent="Panel"]
+layout_mode = 1
+offset_left = 450.0
+offset_top = 120.0
+offset_right = 648.0
+offset_bottom = 160.0
+
+[node name="UpgradeButton" type="Button" parent="Panel"]
+layout_mode = 1
+offset_left = 360.0
+offset_top = 380.0
+offset_right = 648.0
+offset_bottom = 430.0
+text = "تنفيذ التطوير"
