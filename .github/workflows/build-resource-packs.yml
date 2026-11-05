@@ -135,6 +135,18 @@ jobs:
           Path("RESOURCE_MANIFEST").write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
           print(json.dumps(manifest,ensure_ascii=False,indent=2))
           PY
+      - name: Commit generated resource manifest
+        if: ${{ success() }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add RESOURCE_MANIFEST
+          if git diff --cached --quiet; then
+            echo "RESOURCE_MANIFEST already matches this build."
+          else
+            git commit -m "Update resource manifest from verified PCK build"
+            git push
+          fi
       - name: Upload PCKs and source index as workflow artifact
         if: ${{ vars.ALLOW_C3_ASSET_REDISTRIBUTION == 'true' }}
         uses: actions/upload-artifact@v4
