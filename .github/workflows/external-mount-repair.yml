@@ -18,7 +18,9 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y blender python3-numpy
-          blender --background --factory-startup --python-expr "import numpy; print('BLENDER_NUMPY_OK', numpy.__version__)"
+          NUMPY_SITE="$(python3 -c 'import numpy,os; print(os.path.dirname(os.path.dirname(numpy.__file__)))')"
+          echo "Using system NumPy site: $NUMPY_SITE"
+          PYTHONPATH="$NUMPY_SITE" blender --background --factory-startup --python-expr "import sys, numpy; print('BLENDER_PYTHON', sys.version); print('BLENDER_NUMPY_OK', numpy.__version__)"
       - name: Download five source mount GLBs and reference images
         run: |
           set -euo pipefail
