@@ -33,6 +33,7 @@ var download_detail_label: Label
 var download_start_button: Button
 var download_running := false
 var download_done := false
+var last_download_failure := ""
 
 func _ready() -> void:
 	_build_screen()
@@ -369,6 +370,8 @@ func _show_unified_download_prompt() -> void:
 	layout.add_child(cancel)
 
 	manager.aggregate_progress.connect(_on_aggregate_download_progress)
+	if not manager.package_failed.is_connected(_on_package_download_failed):
+		manager.package_failed.connect(_on_package_download_failed)
 	manager.emit_current_progress()
 
 func _close_download_prompt() -> void:
@@ -387,6 +390,11 @@ func _get_bundled_bytes(manager: Node) -> int:
 				total += int(manager.packages[package_id].size_bytes)
 	return total
 
+func _on_package_download_failed(package_id: String, reason: String) -> void:
+	last_download_failure = "%s: %s" % [package_id, reason]
+	if is_instance_valid(download_detail_label):
+		download_detail_label.text = "تعثر تنزيل %s — ستتم إعادة المحاولة تلقائيًا" % package_id
+
 func _on_aggregate_download_progress(received: int, total: int, completed: int, count: int, active: int) -> void:
 	if not is_instance_valid(download_progress_bar):
 		return
@@ -404,6 +412,7 @@ func _start_unified_download() -> void:
 	if download_running:
 		return
 	download_running = true
+	last_download_failure = ""
 	download_start_button.disabled = true
 	download_start_button.text = "جارٍ تنزيل موارد العالم…"
 	download_status_label.text = "يتم تنزيل جميع الموارد والتحقق منها"
@@ -420,7 +429,7 @@ func _start_unified_download() -> void:
 		download_start_button.pressed.connect(_enter_world)
 	else:
 		download_status_label.text = "لم تكتمل كل الموارد — لم يتم اعتماد الملفات الناقصة"
-		download_detail_label.text = "تحقق من الاتصال ثم اضغط إعادة المحاولة؛ الملفات السليمة محفوظة"
+		download_detail_label.text = "آخر خطأ: %s — الملفات السليمة محفوظة؛ اضغط لإعادة المحاولة" % (last_download_failure if not last_download_failure.is_empty() else "تعذر إكمال التنزيل")
 		download_start_button.text = "إعادة محاولة التنزيل"
 		download_start_button.disabled = false
 
