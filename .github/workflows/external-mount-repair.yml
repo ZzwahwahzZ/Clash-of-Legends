@@ -5,6 +5,7 @@ on:
     paths:
       - ".github/workflows/external-mount-repair.yml"
       - "tools/external_assets/repair_mount_glbs.py"
+      - "tools/external_assets/render_mount_glb_previews.py"
 permissions:
   contents: read
 jobs:
@@ -32,6 +33,8 @@ jobs:
       - name: Inspect and conservatively repair candidate meshes in Blender
         run: |
           blender --background --factory-startup --python tools/external_assets/repair_mount_glbs.py -- build/mounts/source reports/mounts
+      - name: Render candidate GLBs for visual review
+        run: blender --background --factory-startup --python tools/external_assets/render_mount_glb_previews.py
       - name: Validate report and candidate output count
         run: |
           python3 - <<'PY'
@@ -51,6 +54,7 @@ jobs:
           path: |
             reports/mounts/*.glb
             reports/mounts/*.json
+            reports/mounts/previews/*.png
             build/mounts/references/*.png
           if-no-files-found: error
           retention-days: 14
