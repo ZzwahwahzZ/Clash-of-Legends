@@ -45,7 +45,7 @@ text = "إغلاق"
 layout_mode = 1
 offset_left = 24.0
 offset_top = 58.0
-offset_right = 820.0
+offset_right = 570.0
 offset_bottom = 100.0
 autowrap_mode = 3
 text = "حالة الموارد"
@@ -61,3 +61,11 @@ horizontal_scroll_mode = 0
 [node name="PackageList" type="VBoxContainer" parent="Panel/Scroll"]
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="DownloadAll" type="Button" parent="Panel"]
+layout_mode = 1
+offset_left = 600.0
+offset_top = 60.0
+offset_right = 820.0
+offset_bottom = 100.0
+text = "تنزيل كل الموارد"
