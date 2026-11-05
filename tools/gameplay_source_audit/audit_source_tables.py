@@ -302,7 +302,7 @@ def main() -> None:
                                     continue
                                 if line.startswith("[") and "]" in line:
                                     current_section = line[1:line.index("]")].strip()
-                                elif "=" in line and len(pairs) < 4000:
+                                elif "=" in line and len(pairs) < 20000:
                                     key, value = line.split("=", 1)
                                     pairs.append({"section": current_section, "key": key.strip(), "value": value.strip()})
                             record["key_value_pair_count"] = len(pairs)
