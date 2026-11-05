@@ -120,29 +120,29 @@ func _on_asset_catalog_loaded(_asset_count: int) -> void:
 	_apply_character_model()
 	_apply_mount_model()
 
-func _apply_character_model() -> void:
+func _apply_character_model() -> bool:
 	if not visual_root or not AssetCatalog:
-		return
+		return false
 	var model_entries := AssetCatalog.get_asset_entries("characters", [".glb", ".gltf"])
 	if model_entries.is_empty():
-		return
+		return false
 	# Never assign a class model by array position: source catalogs contain body
 	# parts, NPCs and unrelated models. Only explicit, reviewed runtime mappings qualify.
 	var model_index := AssetCatalog.get_verified_character_model_index(character_class, character_gender)
 	if model_index < 0:
-		return
+		return false
 	# Build and validate the candidate while the current visible model remains intact.
 	var candidate_root := AssetCatalog.instantiate_fitted_model("characters", model_index, visual_root, 1.7, "CharacterCandidate")
 	if candidate_root == null:
 		push_warning("Character replacement rejected: scene could not be instantiated.")
-		return
+		return false
 	var candidate_instance: Node = candidate_root.get_child(0) if candidate_root.get_child_count() > 0 else null
 	var candidate_animation := candidate_instance.find_child("AnimationPlayer", true, false) if candidate_instance else null
 	var validation := _validate_character_candidate(candidate_instance, candidate_animation)
 	if not bool(validation.get("ok", false)):
 		push_warning("Character replacement rejected; keeping current visible model. " + str(validation.get("reason", "validation failed")))
 		candidate_root.queue_free()
-		return
+		return false
 
 	var old_root := visual_root.get_node_or_null("ImportedModelRoot")
 	if old_root:
@@ -155,6 +155,7 @@ func _apply_character_model() -> void:
 		if child != candidate_root and child is Node3D:
 			child.visible = false
 	call_deferred("_apply_refinement_glow")
+	return true
 
 func _validate_character_candidate(candidate: Node, animation_node: Node) -> Dictionary:
 	if candidate == null:
@@ -429,19 +430,36 @@ func _apply_mount_model() -> void:
 			child.visible = false
 
 func set_character_class(new_cls: String) -> void:
+	if new_cls.is_empty() or new_cls == character_class:
+		return
+	var previous_class := character_class
+	var had_imported_model := visual_root and visual_root.get_node_or_null("ImportedModelRoot") != null
 	character_class = new_cls
 	if ClassProgressionManager:
 		ClassProgressionManager.configure_for_character(character_class)
-	_apply_character_model()
+	var replacement_applied := _apply_character_model()
+	if had_imported_model and not replacement_applied:
+		character_class = previous_class
+		if ClassProgressionManager:
+			ClassProgressionManager.configure_for_character(character_class)
+		if GameManager:
+			GameManager.post_notification("لا يمكن تغيير الفئة قبل اعتماد نموذجها المطابق" if GameManager.current_language == "ar" else "Class change blocked until its matching model is verified", true)
+		return
 	if GameManager:
 		GameManager.post_notification("تم تغيير فئة البطل إلى " + new_cls, false)
 
 func set_character_gender(new_gender: String) -> void:
 	var normalized := new_gender.strip_edges().to_lower()
-	if normalized not in ["male", "female"]:
+	if normalized not in ["male", "female"] or normalized == character_gender:
 		return
+	var previous_gender := character_gender
+	var had_imported_model := visual_root and visual_root.get_node_or_null("ImportedModelRoot") != null
 	character_gender = normalized
-	_apply_character_model()
+	var replacement_applied := _apply_character_model()
+	if had_imported_model and not replacement_applied:
+		character_gender = previous_gender
+		if GameManager:
+			GameManager.post_notification("لا يمكن تغيير النوع قبل اعتماد النموذج المطابق" if GameManager.current_language == "ar" else "Gender change blocked until its matching model is verified", true)
 
 func select_archer_weapon_style(style_id: String) -> bool:
 	if character_class != "Archer" or not ClassProgressionManager:
