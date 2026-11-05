@@ -98,6 +98,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "maps":records,
         "failed":failed
     });
+    for map in &records {
+        let map_path = map["path"].as_str().unwrap_or("");
+        let lower = map_path.to_ascii_lowercase();
+        if ["plain", "twin", "city", "market", "birth", "desert", "arena", "forest"].iter().any(|key| lower.contains(key)) {
+            println!("DMAP CANDIDATE: path={} id={} size={}x{} elevation={}..{} cells={} puzzle={}",
+                map_path,
+                map["map_id"].as_u64().map_or_else(|| "unknown".to_owned(), |id| id.to_string()),
+                map["width"], map["height"], map["elevation_min"], map["elevation_max"], map["cell_count"], map["puzzle_path"]);
+        }
+    }
     if let Some(parent) = output.parent() { fs::create_dir_all(parent)?; }
     fs::write(&output, serde_json::to_vec_pretty(&report)?)?;
     println!("DMap audit: {} files, {} parsed, {} failed, {} cells; GameMap catalog records={}",
