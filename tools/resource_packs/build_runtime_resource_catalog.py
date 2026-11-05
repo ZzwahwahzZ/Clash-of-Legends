@@ -7,7 +7,6 @@ slot, or visual approval. Converted GLBs are merged later as explicit candidates
 from __future__ import annotations
 
 import csv
-import hashlib
 import json
 from pathlib import Path, PurePosixPath
 
@@ -91,5 +90,5 @@ def main() -> None:
     print(f"Catalog: {CATALOG} | indexed assets: {sum(map(len, assets.values()))}")
 
 
-if __(!)name__ == "__main__":
+if __name__ == "__main__":
     main()
