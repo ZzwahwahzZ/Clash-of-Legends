@@ -10,6 +10,8 @@ const CLIPS := [
 ]
 const VAT_DIR := "res://build/c3-glb/motion-poc-vat"
 const OUTPUT_DIR := "reports/c3-vat-six-clips"
+# These C3 helper/socket meshes are preserved in GLB for attachment points, not body surfaces.
+const HIDDEN_C3_HELPERS := ["v_zero", "v_slot", "v_l_slot01", "v_l_slot02", "v_r_slot01", "v_r_slot02"]
 
 func _initialize() -> void:
 	call_deferred("_run")
@@ -81,11 +83,22 @@ func _run() -> void:
 			await process_frame
 			all_passed = false
 			continue
+		var hidden_helpers: Array[String] = []
+		for helper_node in mesh_nodes:
+			var helper_mesh := helper_node as MeshInstance3D
+			if HIDDEN_C3_HELPERS.has(helper_mesh.name):
+				helper_mesh.visible = false
+				hidden_helpers.append(helper_mesh.name)
+		if hidden_helpers.size() != HIDDEN_C3_HELPERS.size():
+			push_error("C3 six-clip visual proof: expected all six C3 helper/socket meshes in GLB for " + clip_id)
+			all_passed = false
 
 		var bounds := AABB()
 		var first_bounds := true
 		for mesh_node in mesh_nodes:
 			var mesh_instance := mesh_node as MeshInstance3D
+			if HIDDEN_C3_HELPERS.has(mesh_instance.name):
+				continue
 			if mesh_instance.mesh == null or mesh_instance.mesh.get_surface_count() == 0:
 				continue
 			var world_bounds := _transform_aabb(mesh_instance.get_aabb(), mesh_instance.global_transform)
@@ -157,8 +170,8 @@ func _run() -> void:
 		var hidden_attachment_socket_count := 0
 		for static_part in static_parts:
 			var static_name := str(static_part.get("mesh_name", ""))
-			if static_name.is_empty() or not mesh_by_name.has(static_name) or applied_mesh_names.has(static_name):
-				push_error("C3 six-clip visual proof: static part missing or incorrectly VAT-animated: " + static_name)
+			if static_name.is_empty() or not mesh_by_name.has(static_name) or applied_mesh_names.has(static_name) or not HIDDEN_C3_HELPERS.has(static_name):
+				push_error("C3 six-clip visual proof: static helper/socket part missing, animated, or unclassified: " + static_name)
 				all_passed = false
 				continue
 			if str(static_part.get("render_role", "")) == "attachment_socket_helper":
@@ -218,6 +231,8 @@ func _run() -> void:
 			"full_character_mesh_count": mesh_nodes.size(),
 			"vat_mesh_count": vat_mesh_count,
 			"static_mesh_count": static_parts.size(),
+			"hidden_helper_meshes": hidden_helpers,
+			"visible_character_mesh_count": mesh_nodes.size() - hidden_helpers.size(),
 			"hidden_attachment_socket_count": hidden_attachment_socket_count,
 			"changed_sampled_pixels": changed_sampled_pixels,
 			"frame_a": OUTPUT_DIR.path_join(file_stem + "_frame_a.png"),
