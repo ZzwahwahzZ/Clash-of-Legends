@@ -93,6 +93,24 @@ for table_name, table in catalog.get("tables", {}).items():
         "mix_texture_path_missing_count": mix_texture_missing,
     }
 
+motion_catalog_path = Path("resource_stage/world/resource_mappings/motion_catalog.json")
+motion_paths_added = 0
+motion_paths_missing = 0
+if motion_catalog_path.is_file():
+    motion_catalog = json.loads(motion_catalog_path.read_text(encoding="utf-8"))
+    for motion_path in motion_catalog.get("unique_motion_paths", []):
+        normalized = str(motion_path).replace("\\", "/").lower()
+        rows = source_by_inner.get(normalized, [])
+        staged_files = [row.get("staged_path", "") for row in rows if row.get("staged_path")]
+        present = next((path for path in staged_files if staged_path_available(path)), None)
+        if present:
+            c3_paths.add(present)
+            motion_paths_added += 1
+        else:
+            motion_paths_missing += 1
+            if len(missing_samples) < 250:
+                missing_samples.append({"family": "motion_tables", "kind": "motion", "path": normalized})
+
 if not c3_paths:
     raise SystemExit("No clean original C3 model paths were found.")
 if not pvr_paths:
@@ -110,6 +128,9 @@ coverage = {
     "unique_texture_path_reference_count": len(referenced_texture_paths),
     "final_c3_path_count": len(c3_paths),
     "final_pvr_path_count": len(pvr_paths),
+    "motion_catalog_available": motion_catalog_path.is_file(),
+    "motion_path_added_count": motion_paths_added,
+    "motion_path_missing_count": motion_paths_missing,
     "family_coverage": family_coverage,
     "missing_reference_samples": missing_samples,
     "status": "SOURCE_PATHS_EXPANDED_FROM_MESH_TABLES_REQUIRES_CONVERSION_AND_VISUAL_REVIEW" if catalog_available else "SOURCE_INDEX_ONLY_MESH_CATALOG_NOT_AVAILABLE",
