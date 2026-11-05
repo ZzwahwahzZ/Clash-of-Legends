@@ -115,10 +115,9 @@ jobs:
           test "$(stat -c%s builds/android/ClashOfLegends-debug.apk)" -gt 1048576
 
       - name: Verify APK archive, signature, package id and Android compatibility
-        env:
-          BUILD_TOOLS: ${{ env.ANDROID_HOME }}/build-tools/34.0.0
         run: |
           set -euo pipefail
+          BUILD_TOOLS="$ANDROID_HOME/build-tools/34.0.0"
           APK="builds/android/ClashOfLegends-debug.apk"
           unzip -t "$APK"
           "$BUILD_TOOLS/apksigner" verify --verbose --print-certs "$APK" | tee builds/android/signature-verification.txt
