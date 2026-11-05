@@ -361,17 +361,20 @@ def parse_wdb(data: bytes) -> dict:
     for table_name, rows in mesh_table_rows.items():
         resolved_records = []
         full_records = []
-        part_total = object_resolved = texture_resolved = fully_resolved = 0
+        part_total = object_resolved = texture_resolved = mix_texture_resolved = fully_resolved = 0
         missing_mesh_ids = set()
         missing_texture_ids = set()
+        missing_mix_texture_ids = set()
         for row in rows:
             resolved_parts = []
             for part in row.get("parts", []):
                 part_total += 1
                 mesh_id = int(part["mesh_id"])
                 texture_id = int(part["texture_id"])
+                mix_texture_id = int(part["mix_texture_id"])
                 mesh_path = object_map.get(mesh_id)
                 texture_path = texture_map.get(texture_id)
+                mix_texture_path = texture_map.get(mix_texture_id) if mix_texture_id else None
                 if mesh_path is None:
                     missing_mesh_ids.add(mesh_id)
                 else:
@@ -380,12 +383,19 @@ def parse_wdb(data: bytes) -> dict:
                     missing_texture_ids.add(texture_id)
                 else:
                     texture_resolved += 1
-                if mesh_path is not None and texture_path is not None:
+                if mix_texture_id:
+                    if mix_texture_path is None:
+                        missing_mix_texture_ids.add(mix_texture_id)
+                    else:
+                        mix_texture_resolved += 1
+                if mesh_path is not None and texture_path is not None and (not mix_texture_id or mix_texture_path is not None):
                     fully_resolved += 1
                 resolved_parts.append({
                     **part, "mesh_path": mesh_path, "texture_path": texture_path,
+                    "mix_texture_path": mix_texture_path,
                     "mesh_path_resolved": mesh_path is not None,
                     "texture_path_resolved": texture_path is not None,
+                    "mix_texture_path_resolved": (not mix_texture_id) or mix_texture_path is not None,
                 })
             full_record = {
                 "unique_id": int(row["id"]), "part_count": int(row["part_count"]),
@@ -398,11 +408,14 @@ def parse_wdb(data: bytes) -> dict:
         mesh_family_catalog[table_name] = {
             "record_count": len(rows), "part_count": part_total,
             "mesh_id_matches": object_resolved, "texture_id_matches": texture_resolved,
+            "mix_texture_id_matches": mix_texture_resolved,
             "fully_resolved_part_count": fully_resolved,
             "missing_mesh_id_count": len(missing_mesh_ids),
             "missing_texture_id_count": len(missing_texture_ids),
+            "missing_mix_texture_id_count": len(missing_mix_texture_ids),
             "missing_mesh_id_samples": sorted(missing_mesh_ids)[:30],
             "missing_texture_id_samples": sorted(missing_texture_ids)[:30],
+            "missing_mix_texture_id_samples": sorted(missing_mix_texture_ids)[:30],
             "sample_records": resolved_records,
             "status": "ID_PATH_JOINED_REQUIRES_FILE_PRESENCE_AND_VISUAL_REVIEW" if rows else "TABLE_NOT_PARSED",
         }
