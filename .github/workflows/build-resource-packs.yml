@@ -64,6 +64,8 @@ jobs:
         run: python3 tools/resource_packs/validate_c3_equipment_resource_links.py
       - name: Join itemtype, mounttype, equipment MESH and original source assets
         run: python3 tools/resource_packs/build_equipment_item_join_catalog.py
+      - name: Probe original item icon atlas mappings for mounts and equipment
+        run: python3 tools/resource_packs/probe_equipment_icon_mappings.py
       - name: Upload immediate joined equipment source catalog
         if: always()
         uses: actions/upload-artifact@v4
@@ -71,6 +73,7 @@ jobs:
           name: Equipment-Item-Mount-MESH-Join-Audit
           path: |
             reports/equipment-item-join-audit.json
+            reports/equipment-icon-translation-probe.json
             reports/c3-equipment-resource-link-audit.json
             reports/c3-equipment-source-path-coverage.json
             resource_stage/world/resource_mappings/mesh_equipment_catalog.json
