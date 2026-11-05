@@ -56,6 +56,10 @@ jobs:
           python3 -m pip install --disable-pip-version-check pillow
           python3 tools/c3_audit/audit_pvr_headers.py
           python3 tools/c3_audit/decode_pvr_textures.py
+      - name: Validate and decode original MJP textures
+        run: |
+          python3 -m unittest tools/resource_packs/test_mjp_decoder.py
+          python3 tools/resource_packs/decode_mjp_assets.py
       - uses: dtolnay/rust-toolchain@stable
       - name: Fetch pinned Apache-2.0 C3 parser
         run: |
