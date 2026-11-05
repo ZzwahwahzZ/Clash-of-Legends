@@ -139,6 +139,29 @@ jobs:
           use-dotnet: false
           include-templates: true
 
+      - name: Bundle verified world and model packs into the APK
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, pathlib, urllib.request
+          manifest = json.loads(pathlib.Path("RESOURCE_MANIFEST").read_text())
+          selected = {"maps", "models"}
+          pathlib.Path("bundled").mkdir(exist_ok=True)
+          total = 0
+          for entry in manifest["resource_packages"]:
+              if entry["package_id"] not in selected:
+                  continue
+              destination = pathlib.Path("bundled") / entry["file_name"]
+              print(f"Downloading bundled pack: {entry['package_id']} ({entry['size_bytes']} bytes)")
+              urllib.request.urlretrieve(entry["download_url"], destination)
+              data_hash = hashlib.sha256(destination.read_bytes()).hexdigest()
+              if destination.stat().st_size != int(entry["size_bytes"]) or data_hash != entry["sha256"]:
+                  raise SystemExit(f"Bundled pack integrity check failed: {entry['package_id']}")
+              total += destination.stat().st_size
+          if total == 0:
+              raise SystemExit("No bundled resource packs were staged")
+          print(f"Verified bundled APK resources: {total} bytes")
+          PY
+
       - name: Import Godot project
         run: godot --headless --editor --path . --quit
 
