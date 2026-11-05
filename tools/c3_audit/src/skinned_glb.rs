@@ -44,10 +44,12 @@ fn coordinate_basis() -> Mat4 {
     Mat4::from_rotation_x(std::f32::consts::FRAC_PI_2) * Mat4::from_scale(Vec3::splat(0.01))
 }
 fn joint_matrix(mesh: &C3Mesh, motion: &C3Motion, bone: u32, frame: f32) -> Mat4 {
-    coordinate_basis() * c3_matrix(motion.matrix_at(bone, frame)) * c3_matrix(mesh.initial_matrix)
+    let basis = coordinate_basis();
+    basis * c3_matrix(motion.matrix_at(bone, frame)) * c3_matrix(mesh.initial_matrix) * basis.inverse()
 }
 fn static_matrix(mesh: &C3Mesh) -> Mat4 {
-    coordinate_basis() * c3_matrix(mesh.initial_matrix)
+    let basis = coordinate_basis();
+    basis * c3_matrix(mesh.initial_matrix) * basis.inverse()
 }
 fn decompose(matrix: Mat4) -> Result<(Vec3, Quat, Vec3), String> {
     let (scale, rotation, translation) = matrix.to_scale_rotation_translation();
@@ -138,12 +140,16 @@ pub fn export_document(
         let (positions, normal_values, joints_accessor, weights_accessor, skin_index, skeleton_root) =
             if skinned {
                 let motion = motion.expect("skinned mesh has motion");
-                let raw_positions: Vec<[f32; 3]> = mesh.vertices.iter().map(|v| [v.position.x, v.position.y, v.position.z]).collect();
-                let normal_values = normals(&raw_positions, &all_indices);
-                let flat_positions = flat3(&raw_positions);
-                let (min, max) = min_max(&raw_positions);
+                let basis = coordinate_basis();
+                let converted_positions: Vec<[f32; 3]> = mesh.vertices.iter().map(|v| {
+                    let p = basis.transform_point3(Vec3::new(v.position.x, v.position.y, v.position.z));
+                    [p.x, p.y, p.z]
+                }).collect();
+                let normal_values = normals(&converted_positions, &all_indices);
+                let flat_positions = flat3(&converted_positions);
+                let (min, max) = min_max(&converted_positions);
                 let pos_view = builder.view(&bytes_f32(&flat_positions), Some(34962));
-                let pos_accessor = builder.accessor(pos_view, 5126, raw_positions.len(), "VEC3", Some(min), Some(max));
+                let pos_accessor = builder.accessor(pos_view, 5126, converted_positions.len(), "VEC3", Some(min), Some(max));
                 let normal_view = builder.view(&bytes_f32(&flat3(&normal_values)), Some(34962));
                 let normal_accessor = builder.accessor(normal_view, 5126, normal_values.len(), "VEC3", None, None);
                 let frame_count = motion.frame_count.max(1).min(10000) as usize;
