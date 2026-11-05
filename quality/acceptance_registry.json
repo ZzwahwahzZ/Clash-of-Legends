@@ -1,0 +1,199 @@
+{
+  "schema_version": "1.0.0",
+  "policy": "No element is complete based on code/build success alone.",
+  "reference": "Conquer Online Mobile source assets and gameplay data supplied for this project",
+  "items": [
+    {
+      "id": "characters_and_classes",
+      "status": "NOT_ACCEPTED",
+      "gates": {
+        "source_traceability": false,
+        "reference_match": false,
+        "functional_integration": false,
+        "runtime_visual_verification": false,
+        "automated_tests": false,
+        "device_performance": false
+      },
+      "evidence": [],
+      "open_issues": [
+        "Original-reference comparison and required evidence not yet completed."
+      ]
+    },
+    {
+      "id": "skeleton_and_equipment_attachment",
+      "status": "NOT_ACCEPTED",
+      "gates": {
+        "source_traceability": false,
+        "reference_match": false,
+        "functional_integration": false,
+        "runtime_visual_verification": false,
+        "automated_tests": false,
+        "device_performance": false
+      },
+      "evidence": [],
+      "open_issues": [
+        "Original-reference comparison and required evidence not yet completed."
+      ]
+    },
+    {
+      "id": "weapons_and_armor",
+      "status": "NOT_ACCEPTED",
+      "gates": {
+        "source_traceability": false,
+        "reference_match": false,
+        "functional_integration": false,
+        "runtime_visual_verification": false,
+        "automated_tests": false,
+        "device_performance": false
+      },
+      "evidence": [],
+      "open_issues": [
+        "Original-reference comparison and required evidence not yet completed."
+      ]
+    },
+    {
+      "id": "refinement_glow_levels",
+      "status": "NEEDS_SOURCE_ANALYSIS",
+      "gates": {
+        "source_traceability": false,
+        "reference_match": false,
+        "functional_integration": false,
+        "runtime_visual_verification": false,
+        "automated_tests": false,
+        "device_performance": false
+      },
+      "evidence": [],
+      "open_issues": [
+        "Original-reference comparison and required evidence not yet completed."
+      ]
+    },
+    {
+      "id": "monsters_and_animations",
+      "status": "NOT_ACCEPTED",
+      "gates": {
+        "source_traceability": false,
+        "reference_match": false,
+        "functional_integration": false,
+        "runtime_visual_verification": false,
+        "automated_tests": false,
+        "device_performance": false
+      },
+      "evidence": [],
+      "open_issues": [
+        "Original-reference comparison and required evidence not yet completed."
+      ]
+    },
+    {
+      "id": "monster_drop_tables",
+      "status": "NEEDS_SOURCE_ANALYSIS",
+      "gates": {
+        "source_traceability": false,
+        "reference_match": false,
+        "functional_integration": false,
+        "runtime_visual_verification": false,
+        "automated_tests": false,
+        "device_performance": false
+      },
+      "evidence": [],
+      "open_issues": [
+        "Original-reference comparison and required evidence not yet completed."
+      ]
+    },
+    {
+      "id": "materials_gems_and_uses",
+      "status": "NEEDS_SOURCE_ANALYSIS",
+      "gates": {
+        "source_traceability": false,
+        "reference_match": false,
+        "functional_integration": false,
+        "runtime_visual_verification": false,
+        "automated_tests": false,
+        "device_performance": false
+      },
+      "evidence": [],
+      "open_issues": [
+        "Original-reference comparison and required evidence not yet completed."
+      ]
+    },
+    {
+      "id": "quests_and_requirements",
+      "status": "NOT_ACCEPTED",
+      "gates": {
+        "source_traceability": false,
+        "reference_match": false,
+        "functional_integration": false,
+        "runtime_visual_verification": false,
+        "automated_tests": false,
+        "device_performance": false
+      },
+      "evidence": [],
+      "open_issues": [
+        "Original-reference comparison and required evidence not yet completed."
+      ]
+    },
+    {
+      "id": "maps_and_terrain",
+      "status": "NOT_ACCEPTED",
+      "gates": {
+        "source_traceability": false,
+        "reference_match": false,
+        "functional_integration": false,
+        "runtime_visual_verification": false,
+        "automated_tests": false,
+        "device_performance": false
+      },
+      "evidence": [],
+      "open_issues": [
+        "Original-reference comparison and required evidence not yet completed."
+      ]
+    },
+    {
+      "id": "ui_and_icons",
+      "status": "NOT_ACCEPTED",
+      "gates": {
+        "source_traceability": false,
+        "reference_match": false,
+        "functional_integration": false,
+        "runtime_visual_verification": false,
+        "automated_tests": false,
+        "device_performance": false
+      },
+      "evidence": [],
+      "open_issues": [
+        "Original-reference comparison and required evidence not yet completed."
+      ]
+    },
+    {
+      "id": "effects_and_audio",
+      "status": "NOT_ACCEPTED",
+      "gates": {
+        "source_traceability": false,
+        "reference_match": false,
+        "functional_integration": false,
+        "runtime_visual_verification": false,
+        "automated_tests": false,
+        "device_performance": false
+      },
+      "evidence": [],
+      "open_issues": [
+        "Original-reference comparison and required evidence not yet completed."
+      ]
+    },
+    {
+      "id": "collisions_and_performance",
+      "status": "NOT_ACCEPTED",
+      "gates": {
+        "source_traceability": false,
+        "reference_match": false,
+        "functional_integration": false,
+        "runtime_visual_verification": false,
+        "automated_tests": false,
+        "device_performance": false
+      },
+      "evidence": [],
+      "open_issues": [
+        "Original-reference comparison and required evidence not yet completed."
+      ]
+    }
+  ]
+}
