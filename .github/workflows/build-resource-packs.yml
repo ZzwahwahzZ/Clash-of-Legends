@@ -115,6 +115,23 @@ jobs:
               echo "Missing or empty PCK for $category"; exit 1
             fi
           done
+      - name: Audit generated runtime PCK content and verified character coverage
+        env:
+          RESOURCE_PACK_DIR: res://build/pcks
+        run: |
+          set -o pipefail
+          godot --headless --path . --script tools/quality/audit_resource_pack_contents.gd 2>&1 | tee reports/resource-pack-runtime-audit.log
+          test -s resource-pack-audit.json
+      - name: Upload runtime PCK audit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ClashOfLegends-Runtime-PCK-Audit
+          path: |
+            resource-pack-audit.json
+            reports/resource-pack-runtime-audit.log
+          if-no-files-found: warn
+          retention-days: 30
       - name: Validate PCK runtime loading and model catalog
         run: godot --headless --path . --script tools/resource_packs/validate_pcks.gd
       - name: Validate gameplay collision shapes
