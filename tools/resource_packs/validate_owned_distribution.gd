@@ -10,6 +10,10 @@ func _initialize() -> void:
 		_fail("Owned PCK is empty or unreadable.")
 		return
 	file.close()
+	var pack_bytes := FileAccess.get_file_as_bytes(pack_path)
+	if pack_bytes.find("assets/shaders/weapon_glow.gdshader".to_utf8_buffer()) < 0:
+		_fail("The PCK index does not contain the allowlisted shader path.")
+		return
 	if not ProjectSettings.load_resource_pack(pack_path, true):
 		_fail("Godot could not mount the owned PCK.")
 		return
