@@ -4,6 +4,7 @@ This folder tracks visual-reference assets for the game's art/3D-generation work
 
 ## Selection and fidelity rules
 - **Paid/premium Conquer Online Mobile appearance is a locked fidelity target.** Weapons, armor, helmets, clothing, fashions, mounts, mount tack/ornaments, and their visual effects must retain the exact source design, silhouette, colors, engravings, patterns, and material details. Do not recolor, simplify, redesign, or substitute these items with a merely similar asset.
+- **Skills and progression materials are also locked fidelity targets.** Preserve the complete reference skill catalogue, class assignments, icons, ranks, unlocks, costs, cooldowns, targeting, execution behavior, animation/VFX/audio, and rank-by-rank progression. Preserve each upgrade/refinement material, gem, socket item, icon, grade, recipe, purpose, consumption rule, and the distinct appearance of every resulting equipment stage. No generic skill/effect/material substitute may be presented as identical.
 - Exact source files may be used only where the project owner has the rights/permission required for the intended use and distribution. Keep proprietary originals out of this public repository and public releases unless redistribution rights are explicitly established.
 - If the exact source asset or permission is unavailable, mark that item **UNRESOLVED — NOT APPROVED**. A licensed substitute may be used for unrelated/non-premium content only when it does not violate the locked premium-asset requirement.
 - Preserve provenance for every imported file: source URL/archive, original path/name, owner, license/permission evidence, retrieval date, checksum, transformations, and intended use (reference, private build, or distributable build).
@@ -36,3 +37,7 @@ This folder tracks visual-reference assets for the game's art/3D-generation work
 
 ## Important status
 This is a source-and-license index, not a claim that the full image bundle has been imported. Binary image/model assets will be added only after their original files and licenses are verified. Do not treat an image preview or a web search thumbnail as a redistributable source file.
+
+## Detailed acceptance gates
+- `PAID_ASSET_VISUAL_FIDELITY_GATE.md` — per-item visual/source/rights acceptance for paid equipment and mounts.
+- `SKILL_AND_UPGRADE_MATERIAL_FIDELITY_GATE.md` — per-skill, per-rank, per-material and per-upgrade-stage functional and visual acceptance.
