@@ -7,6 +7,7 @@ signal download_progress(package_id: String, received_bytes: int, total_bytes: i
 signal package_installed(package_id: String, path: String)
 signal package_failed(package_id: String, reason: String)
 signal package_finished(package_id: String, success: bool, reason: String)
+signal aggregate_progress(received_bytes: int, total_bytes: int, completed_packages: int, total_packages: int, active_downloads: int)
 
 const MANIFEST_URL := "https://raw.githubusercontent.com/ZzwahwahzZ/Clash-of-Legends/main/RESOURCE_MANIFEST"
 const INSTALL_DIR := "user://resource_packs"
@@ -109,6 +110,7 @@ func _accept_manifest(candidate: Dictionary) -> bool:
 		cache.store_string(JSON.stringify(candidate, "\t"))
 		cache.close()
 	manifest_loaded.emit(packages.size())
+	_emit_aggregate_progress()
 	return true
 
 func _load_installed_packages() -> void:
@@ -126,6 +128,7 @@ func _load_installed_packages() -> void:
 			if ProjectSettings.load_resource_pack(bundled_path, true):
 				installed_packages[package_id] = true
 				package_installed.emit(package_id, bundled_path)
+				_emit_aggregate_progress()
 			else:
 				push_warning("Bundled resource pack could not be mounted: " + bundled_path)
 			continue
@@ -161,6 +164,7 @@ func _load_installed_packages() -> void:
 		if ProjectSettings.load_resource_pack(path, true):
 			installed_packages[package_id] = true
 			package_installed.emit(package_id, path)
+		_emit_aggregate_progress()
 
 func _verify_package_file(path: String, expected_size: int, expected_hash: String) -> bool:
 	var file := FileAccess.open(path, FileAccess.READ)
@@ -169,6 +173,37 @@ func _verify_package_file(path: String, expected_size: int, expected_hash: Strin
 	var actual_size := file.get_length()
 	file.close()
 	return actual_size == expected_size and _sha256_file(path) == expected_hash
+
+
+func get_missing_package_count() -> int:
+	var missing := 0
+	for package_id in packages.keys():
+		if not is_package_installed(str(package_id)):
+			missing += 1
+	return missing
+
+func get_total_package_bytes() -> int:
+	var total := 0
+	for entry in packages.values():
+		total += int(entry.get("size_bytes", 0))
+	return total
+
+func _emit_aggregate_progress() -> void:
+	var total_bytes := get_total_package_bytes()
+	var received_bytes := 0
+	var completed := 0
+	for package_id in packages.keys():
+		var entry: Dictionary = packages[package_id]
+		var expected := int(entry.get("size_bytes", 0))
+		if is_package_installed(str(package_id)):
+			received_bytes += expected
+			completed += 1
+		elif _active_downloads.has(package_id):
+			var info: Dictionary = _active_downloads[package_id]
+			var request_node: HTTPRequest = info.get("request")
+			if is_instance_valid(request_node):
+				received_bytes += mini(maxi(request_node.get_downloaded_bytes(), 0), expected)
+	aggregate_progress.emit(received_bytes, total_bytes, completed, packages.size(), _active_downloads.size())
 
 func is_package_installed(package_id: String) -> bool:
 	return bool(installed_packages.get(package_id, false))
@@ -299,6 +334,7 @@ func _on_download_completed(result: int, response_code: int, _headers: PackedStr
 		marker.close()
 	installed_packages[package_id] = true
 	package_installed.emit(package_id, final_path)
+	_emit_aggregate_progress()
 	_finish_success(package_id)
 
 func _finish_success(package_id: String) -> void:
@@ -314,6 +350,7 @@ func _finish_failure(package_id: String, reason: String) -> void:
 	_clear_download(package_id)
 	package_failed.emit(package_id, reason)
 	package_finished.emit(package_id, false, reason)
+	_emit_aggregate_progress()
 
 func _clear_download(package_id: String) -> void:
 	if not _active_downloads.has(package_id):
