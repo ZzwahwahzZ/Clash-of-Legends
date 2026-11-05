@@ -100,7 +100,7 @@ func _run_audit() -> void:
 		quit(1)
 		return
 	if not report["missing_character_classes"].is_empty():
-		push_error("RESOURCE PACK AUDIT FAILED: verified character models are missing for: " + ", ".join(report["missing_character_classes"]))
+		push_error("RESOURCE PACK AUDIT FAILED: verified character models are missing for: " + ", ".join(PackedStringArray(report["missing_character_classes"])))
 		quit(1)
 		return
 	if report["models_with_renderable_meshes"] == 0:
@@ -153,19 +153,19 @@ func _audit_resource_catalog(report: Dictionary) -> void:
 				continue
 			if str(entry.get("mapping_status", "")).to_lower() != "verified":
 				continue
-			var class_name := str(entry.get("character_class", ""))
+			var class_id := str(entry.get("character_class", ""))
 			var gender := str(entry.get("gender", ""))
-			if class_name.is_empty() or gender.is_empty():
+			if class_id.is_empty() or gender.is_empty():
 				continue
-			verified_classes[class_name] = true
+			verified_classes[class_id] = true
 			report["verified_character_mappings"].append({
-				"class": class_name,
+				"class": class_id,
 				"gender": gender,
 				"path": relative_path
 			})
-	for class_name in expected_classes:
-		if not verified_classes.has(class_name):
-			report["missing_character_classes"].append(class_name)
+	for class_id in expected_classes:
+		if not verified_classes.has(class_id):
+			report["missing_character_classes"].append(class_id)
 
 func _walk_directory(path: String, counts: Dictionary, model_paths: Array[String]) -> void:
 	var directory := DirAccess.open(path)
