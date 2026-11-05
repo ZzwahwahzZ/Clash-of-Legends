@@ -89,7 +89,6 @@ pub fn export_document(document: &C3Document, texture_png: &[u8], source: &str, 
     let mut gltf_meshes: Vec<Value> = Vec::new();
     let mut nodes: Vec<Value> = vec![json!({"name":"C3_Root","children":[]})];
     let mut children: Vec<usize> = Vec::new();
-    let motion = document.motions.first();
     let mut mesh_count = 0usize;
 
     for (mesh_index, mesh) in document.meshes.iter().enumerate() {
@@ -97,7 +96,7 @@ pub fn export_document(document: &C3Document, texture_png: &[u8], source: &str, 
         let mut positions: Vec<[f32; 3]> = Vec::with_capacity(mesh.vertices.len());
         let mut uvs: Vec<[f32; 2]> = Vec::with_capacity(mesh.vertices.len());
         for vertex in &mesh.vertices {
-            let point = if let Some(motion) = motion {
+            let point = if let Some(motion) = document.motions.get(mesh_index) {
                 mesh.transformed_vertex_position(vertex, motion, Matrix4::IDENTITY, 0.0)
             } else {
                 mesh.initial_matrix.transform_point(vertex.position)
