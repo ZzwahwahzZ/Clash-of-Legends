@@ -10,6 +10,7 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+import shutil
 import tempfile
 from pathlib import Path, PurePosixPath
 
@@ -91,7 +92,7 @@ def main() -> None:
                         output_rel = Path("resource_stage/audio/nested_7z") / archive_parent / archive_path.stem / Path(inner)
                         output_path = ROOT / output_rel
                         output_path.parent.mkdir(parents=True, exist_ok=True)
-                        output_path.write_bytes(extracted_path.read_bytes())
+                        shutil.copyfile(extracted_path, output_path)
                         new_rows.append({
                             "category": "audio",
                             "source_archive": "resource-packs-v4",
