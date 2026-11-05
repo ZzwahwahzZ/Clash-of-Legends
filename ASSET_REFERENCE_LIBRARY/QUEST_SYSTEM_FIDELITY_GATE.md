@@ -47,3 +47,13 @@ Statuses: `SOURCE_VERIFIED`, `SCHEMA_VERIFIED`, `MAPPED`, `IMPLEMENTED`, `VISUAL
 - Android source decode: BLOCKED — candidate quest/task-item decryption not validated against the 1.1.2.3 APK reader.
 
 Do not approve this gate because the sample chain runs or the project builds.
+
+## Additional runtime audit findings (2026-11-05)
+
+- `NPCBase.interact()` calls `on_npc_talked(npc_id)` before dispatching the NPC role/dialogue. Therefore a talk objective can advance simply by interacting, without proving that the intended dialogue branch was selected or completed.
+- `QuestNavigationAgent._complete_quest()` grants Gold/XP immediately when the objective counter reaches its target, then switches to `next_quest`. It does not require a mapped turn-in NPC, a ready-to-turn-in dialogue state, or an explicit reward-claim choice. This differs from the requested NPC hand-off flow and must be redesigned after source behavior is verified.
+- The current navigation method chooses hard-coded map IDs and Vector3 destinations based on quest IDs. These are not source-linked objective locations.
+- `DialogueUI.show_dialogue()` creates generic buttons and `_on_option_clicked()` emits an index, then closes the panel. There is no quest action payload, branch routing, speaker/portrait state, bubble lifecycle, or reward transaction binding.
+- `NPCBase.gd` supplies three fixed lines per NPC role and the scene's NPC body is assembled from primitive cylinder/sphere meshes. Neither dialogue nor NPC appearance is accepted as reference content.
+
+These findings are recorded as implementation gaps, not fixed by suppressing validation. The current runtime must remain prototype-only until the mobile source reader and quest records are validated and the complete interaction is implemented and tested.
