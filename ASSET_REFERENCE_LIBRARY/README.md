@@ -41,3 +41,5 @@ This is a source-and-license index, not a claim that the full image bundle has b
 ## Detailed acceptance gates
 - `PAID_ASSET_VISUAL_FIDELITY_GATE.md` — per-item visual/source/rights acceptance for paid equipment and mounts.
 - `SKILL_AND_UPGRADE_MATERIAL_FIDELITY_GATE.md` — per-skill, per-rank, per-material and per-upgrade-stage functional and visual acceptance.
+
+- `SOURCE_ASSET_INVENTORY_AUDIT.md` — evidence-based inventory of indexed source files and confirmed gaps for mounts, equipment, skills, fashions, gems and refinement materials.
