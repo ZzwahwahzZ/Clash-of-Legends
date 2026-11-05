@@ -319,6 +319,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         };
                         let clip_id = format!("look{look}_model{model_id}_weapon{weapon}_action{action}");
                         let mut vat_mesh_results = Vec::<Value>::new();
+                        let mut vat_static_meshes = Vec::<Value>::new();
                         let mut vat_mesh_failures = Vec::<String>::new();
                         let vat_dir = glb_root.join("motion-poc-vat");
                         for (mesh_index, mesh) in body_document.meshes.iter().enumerate() {
@@ -341,7 +342,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             };
                             // Rigid/static pieces deliberately remain in the complete GLB
                             // with their original geometry and material; they do not get VAT.
-                            if !deforming { continue; }
+                            if !deforming {
+                                vat_static_meshes.push(json!({
+                                    "mesh_index":mesh_index,"mesh_name":mesh.name,
+                                    "vertex_count":mesh.vertices.len(),
+                                    "status":"STATIC_RETAINED_IN_COMPLETE_GLB_NO_VAT"
+                                }));
+                                continue;
+                            }
                             let safe_mesh_name: String = mesh.name.chars().map(|c| if c.is_ascii_alphanumeric() || c == '_' || c == '-' { c } else { '_' }).collect();
                             let vat_prefix = vat_dir.join(format!("{clip_id}_mesh{mesh_index}_{safe_mesh_name}"));
                             match skinned_glb::export_vat(mesh, mesh_motion, &vat_prefix, &clip_id, mesh_index) {
@@ -358,7 +366,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         vat_motion_poc.push(json!({
                             "model_id":model_id,"look":look,"weapon":weapon,"action":action,
                             "clip_id":clip_id,"mesh_count":vat_mesh_results.len(),
-                            "meshes":vat_mesh_results,"failures":vat_mesh_failures,
+                            "deforming_meshes":vat_mesh_results,
+                            "static_meshes_retained_without_vat":vat_static_meshes,
+                            "failures":vat_mesh_failures,
                             "status":if vat_clip_ok {"EXPORTED_DEFORMING_MESHES_ONLY_PENDING_GODOT_VALIDATION"} else {"REJECTED_NO_VALID_DEFORMING_MESH"}
                         }));
                         let skinned_relative = Path::new("motion-poc-skinned").join(format!("look{look}_model{model_id}_weapon{weapon}_action{action}.glb"));
