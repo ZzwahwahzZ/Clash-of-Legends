@@ -50,6 +50,10 @@ jobs:
         run: |
           godot --headless --editor --path . --import --quit
           godot --headless --path . --script tools/c3_audit/validate_c3_glb.gd
+      - name: Render imported C3 skeletal character with Godot
+        run: |
+          mkdir -p reports
+          ALSOFT_DRIVERS=null LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a godot --path . --rendering-method gl_compatibility --script tools/c3_audit/render_c3_skeleton_poc.gd
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -57,6 +61,8 @@ jobs:
           path: |
             reports/c3-model-audit.json
             reports/c3-motion-poc-validation.json
+            reports/c3-skeletal-poc-frame-a.png
+            reports/c3-skeletal-poc-frame-b.png
             reports/pvr-texture-audit.json
             reports/pvr-decode-report.json
             reports/c3-conversion-report.json
