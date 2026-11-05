@@ -7,6 +7,7 @@ class_name SettingsUI
 @onready var load_button: Button = get_node_or_null("Panel/LoadButton")
 @onready var close_button: Button = get_node_or_null("Panel/CloseButton")
 @onready var resource_packs_button: Button = get_node_or_null("Panel/ResourcePacksButton")
+@onready var guide_button: Button = get_node_or_null("Panel/GuideButton")
 @onready var title_label: Label = get_node_or_null("Panel/TitleLabel")
 
 func _ready() -> void:
@@ -16,6 +17,8 @@ func _ready() -> void:
 		close_button.pressed.connect(close_ui)
 	if resource_packs_button:
 		resource_packs_button.pressed.connect(_on_resource_packs_pressed)
+	if guide_button:
+		guide_button.pressed.connect(_on_guide_pressed)
 	if save_button:
 		save_button.pressed.connect(_on_save_pressed)
 	if load_button:
@@ -52,6 +55,8 @@ func _setup_options() -> void:
 		close_button.text = "إغلاق" if is_ar else "Close"
 	if resource_packs_button:
 		resource_packs_button.text = "تنزيل موارد اللعبة" if is_ar else "Download Game Resources"
+	if guide_button:
+		guide_button.text = "دليل اللعب للمبتدئين" if is_ar else "New Player Guide"
 		
 	if lang_option:
 		lang_option.clear()
@@ -157,3 +162,8 @@ func _on_resource_packs_pressed() -> void:
 	var panel := get_tree().get_first_node_in_group("resource_packs_ui")
 	if panel and panel.has_method("open_ui"):
 		panel.open_ui()
+
+func _on_guide_pressed() -> void:
+	var guide := get_tree().get_first_node_in_group("new_player_guide")
+	if guide and guide.has_method("open_guide"):
+		guide.open_guide()
