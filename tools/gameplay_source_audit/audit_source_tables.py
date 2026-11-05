@@ -61,6 +61,47 @@ def decode_text(data: bytes) -> str:
             continue
     return data.decode("utf-8", errors="replace")
 
+def candidate_text_signals(data: bytes) -> dict:
+    if not data:
+        return {"printable_ratio": 0.0, "at_at_lines": 0, "ini_sections": 0, "key_value_lines": 0, "looks_like_known_text": False}
+    sample = data[:min(len(data), 2 * 1024 * 1024)]
+    printable = sum(1 for value in sample if value in (9, 10, 13) or 32 <= value <= 126 or value >= 0xC0)
+    ratio = printable / len(sample)
+    text = sample.decode("utf-8", errors="ignore")
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    at_at = sum(1 for line in lines if "@@" in line and line.split("@@", 1)[0].isdigit())
+    sections = sum(1 for line in lines if line.startswith("[") and "]" in line)
+    key_values = sum(1 for line in lines if "=" in line and not line.startswith(("#", ";", "//")))
+    plausible = ratio >= 0.90 and (at_at >= 3 or (sections >= 2 and key_values >= 5))
+    return {"printable_ratio": round(ratio, 4), "at_at_lines": at_at, "ini_sections": sections,
+            "key_value_lines": key_values, "looks_like_known_text": plausible}
+
+def probe_tq_candidates(data: bytes) -> dict:
+    # Diagnostic only: these seeds are documented for older desktop files, not accepted as the mobile format.
+    probes = []
+    for seed in (9527, 1234):
+        state = seed & 0xFFFFFFFF
+        key = []
+        for _ in range(128):
+            state = (state * 0x343FD + 0x269EC3) & 0xFFFFFFFF
+            key.append(((state >> 16) & 0x7FFF) & 0xFF)
+        decoded = bytearray(len(data))
+        for index, value in enumerate(data):
+            shifted = value ^ key[index % 128]
+            shift = index % 8
+            decoded[index] = shifted if shift == 0 else ((shifted >> shift) | (shifted << (8 - shift))) & 0xFF
+        signals = candidate_text_signals(bytes(decoded))
+        probe = {"method": "TQ_FILE_CIPHER_RESEARCH_ONLY", "seed": seed, **signals,
+                 "accepted_as_mobile_format": False}
+        if signals["looks_like_known_text"]:
+            lines = [line[:240] for line in bytes(decoded).decode("utf-8", errors="ignore").splitlines() if line.strip()][:12]
+            probe["candidate_line_samples"] = lines
+            probe["review_status"] = "PLAUSIBLE_TEXT_REQUIRES_MOBILE_READER_VALIDATION"
+        else:
+            probe["review_status"] = "NO_KNOWN_TEXT_SIGNATURE"
+        probes.append(probe)
+    return {"status": "RESEARCH_ONLY_NOT_DECODED_FOR_RUNTIME", "candidates": probes}
+
 def parse_ini_opaque(data: bytes) -> dict:
     text = decode_text(data)
     parser = configparser.ConfigParser(
@@ -197,7 +238,7 @@ def main() -> None:
                     for source_zip, member, display in sources.get(rel, []):
                         data = source_zip.read(member)
                         record = {"source_member": display, "relative_path": rel, "size_bytes": len(data),
-                                  "sha256": hashlib.sha256(data).hexdigest(), "parse_status": "BINARY_OR_METADATA_ONLY"}
+                                  "sha256": hashlib.sha256(data).hexdigest(), "parse_status": "BINARY_OR_METADATA_ONLY"}\n                        if rel.lower().endswith(".dat"):\n                            record["cipher_probe"] = probe_tq_candidates(data)
                         if rel.lower().endswith(".ini"):
                             record.update(parse_ini_opaque(data))
                         entries.append(record)
