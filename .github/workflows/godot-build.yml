@@ -162,16 +162,6 @@ jobs:
           print(f"Verified bundled APK resources: {total} bytes")
           PY
 
-      - name: Generate launcher icon PNG assets before Godot import
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y librsvg2-bin
-          rsvg-convert -w 192 -h 192 -o public/clash_launcher_icon_192.png public/clash_launcher_icon.svg
-          rsvg-convert -w 432 -h 432 -o public/clash_launcher_icon_432.png public/clash_launcher_icon.svg
-          file public/clash_launcher_icon_192.png public/clash_launcher_icon_432.png
-          test -s public/clash_launcher_icon_192.png
-          test -s public/clash_launcher_icon_432.png
-
       - name: Import Godot project
         run: godot --headless --editor --path . --quit
 
@@ -210,7 +200,7 @@ jobs:
                   raise SystemExit("Android launcher icon is missing from APK")
               import struct
               icon_data = z.read(icon_entries[0])
-              if not icon_data.startswith(b"\\x89PNG\\r\\n\\x1a\\n"):
+              if not icon_data.startswith(bytes.fromhex("89504e470d0a1a0a")):
                   raise SystemExit("Android launcher icon is not a valid PNG")
               width, height = struct.unpack(">II", icon_data[16:24])
               if width < 192 or height < 192:
