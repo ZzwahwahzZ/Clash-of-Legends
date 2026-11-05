@@ -38,7 +38,7 @@ func _validate_packages() -> void:
 	catalog_file.close()
 	var catalog: Dictionary = parser.data
 	var assets: Dictionary = catalog.get("assets", {})
-	for required_category in ["characters", "monsters", "maps", "equipment", "mounts", "effects", "animations", "interface", "audio", "world"]:
+	for required_category in ["characters", "monsters", "maps", "equipment", "mounts", "effects", "animations", "interface", "audio", "models", "world"]:
 		var entries: Array = assets.get(required_category, [])
 		if entries.is_empty():
 			push_error("PCK validation: category is empty: " + required_category)
@@ -69,7 +69,19 @@ func _validate_packages() -> void:
 			return
 		print("PCK model OK: ", model_category, " -> ", model_path, " | meshes: ", mesh_count)
 		model_instance.free()
-	var audio_entries: Array = assets.get("audio", [])
+		var c3_found := false
+	for entry in assets.get("models", []):
+		if str(entry.get("extension", "")).to_lower() == ".c3":
+			var c3_path := "res://" + str(entry.get("path", ""))
+			if FileAccess.file_exists(c3_path):
+				c3_found = true
+				print("PCK original C3 model OK: ", c3_path)
+				break
+	if not c3_found:
+		push_error("PCK validation: extracted original C3 model files are missing.")
+		quit(1)
+		return
+var audio_entries: Array = assets.get("audio", [])
 	var audio_path := ""
 	for entry in audio_entries:
 		if str(entry.get("extension", "")).to_lower() == ".ogg":

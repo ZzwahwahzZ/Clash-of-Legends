@@ -8,12 +8,12 @@ signal package_installed(package_id: String, path: String)
 signal package_failed(package_id: String, reason: String)
 signal package_finished(package_id: String, success: bool, reason: String)
 
-const MANIFEST_URL := "https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/resource-packs-v2/RESOURCE_MANIFEST"
+const MANIFEST_URL := "https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/resource-packs-v3/RESOURCE_MANIFEST"
 const INSTALL_DIR := "user://resource_packs"
 const MAX_MANIFEST_BYTES := 1024 * 1024
 const APPLICATION_ID := "com.zwahwahzz.clashoflegends"
 const GODOT_VERSION := "4.3"
-const RESOURCE_RELEASE_TAG := "resource-packs-v2"
+const RESOURCE_RELEASE_TAG := "resource-packs-v3"
 
 var manifest: Dictionary = {}
 var packages: Dictionary = {}
