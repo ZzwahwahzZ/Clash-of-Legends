@@ -55,6 +55,7 @@ func assert_true(condition: bool, test_name: String) -> void:
 func test_autoload_presence() -> void:
 	assert_true(GameManager != null, "Autoload: GameManager is loaded and active")
 	assert_true(ClassProgressionManager != null, "Autoload: ClassProgressionManager is loaded and active")
+	assert_true(GameContentDatabase != null, "Autoload: shared content database is loaded and active")
 	assert_true(FeatureGuidanceManager != null, "Autoload: FeatureGuidanceManager is loaded and active")
 	assert_true(LocalSaveEngine != null, "Autoload: LocalSaveEngine is loaded and active")
 	assert_true(CombatEngine != null, "Autoload: CombatEngine is loaded and active")
