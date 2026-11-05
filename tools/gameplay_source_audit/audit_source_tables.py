@@ -67,10 +67,11 @@ def parse_ini_opaque(data: bytes) -> dict:
     except configparser.Error as exc:
         return {"parse_status": "TEXT_PRESENT_INI_PARSE_FAILED", "error": str(exc), "line_count": len(text.splitlines())}
 
-def parse_itemtype(data: bytes) -> dict:
+def parse_itemtype(data: bytes, include_column_59_candidate: bool = False) -> dict:
     text = decode_text(data)
     ids, malformed, hist = set(), 0, {}
     samples = []
+    records = []
     for line_no, raw in enumerate(text.splitlines(), 1):
         line = raw.strip()
         if not line or line.startswith(("#", ";", "//")):
@@ -87,10 +88,15 @@ def parse_itemtype(data: bytes) -> dict:
             continue
         ids.add(rid)
         hist[str(len(parts))] = hist.get(str(len(parts)), 0) + 1
+        record = {"record_id": rid, "record_name": parts[1].strip(), "source_line": line_no, "field_count": len(parts)}
+        if include_column_59_candidate and len(parts) > 59:
+            record["column_59_candidate"] = parts[59].strip()
+        records.append(record)
         if len(samples) < 8:
-            samples.append({"record_id": rid, "record_name": parts[1].strip(), "source_line": line_no, "field_count": len(parts)})
+            samples.append(record)
     return {"parse_status": "RECORD_ID_NAME_ONLY_REMAINDER_OPAQUE", "record_count": len(ids),
-            "malformed_or_duplicate_lines": malformed, "field_count_histogram": hist, "samples": samples}
+            "malformed_or_duplicate_lines": malformed, "field_count_histogram": hist,
+            "samples": samples, "records": records}
 
 def main() -> None:
     ap = argparse.ArgumentParser()
@@ -136,7 +142,7 @@ def main() -> None:
                             for source_zip, member, display in candidates:
                                 data = source_zip.read(member)
                                 record = {"source_member": display, "relative_path": rel, "size_bytes": len(data),
-                                          "sha256": hashlib.sha256(data).hexdigest(), **parse_itemtype(data)}
+                                          "sha256": hashlib.sha256(data).hexdigest(), **parse_itemtype(data, include_column_59_candidate=rel.lower().endswith("itemtype13.ini"))}
                                 entries.append(record)
                 results[category] = entries
             itemtypes = [e for e in results["equipment"] if e["relative_path"].lower().startswith("ini/itemtype/")]
