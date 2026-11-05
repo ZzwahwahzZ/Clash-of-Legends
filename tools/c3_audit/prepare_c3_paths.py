@@ -64,7 +64,7 @@ for table_name, table in catalog.get("tables", {}).items():
                 referenced_texture_paths.add(texture_path)
                 rows = source_by_inner.get(texture_path, [])
                 staged_files = [row.get("staged_path", "") for row in rows if row.get("staged_path")]
-                present = next((path for path in staged_files if Path(path).is_file()), None)
+                present = next((path for path in staged_files if staged_path_available(path)), None)
                 if present:
                     pvr_paths.add(present)
                     texture_found += 1
@@ -115,7 +115,7 @@ if motion_catalog_path.is_file():
 if not c3_paths:
     raise SystemExit("No clean original C3 model paths were found.")
 if not pvr_paths:
-    raise SystemExit("No C3-related PVR texture paths were found.")
+    print("WARNING: no C3 PVR texture paths in current extraction index; continuing with source model paths only.")
 
 Path("build").mkdir(parents=True, exist_ok=True)
 Path("build/c3-paths.json").write_text(json.dumps(sorted(c3_paths), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
