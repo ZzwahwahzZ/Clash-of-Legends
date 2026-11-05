@@ -63,6 +63,12 @@ jobs:
           godot --headless --path . --script tools/resource_packs/validate_runtime_collisions.gd 2>&1 | tee ci-logs/runtime-collision.log
           if grep -Eq "SCRIPT ERROR:|Parse Error:|Compile Error:|RUNTIME COLLISION AUDIT FAILED" ci-logs/runtime-collision.log; then echo "Runtime collision test failed"; exit 1; fi
 
+      - name: Test manual and quest instant travel
+        run: |
+          set -o pipefail
+          godot --headless --path . --script tools/resource_packs/validate_world_travel.gd 2>&1 | tee ci-logs/world-travel.log
+          if grep -Eq "SCRIPT ERROR:|Parse Error:|Compile Error:|WORLD TRAVEL AUDIT FAILED" ci-logs/world-travel.log; then echo "World travel test failed"; exit 1; fi
+
       - name: Upload logs
         if: always()
         uses: actions/upload-artifact@v4
