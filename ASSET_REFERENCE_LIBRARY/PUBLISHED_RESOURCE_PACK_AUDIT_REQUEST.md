@@ -14,7 +14,7 @@ Inspect the exact 11 resource packs referenced by `RESOURCE_MANIFEST` from relea
 
 ## Acceptance rules
 - A model is not approved solely because it imports or contains mesh surfaces.
-- Character candidates require a usable skeletal rig, active materials, and non-empty idle and movement clips.
+- Character candidates require active materials and either (a) a bound skeletal rig with bone-targeted idle and movement clips, or (b) a complete morph/vertex-animation path with semantically identified idle and movement clips. The full body/head/equipment assembly and exact source identity must still be reviewed.
 - Mount candidates require explicit item-to-model identity mapping and renderable materials.
 - Missing evidence remains BLOCKED; never downgrade the gate or mark a candidate verified to make CI green.
 - Keep the existing runtime visual visible when a replacement candidate fails validation.
