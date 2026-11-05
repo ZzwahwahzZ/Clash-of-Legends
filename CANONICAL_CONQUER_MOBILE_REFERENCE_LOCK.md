@@ -16,15 +16,19 @@ The owner explicitly approved the Conquer Online Mobile client resources already
 - SHA-256: `0d21a110c09b762ed5f1a5f4da022857b0534e489eb85052d15da460cb229d2a`
 - Inventory recorded for this archive: 314 entries (174 3D-model entries, 90 image/texture entries, 25 other entries, 25 game-data/config entries).
 
-## 2. Version/build identification — do not fabricate
+## 2. Version/build identification — verified Android package metadata
 
-The owner's approval locks the supplied mobile client snapshot as the canonical project reference. It does **not** by itself prove a marketing version, region, release date, APK versionName/versionCode, or internal build number.
+The base APK was recovered from the owner-supplied archive and its Android manifest was decoded and validated. The canonical reference is now identified as:
 
-Until those identifiers are recovered from original client metadata/APK manifests or other reliable evidence:
-- Refer to it as **Owner-approved Conquer Online Mobile supplied client snapshot**.
-- Record the exact version/build as **UNIDENTIFIED / pending metadata verification**.
-- Do not label it "latest", "classic edition", or a numbered release without evidence.
-- Do not silently mix features from unrelated PC clients, other mobile builds, regional variants, or fan-maintained servers into the baseline.
+- Android package: `com.Tq.CQ2ClientAndroid`
+- `versionName`: `1.1.2.3`
+- `versionCode`: `123`
+- Base APK: `ConquerOnline/ConquerOnline-1.1.2.3.apk`
+- APK size: `155,612,867` bytes
+- APK SHA-256: `b1b8ccf0d5e1a9dcf346f8f11c20011cd9c68332f1b92676e79f87290f12c8f2`
+- Manifest minSdk: `21`; targetSdk: `35`
+
+The Android package version is verified. The server-side content revision, region-specific differences, and any post-install content updates are still not identified. Do not label this client "latest" or mix unrelated PC clients, mobile builds, regions, or fan-maintained servers into the canonical baseline.
 
 ## 3. Feature-research rules
 
@@ -66,4 +70,4 @@ A live GitHub API inspection of the `mobile-source-files` release returned eight
 
 Important: this is a release-list observation, not a claim that these are all original client files. No APK/AAB appeared among those eight listed assets. Earlier workflow records refer to two larger ZIPs (`ConquerOnline.zip` and `Conquer-Mobile-Assets.-mobile-source-files.zip`); their presence must be re-verified rather than assumed. The dedicated one-cell Colab audit notebook checks the current release API, attempts the exact known archive URLs with size/SHA verification, and scans all retrieved contents for package/version/build metadata.
 
-The loose updater files are promising evidence for client resource/update structure, but their names alone do not identify the Android app version or build. Keep the canonical version/build status **UNIDENTIFIED** until direct metadata is recovered.
+The loose updater files remain evidence for the resource/update structure, but their names alone do not identify the app version. The later decoded base-APK manifest above supersedes the earlier UNIDENTIFIED status for the Android package version; server-side content revision and regional variant remain unresolved.
