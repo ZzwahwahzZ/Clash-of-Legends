@@ -1,4 +1,3 @@
-
 name: Clash of Legends - Build and Tests
 
 on:
@@ -60,9 +59,8 @@ jobs:
           path: ci-logs/
           if-no-files-found: warn
 
-
   android-apk:
-    name: Android APK Export
+    name: Android 13 - Signed APK Export and Integrity Checks
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -80,7 +78,24 @@ jobs:
           packages: platform-tools
 
       - name: Install Android SDK packages
-        run: sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+        run: sdkmanager "platform-tools" "platforms;android-33" "build-tools;34.0.0"
+
+      # This stable CI-only debug key is cached so successive debug APKs keep
+      # the same signer. It is not a production/release signing identity.
+      - name: Restore persistent CI debug signing key
+        uses: actions/cache@v4
+        with:
+          path: .ci-signing/debug.keystore
+          key: clash-of-legends-android-debug-signing-v1
+
+      - name: Create CI debug signing key when needed
+        run: |
+          mkdir -p .ci-signing builds/android/signing
+          if [ ! -s .ci-signing/debug.keystore ]; then
+            keytool -genkeypair -v               -keystore .ci-signing/debug.keystore               -storepass android               -alias androiddebugkey               -keypass android               -keyalg RSA -keysize 2048 -validity 10000               -dname "CN=Clash of Legends Debug,O=ZzwahwahzZ,C=EG"
+          fi
+          cp .ci-signing/debug.keystore builds/android/signing/debug.keystore
+          keytool -list -keystore builds/android/signing/debug.keystore -storepass android -alias androiddebugkey
 
       - name: Setup Godot with export templates
         uses: chickensoft-games/setup-godot@v2
@@ -92,18 +107,50 @@ jobs:
       - name: Import Godot project
         run: godot --headless --editor --path . --quit
 
-      - name: Export installable debug APK
+      - name: Export signed Android APK
         run: |
           mkdir -p builds/android
           godot --headless --path . --export-debug "Android" builds/android/ClashOfLegends-debug.apk
+          test -s builds/android/ClashOfLegends-debug.apk
+          test "$(stat -c%s builds/android/ClashOfLegends-debug.apk)" -gt 1048576
 
-      - name: Upload Android APK
+      - name: Verify APK archive, signature, package id and Android compatibility
+        env:
+          BUILD_TOOLS: ${{ env.ANDROID_HOME }}/build-tools/34.0.0
+        run: |
+          set -euo pipefail
+          APK="builds/android/ClashOfLegends-debug.apk"
+          unzip -t "$APK"
+          "$BUILD_TOOLS/apksigner" verify --verbose --print-certs "$APK" | tee builds/android/signature-verification.txt
+          "$BUILD_TOOLS/aapt" dump badging "$APK" | tee builds/android/apk-badging.txt
+          grep -q "package: name='com.zwahwahzz.clashoflegends'" builds/android/apk-badging.txt
+          grep -q "sdkVersion:'23'" builds/android/apk-badging.txt
+          grep -q "targetSdkVersion:'33'" builds/android/apk-badging.txt
+          grep -q "Signer #1 certificate SHA-256 digest" builds/android/signature-verification.txt
+          (cd builds/android && sha256sum ClashOfLegends-debug.apk > SHA256SUMS.txt)
+          {
+            echo "Package: com.zwahwahzz.clashoflegends"
+            echo "Minimum Android: 6.0 (API 23)"
+            echo "Target Android: 13 (API 33)"
+            echo "Architecture: ARM64-v8a"
+            echo "Signature: verified CI debug signature"
+            echo "APK size: $(stat -c%s "$APK") bytes"
+          } > builds/android/INSTALL-INFO.txt
+          cat builds/android/SHA256SUMS.txt
+          cat builds/android/INSTALL-INFO.txt
+
+      - name: Upload verified Android APK and checksum
         uses: actions/upload-artifact@v4
         with:
-          name: ClashOfLegends-Android-debug
-          path: builds/android/ClashOfLegends-debug.apk
+          name: ClashOfLegends-Android13-SIGNED-VERIFIED
+          path: |
+            builds/android/ClashOfLegends-debug.apk
+            builds/android/SHA256SUMS.txt
+            builds/android/INSTALL-INFO.txt
+            builds/android/signature-verification.txt
+            builds/android/apk-badging.txt
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 30
 
   studio-build:
     name: React Studio Build
