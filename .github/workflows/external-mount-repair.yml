@@ -1,0 +1,55 @@
+name: External mount GLB repair and geometry audit
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/external-mount-repair.yml"
+      - "tools/external_assets/repair_mount_glbs.py"
+permissions:
+  contents: read
+jobs:
+  repair-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Blender and Python tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y blender
+      - name: Download five source mount GLBs and reference images
+        run: |
+          set -euo pipefail
+          mkdir -p build/mounts/source build/mounts/references reports/mounts
+          base="https://raw.githubusercontent.com/ZzwahwahzZ/Conquer-Mobile-Assets./main"
+          for n in 0001_82-2302141501351R 0002_82-230214144304112 0003_82-230214144I41T 0004_82-230214145559115 0005_82-230214150623127; do
+            curl --fail --location --retry 4 "$base/generated_models/mounts__mounts_${n}.glb" -o "build/mounts/source/mounts__mounts_${n}.glb"
+          done
+          for n in 0001_82-2302141501351R 0002_82-230214144304112 0003_82-230214144I41T 0004_82-230214145559115 0005_82-230214150623127; do
+            curl --fail --location --retry 4 "$base/original_images/mounts/mounts_${n}.png" -o "build/mounts/references/mounts_${n}.png"
+          done
+      - name: Inspect and conservatively repair candidate meshes in Blender
+        run: |
+          blender --background --factory-startup --python tools/external_assets/repair_mount_glbs.py -- build/mounts/source reports/mounts
+      - name: Validate report and candidate output count
+        run: |
+          python3 - <<'PY'
+          import json,glob,os
+          p=json.load(open('reports/mounts/mount_repair_audit.json'))
+          assert len(p['records']) == 5, len(p['records'])
+          assert all(r['mesh_count'] > 0 for r in p['records'])
+          assert all(os.path.isfile(r['output']) for r in p['records'])
+          print('AUDIT_OK',len(p['records']))
+          for r in p['records']:
+              print(r['file'], 'meshes=',r['mesh_count'],'components=',sum(x['components'] for x in r['after']))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: External-Mount-Repair-Candidates
+          path: |
+            reports/mounts/*.glb
+            reports/mounts/*.json
+            build/mounts/references/*.png
+          if-no-files-found: error
+          retention-days: 14
