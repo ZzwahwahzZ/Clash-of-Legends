@@ -47,34 +47,17 @@ fn u16_bytes(values: &[u16]) -> Vec<u8> {
     out
 }
 
-fn transformed_positions(mesh: &sandbox_data::c3::C3Mesh, motion: Option<&sandbox_data::c3::C3Motion>, frame: f32) -> Vec<[f32; 3]> {
-    mesh.vertices.iter().map(|vertex| {
+fn transformed_positions(mesh: &sandbox_data::c3::C3Mesh, motion: Option<&sandbox_data::c3::C3Motion>, frame: f32) -> Result<Vec<[f32; 3]>, String> {
+    mesh.vertices.iter().enumerate().map(|(vertex_index, vertex)| {
         let point = if let Some(motion) = motion {
-            // Match the C3 runtime's documented behavior: the first positive
-            // influence selects the vertex's bone; the stored weight is a
-            // presence/selection value here, not a conventional GPU blend.
-            // The C3Studio reference renderer and the pinned Preservation CO
-            // runtime both select the first positive influence for this vertex.
-            // Keep this compatibility path separate from the skeletal exporter.
-            let mut point = mesh.initial_matrix.transform_point(vertex.position);
-            for influence in 0..2 {
-                let weight = vertex.bone_weights[influence];
-                let bone = vertex.bone_indices[influence];
-                if weight > 0.0 && bone < motion.bone_count {
-                    point = mesh.initial_matrix
-                        .multiply(motion.matrix_at(bone, frame))
-                        .transform_point(vertex.position);
-                    break;
-                }
-            }
-            point
+            crate::skinned_glb::weighted_c3_position(mesh, motion, vertex_index, frame)?
         } else {
             mesh.initial_matrix.transform_point(vertex.position)
         };
-        // NetDragon C3 uses Z-down; convert to glTF Y-up and centimeters to meters.
-        [point.x * 0.01, -point.z * 0.01, point.y * 0.01]
+        Ok([point.x * 0.01, -point.z * 0.01, point.y * 0.01])
     }).collect()
 }
+
 fn morph_deltas(base: &[[f32; 3]], frame: &[[f32; 3]]) -> Vec<f32> {
     base.iter().zip(frame.iter()).flat_map(|(a, b)| [
         b[0] - a[0], b[1] - a[1], b[2] - a[2]
@@ -196,7 +179,7 @@ pub fn export_document(document: &C3Document, texture_png: &[u8], source: &str, 
 
         let positions_by_frame: Vec<Vec<[f32; 3]>> = sample_frames.iter()
             .map(|frame| transformed_positions(mesh, motion, *frame))
-            .collect();
+            .collect::<Result<_, _>>()?;
         let positions = &positions_by_frame[0];
         let all_indices: Vec<u16> = mesh.opaque_indices.iter()
             .chain(mesh.alpha_indices.iter()).copied().collect();
@@ -390,7 +373,7 @@ mod tests {
     }
 
     #[test]
-    fn sampled_deformation_matches_first_positive_c3_influence() {
+    fn sampled_deformation_matches_normalized_weighted_c3_influences() {
         let mut source = mesh("two_slot_vertex");
         source.vertices[0].bone_indices = [0, 1];
         source.vertices[0].bone_weights = [0.25, 0.75];
@@ -405,9 +388,9 @@ mod tests {
             morph_count: 0,
             morph_values: Vec::new(),
         };
-        let result = transformed_positions(&source, Some(&motion), 0.0);
-        // The C3 runtime selects the first positive influence (bone 0).
-        assert!((result[0][0] - 0.04).abs() < 0.00001);
+        let result = transformed_positions(&source, Some(&motion), 0.0).unwrap();
+        // 25% of the first transform (4) plus 75% of the second (40) = 31 cm.
+        assert!((result[0][0] - 0.31).abs() < 0.00001);
     }
 
     #[test]
