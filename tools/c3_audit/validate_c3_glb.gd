@@ -212,20 +212,33 @@ func _validate() -> void:
 					if named_clip_meshes.has(mesh_name):
 						var imported_mesh := named_clip_meshes[mesh_name] as MeshInstance3D
 						vertex_order_matches = imported_mesh.mesh != null and imported_mesh.mesh.get_surface_count() > 0
+						var seen_source_indices: Dictionary = {}
 						for surface in range(imported_mesh.mesh.get_surface_count()):
 							var arrays: Array = imported_mesh.mesh.surface_get_arrays(surface)
-							var imported_vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
-							if imported_vertices.size() != width:
+							if arrays.size() <= Mesh.ARRAY_TEX_UV2 or not (arrays[Mesh.ARRAY_TEX_UV2] is PackedVector2Array):
 								vertex_order_matches = false
 								break
-							for vertex_index in range(width):
-								var offset := vertex_index * 16
-								var vat_position := Vector3(data.decode_float(offset), data.decode_float(offset + 4), data.decode_float(offset + 8))
-								if imported_vertices[vertex_index].distance_to(vat_position) > 0.0001:
+							var imported_vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+							var source_ids: PackedVector2Array = arrays[Mesh.ARRAY_TEX_UV2]
+							if imported_vertices.size() != source_ids.size():
+								vertex_order_matches = false
+								break
+							for imported_index in range(imported_vertices.size()):
+								var source_uv := source_ids[imported_index]
+								var source_index := int(floor(source_uv.x * float(width)))
+								if source_index < 0 or source_index >= width or absf(source_uv.x - (float(source_index) + 0.5) / float(width)) > 0.00001 or absf(source_uv.y - 0.5) > 0.00001:
 									vertex_order_matches = false
 									break
+								var offset := source_index * 16
+								var vat_position := Vector3(data.decode_float(offset), data.decode_float(offset + 4), data.decode_float(offset + 8))
+								if imported_vertices[imported_index].distance_to(vat_position) > 0.0001:
+									vertex_order_matches = false
+									break
+								seen_source_indices[source_index] = true
 							if not vertex_order_matches:
 								break
+						var expected_referenced_count := int(metadata.get("referenced_vertex_count", -1))
+						vertex_order_matches = vertex_order_matches and expected_referenced_count > 0 and seen_source_indices.size() == expected_referenced_count
 			var weighted_affine := str(metadata.get("influence_semantics", "")).contains("all positive C3 bone_weights")
 			var valid_vat: bool = finite_values and changed and vertex_order_matches and str(metadata.get("format", "")) == "C3_VAT_RGBA32F" and str(metadata.get("classification", "")) == "deforming" and weighted_affine and bool(metadata.get("preserves_affine_shear", false)) and str(metadata.get("vertex_order", "")).begins_with("source C3 vertex index") and not clip_id.is_empty() and mesh_index >= 0 and not mesh_name.is_empty()
 			if valid_vat:
