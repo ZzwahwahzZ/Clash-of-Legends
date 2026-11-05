@@ -4,7 +4,7 @@ import csv, hashlib, json, os, re, shutil, sys, zipfile
 from pathlib import Path
 
 ROOT=Path.cwd()
-STAGE=ROOT/"build/resource_stage"
+STAGE=ROOT/"resource_stage"
 SOURCE=ROOT/"build/source_archives"
 for p in (STAGE,SOURCE):
     shutil.rmtree(p,ignore_errors=True); p.mkdir(parents=True,exist_ok=True)
