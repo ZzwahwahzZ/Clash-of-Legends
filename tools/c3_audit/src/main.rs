@@ -33,6 +33,7 @@ fn category_for(path: &Path) -> Option<&'static str> {
         "body" | "npc" => Some("characters"),
         "monster" => Some("monsters"),
         "armet" | "weapon" | "hair" | "cape" | "head" => Some("equipment"),
+        "mount" | "horse" | "pet" | "ride" => Some("mounts"),
         "effect" => Some("effects"),
         "ghost" | "misc" => Some("world"),
         _ => None,
