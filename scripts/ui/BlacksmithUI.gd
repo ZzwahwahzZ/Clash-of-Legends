@@ -70,10 +70,17 @@ func _update_info() -> void:
 		info_label.text = "لا يوجد عتاد مجهز في هذه الخانة!" if is_ar else "No equipment in this slot!"
 		return
 		
-	var cur_ref = eq.get("refine_level", 0)
-	var next_ref = cur_ref + 1
-	var gold_cost = next_ref * 200
-	var success_chance = int(max(0.35, 1.0 - (cur_ref * 0.12)) * 100)
+	var preview := inv.get_refine_preview(slot_key)
+	if preview.is_empty():
+		info_label.text = "لا يمكن عرض بيانات الصقل" if is_ar else "Refinement data unavailable"
+		return
+	if preview.get("maxed", false):
+		info_label.text = "وصل العتاد إلى أقصى صقل +12" if is_ar else "Equipment reached maximum refinement +12"
+		return
+	var cur_ref := int(preview.current_level)
+	var next_ref := int(preview.next_level)
+	var gold_cost := int(preview.gold_cost)
+	var success_chance := int(float(preview.success_chance) * 100.0)
 	
 	info_label.text = "[%s]\nالمستوى الحالي: +%d\nالمستوى القادم: +%d\nالمتطلبات: 1 حجر نيزك + %d ذهب\nنسبة النجاح: %d%%" % [
 		eq.get("name_ar", "عتاد") if is_ar else eq.get("name_en", "Gear"),
