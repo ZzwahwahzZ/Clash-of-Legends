@@ -270,14 +270,22 @@ func _render() -> void:
 		await process_frame
 		await process_frame
 		var after_image := get_root().get_texture().get_image()
-		var changed_bytes := 0
+		var changed_sampled_pixels := 0
 		var before_data := before_image.get_data()
 		var after_data := after_image.get_data()
 		if before_data.size() == after_data.size():
-			for byte_index in range(before_data.size()):
-				if before_data[byte_index] != after_data[byte_index]:
-					changed_bytes += 1
-		if changed_bytes < 100:
+			# Compare one RGBA pixel every four pixels and stop once visible change is proven.
+			for pixel_offset in range(0, before_data.size(), 16):
+				var pixel_changed := false
+				for channel in range(4):
+					if before_data[pixel_offset + channel] != after_data[pixel_offset + channel]:
+						pixel_changed = true
+						break
+				if pixel_changed:
+					changed_sampled_pixels += 1
+					if changed_sampled_pixels >= 100:
+						break
+		if changed_sampled_pixels < 100:
 			push_error("C3 VAT visual proof: before/after frames show no meaningful movement for " + clip_id)
 			quit(1)
 			return
@@ -288,7 +296,7 @@ func _render() -> void:
 			"full_character_mesh_count": all_mesh_nodes.size(),
 			"vat_mesh_count": vat_players_for_clip.size(),
 			"static_mesh_count": clip_report.get("static_meshes_retained_without_vat", []).size(),
-			"changed_pixel_bytes": changed_bytes,
+			"changed_sampled_pixels": changed_sampled_pixels,
 			"status": "FULL_CHARACTER_VISUAL_MOTION_CONFIRMED"
 		})
 		print("C3 VAT FULL CHARACTER VISUAL PROOF: ", JSON.stringify(clip_proofs[clip_proofs.size() - 1]))
