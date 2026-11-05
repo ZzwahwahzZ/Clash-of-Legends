@@ -275,6 +275,86 @@ func refine_equipment(slot_name: String) -> bool:
 		GameManager.post_notification("فشلت محاولة الصقل؛ احتفظ العتاد بمستواه الحالي" if GameManager.current_language == "ar" else "Refinement failed; equipment level was preserved", true)
 	return false
 
+func get_upgrade_preview(slot_name: String, upgrade_type: String) -> Dictionary:
+	if not equipment.has(slot_name) or equipment[slot_name] == null:
+		return {}
+	var item: Dictionary = equipment[slot_name]
+	var rules := {
+		"perfection": {"field":"perfection_level","cap":20,"material":"perfection_stone","base_cost":300},
+		"blessing": {"field":"blessing_level","cap":7,"material":"blessing_stone","base_cost":500},
+		"enchant": {"field":"enchant_level","cap":5,"material":"enchant_scroll","base_cost":400},
+		"purification": {"field":"purification_level","cap":1,"material":"purification_stone","base_cost":800},
+		"anima": {"field":"anima_level","cap":3,"material":"anima_core","base_cost":1000}
+	}
+	if not rules.has(upgrade_type):
+		return {}
+	var rule: Dictionary = rules[upgrade_type]
+	var level := int(item.get(rule.field, 0))
+	var material_count := 0
+	for stack in slots:
+		if stack != null and str(stack.get("id", "")) == str(rule.material):
+			material_count += int(stack.get("quantity", 1))
+	var maxed := level >= int(rule.cap) or (upgrade_type == "purification" and item.has("purification"))
+	return {
+		"upgrade_type": upgrade_type,
+		"current_level": level,
+		"next_level": level + 1,
+		"maxed": maxed,
+		"material_id": rule.material,
+		"material_count": material_count,
+		"gold_cost": int(rule.base_cost) * (level + 1),
+		"material_required": 1
+	}
+
+func apply_equipment_upgrade(slot_name: String, upgrade_type: String, stat_choice: String = "attack") -> bool:
+	var preview := get_upgrade_preview(slot_name, upgrade_type)
+	if preview.is_empty() or preview.get("maxed", false) or int(preview.material_count) < 1:
+		return false
+	if stat_choice not in ["attack", "defense"]:
+		return false
+	if not GameManager or not GameManager.spend_gold(int(preview.gold_cost)):
+		return false
+	var material_index := -1
+	for i in range(MAX_SLOTS):
+		if slots[i] != null and str(slots[i].get("id", "")) == str(preview.material_id) and int(slots[i].get("quantity", 1)) > 0:
+			material_index = i
+			break
+	if material_index < 0:
+		GameManager.add_gold(int(preview.gold_cost))
+		return false
+	remove_item_at(material_index, 1)
+	var item: Dictionary = equipment[slot_name]
+	match upgrade_type:
+		"perfection":
+			item["perfection_level"] = int(preview.next_level)
+			item["attack_bonus"] = int(item.get("attack_bonus", 0)) + 2
+			item["defense_bonus"] = int(item.get("defense_bonus", 0)) + 2
+		"blessing":
+			item["blessing_level"] = int(preview.next_level)
+		"enchant":
+			item["enchant_level"] = int(preview.next_level)
+			if stat_choice == "attack":
+				item["enchant_attack_bonus"] = int(item.get("enchant_attack_bonus", 0)) + 5
+			else:
+				item["enchant_defense_bonus"] = int(item.get("enchant_defense_bonus", 0)) + 3
+		"purification":
+			item["purification_level"] = 1
+			item["purification"] = {"stat": stat_choice, "value": 10 if stat_choice == "attack" else 8}
+		"anima":
+			item["anima_level"] = int(preview.next_level)
+			item["attack_bonus"] = int(item.get("attack_bonus", 0)) + 4
+			item["defense_bonus"] = int(item.get("defense_bonus", 0)) + 4
+	emit_signal("equipment_updated")
+	_recalculate_player_stats()
+	return true
+
+func get_total_blessing_reduction() -> float:
+	var total_levels := 0
+	for item in equipment.values():
+		if item is Dictionary:
+			total_levels += int(item.get("blessing_level", 0))
+	return minf(0.35, float(total_levels) * 0.02)
+
 func insert_gem(slot_name: String, inventory_index: int, socket_index: int) -> bool:
 	if not equipment.has(slot_name) or equipment[slot_name] == null:
 		return false
@@ -324,8 +404,13 @@ func _recalculate_player_stats() -> void:
 	for k in equipment.keys():
 		var eq = equipment[k]
 		if eq != null:
-			total_atk += int(eq.get("attack_bonus", 0))
-			total_def += int(eq.get("defense_bonus", 0))
+			total_atk += int(eq.get("attack_bonus", 0)) + int(eq.get("enchant_attack_bonus", 0))
+			total_def += int(eq.get("defense_bonus", 0)) + int(eq.get("enchant_defense_bonus", 0))
+			var purification: Dictionary = eq.get("purification", {})
+			if purification.get("stat", "") == "attack":
+				total_atk += int(purification.get("value", 0))
+			elif purification.get("stat", "") == "defense":
+				total_def += int(purification.get("value", 0))
 			for gem in eq.get("socket_gems", []):
 				if gem is Dictionary:
 					total_atk += int(gem.get("attack_bonus", 0))
