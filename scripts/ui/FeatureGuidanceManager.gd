@@ -50,8 +50,8 @@ func show_feature_intro(feature_id: String) -> bool:
 	dialog.dialog_text = str(guide["body"])
 	dialog.ok_button_text = "فهمت"
 	dialog.min_size = Vector2i(460, 220)
-	_apply_rtl_tree(dialog)
 	get_tree().root.add_child(dialog)
+	_apply_rtl_tree(dialog)
 	dialog.confirmed.connect(func(): _mark_seen(feature_id))
 	dialog.close_requested.connect(func(): _mark_seen(feature_id))
 	dialog.popup_centered()
