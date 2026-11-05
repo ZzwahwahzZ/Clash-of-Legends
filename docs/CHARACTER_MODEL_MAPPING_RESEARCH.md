@@ -113,3 +113,23 @@ The current runtime now requires explicit metadata before selecting a class mode
 The lookup helper returns no model when these conditions are not met. In that case the existing fallback scene remains visible rather than silently attaching an unrelated GLB. This is a safety gate, **not** completion of the visual character system. The current C3 conversion catalog does not yet prove full-character metadata or attachment transforms.
 
 A new regression script, `tools/resource_packs/validate_character_model_mapping.gd`, tests that body-part records, candidate mappings, unknown classes, and wrong-gender models are rejected. The Godot CI workflow now runs this check. The source-to-class mappings remain unaccepted until rendered male/female characters and their head/equipment attachment points are verified.
+
+## 8. Motion-only C3 structure: new evidence and safe replacement path
+
+The latest C3 audit artifact confirms that the 558 motion-only documents are not arbitrary one-off files. Examples from the extracted source set:
+
+- `netdragon/c31/c3/0007/000/100.c3`: 18 MOTI chunks; the first has 66 bones and 40 frames / 30 keys; the remaining 17 have one bone each.
+- `netdragon/c31/c3/0007/500/100.c3`: 18 MOTI chunks; the first has 66 bones and 41 frames / 21 keys; the remaining 17 have one bone each.
+- `netdragon/c31/c3/1007/500/100.c3` and `71007/500/100.c3` have the same 18-slot shape but different motion timing/key counts.
+- Base body `netdragon/c31/c3/body/7130000.c3` has 18 PHY meshes and 18 embedded MOTI chunks. Its main `v_body` channel has 66 bones; named socket/part meshes include `v_armet`, `v_l_weapon`, `v_r_weapon`, `v_back`, `v_pelvis`, `v_zero`, and equipment slots. Its embedded motions are 21 frames with one key each, consistent with a static/default bind pose rather than the multi-key action clips above.
+
+The folder shape `c3/<numeric-look>/<numeric-weapon>/<numeric-action>.c3` is now parsed as a **candidate key**. This is supported by the observed path structure and cross-checked against the community C3Studio desktop reference, which calculates action/motion keys from look, weapon and action values and replaces a model's per-PHY MOTI bindings from a separate motion-only C3 document. That desktop implementation is a research reference only; the mobile 1.1.2.3 mapping is not yet proven, and no C3Studio source code was copied into this project.
+
+A guarded Rust API, `export_document_with_external_motion`, has now been added to the converter. It:
+- requires the external motion document to contain exactly one MOTI chunk per base PHY mesh;
+- verifies every positively weighted vertex bone index is inside the corresponding motion's bone range;
+- clones the base geometry and replaces only its motion chunks before GLB export.
+
+Regression tests cover successful external motion replacement and rejection of a mismatched PHY/MOTI count. This proves the conversion path can safely represent external clips when the source pairing is established; it does **not** yet mean the 558 clips have been assigned to classes/actions or integrated into the playable character controller.
+
+Reference reviewed: [C3Studio community C3 model/role viewer](https://github.com/abdouthematrix/C3Studio) (desktop reference; version compatibility with this Android source set remains to be validated).
