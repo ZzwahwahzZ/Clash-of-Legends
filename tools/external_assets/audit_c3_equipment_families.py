@@ -51,7 +51,9 @@ def main():
     motion_assets = []
     for row in converted:
         src = row.get("source", "")
-        if src.replace("\\", "/").lower() in motion_paths:
+        src_normalized = src.replace("\\", "/").lower()
+        src_inner = "c3/" + src_normalized.split("/c3/", 1)[1] if "/c3/" in src_normalized else src_normalized
+        if src_inner in motion_paths:
             motion_model = model_by_path.get(src.lower(), {})
             motion_assets.append({
                 "source_c3": src,
