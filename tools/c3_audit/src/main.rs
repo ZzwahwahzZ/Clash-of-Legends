@@ -58,6 +58,18 @@ fn parse_body_model_look(path: &str) -> Option<u32> {
     Some(model_id / 1_000_000)
 }
 
+fn action_name_candidate(action: u32) -> Option<&'static str> {
+    match action {
+        100 => Some("standby"),
+        101 => Some("rest"),
+        110 | 111 => Some("walk"),
+        120 | 121 => Some("run"),
+        130 => Some("jump"),
+        190 => Some("wave"),
+        _ => None,
+    }
+}
+
 fn motion_signature_matches(model: &[u32], action: &[u32]) -> bool {
     !model.is_empty() && model == action
 }
@@ -100,6 +112,14 @@ mod motion_pairing_tests {
         assert_eq!(parse_body_model_look("netdragon/c31/c3/body/7130000.c3"), Some(7));
         assert_eq!(parse_body_model_look("netdragon/c31/c3/body/8130000.c3"), Some(8));
         assert_eq!(parse_body_model_look("netdragon/c31/c3/head/7000000.c3"), None);
+    }
+
+    #[test]
+    fn labels_common_mobile_action_tokens_as_reference_candidates() {
+        assert_eq!(action_name_candidate(100), Some("standby"));
+        assert_eq!(action_name_candidate(110), Some("walk"));
+        assert_eq!(action_name_candidate(120), Some("run"));
+        assert_eq!(action_name_candidate(999), None);
     }
 }
 
@@ -209,6 +229,94 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             Err(error) => failed.push(json!({"path": relative, "size_bytes": bytes.len(), "error": error.to_string()})),
         }
     }
+    // Produce a small proof-of-concept set by applying separate motion-only C3
+    // clips to one male and one female base body. These remain audit-only GLBs under
+    // build/c3-glb/motion-poc and are intentionally excluded from runtime PCK merge.
+    let mut external_motion_poc: Vec<Value> = Vec::new();
+    for (model_id, look) in [(7130000_u32, 7_u32), (8133010_u32, 8_u32)] {
+        let body_suffix = format!("/c3/body/{model_id}.c3");
+        let Some(body_path) = files.iter().find(|path| path.to_string_lossy().replace('\\', "/").ends_with(&body_suffix)) else {
+            external_motion_poc.push(json!({"model_id":model_id,"status":"SKIPPED","reason":"base body C3 file not found"}));
+            continue;
+        };
+        let body_relative = body_path.strip_prefix(&root).unwrap_or(body_path).to_string_lossy().replace('\\', "/");
+        let body_inner = c3_inner_path(Path::new(&body_relative));
+        let texture_path = pvr_root.join(body_inner.with_extension("png"));
+        if !texture_path.is_file() {
+            external_motion_poc.push(json!({"model_id":model_id,"status":"SKIPPED","reason":"decoded body PVR texture not found","body_source":body_relative}));
+            continue;
+        }
+        let body_bytes = fs::read(body_path)?;
+        let body_document = match C3Document::parse(&body_bytes) {
+            Ok(document) => document,
+            Err(error) => {
+                external_motion_poc.push(json!({"model_id":model_id,"status":"SKIPPED","reason":format!("base body parse failed: {error}")}));
+                continue;
+            }
+        };
+        let texture_bytes = fs::read(&texture_path)?;
+        for (weapon, action) in [(500_u32, 100_u32), (500_u32, 110_u32), (500_u32, 120_u32)] {
+            let motion_suffix = format!("/c3/{look:04}/{weapon:03}/{action}.c3");
+            let Some(motion_path) = files.iter().find(|path| path.to_string_lossy().replace('\\', "/").ends_with(&motion_suffix)) else {
+                external_motion_poc.push(json!({"model_id":model_id,"look":look,"weapon":weapon,"action":action,"status":"SKIPPED","reason":"motion-only C3 file not found"}));
+                continue;
+            };
+            let motion_relative = motion_path.strip_prefix(&root).unwrap_or(motion_path).to_string_lossy().replace('\\', "/");
+            let motion_key = parse_motion_path_key(&motion_relative);
+            let motion_bytes = fs::read(motion_path)?;
+            let motion_document = match C3Document::parse(&motion_bytes) {
+                Ok(document) => document,
+                Err(error) => {
+                    external_motion_poc.push(json!({"model_id":model_id,"motion_source":motion_relative,"status":"SKIPPED","reason":format!("motion C3 parse failed: {error}")}));
+                    continue;
+                }
+            };
+            let body_signature: Vec<u32> = body_document.motions.iter().map(|motion| motion.bone_count).collect();
+            let motion_signature: Vec<u32> = motion_document.motions.iter().map(|motion| motion.bone_count).collect();
+            if parse_body_model_look(&body_relative) != Some(look)
+                || motion_key != Some((look, weapon, action))
+                || !motion_signature_matches(&body_signature, &motion_signature)
+            {
+                external_motion_poc.push(json!({"model_id":model_id,"motion_source":motion_relative,"status":"REJECTED","reason":"look/action path or exact per-mesh bone-count signature mismatch"}));
+                continue;
+            }
+            let output_relative = Path::new("motion-poc").join(format!("look{look}_model{model_id}_weapon{weapon}_action{action}.glb"));
+            let output_path = glb_root.join(&output_relative);
+            if let Some(parent) = output_path.parent() { fs::create_dir_all(parent)?; }
+            let source_pair = format!("{body_relative} + {motion_relative}");
+            match glb::export_document_with_external_motion(
+                &body_document, &motion_document, &texture_bytes, &source_pair, &output_path
+            ) {
+                Ok((glb_bytes, mesh_count, animated_mesh_count)) => {
+                    total_animated_meshes += animated_mesh_count as u64;
+                    converted.push(json!({
+                        "source":body_relative,
+                        "external_motion_source":motion_relative,
+                        "output":output_relative.to_string_lossy().replace('\\', "/"),
+                        "texture":texture_path.to_string_lossy(),
+                        "glb_bytes":glb_bytes,
+                        "mesh_count":mesh_count,
+                        "motion_chunk_count":motion_document.motions.len(),
+                        "animated_mesh_count":animated_mesh_count,
+                        "motion_poc":true
+                    }));
+                    external_motion_poc.push(json!({
+                        "model_id":model_id,"look":look,"weapon":weapon,"action":action,
+                        "action_name_candidate":action_name_candidate(action),
+                        "body_source":body_relative,"motion_source":motion_relative,
+                        "output":output_relative.to_string_lossy().replace('\\', "/"),
+                        "mesh_count":mesh_count,"animated_mesh_count":animated_mesh_count,
+                        "status":"EXPORTED_PENDING_GODOT_IMPORT_VALIDATION"
+                    }));
+                },
+                Err(error) => external_motion_poc.push(json!({
+                    "model_id":model_id,"motion_source":motion_relative,"status":"REJECTED",
+                    "reason":error.to_string()
+                })),
+            }
+        }
+    }
+
     // Motion-only C3 documents contain action data but no PHY geometry. Match them
     // conservatively against renderable model files by exact per-mesh bone-count
     // signature and valid vertex bone indices. This is a structural candidate list,
@@ -272,6 +380,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "motion_only_uniquely_pairable_documents": uniquely_pairable_motion_files,
         "motion_only_parsed_path_keys": parsed_motion_path_keys,
         "motion_only_body_look_candidate_pairs": body_look_candidate_pairs,
+        "external_motion_poc_count": external_motion_poc.iter().filter(|row| row["status"] == "EXPORTED_PENDING_GODOT_IMPORT_VALIDATION").count(),
+        "external_motion_poc": external_motion_poc,
         "motion_only_pairing_status": "PATH_KEY_AND_BONE_SIGNATURE_CANDIDATES_ONLY_NOT_RUNTIME_PAIRED",
         "motion_only_pairing": motion_pairing_report,
         "converted_models": converted.len(),
