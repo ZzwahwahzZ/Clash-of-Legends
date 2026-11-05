@@ -9,6 +9,8 @@ class_name SettingsUI
 @onready var resource_packs_button: Button = get_node_or_null("Panel/ResourcePacksButton")
 @onready var guide_button: Button = get_node_or_null("Panel/GuideButton")
 @onready var title_label: Label = get_node_or_null("Panel/TitleLabel")
+@onready var loot_filters_label: Label = get_node_or_null("Panel/LootFiltersLabel")
+@onready var loot_filters_grid: GridContainer = get_node_or_null("Panel/LootFiltersGrid")
 
 func _ready() -> void:
 	add_to_group("settings_ui")
@@ -47,6 +49,8 @@ func _setup_options() -> void:
 	var is_ar = GameManager and GameManager.current_language == "ar"
 	if title_label:
 		title_label.text = "إعدادات صراع الأساطير" if is_ar else "Clash of Legends Settings"
+	if loot_filters_label:
+		loot_filters_label.text = "فلاتر الجمع التلقائي" if is_ar else "Auto-Loot Filters"
 	if save_button:
 		save_button.text = "حفظ اللعبة محلياً" if is_ar else "Save Game Locally"
 	if load_button:
@@ -83,6 +87,38 @@ func _setup_options() -> void:
 				if class_option.get_item_metadata(i) == current_class:
 					class_option.select(i)
 					break
+	_build_loot_filter_controls()
+
+func _build_loot_filter_controls() -> void:
+	if not loot_filters_grid or not AutoLootManager:
+		return
+	for child in loot_filters_grid.get_children():
+		loot_filters_grid.remove_child(child)
+		child.queue_free()
+	var definitions := [
+		{"key":"gold","ar":"الذهب","en":"Gold"},
+		{"key":"equipment","ar":"المعدات","en":"Equipment"},
+		{"key":"materials","ar":"المواد","en":"Materials"},
+		{"key":"gems","ar":"الأحجار الكريمة","en":"Gems"},
+		{"key":"quest_items","ar":"أغراض المهام","en":"Quest Items"},
+		{"key":"consumables","ar":"المستهلكات","en":"Consumables"},
+		{"key":"refinement_materials","ar":"مواد التطوير","en":"Refinement"},
+		{"key":"crafting_materials","ar":"مواد التصنيع","en":"Crafting"},
+		{"key":"cosmetics","ar":"المظاهر","en":"Cosmetics"}
+	]
+	var settings: Dictionary = AutoLootManager.get_filter_settings()
+	var is_ar := GameManager and GameManager.current_language == "ar"
+	for definition in definitions:
+		var filter_key := str(definition.key)
+		var checkbox := CheckBox.new()
+		checkbox.text = str(definition.ar) if is_ar else str(definition.en)
+		checkbox.button_pressed = bool(settings.get(filter_key, true))
+		checkbox.toggled.connect(_on_loot_filter_toggled.bind(filter_key))
+		loot_filters_grid.add_child(checkbox)
+
+func _on_loot_filter_toggled(enabled: bool, category: String) -> void:
+	if AutoLootManager:
+		AutoLootManager.set_category_enabled(category, enabled)
 
 func _on_language_selected(idx: int) -> void:
 	if not lang_option or not GameManager:
@@ -122,7 +158,8 @@ func _on_save_pressed() -> void:
 		"class_progression": ClassProgressionManager.serialize() if ClassProgressionManager else {},
 		"position": {"x": player.global_position.x, "y": player.global_position.y, "z": player.global_position.z},
 		"inventory": inv_data,
-		"quest_agents": LocalSaveEngine.capture_quest_states()
+		"quest_agents": LocalSaveEngine.capture_quest_states(),
+		"loot_filters": AutoLootManager.get_filter_settings() if AutoLootManager else {}
 	}
 	LocalSaveEngine.save_game(p_data)
 
@@ -156,6 +193,9 @@ func _on_load_pressed() -> void:
 			inv.deserialize(data["inventory"])
 		if data.has("quest_agents") and typeof(data["quest_agents"]) == TYPE_DICTIONARY:
 			LocalSaveEngine.restore_quest_states(data["quest_agents"])
+		if data.has("loot_filters") and typeof(data["loot_filters"]) == TYPE_DICTIONARY and AutoLootManager:
+			AutoLootManager.apply_filter_settings(data["loot_filters"])
+			_build_loot_filter_controls()
 		player.sync_stats_to_hud()
 
 func _on_resource_packs_pressed() -> void:
