@@ -34,7 +34,6 @@ func _apply_rtl_tree(node: Node) -> void:
 
 func _apply_rtl_control(control: Control) -> void:
 	control.layout_direction = Control.LAYOUT_DIRECTION_RTL
-	control.text_direction = Control.TEXT_DIRECTION_RTL
 
 func show_feature_intro(feature_id: String) -> bool:
 	if seen.get(feature_id, false):
