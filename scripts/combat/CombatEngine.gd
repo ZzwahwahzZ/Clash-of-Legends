@@ -19,7 +19,7 @@ var skill_database: Dictionary = {
 	"pirate_cannon": {"name_ar":"قذيفة المدفع","name_en":"Cannon Blast","class_req":"Pirate","cooldown":5.0,"mp_cost":35,"damage_multiplier":2.3,"range":11.0,"is_aoe":true,"aoe_radius":4.5,"effect":"damage"}
 }
 
-var cooldown_trackers: Dictionary = {}
+var cooldown_trackers: Dictionary = {}\n\nfunc _ready() -> void:\n\tif GameContentDatabase:\n\t\tfor skill_id in GameContentDatabase.get_skill_database():\n\t\t\tskill_database[skill_id] = GameContentDatabase.get_skill_database()[skill_id]
 
 func _process(delta: float) -> void:
 	for skill_id in cooldown_trackers.keys():
