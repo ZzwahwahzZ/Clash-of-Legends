@@ -58,7 +58,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut skipped = Vec::new();
     let mut total_vertices = 0_u64;
     let mut total_triangles = 0_u64;
-    let mut total_motions = 0_u64;
+    let mut total_motion_chunks = 0_u64;
+    let mut total_animated_meshes = 0_u64;
     for path in &files {
         let bytes = fs::read(path)?;
         let relative = path.strip_prefix(&root)?.to_string_lossy().replace('\\', "/");
@@ -88,7 +89,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 }
                 total_vertices += vertices;
                 total_triangles += triangles;
-                total_motions += document.motions.len() as u64;
+                total_motion_chunks += document.motions.len() as u64;
                 let motion_details: Vec<Value> = document.motions.iter().map(|m| json!({"bone_count":m.bone_count,"frame_count":m.frame_count,"key_count":m.keys.len(),"morph_count":m.morph_count})).collect();
                 parsed.push(json!({
                     "path": relative,
@@ -112,7 +113,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         let output_relative = Path::new(category).join("c3").join(inner.with_extension("glb"));
                         let output_path = glb_root.join(&output_relative);
                         match glb::export_document(&document, &texture_bytes, &relative, &output_path) {
-                            Ok((glb_bytes, mesh_count)) => converted.push(json!({"source":relative,"output":output_relative.to_string_lossy().replace('\\',"/"),"texture":texture_path.to_string_lossy(),"glb_bytes":glb_bytes,"mesh_count":mesh_count,"motion_count":document.motions.len()})),
+                            Ok((glb_bytes, mesh_count, animated_mesh_count)) => {
+                                total_animated_meshes += animated_mesh_count as u64;
+                                converted.push(json!({
+                                    "source":relative,
+                                    "output":output_relative.to_string_lossy().replace('\\',"/"),
+                                    "texture":texture_path.to_string_lossy(),
+                                    "glb_bytes":glb_bytes,
+                                    "mesh_count":mesh_count,
+                                    "motion_chunk_count":document.motions.len(),
+                                    "animated_mesh_count":animated_mesh_count
+                                }));
+                            },
                             Err(error) => skipped.push(json!({"source":relative,"reason":error.to_string()})),
                         }
                     } else {
@@ -132,7 +144,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "total_meshes": parsed.iter().map(|x| x["mesh_count"].as_u64().unwrap_or(0)).sum::<u64>(),
         "total_vertices": total_vertices,
         "total_triangles": total_triangles,
-        "total_motion_tracks": total_motions,
+        "total_motion_chunks": total_motion_chunks,
+        "total_animated_meshes": total_animated_meshes,
         "converted_models": converted.len(),
         "skipped_models": skipped.len(),
         "models": parsed,
@@ -144,10 +157,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     fs::write(&output, serde_json::to_vec_pretty(&report)?)?;
     let conversion_path = output.parent().unwrap_or(Path::new(".")).join("c3-conversion-report.json");
     fs::write(&conversion_path, serde_json::to_vec_pretty(&json!({"converted":converted,"skipped":skipped}))?)?;
-    println!("C3 audit: {} files, {} parsed, {} failed, {} meshes, {} vertices, {} triangles, {} motion tracks; converted {} GLB models",
+    println!("C3 audit: {} files, {} parsed, {} failed, {} meshes, {} vertices, {} triangles, {} motion chunks, {} animated mesh channels; converted {} GLB models",
         files.len(), parsed.len(), report["failed_files"].as_u64().unwrap_or(0),
-        report["total_meshes"].as_u64().unwrap_or(0), total_vertices, total_triangles, total_motions,
-        report["converted_models"].as_u64().unwrap_or(0));
+        report["total_meshes"].as_u64().unwrap_or(0), total_vertices, total_triangles, total_motion_chunks,
+        total_animated_meshes, report["converted_models"].as_u64().unwrap_or(0));
     if parsed.is_empty() { return Err("no C3 models parsed successfully".into()); }
     if converted.is_empty() { return Err("no C3 models with matching PVR textures converted".into()); }
     Ok(())
