@@ -238,22 +238,30 @@ func navigate_to_quest_target() -> void:
 		return
 	var destination := Vector3(18.0, 0.0, 15.0)
 	var travel_id := "twin_city"
-	match active_quest_id:
-		"quest_wolves", "quest_wolf_alpha", "quest_meteor_gather":
-			travel_id = "twin_plains"
-			destination = Vector3(18.0, 0.0, 15.0)
-		"quest_dragon":
-			travel_id = "mountain_summit"
-			destination = Vector3(40.0, 0.0, -35.0)
-		"quest_guardian":
-			travel_id = "desert_ruins"
-			destination = Vector3(-32.0, 0.0, 28.0)
-		"quest_blacksmith_visit":
-			travel_id = "twin_city"
+	if is_quest_completed:
+		var active_data := get_active_quest()
+		var turn_in_id := str(active_data.get("turn_in_npc_id", "npc_sage"))
+		if turn_in_id == "npc_blacksmith":
 			destination = Vector3(-5.0, 0.0, 4.0)
-		"quest_final_sage":
-			travel_id = "twin_city"
+		else:
 			destination = Vector3(4.0, 0.0, 3.0)
+	else:
+		match active_quest_id:
+			"quest_wolves", "quest_wolf_alpha", "quest_meteor_gather":
+				travel_id = "twin_plains"
+				destination = Vector3(18.0, 0.0, 15.0)
+			"quest_dragon":
+				travel_id = "mountain_summit"
+				destination = Vector3(40.0, 0.0, -35.0)
+			"quest_guardian":
+				travel_id = "desert_ruins"
+				destination = Vector3(-32.0, 0.0, 28.0)
+			"quest_blacksmith_visit":
+				travel_id = "twin_city"
+				destination = Vector3(-5.0, 0.0, 4.0)
+			"quest_final_sage":
+				travel_id = "twin_city"
+				destination = Vector3(4.0, 0.0, 3.0)
 	var travel_manager := get_tree().get_first_node_in_group("world_travel_manager")
 	if travel_manager and travel_manager.has_method("travel_to"):
 		if not travel_manager.travel_to(travel_id, "quest"):
