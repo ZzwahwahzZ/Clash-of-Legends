@@ -154,7 +154,7 @@ def parse_rsdb(data: bytes, stem: str) -> dict:
                 "parse_status": "UNKNOWN_RSDB_KEY_WIDTH"}
     return {"format": magic.decode("ascii", errors="replace"), "record_count": count,
             "entry_size": entry_size, "parse_status": "PARSED",
-            "sample_records": records[:20]}
+            "sample_records": records[:20], "_records": records}
 
 
 def parse_simo(data: bytes) -> dict:
@@ -175,7 +175,7 @@ def parse_simo(data: bytes) -> dict:
             parts.append({"part_id": part_id, "texture_id": texture_id})
         records.append({"object_id": object_id, "part_count": part_count, "parts": parts})
     return {"format": "SIMO", "record_count": count, "parse_status": "PARSED",
-            "sample_records": records[:20]}
+            "sample_records": records[:20], "_records": records}
 
 
 def parse_wdb(data: bytes) -> dict:
@@ -217,10 +217,82 @@ def parse_wdb(data: bytes) -> dict:
             "sha256": hashlib.sha256(blob).hexdigest(), "magic": magic.decode("ascii", errors="replace"),
             "parsed": parsed
         })
+    # Resolve the 3DSimpleObj part references against the full 3DObj and
+    # 3DTexture indexes. Keep only compact evidence in the report, not all rows.
+    by_name = {entry["name"].lower(): entry for entry in entries}
+
+    def take_rows(table_name: str) -> list:
+        entry = by_name.get(table_name.lower())
+        if entry is None:
+            return []
+        return entry["parsed"].pop("_records", [])
+
+    object_rows = take_rows("ini/3DObj.dbc")
+    texture_rows = take_rows("ini/3DTexture.dbc")
+    simple_rows = take_rows("ini/3DSimpleObj.dbc")
+    object_map = {int(row["id"]): str(row["path"]) for row in object_rows}
+    texture_map = {int(row["id"]): str(row["path"]) for row in texture_rows}
+
+    object_duplicates = len(object_rows) - len(object_map)
+    texture_duplicates = len(texture_rows) - len(texture_map)
+    total_parts = object_matches = texture_matches = full_matches = 0
+    missing_object_ids = set()
+    missing_texture_ids = set()
+    resolved_samples = []
+    for simple in simple_rows:
+        for part in simple.get("parts", []):
+            total_parts += 1
+            part_id = int(part["part_id"])
+            texture_id = int(part["texture_id"])
+            object_path = object_map.get(part_id)
+            texture_path = texture_map.get(texture_id)
+            if object_path is not None:
+                object_matches += 1
+            else:
+                missing_object_ids.add(part_id)
+            if texture_path is not None:
+                texture_matches += 1
+            else:
+                missing_texture_ids.add(texture_id)
+            if object_path is not None and texture_path is not None:
+                full_matches += 1
+                if len(resolved_samples) < 40:
+                    resolved_samples.append({
+                        "simple_object_id": int(simple["object_id"]),
+                        "part_id": part_id,
+                        "object_path": object_path,
+                        "texture_id": texture_id,
+                        "texture_path": texture_path,
+                    })
+
+    resource_reference_audit = {
+        "schema_status": "CROSS_REFERENCED_BY_SOURCE_IDS",
+        "table_counts": {
+            "3DObj": len(object_rows),
+            "3DTexture": len(texture_rows),
+            "3DSimpleObj": len(simple_rows),
+        },
+        "duplicate_ids": {
+            "3DObj": object_duplicates,
+            "3DTexture": texture_duplicates,
+        },
+        "simple_object_parts": total_parts,
+        "object_id_matches": object_matches,
+        "texture_id_matches": texture_matches,
+        "both_object_and_texture_match": full_matches,
+        "missing_object_id_count": len(missing_object_ids),
+        "missing_texture_id_count": len(missing_texture_ids),
+        "missing_object_id_samples": sorted(missing_object_ids)[:40],
+        "missing_texture_id_samples": sorted(missing_texture_ids)[:40],
+        "resolved_samples": resolved_samples,
+        "note": "ID-level joins only; C3 geometry, UV/material correctness and rendered appearance still require separate validation.",
+    }
+
     return {
         "magic": "BDMG", "file_size_bytes": len(data), "declared_size_bytes": total_size,
         "table_offset": table_offset, "entry_count": entry_count,
         "table_end": table_offset + entry_count * WDB_ENTRY_SIZE,
+        "resource_reference_audit": resource_reference_audit,
         "entries": entries
     }
 
