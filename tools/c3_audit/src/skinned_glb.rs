@@ -451,7 +451,7 @@ mod tests {
 
 /// Evaluate a vertex using every positive C3 influence and its real weight.
 /// The complete affine product is retained; no TRS decomposition is involved.
-fn weighted_c3_position(mesh: &C3Mesh, motion: &C3Motion, vertex_index: usize, frame: f32) -> Result<sandbox_data::c3::Vector3, String> {
+pub fn weighted_c3_position(mesh: &C3Mesh, motion: &C3Motion, vertex_index: usize, frame: f32) -> Result<sandbox_data::c3::Vector3, String> {
     let vertex = &mesh.vertices[vertex_index];
     let mut total_weight = 0.0_f32;
     let mut x = 0.0_f32;
@@ -459,6 +459,9 @@ fn weighted_c3_position(mesh: &C3Mesh, motion: &C3Motion, vertex_index: usize, f
     let mut z = 0.0_f32;
     for slot in 0..2 {
         let weight = vertex.bone_weights[slot];
+        if !weight.is_finite() {
+            return Err(format!("vertex {vertex_index} has a non-finite C3 bone weight in slot {slot}"));
+        }
         if weight <= 0.0 { continue; }
         let bone = u32::from(vertex.bone_indices[slot]);
         if bone >= motion.bone_count {
@@ -470,10 +473,12 @@ fn weighted_c3_position(mesh: &C3Mesh, motion: &C3Motion, vertex_index: usize, f
         z += point.z * weight;
         total_weight += weight;
     }
-    if total_weight <= 0.0 {
-        return Err(format!("vertex {vertex_index} has no positive C3 bone influence"));
+    if !total_weight.is_finite() {
+        return Err(format!("vertex {vertex_index} has a non-finite total C3 bone weight"));
     }
-    // C3's two influence weights are normalized for position blending.
+    if total_weight <= 0.0 {
+        return Ok(mesh.initial_matrix.transform_point(vertex.position));
+    }
     Ok(sandbox_data::c3::Vector3 { x: x / total_weight, y: y / total_weight, z: z / total_weight })
 }
 
@@ -501,8 +506,11 @@ pub fn is_deforming(mesh: &C3Mesh, motion: &C3Motion) -> Result<bool, String> {
 }
 
 pub fn export_vat(mesh: &C3Mesh, motion: &C3Motion, output_prefix: &Path, clip_id: &str, mesh_index: usize) -> Result<(u64, usize, usize), Box<dyn std::error::Error>> {
-    if mesh.vertices.is_empty() || motion.bone_count == 0 || motion.frame_count == 0 {
-        return Err("VAT requires vertices and a non-empty C3 motion".into());
+    if mesh.vertices.is_empty() || motion.bone_count == 0 || motion.frame_count <= 1 || motion.keys.is_empty() {
+        return Err("VAT requires vertices and a multi-frame C3 motion".into());
+    }
+    if !is_deforming(mesh, motion)? {
+        return Err("VAT export rejected: the mesh has no evaluated affine vertex deformation".into());
     }
     let vertex_count = mesh.vertices.len();
     let frame_count = motion.frame_count as usize;
@@ -510,7 +518,7 @@ pub fn export_vat(mesh: &C3Mesh, motion: &C3Motion, output_prefix: &Path, clip_i
     let mut min = [f32::INFINITY; 3];
     let mut max = [f32::NEG_INFINITY; 3];
     for frame in 0..frame_count {
-        for (vertex_index, vertex) in mesh.vertices.iter().enumerate() {
+        for vertex_index in 0..vertex_count {
             let point = weighted_c3_position(mesh, motion, vertex_index, frame as f32)?;
             let p = [point.x * 0.01, -point.z * 0.01, point.y * 0.01];
             for axis in 0..3 {
@@ -533,6 +541,8 @@ pub fn export_vat(mesh: &C3Mesh, motion: &C3Motion, output_prefix: &Path, clip_i
         "sampling":"one texel per source vertex per frame; RGBA=(x,y,z,1)",
         "matrix_semantics":"weighted blend of initial_matrix * motion.matrix_at(each_positive_influence, frame)",
         "influence_semantics":"all positive C3 bone_weights are used and normalized",
+        "classification":"deforming",
+        "vertex_order":"source C3 vertex index; one RGBA texel per original vertex index",
         "preserves_affine_shear":true,
         "coordinate_conversion":"C3 centimeters Z-down to meters Y-up: (x*0.01,-z*0.01,y*0.01)",
         "bounds_min":min,"bounds_max":max,
