@@ -6,8 +6,9 @@ from pathlib import Path
 ROOT=Path.cwd()
 STAGE=ROOT/"resource_stage"
 SOURCE=ROOT/"build/source_archives"
-for p in (STAGE,SOURCE):
-    shutil.rmtree(p,ignore_errors=True); p.mkdir(parents=True,exist_ok=True)
+shutil.rmtree(STAGE,ignore_errors=True)
+STAGE.mkdir(parents=True,exist_ok=True)
+if not SOURCE.is_dir(): raise SystemExit(f"Source archive directory does not exist: {SOURCE}")
 
 ARCHIVES=[
  ("extracted-assets-001.zip","https://github.com/ZzwahwahzZ/Conquer-Mobile-Assets./releases/download/mobile-extracted-assets/extracted-assets-001.zip"),
