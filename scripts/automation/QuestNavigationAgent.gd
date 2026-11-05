@@ -15,6 +15,7 @@ var completed_quest_ids: Array[String] = []
 # the progression API or requiring a server.
 var quest_database: Dictionary = {
 	"quest_wolves": {
+		"turn_in_npc_id": "npc_sage",
 		"title_ar": "تهديد الذئاب البرية",
 		"title_en": "Wild Wolf Threat",
 		"desc_ar": "اقضِ على 5 ذئاب برية في سهل التوأم لحماية القوافل.",
@@ -26,6 +27,7 @@ var quest_database: Dictionary = {
 		"next_quest": "quest_wolf_alpha"
 	},
 	"quest_wolf_alpha": {
+		"turn_in_npc_id": "npc_sage",
 		"title_ar": "زعيم القطيع",
 		"title_en": "Pack Leader",
 		"desc_ar": "اهزم 8 ذئاب أخرى لتجبر زعيم القطيع على الظهور.",
@@ -37,6 +39,7 @@ var quest_database: Dictionary = {
 		"next_quest": "quest_meteor_gather"
 	},
 	"quest_dragon": {
+		"turn_in_npc_id": "npc_sage",
 		"title_ar": "تحدي تنين اللهب",
 		"title_en": "Flame Dragon Challenge",
 		"desc_ar": "اهزم تنين اللهب في قمة الجبل.",
@@ -48,6 +51,7 @@ var quest_database: Dictionary = {
 		"next_quest": "quest_final_sage"
 	},
 	"quest_guardian": {
+		"turn_in_npc_id": "npc_sage",
 		"title_ar": "حارس الأطلال",
 		"title_en": "Ruins Guardian",
 		"desc_ar": "اقضِ على 10 وحوش في رحلة تطهير أطراف المدينة.",
@@ -59,6 +63,7 @@ var quest_database: Dictionary = {
 		"next_quest": "quest_level_10"
 	},
 	"quest_meteor_gather": {
+		"turn_in_npc_id": "npc_sage",
 		"title_ar":"أحجار من السماء",
 		"title_en":"Stones from the Sky",
 		"desc_ar":"اجمع 3 أحجار نيزك من الوحوش وأسقطها في الحقيبة.",
@@ -71,6 +76,7 @@ var quest_database: Dictionary = {
 		"next_quest":"quest_blacksmith_visit"
 	},
 	"quest_blacksmith_visit": {
+		"turn_in_npc_id": "npc_blacksmith",
 		"title_ar":"سر الحداد",
 		"title_en":"The Blacksmith's Secret",
 		"desc_ar":"تحدث إلى حداد الأساطير وتعرف على صقل العتاد.",
@@ -83,6 +89,7 @@ var quest_database: Dictionary = {
 		"next_quest":"quest_guardian"
 	},
 	"quest_level_10": {
+		"turn_in_npc_id": "npc_sage",
 		"title_ar":"اختبار البطل",
 		"title_en":"Hero's Trial",
 		"desc_ar":"واصل التدريب حتى تصل إلى المستوى 10.",
@@ -95,6 +102,7 @@ var quest_database: Dictionary = {
 		"next_quest":"quest_dragon"
 	},
 	"quest_final_sage": {
+		"turn_in_npc_id": "npc_sage",
 		"title_ar":"عودة إلى الحكيم",
 		"title_en":"Return to the Sage",
 		"desc_ar":"عد إلى حكيم التوأم وأبلغه بانتصارك على التنين.",
@@ -144,6 +152,12 @@ func on_item_collected(item_id: String, quantity: int = 1) -> void:
 	_advance_objective("collect", item_id, quantity)
 
 func on_npc_talked(npc_id: String) -> void:
+	if is_quest_completed:
+		var ready_quest := get_active_quest()
+		var turn_in_id := str(ready_quest.get("turn_in_npc_id", "npc_sage"))
+		if npc_id == turn_in_id:
+			_claim_completed_quest()
+		return
 	_advance_objective("talk", npc_id, 1)
 
 func on_level_reached(level: int) -> void:
@@ -171,27 +185,37 @@ func _advance_objective(event_type: String, target_id: String, amount: int) -> v
 func _complete_quest() -> void:
 	if is_quest_completed or completed_quest_ids.has(active_quest_id):
 		return
-
+	# Objective completion is not quest completion: rewards are only granted
+	# after the hero returns to the quest's designated turn-in NPC.
 	is_quest_completed = true
+	var quest: Dictionary = quest_database[active_quest_id]
+	emit_signal("quest_state_changed", active_quest_id, "ready_to_turn_in")
+	_notify_game_manager()
+	if GameManager:
+		var title := str(quest["title_ar"]) if GameManager.current_language == "ar" else str(quest["title_en"])
+		var npc_name := str(quest.get("turn_in_npc_id", "npc_sage"))
+		var message_ar := "اكتمل الهدف: %s. عُد إلى صاحب المهمة لتسلّم المكافأة." % title
+		var message_en := "Objective complete: %s. Return to the quest NPC to claim your reward." % title
+		GameManager.post_notification(message_ar if GameManager.current_language == "ar" else message_en, false)
+
+func _claim_completed_quest() -> void:
+	if not is_quest_completed or not quest_database.has(active_quest_id) or completed_quest_ids.has(active_quest_id):
+		return
 	var completed_id := active_quest_id
 	var quest: Dictionary = quest_database[completed_id]
-	completed_quest_ids.append(completed_id)
-
 	var gold: int = maxi(0, int(quest.get("reward_gold", 0)))
 	var xp: int = maxi(0, int(quest.get("reward_xp", 0)))
+	completed_quest_ids.append(completed_id)
 	if GameManager:
 		GameManager.add_gold(gold)
 		var player = GameManager.player_reference
 		if is_instance_valid(player) and player.has_method("add_xp"):
 			player.add_xp(xp)
 		var title := str(quest["title_ar"]) if GameManager.current_language == "ar" else str(quest["title_en"])
-		var message_ar := "اكتملت المهمة: %s! حصلت على %d ذهب و%d خبرة" % [title, gold, xp]
-		var message_en := "Quest completed: %s! Reward: %d Gold and %d XP" % [title, gold, xp]
+		var message_ar := "استلمت مكافأة المهمة %s: %d ذهب و%d خبرة." % [title, gold, xp]
+		var message_en := "Claimed %s reward: %d Gold and %d XP." % [title, gold, xp]
 		GameManager.post_notification(message_ar if GameManager.current_language == "ar" else message_en, false)
-
 	emit_signal("quest_state_changed", completed_id, "completed")
-	_notify_game_manager()
-
 	var next_id := str(quest.get("next_quest", ""))
 	if not next_id.is_empty() and quest_database.has(next_id):
 		active_quest_id = next_id
@@ -199,6 +223,11 @@ func _complete_quest() -> void:
 		is_quest_completed = false
 		emit_signal("quest_started", active_quest_id)
 		_notify_game_manager()
+	else:
+		active_quest_id = ""
+		quest_progress = 0
+		is_quest_completed = true
+		emit_signal("quest_state_changed", completed_id, "chain_completed")
 
 func navigate_to_quest_target() -> void:
 	if not GameManager or not is_instance_valid(GameManager.player_reference):
