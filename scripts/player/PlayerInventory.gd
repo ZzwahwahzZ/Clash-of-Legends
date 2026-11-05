@@ -7,6 +7,7 @@ signal item_used(item_id: String, effect: String)
 signal item_refined(item_id: String, success: bool, new_level: int)
 
 const MAX_SLOTS: int = 40
+const MAX_REFINE_LEVEL: int = 12
 
 var slots: Array = []
 var equipment: Dictionary = {
@@ -16,7 +17,11 @@ var equipment: Dictionary = {
 	"shield": null,
 	"boots": null,
 	"necklace": null,
-	"ring": null
+	"ring": null,
+	"garment": null,
+	"fan": null,
+	"tower": null,
+	"mount": null
 }
 
 func _ready() -> void:
@@ -192,52 +197,109 @@ func sell_item_at(index: int) -> bool:
 		GameManager.post_notification(msg_ar if GameManager.current_language == "ar" else msg_en, false)
 	return true
 
-func refine_equipment(slot_name: String) -> bool:
+func get_refine_preview(slot_name: String) -> Dictionary:
 	if not equipment.has(slot_name) or equipment[slot_name] == null:
+		return {}
+	var item: Dictionary = equipment[slot_name]
+	var level := int(item.get("refine_level", 0))
+	if level >= MAX_REFINE_LEVEL:
+		return {"current_level": level, "maxed": true, "gold_cost": 0, "success_chance": 0.0}
+	var chances := [1.0, 0.95, 0.90, 0.82, 0.72, 0.62, 0.52, 0.42, 0.32, 0.25, 0.20, 0.15]
+	return {
+		"current_level": level,
+		"next_level": level + 1,
+		"maxed": false,
+		"gold_cost": 200 * int(pow(level + 1, 2)),
+		"success_chance": chances[clampi(level, 0, chances.size() - 1)],
+		"meteor_required": 1
+	}
+
+func refine_equipment(slot_name: String) -> bool:
+	var preview := get_refine_preview(slot_name)
+	if preview.is_empty() or preview.get("maxed", false):
+		if GameManager:
+			GameManager.post_notification("وصل العتاد إلى أقصى مستوى صقل +12" if GameManager.current_language == "ar" else "Equipment is already at maximum refinement +12", true)
 		return false
-		
-	var item = equipment[slot_name]
-	var current_refine = item.get("refine_level", 0)
-	var gold_cost = (current_refine + 1) * 200
-	
-	# Check meteor count
-	var meteor_idx = -1
+	var meteor_idx := -1
 	for i in range(MAX_SLOTS):
-		if slots[i] != null and slots[i]["id"] == "meteor_stone":
+		if slots[i] != null and str(slots[i].get("id", "")) == "meteor_stone" and int(slots[i].get("quantity", 1)) > 0:
 			meteor_idx = i
 			break
-			
 	if meteor_idx == -1:
 		if GameManager:
 			GameManager.post_notification("تحتاج إلى حجر نيزك للصقل!" if GameManager.current_language == "ar" else "You need a Meteor for refinement!", true)
 		return false
-		
+	var gold_cost := int(preview.gold_cost)
 	if not GameManager or not GameManager.spend_gold(gold_cost):
 		return false
-		
-	# Consume meteor
 	remove_item_at(meteor_idx, 1)
-	
-	# Refine success chance
-	var success_chance = max(0.35, 1.0 - (current_refine * 0.12))
-	var success = randf() < success_chance
-	
+	var item: Dictionary = equipment[slot_name]
+	var current_refine := int(preview.current_level)
+	var next_refine := current_refine + 1
+	var success := randf() < float(preview.success_chance)
 	if success:
-		item["refine_level"] = current_refine + 1
-		item["attack_bonus"] = item.get("attack_bonus", 0) + 12
-		item["defense_bonus"] = item.get("defense_bonus", 0) + 6
+		if not item.has("base_attack_bonus"):
+			item["base_attack_bonus"] = int(item.get("attack_bonus", 0))
+			item["base_defense_bonus"] = int(item.get("defense_bonus", 0))
+			item["base_refine_level"] = current_refine
+		var base_level := int(item.get("base_refine_level", 0))
+		item["refine_level"] = next_refine
+		item["attack_bonus"] = int(item.get("base_attack_bonus", 0)) + (next_refine - base_level) * 12
+		item["defense_bonus"] = int(item.get("base_defense_bonus", 0)) + (next_refine - base_level) * 6
 		emit_signal("equipment_updated")
-		emit_signal("item_refined", item["id"], true, item["refine_level"])
+		emit_signal("item_refined", item["id"], true, next_refine)
 		_recalculate_player_stats()
 		if GameManager:
-			var txt = "نجح صقل %s إلى المستوى +%d!" % [item.get("name_ar", ""), item["refine_level"]]
-			GameManager.post_notification(txt if GameManager.current_language == "ar" else "Refinement Succeeded!", false)
+			var txt := "نجح صقل %s إلى المستوى +%d!" % [item.get("name_ar", ""), next_refine]
+			GameManager.post_notification(txt if GameManager.current_language == "ar" else "Refinement succeeded: +%d" % next_refine, false)
 		return true
-	else:
-		emit_signal("item_refined", item["id"], false, current_refine)
-		if GameManager:
-			GameManager.post_notification("فشلت محاولة الصقل! تم الحفاظ على مستوى العتاد" if GameManager.current_language == "ar" else "Refinement Failed!", true)
+	emit_signal("item_refined", item["id"], false, current_refine)
+	if GameManager:
+		GameManager.post_notification("فشلت محاولة الصقل؛ احتفظ العتاد بمستواه الحالي" if GameManager.current_language == "ar" else "Refinement failed; equipment level was preserved", true)
+	return false
+
+func insert_gem(slot_name: String, inventory_index: int, socket_index: int) -> bool:
+	if not equipment.has(slot_name) or equipment[slot_name] == null:
 		return false
+	if inventory_index < 0 or inventory_index >= MAX_SLOTS or slots[inventory_index] == null:
+		return false
+	var item: Dictionary = equipment[slot_name]
+	var socket_count := int(item.get("sockets", 0))
+	if socket_count <= 0 or socket_index < 0 or socket_index >= socket_count:
+		return false
+	var gem: Dictionary = slots[inventory_index]
+	if str(gem.get("type", "")) != "gem":
+		return false
+	var socket_gems: Array = item.get("socket_gems", [])
+	while socket_gems.size() < socket_count:
+		socket_gems.append(null)
+	if socket_gems[socket_index] != null:
+		return false
+	socket_gems[socket_index] = gem.duplicate(true)
+	item["socket_gems"] = socket_gems
+	remove_item_at(inventory_index, 1)
+	emit_signal("equipment_updated")
+	_recalculate_player_stats()
+	return true
+
+func remove_gem(slot_name: String, socket_index: int, gold_cost: int = 500) -> bool:
+	if not equipment.has(slot_name) or equipment[slot_name] == null or gold_cost < 0:
+		return false
+	var item: Dictionary = equipment[slot_name]
+	var socket_gems: Array = item.get("socket_gems", [])
+	if socket_index < 0 or socket_index >= socket_gems.size() or socket_gems[socket_index] == null:
+		return false
+	if not GameManager or not GameManager.spend_gold(gold_cost):
+		return false
+	var gem: Dictionary = socket_gems[socket_index]
+	if not add_item(gem):
+		GameManager.add_gold(gold_cost)
+		return false
+	socket_gems[socket_index] = null
+	item["socket_gems"] = socket_gems
+	emit_signal("equipment_updated")
+	_recalculate_player_stats()
+	return true
 
 func _recalculate_player_stats() -> void:
 	var total_atk = 0
@@ -245,8 +307,12 @@ func _recalculate_player_stats() -> void:
 	for k in equipment.keys():
 		var eq = equipment[k]
 		if eq != null:
-			total_atk += eq.get("attack_bonus", 0)
-			total_def += eq.get("defense_bonus", 0)
+			total_atk += int(eq.get("attack_bonus", 0))
+			total_def += int(eq.get("defense_bonus", 0))
+			for gem in eq.get("socket_gems", []):
+				if gem is Dictionary:
+					total_atk += int(gem.get("attack_bonus", 0))
+					total_def += int(gem.get("defense_bonus", 0))
 			
 	var parent_body = get_parent()
 	if parent_body and parent_body.has_method("update_equipment_bonuses"):
