@@ -67,3 +67,32 @@ The source-index audit report is available in [Source-Audit-Reports run 42000137
 - `APPROVED`: every per-item acceptance check above passed and evidence is retained.
 
 No category-wide approval is permitted from aggregate counts alone.
+
+## Runtime scene audit — 2026-11-05 (latest checked main)
+
+The production visual gate was executed in workflow run [42072303327](https://github.com/ZzwahwahzZ/Clash-of-Legends/actions/runs/42072303327). Android 13 signed APK export and the Android 13 emulator smoke test passed, but the Godot validation job failed at the production visual gate. The exact reported failures were:
+
+- scenes/characters/Player.tscn: placeholder BoxMesh, CylinderMesh, and SphereMesh render geometry.
+- scenes/characters/SimulatedPlayer.tscn: placeholder BoxMesh and SphereMesh render geometry.
+- scenes/core/MainGame.tscn: placeholder BoxMesh, CylinderMesh, and PrismMesh render geometry.
+
+Code inspection confirms these are not merely false-positive resource names: Player.tscn constructs its torso, head, helmet, pauldrons, limbs, sword, shield, horse body and saddle from primitive meshes. MainGame.tscn constructs its ground, plaza, gate, furnace, lava, trees and terrain props from primitive meshes. SimulatedPlayer.tscn likewise builds its body, head, limbs and weapon from primitive meshes.
+
+The current player importer can instantiate a catalog model only when an explicit reviewed class mapping exists. If the mapping is absent, it returns without importing a model; the primitive scene children remain visible. The mount importer currently requests the first entry in the mounts category rather than resolving a source-verified mount identity. This is not an acceptable per-mount mapping and must be replaced by stable source IDs and reviewed attachment metadata.
+
+The current C3 audit contains 569 converted outputs, but only 42 equipment outputs and zero mount-category outputs. Motion pairing also remains incomplete: the audit lists 558 motion-only documents, but the recorded pairing status is candidate paths/bone signatures only, not runtime-paired clips. These outputs therefore cannot yet be treated as a complete playable character wardrobe or mount library.
+
+The current GameContentDatabase.gd contains a hand-authored sample skill dictionary, while CombatEngine.gd labels its local skill entries as prototype entries. These values are not a source-verified skill catalogue. They must not be presented as exact reference mechanics or used to approve skill parity.
+
+### Required implementation order
+
+1. Decode and validate the item/model/texture/mount table schemas against the exact 1.1.2.3 source files; preserve raw source IDs, file paths and hashes in a machine-readable provenance registry.
+2. Resolve complete character body/look/weapon/motion combinations, then implement source-verified character assembly and equipment attachment points. Remove primitive visible character parts only when the replacement asset and rig are verified; never leave an invisible or broken player as a workaround.
+3. Resolve every helmet and armor piece to its exact geometry, texture atlas region, UVs, material flags and attachment/bone. Generate front/back/side and close-up runtime comparisons for each entry.
+4. Build separate registries for weapon families, paid equipment, fashion layers, starter and collectible mounts, and mount tack/ornaments. Do not infer that a record is paid from its numeric ID.
+5. Replace the hand-authored sample skill list with source-verified skill records, including class/branch eligibility, rank progression, costs, cooldowns, target rules, animation/motion, effect/projectile, VFX and audio links. Unknown fields remain explicitly unresolved.
+6. Decode the refinement, socket, gem and crafting/material tables only after their schemas are validated; link every grade, icon, recipe, consumption rule, outcome and resulting equipment appearance to source evidence.
+7. Replace the primitive world scene with verified world/map assets and data, including correct object composition, texture assignment, collision and navigation. A decorative scene assembled from generic shapes is not an acceptable substitute.
+8. Run source-to-runtime visual review and Android 13 device-class performance checks. Keep the production visual gate failing until the three critical scenes use approved production assets and all required comparisons pass.
+
+**Current acceptance status:** character visuals BLOCKED / NOT APPROVED; simulated-player visuals BLOCKED / NOT APPROVED; main world visuals BLOCKED / NOT APPROVED; mounts UNRESOLVED / NOT APPROVED; exact skill catalogue UNRESOLVED / NOT APPROVED; complete paid-item wardrobe UNRESOLVED / NOT APPROVED. Passing APK export or emulator startup does not change these statuses.
