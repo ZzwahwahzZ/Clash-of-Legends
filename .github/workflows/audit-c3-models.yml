@@ -31,8 +31,12 @@ jobs:
         run: godot --headless --path . --script tools/c3_audit/extract_c3_for_audit.gd
       - name: Unpack C3 and PVR extraction bundles
         run: python3 tools/c3_audit/unpack_c3_bundle.py
+      - name: Install Pillow for texture conversion
+        run: python3 -m pip install --disable-pip-version-check pillow
       - name: Audit PVR texture headers
         run: python3 tools/c3_audit/audit_pvr_headers.py
+      - name: Decode original PVR textures to PNG
+        run: python3 tools/c3_audit/decode_pvr_textures.py
       - uses: dtolnay/rust-toolchain@stable
       - name: Fetch pinned Apache-2.0 C3 parser
         run: |
@@ -46,6 +50,8 @@ jobs:
           path: |
             reports/c3-model-audit.json
             reports/pvr-texture-audit.json
+            reports/pvr-decode-report.json
+            build/pvr-png/**
             tools/c3_audit/THIRD_PARTY_NOTICES.md
           if-no-files-found: error
           retention-days: 30
