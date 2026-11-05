@@ -30,7 +30,7 @@ EXTS = {
     ".c3b", ".c3t", ".c3a", ".c3i", ".c3e", ".c3s", ".c3m", ".c3d", ".c3p",
     ".skel", ".skeleton", ".anim", ".ani", ".mesh", ".model",
     ".scene", ".tme", ".pul", ".pux", ".otherdata", ".fui", ".rgn",
-    ".tpd", ".tpi", ".wdb", ".fcs", ".dmap", ".map", ".terrain", ".bytes",
+    ".tpd", ".tpi", ".wdb", ".fcs", ".dmap", ".map", ".terrain", ".bytes", ".7z",
 }
 RULES = [
     ("audio", re.compile(r"audio|sound|music|voice|(^|[/_.-])sfx([/_.-]|$)|\.ogg$|\.wav$|\.mp3$|\.flac$", re.I)),
@@ -50,6 +50,7 @@ extension_counts = {}
 archive_entry_counts = {}
 apk_inner_entry_counts = {}
 nested_zip_entry_counts = {}
+nested_7z_entry_counts = {}
 unsupported = []
 
 def note_extension(ext):
@@ -146,10 +147,47 @@ def scan_apk(source_archive, outer_path, outer_stream):
                         with apk.open(item) as nested_stream:
                             scan_nested_zip(source_archive, outer_path + "!" + inner, nested_stream)
                         continue
+                    if ext == ".7z":
+                        with apk.open(item) as archive_stream:
+                            scan_nested_7z(source_archive, outer_path + "!" + inner, archive_stream)
+                        staged = "apk_assets/" + Path(outer_path).stem + "/" + inner
+                        stage_stream(source_archive, outer_path + "!" + inner, staged, item.file_size, lambda a=apk, i=item: a.open(i))
+                        continue
                     staged = "apk_assets/" + Path(outer_path).stem + "/" + inner
                     stage_stream(source_archive, outer_path + "!" + inner, staged, item.file_size, lambda a=apk, i=item: a.open(i))
         except zipfile.BadZipFile:
             unsupported.append({"archive": source_archive, "path": outer_path, "extension": ".apk-invalid", "size_bytes": 0})
+
+def scan_nested_7z(source_archive, outer_path, outer_stream):
+    try:
+        import py7zr
+    except ImportError:
+        unsupported.append({"archive": source_archive, "path": outer_path, "extension": ".7z-no-extractor", "size_bytes": 0})
+        return
+    with tempfile.NamedTemporaryFile(suffix=".7z") as temp:
+        shutil.copyfileobj(outer_stream, temp, 1024 * 1024)
+        temp.flush()
+        with tempfile.TemporaryDirectory() as destination:
+            try:
+                with py7zr.SevenZipFile(temp.name, mode="r") as archive:
+                    safe_names = []
+                    for name in archive.getnames():
+                        normalized = name.replace("\\", "/")
+                        parts = [part for part in normalized.split("/") if part not in ("", ".")]
+                        if not normalized.startswith("/") and ".." not in parts:
+                            safe_names.append(name)
+                    if safe_names:
+                        archive.extract(path=destination, targets=safe_names)
+                root = Path(destination)
+                for file_path in root.rglob("*"):
+                    if not file_path.is_file():
+                        continue
+                    relative = file_path.relative_to(root).as_posix()
+                    nested_7z_entry_counts[source_archive] = nested_7z_entry_counts.get(source_archive, 0) + 1
+                    staged = "nested_7z/" + Path(outer_path).stem + "/" + relative
+                    stage_stream(source_archive, outer_path + "!" + relative, staged, file_path.stat().st_size, lambda path=file_path: open(path, "rb"))
+            except Exception as error:
+                unsupported.append({"archive": source_archive, "path": outer_path, "extension": ".7z-extract-error", "size_bytes": 0, "error": str(error)[:240]})
 
 for archive_name in ARCHIVES:
     archive = SOURCE / archive_name
@@ -180,6 +218,7 @@ audit = {
     "archive_entry_counts": archive_entry_counts,
     "apk_inner_entry_counts": apk_inner_entry_counts,
     "nested_zip_entry_counts": nested_zip_entry_counts,
+    "nested_7z_entry_counts": nested_7z_entry_counts,
     "extension_counts": dict(sorted(extension_counts.items())),
     "unsupported_files": unsupported,
     "unique_supported_files": len(rows),
