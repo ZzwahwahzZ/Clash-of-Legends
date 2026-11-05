@@ -379,14 +379,7 @@ func _apply_mount_model() -> void:
 		imported_mount_item_id = ""
 	if mount_item_id.is_empty() or not AssetCatalog:
 		return
-	var mount_entries := AssetCatalog.get_asset_entries("mounts", [".glb", ".gltf"])
-	var verified_index := -1
-	for index in range(mount_entries.size()):
-		var entry: Dictionary = mount_entries[index]
-		var mapped_id := str(entry.get("mount_id", entry.get("item_id", "")))
-		if str(entry.get("mapping_status", "")).to_lower() == "verified" and mapped_id == mount_item_id:
-			verified_index = index
-			break
+	var verified_index := AssetCatalog.get_verified_mount_model_index(mount_item_id)
 	if verified_index < 0:
 		return
 	var candidate_root := AssetCatalog.instantiate_fitted_model("mounts", verified_index, mount_mesh, 1.6, "MountCandidate")
