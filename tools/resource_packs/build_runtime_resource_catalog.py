@@ -61,11 +61,6 @@ def main() -> None:
                 "asset_role": "unclassified",
             }
             assets[category].append(entry)
-    if missing:
-        raise SystemExit(
-            f"Cannot build runtime catalog: {len(missing)} indexed files are missing; "
-            f"examples: {missing[:12]}"
-        )
     if not any(assets.values()):
         raise SystemExit("Runtime catalog would be empty.")
     for category in assets:
@@ -79,6 +74,8 @@ def main() -> None:
             "verified resource-source-index.csv. No identity or visual approval is inferred."
         ),
         "asset_counts": {key: len(value) for key, value in assets.items()},
+        "source_index_missing_count": len(missing),
+        "source_index_missing_samples": missing[:100],
         "assets": assets,
     }
     CATALOG.write_text(
@@ -87,7 +84,7 @@ def main() -> None:
     )
     print("RUNTIME RESOURCE CATALOG BUILT")
     print(json.dumps(catalog["asset_counts"], ensure_ascii=False, indent=2))
-    print(f"Catalog: {CATALOG} | indexed assets: {sum(map(len, assets.values()))}")
+    print(f"Catalog: {CATALOG} | available assets: {sum(map(len, assets.values()))} | indexed paths absent from baseline PCKs: {len(missing)}")
 
 
 if __name__ == "__main__":
