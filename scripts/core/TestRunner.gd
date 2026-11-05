@@ -33,6 +33,7 @@ func run_all_tests() -> Dictionary:
 	test_inventory_and_equipment_refinement()
 	test_mount_identity_mapping_rules()
 	test_character_candidate_requires_bound_skinning()
+	test_offline_audio_catalog()
 	test_inventory_capacity_is_transactional()
 	test_local_save_and_backup_recovery()
 	test_quest_progression_lifecycle()
@@ -90,6 +91,12 @@ func test_character_candidate_requires_bound_skinning() -> void:
 	candidate.free()
 	animation_player.free()
 	controller.free()
+
+func test_offline_audio_catalog() -> void:
+	assert_true(GameAudioManager != null and GameAudioManager._files_by_stem.size() >= 100, "Audio: offline OGG catalogue is indexed")
+	assert_true(GameAudioManager._resolve_stem("jump") == "jump", "Audio: jump cue resolves to the checked-in sound")
+	assert_true(GameAudioManager._resolve_stem("attack_bow") == "bow01", "Audio: archer attack resolves to a bow sound")
+	assert_true(GameAudioManager._files_by_stem.has("centralplains"), "Audio: world music asset is available offline")
 
 func assert_true(condition: bool, test_name: String) -> void:
 	total_tests += 1
