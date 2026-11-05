@@ -39,6 +39,7 @@ Successful conversion/import is not proof that these models are correctly assign
 - The current `MainGame.tscn` world is procedural blockout architecture/terrain, not an accepted reconstruction of the original mobile maps.
 - The wolf, dragon, NPC, player, and world scenes have procedural geometry. Their hierarchy checks do not establish professional visual quality.
 - No comparable rendered screenshots have been reviewed against the approved mobile reference.
+- The PCK validator reports 172/172 model scenes structurally valid, but only 15/172 expose imported AnimationPlayer tracks in the runtime model-scene sample; this is not enough to claim animation coverage.
 - No Redmi Note 11 measurements exist yet for FPS, memory, heat, loading time, or stability.
 
 ## 4. Current Android build
@@ -56,7 +57,9 @@ Successful conversion/import is not proof that these models are correctly assign
 The current resource-pack workflow is:
 https://github.com/ZzwahwahzZ/Clash-of-Legends/actions/runs/41991454834
 
-At the time of this report update, source extraction, readable-data cataloging, PVR decoding, MJP decoding step, C3 conversion/import, and DMap audit had completed. Category PCK export was still running; PCK runtime validation, manifest generation, and artifact publication had not yet completed.
+The resource workflow completed successfully: 11 category PCK files were built, the PCK runtime/model catalog validation passed, collision validation passed, and a SHA-256 manifest was generated and committed. The 11 PCKs total 1,414,091,280 bytes (about 1.317 GiB). The package set covers animations, audio, characters, effects, equipment, interface, maps, models, monsters, mounts, and world data.
+
+The explicit distribution gate remains disabled: the PCK upload and release publication steps were intentionally skipped, and all manifest download URLs are empty. The manifest status is `BUILT_NOT_PUBLISHED_REVIEW_REQUIRED`. The PCKs were validated in the CI workspace but were not made available for installation or download.
 
 The PCK builder and runtime downloader exist in the repository. Publishing/download URLs remain disabled unless the repository's explicit redistribution permission gate is enabled. Do not enable that gate without separate rights clearance.
 
