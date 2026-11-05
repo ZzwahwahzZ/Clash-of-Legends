@@ -1,8 +1,8 @@
 # CONQUER ONLINE FEATURE PARITY MATRIX
 **Project:** Clash of Legends  
 **Branch:** main  
-**Baseline inspected:** 2026-11-02  
-**Reference:** Conquer Online; exact client/region/build is **not yet pinned**.  
+**Baseline inspected:** 2026-11-05  
+**Canonical reference:** Owner-supplied Android client snapshot `com.Tq.CQ2ClientAndroid`, `versionName=1.1.2.3`, `versionCode=123`; base APK SHA-256 `b1b8ccf0d5e1a9dcf346f8f11c20011cd9c68332f1b92676e79f87290f12c8f2`. Server-side content revision and regional variant remain unresolved.  
 **Purpose:** Track feature-by-feature parity against the reference. This is an implementation inventory, not a claim that every feature in every Conquer release is known or complete.
 
 ## Status vocabulary
