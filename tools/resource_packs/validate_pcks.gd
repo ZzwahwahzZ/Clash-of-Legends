@@ -84,7 +84,8 @@ func _validate_packages() -> void:
 				var bounds := mesh_instance.get_aabb()
 				if not _valid_vector3(bounds.position) or not _valid_vector3(bounds.size):
 					model_ok = false
-				if bounds.size.x <= 0.0001 or bounds.size.y <= 0.0001 or bounds.size.z <= 0.0001:
+				var nonzero_axes := int(bounds.size.x > 0.0001) + int(bounds.size.y > 0.0001) + int(bounds.size.z > 0.0001)
+			if nonzero_axes < 2:
 					model_ok = false
 			var animation_nodes := instance.find_children("*", "AnimationPlayer", true, false)
 			var animation_count := 0
