@@ -198,7 +198,17 @@ jobs:
               icon_entries = [n for n in names if n.endswith("/mipmap-xxxhdpi-v4/icon.png")]
               if not icon_entries:
                   raise SystemExit("Android launcher icon is missing from APK")
-              print("ANDROID LAUNCHER ICON PRESENT:", icon_entries[0])
+              import struct
+              icon_data = z.read(icon_entries[0])
+              if not icon_data.startswith(b"\\x89PNG\\r\\n\\x1a\\n"):
+                  raise SystemExit("Android launcher icon is not a valid PNG")
+              width, height = struct.unpack(">II", icon_data[16:24])
+              if width < 192 or height < 192:
+                  raise SystemExit(f"Android launcher icon is too small: {width}x{height}")
+              expected_icon = pathlib.Path("public/clash_launcher_icon_192.png").read_bytes()
+              if icon_data != expected_icon:
+                  raise SystemExit("APK launcher icon does not match the newly generated game crest")
+              print(f"ANDROID LAUNCHER ICON VERIFIED: {icon_entries[0]} ({width}x{height}) matches game crest")
           print(f"APK EXPORT PASSED: {apk.stat().st_size} bytes")
           PY
 
