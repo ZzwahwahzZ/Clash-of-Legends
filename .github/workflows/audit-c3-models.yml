@@ -25,6 +25,8 @@ jobs:
           version: 4.3.0
           use-dotnet: false
           include-templates: false
+      - name: Prepare C3 path list from source index
+        run: python3 tools/c3_audit/prepare_c3_paths.py
       - name: Extract C3 files from verified PCK
         run: godot --headless --path . --script tools/c3_audit/extract_c3_for_audit.gd
       - name: Unpack C3 extraction bundle
