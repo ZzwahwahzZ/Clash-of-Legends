@@ -42,7 +42,7 @@ func _sha256(bytes: PackedByteArray) -> String:
 func _extract() -> void:
 	var pack_root := "res://build/source_packs/"
 	for pack_name in PACKS:
-		var pack_path := pack_root + pack_name
+		var pack_path: String = pack_root + str(pack_name)
 		if not FileAccess.file_exists(pack_path):
 			push_error("PCK extraction: missing verified source pack " + pack_path)
 			quit(1)
@@ -106,7 +106,7 @@ func _extract() -> void:
 
 		var source := str(entry.get("source", "")).replace("\\", "/")
 		var source_parts := source.split("!")
-		var inner_path := source_parts[source_parts.size() - 1] if not source_parts.is_empty() else relative_path
+		var inner_path: String = source_parts[source_parts.size() - 1] if not source_parts.is_empty() else relative_path
 		var extension := inner_path.get_extension().to_lower()
 		if extension in sample_extensions and int(sample_counts.get(extension, 0)) < 2:
 			sample_counts[extension] = int(sample_counts.get(extension, 0)) + 1
