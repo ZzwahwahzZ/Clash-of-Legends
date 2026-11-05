@@ -60,7 +60,11 @@ func get_asset_path(category: String, index: int) -> String:
 	return "res://" + str(entries[index].get("path", ""))
 
 func load_model_scene(category: String, index: int) -> PackedScene:
-	var path := get_asset_path(category, index)
+	var model_extensions: Array[String] = [".glb", ".gltf"]
+	var entries := get_asset_entries(category, model_extensions)
+	if index < 0 or index >= entries.size():
+		return null
+	var path := "res://" + str(entries[index].get("path", ""))
 	if path.is_empty():
 		return null
 	var resource := ResourceLoader.load(path)
