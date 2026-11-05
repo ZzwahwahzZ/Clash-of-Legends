@@ -89,11 +89,6 @@ jobs:
           godot --headless --editor --path . --quit
           godot --headless --path . --script tools/c3_audit/validate_c3_glb.gd
           python3 tools/c3_audit/merge_c3_glb_assets.py
-        uses: chickensoft-games/setup-godot@v2
-        with:
-          version: 4.3.0
-          use-dotnet: false
-          include-templates: false
       - name: Build category PCK files
         run: |
           set -euo pipefail
