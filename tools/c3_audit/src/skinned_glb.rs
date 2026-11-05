@@ -405,6 +405,10 @@ mod tests {
         let json_length = u32::from_le_bytes(glb[12..16].try_into().unwrap()) as usize;
         let json: Value = serde_json::from_slice(&glb[20..20 + json_length]).unwrap();
         assert_eq!(json["skins"].as_array().unwrap().len(), 1);
+        let position_accessor = json["meshes"][0]["primitives"][0]["attributes"]["POSITION"].as_u64().unwrap() as usize;
+        assert!((json["accessors"][position_accessor]["max"][0].as_f64().unwrap() - 0.01).abs() < 1e-6);
+        let first_joint = json["skins"][0]["joints"][0].as_u64().unwrap() as usize;
+        assert!((json["nodes"][first_joint]["scale"][0].as_f64().unwrap() - 1.0).abs() < 1e-6);
         assert_eq!(json["meshes"][0]["primitives"][0]["attributes"]["JOINTS_0"].is_number(), true);
         assert_eq!(json["meshes"][0]["primitives"][0]["attributes"]["WEIGHTS_0"].is_number(), true);
         assert!(json["meshes"][0]["primitives"][0].get("targets").is_none());
