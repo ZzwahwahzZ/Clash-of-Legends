@@ -171,6 +171,11 @@ func _run() -> void:
 				if target_mesh.get_surface_override_material(surface_index) == null:
 					push_error("C3 six-clip visual proof: VAT surface has no independent material override: " + mesh_name + " surface=" + str(surface_index))
 					all_passed = false
+			for marker_name in ["v_armet", "v_l_weapon", "v_r_weapon", "v_l_forearm", "v_l_shoulder", "v_r_forearm", "v_r_shoulder", "v_back", "v_l_foot", "v_r_foot", "v_pelvis", "v_zero", "v_slot", "v_l_slot01", "v_l_slot02", "v_r_slot01", "v_r_slot02"]:
+				for marker_node in target_mesh.get_parent().find_children(marker_name, "MeshInstance3D", true, false):
+					if marker_node.visible:
+						push_error("C3 six-clip visual proof: virtual socket marker is still visible: " + marker_name)
+						all_passed = false
 			vat_player.pause()
 			vat_player.set_frame(0.0)
 			vat_players.append({"player":vat_player,"middle_frame":float(maxi(1, int(int(metadata_value.get("height", 2)) / 2)))})
