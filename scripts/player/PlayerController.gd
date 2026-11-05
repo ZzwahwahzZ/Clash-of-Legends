@@ -115,12 +115,11 @@ func _apply_character_model() -> void:
 	var model_entries := AssetCatalog.get_asset_entries("characters", [".glb", ".gltf"])
 	if model_entries.is_empty():
 		return
-	var class_indices := {
-		"Trojan":0, "Warrior":1, "Archer":2, "Ninja":3, "Monk":4,
-		"Pirate":5, "DragonWarrior":6, "Windwalker":7, "Thunderstriker":8,
-		"WaterTaoist":9, "FireTaoist":10, "Taoist":0
-	}
-	var model_index := int(class_indices.get(character_class, 0)) % model_entries.size()
+	# Never assign a class model by array position: source catalogs contain body
+	# parts, NPCs and unrelated models. Only explicit, reviewed runtime mappings qualify.
+	var model_index := AssetCatalog.get_verified_character_model_index(character_class)
+	if model_index < 0:
+		return
 	imported_model_animation = null
 	imported_animation_name = ""
 	var old_root := visual_root.get_node_or_null("ImportedModelRoot")
