@@ -230,6 +230,24 @@ with open(REPORTS / "resource-source-index.csv", "w", newline="", encoding="utf-
     writer.writeheader()
     writer.writerows(rows)
 
+sample_extensions = {".ini", ".scene", ".tme", ".ani", ".dat", ".fui", ".tpd", ".tpi", ".wdb", ".otherdata", ".pul", ".pux", ".dmap"}
+sample_counts = {}
+sample_lines = []
+for row in rows:
+    source_name = row["source_path"].split("!")[-1]
+    ext = Path(source_name).suffix.lower()
+    if ext not in sample_extensions or sample_counts.get(ext, 0) >= 2:
+        continue
+    sample_counts[ext] = sample_counts.get(ext, 0) + 1
+    sample_path = ROOT / row["staged_path"]
+    data = sample_path.read_bytes()[:512]
+    decoded = data.decode("utf-8", errors="replace")
+    printable = sum(1 for ch in decoded if ch.isprintable() or ch in "\r\n\t") / max(1, len(decoded))
+    sample_lines.append(f"### {ext} | {row['source_path']} | {row['size_bytes']} bytes")
+    sample_lines.append(decoded[:350] if printable > 0.82 else "HEX: " + data[:96].hex(" "))
+    sample_lines.append("")
+(REPORTS / "source-format-samples.txt").write_text("\n".join(sample_lines), encoding="utf-8")
+
 audit = {
     "archive_entry_counts": archive_entry_counts,
     "apk_inner_entry_counts": apk_inner_entry_counts,
