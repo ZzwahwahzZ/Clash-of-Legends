@@ -51,7 +51,7 @@ jobs:
       - name: Validate verified character model mapping
         run: |
           set -o pipefail
-          godot --headless --path . --script tools/resource_packs/validate_character_model_mapping.gd 2>&1 | tee ci-logs/character-model-mapping.log
+          godot --headless --path . --script tools/resource_packs/validate_character_model_mapping.gd --quit-after 3 2>&1 | tee ci-logs/character-model-mapping.log
           grep -q "CHARACTER MODEL MAPPING AUDIT PASSED" ci-logs/character-model-mapping.log
           if grep -Eq "SCRIPT ERROR:|Parse Error:|Compile Error:|CHARACTER MODEL MAPPING AUDIT FAILED" ci-logs/character-model-mapping.log; then echo "Character model mapping audit failed"; exit 1; fi
 
