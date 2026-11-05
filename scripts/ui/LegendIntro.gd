@@ -26,11 +26,8 @@ var class_grid: GridContainer
 var intro_overlay: Control
 var intro_tween: Tween
 var intro_finished := false
-var download_overlay: Control
-var download_progress_bar: ProgressBar
-var download_status_label: Label
-var download_detail_label: Label
-var download_start_button: Button
+var splash_progress_bar: ProgressBar
+var splash_loading := false
 var download_running := false
 var download_done := false
 var last_download_failure := ""
@@ -222,6 +219,31 @@ func _build_cinematic_intro() -> void:
 	skip.pressed.connect(_finish_cinematic_intro)
 	center.add_child(skip)
 
+	# The same splash owns the resource bar: no dialog, card, labels or extra window.
+	splash_progress_bar = ProgressBar.new()
+	splash_progress_bar.name = "IntegratedSplashProgress"
+	splash_progress_bar.min_value = 0.0
+	splash_progress_bar.max_value = 100.0
+	splash_progress_bar.value = 0.0
+	splash_progress_bar.show_percentage = false
+	splash_progress_bar.visible = false
+	splash_progress_bar.anchor_left = 0.16
+	splash_progress_bar.anchor_right = 0.84
+	splash_progress_bar.anchor_top = 0.88
+	splash_progress_bar.anchor_bottom = 0.88
+	splash_progress_bar.offset_top = -5
+	splash_progress_bar.offset_bottom = 5
+	splash_progress_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var bar_track := StyleBoxFlat.new()
+	bar_track.bg_color = Color(0.035, 0.055, 0.10, 0.82)
+	bar_track.set_corner_radius_all(5)
+	splash_progress_bar.add_theme_stylebox_override("background", bar_track)
+	var bar_fill := StyleBoxFlat.new()
+	bar_fill.bg_color = Color("#e4b95e")
+	bar_fill.set_corner_radius_all(5)
+	splash_progress_bar.add_theme_stylebox_override("fill", bar_fill)
+	intro_overlay.add_child(splash_progress_bar)
+
 	intro_tween = create_tween()
 	intro_tween.set_parallel(true)
 	intro_tween.tween_property(cinematic_title, "scale", Vector2.ONE, 0.95).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
@@ -268,174 +290,72 @@ func _request_world_entry() -> void:
 	if manager.get_missing_package_count() <= 0:
 		_enter_world()
 		return
-	_show_unified_download_prompt()
+	_start_splash_resource_download(manager)
 
-func _show_unified_download_prompt() -> void:
-	if is_instance_valid(download_overlay):
-		return
-	var manager := get_node("/root/ResourcePackManager")
-	download_overlay = Control.new()
-	download_overlay.name = "UnifiedResourceDownload"
-	download_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	download_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
-	add_child(download_overlay)
 
-	var shade := ColorRect.new()
-	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	shade.color = Color(0.015, 0.02, 0.045, 0.94)
-	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	download_overlay.add_child(shade)
-
-	var panel := PanelContainer.new()
-	panel.anchor_left = 0.07
-	panel.anchor_top = 0.30
-	panel.anchor_right = 0.93
-	panel.anchor_bottom = 0.70
-	panel.offset_left = 0
-	panel.offset_top = 0
-	panel.offset_right = 0
-	panel.offset_bottom = 0
-	var panel_style := StyleBoxFlat.new()
-	panel_style.bg_color = Color("#101a31")
-	panel_style.border_color = Color("#d4aa62")
-	panel_style.set_border_width_all(2)
-	panel_style.set_corner_radius_all(18)
-	panel_style.content_margin_left = 22
-	panel_style.content_margin_right = 22
-	panel_style.content_margin_top = 22
-	panel_style.content_margin_bottom = 22
-	panel.add_theme_stylebox_override("panel", panel_style)
-	download_overlay.add_child(panel)
-
-	var layout := VBoxContainer.new()
-	layout.alignment = BoxContainer.ALIGNMENT_CENTER
-	layout.add_theme_constant_override("separation", 14)
-	panel.add_child(layout)
-
-	var heading := Label.new()
-	heading.text = "بوابةُ العالَمِ الأَسطوريّ"
-	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	heading.add_theme_font_size_override("font_size", 27)
-	heading.add_theme_color_override("font_color", Color("#ffe2a0"))
-	layout.add_child(heading)
-
-	var explanation := Label.new()
-	explanation.text = "يلزم تنزيل موارد العالم كاملةً مرةً واحدة قبل بدء المغامرة"
-	explanation.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	explanation.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	explanation.add_theme_font_size_override("font_size", 15)
-	explanation.add_theme_color_override("font_color", Color("#d4def0"))
-	layout.add_child(explanation)
-
-	download_status_label = Label.new()
-	download_status_label.text = "جاهز لتنزيل %d حزمة موارد" % manager.get_missing_package_count()
-	download_status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	download_status_label.add_theme_color_override("font_color", Color("#f0d08b"))
-	layout.add_child(download_status_label)
-
-	download_progress_bar = ProgressBar.new()
-	download_progress_bar.min_value = 0
-	download_progress_bar.max_value = 100
-	download_progress_bar.value = 0
-	download_progress_bar.show_percentage = false
-	download_progress_bar.custom_minimum_size = Vector2(0, 24)
-	var track := StyleBoxFlat.new()
-	track.bg_color = Color("#263653")
-	track.set_corner_radius_all(12)
-	download_progress_bar.add_theme_stylebox_override("background", track)
-	var fill := StyleBoxFlat.new()
-	fill.bg_color = Color("#d6a64d")
-	fill.set_corner_radius_all(12)
-	download_progress_bar.add_theme_stylebox_override("fill", fill)
-	layout.add_child(download_progress_bar)
-
-	download_detail_label = Label.new()
-	download_detail_label.text = "سيتم التحقق من كل ملف قبل تثبيته"
-	download_detail_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	download_detail_label.add_theme_font_size_override("font_size", 13)
-	download_detail_label.add_theme_color_override("font_color", Color("#aebed8"))
-	layout.add_child(download_detail_label)
-
-	download_start_button = Button.new()
-	download_start_button.text = "ابدأ تنزيل موارد العالم"
-	download_start_button.custom_minimum_size = Vector2(0, 52)
-	download_start_button.add_theme_font_size_override("font_size", 19)
-	download_start_button.pressed.connect(_start_unified_download)
-	layout.add_child(download_start_button)
-
-	var cancel := Button.new()
-	cancel.text = "العودة"
-	cancel.custom_minimum_size = Vector2(0, 40)
-	cancel.pressed.connect(_close_download_prompt)
-	layout.add_child(cancel)
-
-	manager.aggregate_progress.connect(_on_aggregate_download_progress)
-	if not manager.package_failed.is_connected(_on_package_download_failed):
-		manager.package_failed.connect(_on_package_download_failed)
+func _show_integrated_loading_splash(manager: Node) -> void:
+	if not is_instance_valid(intro_overlay):
+		_build_cinematic_intro()
+	if is_instance_valid(intro_tween):
+		intro_tween.kill()
+	intro_overlay.modulate.a = 1.0
+	intro_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	# Keep the opening artwork visible, but show only the progress bar over it.
+	for child in intro_overlay.get_children():
+		if child == splash_progress_bar:
+			continue
+		child.visible = false
+	var veil := intro_overlay.get_child(0) as ColorRect
+	if veil:
+		veil.visible = true
+		veil.color = Color(0.012, 0.018, 0.045, 0.22)
+	splash_progress_bar.visible = true
+	splash_progress_bar.value = 0.0
+	splash_loading = true
 	manager.emit_current_progress()
 
-func _close_download_prompt() -> void:
-	if download_running:
-		return
-	if is_instance_valid(download_overlay):
-		download_overlay.queue_free()
-	download_overlay = null
 
-func _get_bundled_bytes(manager: Node) -> int:
-	var total := 0
-	for package_id in manager.packages.keys():
-		if manager.is_package_installed(str(package_id)):
-			var path := "res://bundled/" + str(manager.packages[package_id].file_name)
-			if FileAccess.file_exists(path):
-				total += int(manager.packages[package_id].size_bytes)
-	return total
-
-func _on_package_download_failed(package_id: String, reason: String) -> void:
-	last_download_failure = "%s: %s" % [package_id, reason]
-	if is_instance_valid(download_detail_label):
-		download_detail_label.text = "تعثر تنزيل %s — ستتم إعادة المحاولة تلقائيًا" % package_id
-
-func _on_aggregate_download_progress(received: int, total: int, completed: int, count: int, active: int) -> void:
-	if not is_instance_valid(download_progress_bar):
-		return
-	var ratio := 0.0 if total <= 0 else clampf(float(received) / float(total), 0.0, 1.0)
-	download_progress_bar.value = ratio * 100.0
-	download_status_label.text = "اكتمل %d من %d حزمة" % [completed, count]
-	download_detail_label.text = "%s / %s  •  %d تنزيلات متزامنة" % [_format_bytes(received), _format_bytes(total), active]
-
-func _format_bytes(value: int) -> String:
-	if value >= 1073741824:
-		return "%.2f GB" % (float(value) / 1073741824.0)
-	return "%.1f MB" % (float(value) / 1048576.0)
-
-func _start_unified_download() -> void:
+func _start_splash_resource_download(manager: Node) -> void:
 	if download_running:
 		return
 	download_running = true
 	last_download_failure = ""
-	download_start_button.disabled = true
-	download_start_button.text = "جارٍ تنزيل موارد العالم…"
-	download_status_label.text = "يتم تنزيل جميع الموارد والتحقق منها"
-	var manager := get_node("/root/ResourcePackManager")
+	_show_integrated_loading_splash(manager)
+	if not manager.aggregate_progress.is_connected(_on_aggregate_download_progress):
+		manager.aggregate_progress.connect(_on_aggregate_download_progress)
+	if not manager.package_failed.is_connected(_on_package_download_failed):
+		manager.package_failed.connect(_on_package_download_failed)
 	var success: bool = await manager.download_all_packages()
 	download_running = false
+	splash_loading = false
 	if success and manager.get_missing_package_count() == 0:
-		download_done = true
-		download_status_label.text = "اكتملت جميع الموارد بنجاح"
-		download_detail_label.text = "تم التحقق من الملفات كاملةً — عالم الأساطير جاهز"
-		download_start_button.text = "ادخل إلى عالم الأساطير"
-		download_start_button.disabled = false
-		download_start_button.pressed.disconnect(_start_unified_download)
-		download_start_button.pressed.connect(_enter_world)
-	else:
-		download_status_label.text = "لم تكتمل كل الموارد — لم يتم اعتماد الملفات الناقصة"
-		download_detail_label.text = "آخر خطأ: %s — الملفات السليمة محفوظة؛ اضغط لإعادة المحاولة" % (last_download_failure if not last_download_failure.is_empty() else "تعذر إكمال التنزيل")
-		download_start_button.text = "إعادة محاولة التنزيل"
-		download_start_button.disabled = false
+		_enter_world()
+		return
+	# Keep failure recoverable without leaving a fake completed loading bar.
+	if is_instance_valid(intro_overlay):
+		intro_overlay.queue_free()
+	intro_overlay = null
+	if is_instance_valid(splash_progress_bar):
+		splash_progress_bar = null
+	if class_status:
+		class_status.text = "تعذّر اكتمال تحميل الموارد؛ اضغط «ابدأ رحلتك» لإعادة المحاولة"
+
+
+func _on_package_download_failed(package_id: String, reason: String) -> void:
+	last_download_failure = "%s: %s" % [package_id, reason]
+
+
+func _on_aggregate_download_progress(received: int, total: int, _completed: int, _count: int, _active: int) -> void:
+	if not splash_loading or not is_instance_valid(splash_progress_bar):
+		return
+	var ratio := 0.0 if total <= 0 else clampf(float(received) / float(total), 0.0, 1.0)
+	splash_progress_bar.value = ratio * 100.0
+
 
 func _enter_world() -> void:
-	if is_instance_valid(download_overlay):
-		download_overlay.queue_free()
+	if is_instance_valid(intro_overlay):
+		intro_overlay.queue_free()
+	intro_overlay = null
 	GameManager.set("selected_class", str(CLASSES[selected_class].en))
 	get_tree().change_scene_to_file(GAME_SCENE)
 
