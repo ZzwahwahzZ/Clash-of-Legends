@@ -51,6 +51,7 @@ jobs:
           godot --headless --editor --path . --import --quit
           godot --headless --path . --script tools/c3_audit/validate_c3_glb.gd
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: C3-Model-Conversion-Reports
           path: |
@@ -60,5 +61,7 @@ jobs:
             reports/pvr-decode-report.json
             reports/c3-conversion-report.json
             tools/c3_audit/THIRD_PARTY_NOTICES.md
-          if-no-files-found: error
+            build/c3-glb/motion-poc/*.glb
+            build/c3-glb/motion-poc-skinned/*.glb
+          if-no-files-found: warn
           retention-days: 14
