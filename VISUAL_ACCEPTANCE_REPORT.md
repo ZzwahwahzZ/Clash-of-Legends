@@ -24,7 +24,7 @@ The project has working structural and technical foundations, but the game is no
 - 563 converted C3 GLB scenes imported and passed the geometry/import validator.
 - 2,454 GLB mesh surfaces were imported.
 - 936,015 triangles and 709,677 vertices were reported by the C3 audit.
-- The audit parsed 18,029 C3 MOTI chunks. This is a source-chunk count, not a count of imported animation clips.
+- The audit parsed 18,029 C3 MOTI chunks and found 558 motion-only C3 documents (typically 18 MOTI chunks each, no PHY meshes). These appear to be external action-animation data that must be paired with body models; they are not yet integrated.
 - Inspection of the previous exporter found it reused the first MOTI chunk for every mesh. Sampled body GLBs therefore had no skin and often no animation clip even when later per-mesh MOTI chunks contained keyframes. A per-mesh motion exporter and stricter Godot morph/track validation are now under CI; not yet accepted.
 - 1,060 PVR textures decoded; 0 decoder failures.
 - 40 C3 files were rejected by the pinned parser, all in effect paths, due to 4- or 8-byte unparsed mesh tails. These require format investigation; they are not silently accepted.
