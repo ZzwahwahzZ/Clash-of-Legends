@@ -238,7 +238,9 @@ def main() -> None:
                     for source_zip, member, display in sources.get(rel, []):
                         data = source_zip.read(member)
                         record = {"source_member": display, "relative_path": rel, "size_bytes": len(data),
-                                  "sha256": hashlib.sha256(data).hexdigest(), "parse_status": "BINARY_OR_METADATA_ONLY"}\n                        if rel.lower().endswith(".dat"):\n                            record["cipher_probe"] = probe_tq_candidates(data)
+                                  "sha256": hashlib.sha256(data).hexdigest(), "parse_status": "BINARY_OR_METADATA_ONLY"}
+                        if rel.lower().endswith(".dat"):
+                            record["cipher_probe"] = probe_tq_candidates(data)
                         if rel.lower().endswith(".ini"):
                             record.update(parse_ini_opaque(data))
                         entries.append(record)
