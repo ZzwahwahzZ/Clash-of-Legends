@@ -62,7 +62,8 @@ jobs:
           python3 tools/c3_audit/unpack_c3_bundle.py
       - name: Decode original PVR textures
         run: |
-          python3 -m pip install --disable-pip-version-check numpy pillow
+          python3 -m pip install --disable-pip-version-check numpy pillow texture2ddecoder==1.0.6
+          python3 -m unittest tools.c3_audit.test_pvr_decoder
           python3 tools/c3_audit/audit_pvr_headers.py
           python3 tools/c3_audit/decode_pvr_textures.py
       - name: Validate and decode original MJP textures
