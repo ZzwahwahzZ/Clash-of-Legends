@@ -160,6 +160,7 @@ func _validate_character_candidate(candidate: Node, animation_node: Node) -> Dic
 	if candidate == null:
 		return {"ok": false, "reason": "missing instantiated model root"}
 	var mesh_count := 0
+	var morph_mesh_count := 0
 	var skinned_mesh_count := 0
 	var skeleton_count := 0
 	var total_bones := 0
@@ -172,6 +173,8 @@ func _validate_character_candidate(candidate: Node, animation_node: Node) -> Dic
 		if not _is_renderable_mesh_instance(mesh_instance):
 			continue
 		mesh_count += 1
+		if mesh_instance.mesh.get_blend_shape_count() > 0:
+			morph_mesh_count += 1
 		if mesh_instance.skin != null and not mesh_instance.skeleton.is_empty():
 			skinned_mesh_count += 1
 		for surface_index in range(mesh_instance.mesh.get_surface_count()):
@@ -180,31 +183,36 @@ func _validate_character_candidate(candidate: Node, animation_node: Node) -> Dic
 				return {"ok": false, "reason": "mesh surface has no active material"}
 	if mesh_count == 0:
 		return {"ok": false, "reason": "no renderable mesh surfaces"}
-	if skeleton_count == 0 or total_bones < 8 or skinned_mesh_count == 0:
-		return {"ok": false, "reason": "character requires a bound skinned mesh and usable skeletal rig (minimum 8 bones)"}
 	if not animation_node is AnimationPlayer:
 		return {"ok": false, "reason": "no AnimationPlayer"}
 	var animation_player := animation_node as AnimationPlayer
 	var has_skeletal_idle := false
 	var has_skeletal_move := false
+	var has_morph_idle := false
+	var has_morph_move := false
 	for animation_name in animation_player.get_animation_list():
 		var normalized := animation_name.to_lower()
 		var animation := animation_player.get_animation(animation_name)
 		if animation == null or animation.get_track_count() == 0:
 			continue
 		var has_skeletal_track := false
+		var has_morph_track := false
 		for track_index in range(animation.get_track_count()):
 			var track_path := str(animation.track_get_path(track_index)).to_lower()
 			if track_path.contains("skeleton3d") or track_path.contains("bone_pose") or track_path.contains("bones/"):
 				has_skeletal_track = true
-				break
-		if not has_skeletal_track:
-			continue
-		has_skeletal_idle = has_skeletal_idle or normalized.contains("idle") or normalized.contains("stand")
-		has_skeletal_move = has_skeletal_move or normalized.contains("walk") or normalized.contains("run") or normalized.contains("move")
-	if not has_skeletal_idle or not has_skeletal_move:
-		return {"ok": false, "reason": "missing non-empty bone-targeted idle/stand or walk/run/move animation"}
-	return {"ok": true, "reason": "renderable materials, bound skinned mesh, usable skeleton and bone-targeted idle/move clips present"}
+			if track_path.contains("blend_shapes") or track_path.contains("blend_shape"):
+				has_morph_track = true
+		has_skeletal_idle = has_skeletal_idle or (has_skeletal_track and (normalized.contains("idle") or normalized.contains("stand")))
+		has_skeletal_move = has_skeletal_move or (has_skeletal_track and (normalized.contains("walk") or normalized.contains("run") or normalized.contains("move")))
+		has_morph_idle = has_morph_idle or (has_morph_track and (normalized.contains("idle") or normalized.contains("stand")))
+		has_morph_move = has_morph_move or (has_morph_track and (normalized.contains("walk") or normalized.contains("run") or normalized.contains("move")))
+	var skeletal_animation_valid := skeleton_count > 0 and total_bones >= 8 and skinned_mesh_count > 0 and has_skeletal_idle and has_skeletal_move
+	var morph_animation_valid := morph_mesh_count >= 8 and has_morph_idle and has_morph_move
+	if not skeletal_animation_valid and not morph_animation_valid:
+		return {"ok": false, "reason": "requires bound skeletal idle/move clips or at least 8 morph meshes with semantic idle/move clips"}
+	var mode := "skeletal" if skeletal_animation_valid else "morph"
+	return {"ok": true, "reason": "renderable materials and complete %s idle/move animation path present" % mode}
 
 func _physics_process(delta: float) -> void:
 	if is_dead:
