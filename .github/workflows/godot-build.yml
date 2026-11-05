@@ -96,9 +96,6 @@ jobs:
           xvfb-run -a godot --path . --rendering-method gl_compatibility --scene res://scenes/core/VisualAuditScene.tscn 2>&1 | tee ci-logs/visual-audit.log
           if grep -Eq "SCRIPT ERROR:|Parse Error:|Compile Error:|ERROR: Failed to load script|ERROR: Failed to instantiate an autoload" ci-logs/visual-audit.log; then echo "Visual audit emitted script errors"; exit 1; fi
 
-      - name: Enforce production visual assets (no primitive blockouts)
-        run: python3 tools/quality/reject_visual_blockouts.py
-
       - name: Validate automatic loot category filters
         run: |
           set -o pipefail
@@ -123,6 +120,9 @@ jobs:
           set -o pipefail
           godot --headless --path . --script tools/resource_packs/validate_world_travel.gd 2>&1 | tee ci-logs/world-travel.log
           if grep -Eq "SCRIPT ERROR:|Parse Error:|Compile Error:|WORLD TRAVEL AUDIT FAILED" ci-logs/world-travel.log; then echo "World travel test failed"; exit 1; fi
+
+      - name: Enforce production visual assets (no primitive blockouts)
+        run: python3 tools/quality/reject_visual_blockouts.py
 
       - name: Upload logs
         if: always()
