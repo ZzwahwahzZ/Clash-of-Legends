@@ -23,6 +23,11 @@ func _run_audit() -> void:
 		"models_with_animations": 0,
 		"models_failed": [],
 		"model_samples": [],
+		"catalog_found": false,
+		"catalog_categories": {},
+		"catalog_missing_paths": [],
+		"verified_character_mappings": [],
+		"missing_character_classes": [],
 		"visual_geometry": {
 			"mesh_instances": 0,
 			"surfaces": 0,
@@ -43,6 +48,7 @@ func _run_audit() -> void:
 	var model_paths: Array[String] = []
 	_walk_directory("res://", report["extension_counts"], model_paths)
 	report["model_files_found"] = model_paths.size()
+	_audit_resource_catalog(report)
 	model_paths.sort()
 	var inspect_count := mini(model_paths.size(), MAX_MODEL_INSPECTIONS)
 	for index in range(inspect_count):
@@ -85,6 +91,18 @@ func _run_audit() -> void:
 		"extension_counts": report["extension_counts"],
 		"geometry": report["visual_geometry"]
 	}))
+	if not report["catalog_found"]:
+		push_error("RESOURCE PACK AUDIT FAILED: runtime resource_catalog.json is missing or invalid.")
+		quit(1)
+		return
+	if not report["catalog_missing_paths"].is_empty():
+		push_error("RESOURCE PACK AUDIT FAILED: catalog contains missing asset paths.")
+		quit(1)
+		return
+	if not report["missing_character_classes"].is_empty():
+		push_error("RESOURCE PACK AUDIT FAILED: verified character models are missing for: " + ", ".join(report["missing_character_classes"]))
+		quit(1)
+		return
 	if report["models_with_renderable_meshes"] == 0:
 		push_error("RESOURCE PACK AUDIT FAILED: no loadable 3D model with renderable mesh surfaces was found.")
 		quit(1)
@@ -92,6 +110,62 @@ func _run_audit() -> void:
 	if report["models_failed"].size() > 0:
 		print("RESOURCE MODEL WARNINGS: ", report["models_failed"].size())
 	quit(0)
+
+
+func _audit_resource_catalog(report: Dictionary) -> void:
+	var catalog_path := "res://resource_stage/world/resource_catalog.json"
+	if not FileAccess.file_exists(catalog_path):
+		return
+	var file := FileAccess.open(catalog_path, FileAccess.READ)
+	if file == null:
+		return
+	var parser := JSON.new()
+	var parse_error := parser.parse(file.get_as_text())
+	file.close()
+	if parse_error != OK or typeof(parser.data) != TYPE_DICTIONARY:
+		return
+	var assets: Variant = parser.data.get("assets", {})
+	if typeof(assets) != TYPE_DICTIONARY:
+		return
+	report["catalog_found"] = true
+	var expected_classes := [
+		"Trojan", "Warrior", "Archer", "Ninja", "Monk", "Pirate",
+		"DragonWarrior", "Windwalker", "Thunderstriker", "WaterTaoist", "FireTaoist"
+	]
+	var verified_classes: Dictionary = {}
+	for category in assets.keys():
+		var entries: Variant = assets[category]
+		if typeof(entries) != TYPE_ARRAY:
+			continue
+		report["catalog_categories"][str(category)] = entries.size()
+		for entry in entries:
+			if typeof(entry) != TYPE_DICTIONARY:
+				continue
+			var relative_path := str(entry.get("path", ""))
+			if relative_path.is_empty() or not FileAccess.file_exists("res://" + relative_path):
+				report["catalog_missing_paths"].append(relative_path)
+			if str(category) != "characters":
+				continue
+			var extension := str(entry.get("extension", "")).to_lower()
+			if extension not in [".glb", ".gltf"]:
+				continue
+			if str(entry.get("asset_role", "")) != "complete_character":
+				continue
+			if str(entry.get("mapping_status", "")).to_lower() != "verified":
+				continue
+			var class_name := str(entry.get("character_class", ""))
+			var gender := str(entry.get("gender", ""))
+			if class_name.is_empty() or gender.is_empty():
+				continue
+			verified_classes[class_name] = true
+			report["verified_character_mappings"].append({
+				"class": class_name,
+				"gender": gender,
+				"path": relative_path
+			})
+	for class_name in expected_classes:
+		if not verified_classes.has(class_name):
+			report["missing_character_classes"].append(class_name)
 
 func _walk_directory(path: String, counts: Dictionary, model_paths: Array[String]) -> void:
 	var directory := DirAccess.open(path)
