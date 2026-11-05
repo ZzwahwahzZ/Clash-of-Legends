@@ -7,7 +7,13 @@ func _run_travel_test() -> void:
 	var player := CharacterBody3D.new()
 	player.name = "TravelTestPlayer"
 	get_root().add_child(player)
-	GameManager.register_player(player)
+	var game_manager := get_root().get_node_or_null("GameManager")
+	if game_manager == null:
+		game_manager = Node.new()
+		game_manager.name = "GameManager"
+		game_manager.set_script(load("res://tools/resource_packs/TravelTestGameManager.gd"))
+		get_root().add_child(game_manager)
+	game_manager.call("register_player", player)
 	var manager: Node = (load("res://scripts/world/WorldTravelManager.gd") as Script).new()
 	get_root().add_child(manager)
 	await process_frame
