@@ -81,36 +81,44 @@ with zipfile.ZipFile(index_zip,"w",compression=zipfile.ZIP_DEFLATED,compressleve
         ti=tpi_path.read_bytes()
         td=tpd_path.read_bytes()
         report={"tpi_source":tpi["source_path"],"tpd_source":tpd["source_path"],"tpi_bytes":len(ti),"tpd_bytes":len(td),"entries_declared":0,"entries_extracted":0,"entries_deduplicated":0,"entries_failed":0,"bytes_extracted":0,"extensions":{},"errors":[]}
-        if not ti.startswith(b"NetDragonDatPkg"):
-            report["errors"].append("TPI magic header mismatch")
+        if len(ti) < 0x30 or not ti.startswith(b"NetDragonDatPkg"):
+            report["errors"].append("TPI magic header or header size mismatch")
             results.append(report)
             continue
         try:
-            file_count,info_size=struct.unpack_from("<II",ti,0x24)
-            record_offset=0x2C
-            record_end=record_offset+file_count*24
-            if file_count>500000 or record_end>len(ti) or record_offset+info_size>len(ti)+8:
-                raise ValueError("TPI directory bounds are invalid")
+            file_count=struct.unpack_from("<I",ti,0x24)[0]
+            pos=0x30
+            if file_count>500000:
+                raise ValueError("TPI entry count is unreasonable")
             report["entries_declared"]=file_count
             stem=Path(tpi["source_path"].split("!")[-1]).stem
             for idx in range(file_count):
-                name_off,data_off,size,zsize,flags,timestamp=struct.unpack_from("<6I",ti,record_offset+idx*24)
                 try:
-                    name=read_c_string(ti,name_off)
+                    if pos>=len(ti):
+                        raise ValueError("TPI directory ended before declared entry count")
+                    path_len=ti[pos]
+                    pos+=1
+                    if pos+path_len+22>len(ti):
+                        raise ValueError("TPI entry exceeds index bounds")
+                    name=ti[pos:pos+path_len].decode("cp1252",errors="replace").strip()
+                    pos+=path_len+2
+                    size,zsize,zsize_check,size_check,data_off=struct.unpack_from("<5I",ti,pos)
+                    pos+=20
+                    if zsize!=zsize_check or size!=size_check:
+                        raise ValueError("TPI duplicate size fields disagree")
                     normalized=name.replace("\\","/").lstrip("/")
-                    if ".." in normalized.split("/"):
-                        raise ValueError("unsafe resource path")
-                    packed_size=zsize if zsize>0 else size
-                    if size>MAX_ENTRY_BYTES or data_off+packed_size>len(td):
+                    if not normalized or ".." in normalized.split("/"):
+                        raise ValueError("unsafe or empty resource path")
+                    if size>MAX_ENTRY_BYTES or data_off+zsize>len(td):
                         raise ValueError("resource payload bounds are invalid")
-                    payload=td[data_off:data_off+packed_size]
-                    if zsize>0:
+                    payload=td[data_off:data_off+zsize]
+                    if zsize==size:
+                        decoded=payload
+                    else:
                         try:
                             decoded=zlib.decompress(payload)
                         except zlib.error:
                             decoded=zlib.decompress(payload,-15)
-                    else:
-                        decoded=payload
                     if len(decoded)!=size:
                         raise ValueError(f"decoded size mismatch ({len(decoded)} != {size})")
                     digest=hashlib.sha256(decoded).hexdigest()
