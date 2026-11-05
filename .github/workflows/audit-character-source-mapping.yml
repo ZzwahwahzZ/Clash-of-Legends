@@ -106,14 +106,42 @@ jobs:
                                   sample = decoded[:min(len(decoded), 2*1024*1024)]
                                   printable = sum(1 for b in sample if b in (9,10,13) or 32 <= b <= 126 or b >= 0xc0) / max(1,len(sample))
                                   decoded_text = sample.decode("utf-8", errors="ignore")
+                                  relevant = [line.strip() for line in decoded_text.splitlines()
+                                              if re.search(r"role|class|job|body|model|sex|look|hair|armor|c3|profession|vocation", line, flags=re.IGNORECASE)]
                                   candidates.append({
                                       "seed": seed,
                                       "printable_ratio": round(printable,4),
                                       "lua_table_marker": bool(re.search(rb"local\s+[A-Za-z_][A-Za-z0-9_]*\s*=", decoded[:4096])),
                                       "ini_section_count": len(re.findall(r"^\s*\[[^]]+\]", decoded_text, flags=re.MULTILINE)),
                                       "model_reference_count": len(set(re.findall(r"[A-Za-z0-9_./\-]+\.c3", decoded_text, flags=re.IGNORECASE))),
+                                      "relevant_mapping_lines": relevant[:160],
                                       "accepted_as_mobile_format": False
                                   })
+                          ini_sections = {}
+                          current_section = ""
+                          if target.lower().endswith(".ini"):
+                              for line in lines:
+                                  stripped = line.strip()
+                                  if stripped.startswith("[") and "]" in stripped:
+                                      current_section = stripped[1:stripped.index("]")]
+                                      ini_sections.setdefault(current_section, {})
+                                  elif "=" in stripped and current_section and not stripped.startswith((";", "#")):
+                                      key, value = stripped.split("=", 1)
+                                      ini_sections[current_section][key.strip()] = value.strip()
+                          xml_structure = {}
+                          if target.lower().endswith(".xml"):
+                              try:
+                                  import xml.etree.ElementTree as ET
+                                  root = ET.fromstring(text)
+                                  nodes = list(root.iter())
+                                  xml_structure = {
+                                      "root_tag": root.tag,
+                                      "node_count": len(nodes),
+                                      "tag_counts": {tag: sum(1 for node in nodes if node.tag == tag) for tag in sorted(set(node.tag for node in nodes))},
+                                      "nodes": [{"tag": node.tag, "attributes": dict(node.attrib), "text": (node.text or "").strip()[:120]} for node in nodes[:250]]
+                                  }
+                              except Exception as error:
+                                  xml_structure = {"parse_error": str(error)[:240]}
                           records.append({
                               "source_path": target,
                               "size_bytes": len(data),
@@ -122,6 +150,8 @@ jobs:
                               "line_count": len(lines),
                               "section_count": len(sections),
                               "key_names": keys[:300],
+                              "ini_sections": ini_sections,
+                              "xml_structure": xml_structure,
                               "asset_reference_count": len(refs),
                               "asset_references": refs[:500],
                               "numeric_id_count": len(set(re.findall(r"(?<![A-Za-z0-9_])\d{4,10}(?![A-Za-z0-9_])", text))),
