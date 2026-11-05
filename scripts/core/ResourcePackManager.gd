@@ -7,7 +7,7 @@ signal download_progress(package_id: String, received_bytes: int, total_bytes: i
 signal package_installed(package_id: String, path: String)
 signal package_failed(package_id: String, reason: String)
 
-const MANIFEST_URL := "https://raw.githubusercontent.com/ZzwahwahzZ/Clash-of-Legends/main/RESOURCE_MANIFEST"
+const MANIFEST_URL := "https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/resource-packs-v1/RESOURCE_MANIFEST"
 const INSTALL_DIR := "user://resource_packs"
 const MAX_MANIFEST_BYTES := 1024 * 1024
 
