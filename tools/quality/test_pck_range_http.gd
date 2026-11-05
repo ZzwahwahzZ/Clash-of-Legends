@@ -28,7 +28,6 @@ func _run_range_resume_test() -> void:
 
 	# First request: save the first 1 KiB, then destroy the downloader to simulate app interruption.
 	var first_manager := preload("res://scripts/core/ResourcePackManager.gd").new()
-	root.add_child(first_manager)
 	var first_request := _new_request(1024)
 	var first: Dictionary = await first_manager._fetch_range_chunk(first_request, url, 0, 1023, total_size)
 	if not bool(first.get("success", false)):
@@ -40,12 +39,11 @@ func _run_range_resume_test() -> void:
 		quit(1)
 		return
 	first_request.queue_free()
-	first_manager.queue_free()
+	first_manager.free()
 	await process_frame
 
 	# Second request: a fresh manager resumes at byte 1024 and appends the next 1 KiB.
 	var resume_manager := preload("res://scripts/core/ResourcePackManager.gd").new()
-	root.add_child(resume_manager)
 	var resume_request := _new_request(1024)
 	var second: Dictionary = await resume_manager._fetch_range_chunk(resume_request, url, 1024, 2047, total_size)
 	if not bool(second.get("success", false)):
@@ -70,7 +68,7 @@ func _run_range_resume_test() -> void:
 		return
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(temp_path))
 	resume_request.queue_free()
-	resume_manager.queue_free()
+	resume_manager.free()
 	print("GODOT HTTP RANGE RESUME TEST PASSED: interrupted partial data resumed at byte 1024 and matched the contiguous 2 KiB reference.")
 	quit(0)
 
