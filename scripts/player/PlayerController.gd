@@ -178,6 +178,11 @@ func move_towards_target_position(pos: Vector3, _delta: float) -> void:
 	target_nav_position = pos
 	is_moving_to_target = true
 
+func clear_movement_target() -> void:
+	is_moving_to_target = false
+	target_nav_position = global_position
+	input_direction = Vector2.ZERO
+
 func perform_jump() -> void:
 	if is_on_floor() and not is_dead:
 		velocity.y = jump_velocity
