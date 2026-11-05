@@ -28,6 +28,7 @@ func run_all_tests() -> Dictionary:
 	test_offline_social_and_population_rules()
 	test_arabic_localization_integrity()
 	test_inventory_and_equipment_refinement()
+	test_inventory_capacity_is_transactional()
 	test_local_save_and_backup_recovery()
 	test_quest_progression_lifecycle()
 	test_auto_hunt_and_loot_systems()
@@ -164,6 +165,47 @@ func test_inventory_and_equipment_refinement() -> void:
 	inv.deserialize({"slots": [], "equipment": {"weapon": {"id":"legacy_weapon","slot":"weapon","type":"equipment"}}})
 	assert_true(inv.equipment.has("mount") and inv.equipment.has("garment") and inv.slots.size() == PlayerInventoryScript.MAX_SLOTS, "Inventory: legacy saves migrate to the expanded equipment layout")
 	inv.queue_free()
+
+
+func test_inventory_capacity_is_transactional() -> void:
+	var test_player := CharacterBody3D.new()
+	test_player.name = "InventoryCapacityTestPlayer"
+	add_child(test_player)
+	var full_inventory := PlayerInventoryScript.new()
+	full_inventory.name = "PlayerInventory"
+	test_player.add_child(full_inventory)
+
+	var meteor_index := -1
+	for i in range(full_inventory.MAX_SLOTS):
+		if full_inventory.slots[i] != null and str(full_inventory.slots[i].get("id", "")) == "meteor_stone":
+			meteor_index = i
+			break
+	assert_true(meteor_index >= 0, "Inventory Capacity: starter material stack is available")
+	if meteor_index < 0:
+		test_player.queue_free()
+		return
+
+	full_inventory.slots[meteor_index]["quantity"] = 98
+	for i in range(full_inventory.MAX_SLOTS):
+		if full_inventory.slots[i] == null:
+			full_inventory.slots[i] = {"id": "capacity_filler_%d" % i, "quantity": 1, "max_stack": 1}
+
+	var before_quantity := int(full_inventory.slots[meteor_index].get("quantity", 0))
+	var accepted := full_inventory.add_item({"id": "meteor_stone", "type": "material", "quantity": 3, "max_stack": 99})
+	assert_true(not accepted and int(full_inventory.slots[meteor_index].get("quantity", 0)) == before_quantity, "Inventory Capacity: failed stack insertion makes no partial changes")
+
+	var drop_scene := load("res://scenes/world/LootDrop3D.tscn") as PackedScene
+	var drop := drop_scene.instantiate() as LootDrop3D if drop_scene else null
+	var gold_before := GameManager.current_gold
+	if drop:
+		add_child(drop)
+		drop.setup_loot({"gold": 25, "has_item": true, "item_data": {"id": "meteor_stone", "type": "material", "quantity": 3, "max_stack": 99}})
+		drop.collect_by_player(test_player)
+		assert_true(not drop.is_collected and not drop.is_queued_for_deletion() and GameManager.current_gold == gold_before, "Loot: full inventory preserves the drop and does not grant its gold")
+		drop.queue_free()
+	else:
+		assert_true(false, "Loot: test drop scene is available")
+	test_player.queue_free()
 
 func test_local_save_and_backup_recovery() -> void:
 	var dummy_data = {"level":45,"hp":980,"gold":12500,"class":"Trojan"}
