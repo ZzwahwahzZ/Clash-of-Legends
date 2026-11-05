@@ -51,6 +51,7 @@ jobs:
               "assets/ConquerRes/ini/weapon_trans.ini",
               "assets/ConquerRes/ini/weaponmatch.ini",
               "assets/ConquerRes/ini/weaponshow.ini",
+              "assets/ConquerRes/ini/weaponmotiondata.dat",
           ]
           known_role_model_ids = {
               "134080","131230","139000","133080","138230","136000","135000","130000",
