@@ -58,6 +58,8 @@ func travel_to(destination_id: String, reason: String = "manual") -> bool:
 		player.clear_movement_target()
 	player.global_position = target
 	current_destination_id = destination_id
+	if GameAudioManager:
+		GameAudioManager.play_map_music(destination_id)
 	travel_in_progress = false
 	emit_signal("travel_completed", destination_id, target)
 	var label := str(destination.name_ar) if str(game_manager.get("current_language")) == "ar" else str(destination.name_en)
