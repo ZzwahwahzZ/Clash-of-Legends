@@ -47,6 +47,8 @@ func _startup_resource_check() -> void:
 			break
 	if missing:
 		await open_ui()
+		# First launch: begin downloading all required packs automatically.
+		await _on_download_all_pressed()
 	else:
 		_set_status("كل موارد اللعبة مثبتة ويمكن اللعب دون اتصال." if _is_ar() else "All game resources are installed. Offline play is ready.")
 
