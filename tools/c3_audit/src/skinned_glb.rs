@@ -333,3 +333,78 @@ pub fn export_document(
     fs::write(output, &glb)?;
     Ok((glb.len() as u64, mesh_count, animated_mesh_count))
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use sandbox_data::c3::{C3Vertex, MotionKey, Vector2, Vector3};
+
+    fn triangle_mesh() -> C3Mesh {
+        C3Mesh {
+            name: "v_body".to_owned(),
+            blend_count: 0,
+            opaque_vertex_count: 3,
+            alpha_vertex_count: 0,
+            vertices: vec![
+                C3Vertex { position: Vector3 { x: 0.0, y: 0.0, z: 0.0 }, texture_coordinate: Vector2 { x: 0.0, y: 0.0 }, colour: 0, bone_indices: [0, 0], bone_weights: [1.0, 0.0] },
+                C3Vertex { position: Vector3 { x: 1.0, y: 0.0, z: 0.0 }, texture_coordinate: Vector2 { x: 1.0, y: 0.0 }, colour: 0, bone_indices: [0, 0], bone_weights: [1.0, 0.0] },
+                C3Vertex { position: Vector3 { x: 0.0, y: 1.0, z: 0.0 }, texture_coordinate: Vector2 { x: 0.0, y: 1.0 }, colour: 0, bone_indices: [0, 0], bone_weights: [1.0, 0.0] }
+            ],
+            opaque_indices: vec![0, 1, 2],
+            alpha_indices: Vec::new(),
+            texture_name: String::new(),
+            bounds_minimum: Vector3::default(),
+            bounds_maximum: Vector3 { x: 1.0, y: 1.0, z: 0.0 },
+            initial_matrix: Matrix4::IDENTITY,
+            texture_rows: 1,
+            transparency_keys: Vec::new(),
+            draw_keys: Vec::new(),
+            texture_keys: Vec::new(),
+            extension_tag: None,
+        }
+    }
+
+    #[test]
+    fn exports_real_glb_skin_and_full_frame_animation_without_morph_targets() {
+        let mut moved = Matrix4::IDENTITY;
+        moved.values[12] = 4.0;
+        let motion = C3Motion {
+            bone_count: 1,
+            frame_count: 2,
+            keys: vec![
+                MotionKey { frame: 0, bone_matrices: vec![Matrix4::IDENTITY] },
+                MotionKey { frame: 1, bone_matrices: vec![moved] }
+            ],
+            morph_count: 0,
+            morph_values: Vec::new(),
+        };
+        let document = C3Document {
+            version: "test".to_owned(),
+            meshes: vec![triangle_mesh()],
+            motions: vec![motion],
+            unknown_chunks: Vec::new(),
+        };
+        let png = [
+            137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,1,0,0,0,1,
+            8,6,0,0,0,31,21,196,137,0,0,0,13,73,68,65,84,120,156,99,248,207,192,
+            240,31,0,5,0,1,255,137,153,61,29,0,0,0,0,73,69,78,68,174,66,96,130
+        ];
+        let output = std::env::temp_dir().join(format!("c3-skinned-{}.glb", std::process::id()));
+        let (bytes, meshes, animated) = export_document(&document, &png, "test.c3", &output).unwrap();
+        assert!(bytes > 0);
+        assert_eq!(meshes, 1);
+        assert_eq!(animated, 1);
+        let glb = fs::read(&output).unwrap();
+        let json_length = u32::from_le_bytes(glb[12..16].try_into().unwrap()) as usize;
+        let json: Value = serde_json::from_slice(&glb[20..20 + json_length]).unwrap();
+        assert_eq!(json["skins"].as_array().unwrap().len(), 1);
+        assert_eq!(json["meshes"][0]["primitives"][0]["attributes"]["JOINTS_0"].is_number(), true);
+        assert_eq!(json["meshes"][0]["primitives"][0]["attributes"]["WEIGHTS_0"].is_number(), true);
+        assert!(json["meshes"][0]["primitives"][0].get("targets").is_none());
+        assert_eq!(json["animations"][0]["channels"].as_array().unwrap().len(), 3);
+        let time_accessor = json["animations"][0]["samplers"][0]["input"].as_u64().unwrap() as usize;
+        assert_eq!(json["accessors"][time_accessor]["count"], 2);
+        fs::remove_file(output).unwrap();
+    }
+}
