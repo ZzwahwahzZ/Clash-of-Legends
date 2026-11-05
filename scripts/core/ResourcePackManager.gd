@@ -177,6 +177,7 @@ func download_package(package_id: String) -> bool:
 		var completion: Array = await package_finished
 		if completion.size() >= 2 and str(completion[0]) == package_id:
 			return bool(completion[1])
+	return false
 
 func _start_download(package_id: String) -> bool:
 	if not packages.has(package_id) or is_package_installed(package_id) or _active_downloads.has(package_id):
