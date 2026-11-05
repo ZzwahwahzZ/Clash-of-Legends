@@ -164,6 +164,13 @@ func _run() -> void:
 			if target_mesh.skin != null or not target_mesh.skeleton.is_empty():
 				push_error("C3 six-clip visual proof: baked VAT mesh is still linked to a glTF skin/skeleton: " + mesh_name)
 				all_passed = false
+			if target_mesh.material_override != null:
+				push_error("C3 six-clip visual proof: VAT must preserve separate per-surface material states, not use one global override: " + mesh_name)
+				all_passed = false
+			for surface_index in range(target_mesh.mesh.get_surface_count()):
+				if target_mesh.get_surface_override_material(surface_index) == null:
+					push_error("C3 six-clip visual proof: VAT surface has no independent material override: " + mesh_name + " surface=" + str(surface_index))
+					all_passed = false
 			vat_player.pause()
 			vat_player.set_frame(0.0)
 			vat_players.append({"player":vat_player,"middle_frame":float(maxi(1, int(int(metadata_value.get("height", 2)) / 2)))})
