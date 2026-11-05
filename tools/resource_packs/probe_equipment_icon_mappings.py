@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Probe the Mobile item-minicon translation table for mount and equipment icon references."""
-import csv, json, hashlib
+import csv, json, hashlib, struct
 from pathlib import Path
 
 INDEX = Path("reports/resource-source-index.csv")
@@ -99,6 +99,10 @@ report = {
     "source_path": source.get("source_path"),
     "source_sha256": hashlib.sha256(raw).hexdigest(),
     "source_size_bytes": len(raw),
+    "raw_hex_head_256": raw[:256].hex(),
+    "raw_ascii_head_128": "".join(chr(b) if 32 <= b < 127 else "." for b in raw[:128]),
+    "binary_u32x4_record_count_if_16_byte_aligned": len(raw) // 16 if len(raw) % 16 == 0 else None,
+    "binary_u32x4_first_32_records_if_16_byte_aligned": [list(struct.unpack_from("<4I", raw, offset)) for offset in range(0, min(len(raw) - 15, 16 * 32), 16)] if len(raw) % 16 == 0 else [],
     "candidate_decodes": probes,
     "best_seed_by_text_structure_score": best_seed,
     "best_decode_printable_ratio": round(printable_ratio(best_decoded), 6),
@@ -109,6 +113,11 @@ report = {
     "mount_icon_ids_sample": sorted(icon_ids)[:100],
     "mount_icon_id_matches": icon_matches,
     "mount_icon_literal_occurrences": literal_icon_occurrences,
+    "mount_icon_id_binary_word_offsets": {
+        icon_id: [offset for offset in range(0, len(raw) - 3, 4) if struct.unpack_from("<I", raw, offset)[0] == int(icon_id)][:30]
+        for icon_id in sorted(icon_ids)
+        if any(struct.unpack_from("<I", raw, offset)[0] == int(icon_id) for offset in range(0, len(raw) - 3, 4))
+    },
     "itemminicon_pvr_count": len(pvr_rows),
     "itemminicon_pvr_samples": [r.get("source_path") for r in pvr_rows[:100]],
     "status": "ICON_TRANSLATION_FORMAT_PROBED_REQUIRES_SPRITE_COORDINATE_AND_VISUAL_VALIDATION",
