@@ -33,6 +33,7 @@ var is_moving_to_target: bool = false
 var imported_model_animation: AnimationPlayer = null
 var imported_animation_name: String = ""
 var imported_mount_item_id: String = ""
+var footstep_timer: float = 0.0
 
 @onready var camera_pivot: Node3D = $CameraPivot
 @onready var free_camera: FreeCamera3D = $CameraPivot/FreeCamera3D
@@ -273,10 +274,16 @@ func _physics_process(delta: float) -> void:
 		if right_arm and attack_anim_timer <= 0.0: right_arm.rotation.x = stride * 0.7
 	else:
 		walk_anim_time = 0.0
+		footstep_timer = 0.0
 		if left_leg: left_leg.rotation.x = lerp(left_leg.rotation.x, 0.0, delta * 10.0)
 		if right_leg: right_leg.rotation.x = lerp(right_leg.rotation.x, 0.0, delta * 10.0)
 		if left_arm: left_arm.rotation.x = lerp(left_arm.rotation.x, 0.0, delta * 10.0)
 		if right_arm and attack_anim_timer <= 0.0: right_arm.rotation.x = lerp(right_arm.rotation.x, 0.0, delta * 10.0)
+	if is_moving and is_on_floor():
+		footstep_timer = maxf(0.0, footstep_timer - delta)
+		if footstep_timer <= 0.0 and GameAudioManager:
+			GameAudioManager.play_sfx("footstep", self, -10.0, randf_range(0.94, 1.06))
+			footstep_timer = 0.38 if is_mounted else 0.48
 	move_and_slide()
 
 func _set_imported_animation_state(state: String) -> void:
@@ -317,6 +324,8 @@ func clear_movement_target() -> void:
 func perform_jump() -> void:
 	if is_on_floor() and not is_dead:
 		velocity.y = jump_velocity
+		if GameAudioManager:
+			GameAudioManager.play_sfx("jump", self)
 
 func toggle_mount() -> void:
 	if not is_mounted:
@@ -355,6 +364,8 @@ func execute_basic_attack() -> void:
 	if is_crit:
 		dmg = int(dmg * 1.5)
 	if target.has_method("take_damage"):
+		if GameAudioManager:
+			GameAudioManager.play_player_attack(self, target)
 		target.take_damage(dmg, self)
 		if CombatEngine:
 			CombatEngine.emit_signal("damage_dealt", target, dmg, is_crit, target.global_position + Vector3(0, 1.2, 0))
@@ -505,6 +516,8 @@ func take_damage(amount: int, attacker: Node3D) -> void:
 		var inventory: PlayerInventory = get_node("PlayerInventory")
 		reduced = maxi(1, int(round(float(reduced) * (1.0 - inventory.get_total_blessing_reduction()))))
 	current_hp = max(0, current_hp - reduced)
+	if GameAudioManager:
+		GameAudioManager.play_sfx("hit", self, -4.0)
 	sync_stats_to_hud()
 	if current_hp <= 0:
 		_on_death(attacker)
@@ -518,6 +531,8 @@ func add_xp(amount: int) -> void:
 
 func _level_up() -> void:
 	current_level += 1
+	if GameAudioManager:
+		GameAudioManager.play_sfx("level_up", self)
 	max_hp += 80
 	current_hp = max_hp
 	max_mp += 40
@@ -539,6 +554,8 @@ func _level_up() -> void:
 
 func _on_death(_killer: Node3D) -> void:
 	is_dead = true
+	if GameAudioManager:
+		GameAudioManager.play_sfx("death", self)
 	if GameManager:
 		GameManager.post_notification("سقط البطل في المعركة! ستتم العودة للحياة في مدينة التوأم..." if GameManager.current_language == "ar" else "You died! Respawning in Twin City...", true)
 	await get_tree().create_timer(3.0).timeout
