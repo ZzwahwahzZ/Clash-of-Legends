@@ -58,26 +58,20 @@ func _setup_options() -> void:
 		
 	if class_option:
 		class_option.clear()
-		var classes = [
-			{"id": "Trojan", "ar": "تروجان (Trojan - فأس وسيف مزدوج)", "en": "Trojan (Dual Wield)"},
-			{"id": "Warrior", "ar": "محارب (Warrior - درع وسيف)", "en": "Warrior (Shield & Blade)"},
-			{"id": "Archer", "ar": "رامي سهام (Archer - قنص عن بعد)", "en": "Archer (Long Range Bow)"},
-			{"id": "Taoist", "ar": "تاويست (Taoist - صواعق وشفاء)", "en": "Taoist (Lightning & Heal)"},
-			{"id": "Ninja", "ar": "نينجا (Ninja - هجوم خفي خاطف)", "en": "Ninja (Stealth & Katanas)"},
-			{"id": "Monk", "ar": "راهب (Monk - مسبحة وهالات)", "en": "Monk (Holy Auras)"},
-			{"id": "Pirate", "ar": "قرصان (Pirate - مسدس ومدفع)", "en": "Pirate (Guns & Cannons)"}
-		]
-		for i in range(classes.size()):
-			var c = classes[i]
-			class_option.add_item(c["ar"] if is_ar else c["en"])
-			class_option.set_item_metadata(i, c["id"])
-			
+		var class_ids := GameContentDatabase.get_class_ids() if GameContentDatabase else []
+		for class_id in class_ids:
+			if class_id == "Taoist":
+				continue
+			var definition: Dictionary = GameContentDatabase.get_class_definition(class_id)
+			var display := "%s (%s)" % [definition.get("name_ar", class_id), definition.get("name_en", class_id)] if is_ar else str(definition.get("name_en", class_id))
+			class_option.add_item(display)
+			class_option.set_item_metadata(class_option.get_item_count() - 1, class_id)
 		var player = GameManager.player_reference if GameManager else null
 		if player and player.has_method("get_character_class"):
-			var cur_c = player.get_character_class()
+			var current_class := player.get_character_class()
 			for i in range(class_option.get_item_count()):
-				if class_option.get_item_metadata(i) == cur_c:
-					class_option.selected = i
+				if class_option.get_item_metadata(i) == current_class:
+					class_option.select(i)
 					break
 
 func _on_language_selected(idx: int) -> void:
