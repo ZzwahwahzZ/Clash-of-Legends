@@ -115,6 +115,15 @@ func _load_installed_packages() -> void:
 	installed_packages.clear()
 	for package_id in packages:
 		var entry: Dictionary = packages[package_id]
+		# Large world/model packs are shipped inside the APK. Mount them first so
+		# the first playable launch never waits for these core resources.
+		var bundled_path := "res://bundled/" + str(entry.file_name)
+		if FileAccess.file_exists(bundled_path):
+			if ProjectSettings.load_resource_pack(bundled_path, true):
+				installed_packages[package_id] = true
+				package_installed.emit(package_id, bundled_path)
+				continue
+			push_warning("Bundled resource pack could not be mounted: " + bundled_path)
 		var path := INSTALL_DIR.path_join(str(entry.file_name))
 		if not FileAccess.file_exists(path):
 			continue
