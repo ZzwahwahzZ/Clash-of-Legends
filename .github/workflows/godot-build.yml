@@ -392,38 +392,13 @@ jobs:
             sleep 3
             adb shell screencap -p /sdcard/clash-character-select.png
             adb pull /sdcard/clash-character-select.png emulator-evidence/character-select.png
-            python3 - <<'PY'
-            from PIL import Image, ImageChops
-            launch = Image.open("emulator-evidence/launch-screen.png").convert("RGB")
-            select = Image.open("emulator-evidence/character-select.png").convert("RGB")
-            if launch.size != select.size:
-                raise SystemExit(f"Character-select screenshot size changed: {launch.size} -> {select.size}")
-            panel = (700, 0, 1700, 600)
-            diff = ImageChops.difference(launch.crop(panel), select.crop(panel))
-            changed = sum(1 for pixel in diff.getdata() if max(pixel) > 12)
-            ratio = changed / (diff.width * diff.height)
-            print(f"OVERLAY DISMISS PANEL CHANGE: {ratio:.3%}")
-            if ratio < 0.05:
-                raise SystemExit("Immersive-mode overlay is still visible; character selection was not reached.")
-            PY
+            python3 tools/ci/compare_emulator_screens.py emulator-evidence/launch-screen.png emulator-evidence/character-select.png 700,0,1700,600
             # Enter the journey using the center of the actual start button.
             adb shell input tap 105 1200
             sleep 15
             adb shell screencap -p /sdcard/clash-world-entry.png
             adb pull /sdcard/clash-world-entry.png emulator-evidence/world-entry.png
-            python3 - <<'PY'
-            from PIL import Image, ImageChops
-            select = Image.open("emulator-evidence/character-select.png").convert("RGB")
-            world = Image.open("emulator-evidence/world-entry.png").convert("RGB")
-            if select.size != world.size:
-                raise SystemExit(f"World-entry screenshot size changed: {select.size} -> {world.size}")
-            diff = ImageChops.difference(select, world)
-            changed = sum(1 for pixel in diff.getdata() if max(pixel) > 12)
-            ratio = changed / (world.width * world.height)
-            print(f"WORLD-ENTRY SCREEN CHANGE: {ratio:.3%}")
-            if ratio < 0.05:
-                raise SystemExit("Start-button input did not transition from character selection into the world.")
-            PY
+            python3 tools/ci/compare_emulator_screens.py emulator-evidence/character-select.png emulator-evidence/world-entry.png
             # Exercise the landscape movement area and capture the resulting scene.
             adb shell input swipe 180 280 180 420 700
             sleep 3
