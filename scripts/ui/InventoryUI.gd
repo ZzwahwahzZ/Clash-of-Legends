@@ -27,6 +27,7 @@ func _ready() -> void:
 	_apply_localization()
 
 func open_ui() -> void:
+	FeatureGuidanceManager.show_feature_intro("inventory")
 	visible = true
 	_apply_localization()
 	refresh_inventory()
