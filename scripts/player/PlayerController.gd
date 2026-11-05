@@ -50,9 +50,61 @@ func _ready() -> void:
 		GameManager.register_player(self)
 	if ClassProgressionManager:
 		ClassProgressionManager.configure_for_character(character_class)
+	if AssetCatalog:
+		AssetCatalog.catalog_loaded.connect(_on_asset_catalog_loaded)
 	sync_stats_to_hud()
 	if anim_player and anim_player.has_animation("idle"):
 		anim_player.play("idle")
+	call_deferred("_apply_character_model")
+
+func _on_asset_catalog_loaded(_asset_count: int) -> void:
+	_apply_character_model()
+
+func _apply_character_model() -> void:
+	if not visual_root or not AssetCatalog:
+		return
+	var model_entries := AssetCatalog.get_asset_entries("characters", [".glb", ".gltf"])
+	if model_entries.is_empty():
+		return
+	var class_indices := {
+		"Trojan":0, "Warrior":1, "Archer":2, "Ninja":3, "Monk":4,
+		"Pirate":5, "DragonWarrior":6, "Windwalker":7, "Thunderstriker":8,
+		"WaterTaoist":9, "FireTaoist":10, "Taoist":0
+	}
+	var model_index := int(class_indices.get(character_class, 0)) % model_entries.size()
+	var packed_model: PackedScene = AssetCatalog.load_model_scene("characters", model_index)
+	if packed_model == null:
+		return
+	var old_root := visual_root.get_node_or_null("ImportedModelRoot")
+	if old_root:
+		old_root.queue_free()
+	var imported_root := Node3D.new()
+	imported_root.name = "ImportedModelRoot"
+	visual_root.add_child(imported_root)
+	var instance := packed_model.instantiate()
+	imported_root.add_child(instance)
+	var combined_bounds := AABB()
+	var has_bounds := false
+	for mesh_node in instance.find_children("*", "MeshInstance3D", true, false):
+		var mesh_instance := mesh_node as MeshInstance3D
+		if mesh_instance and mesh_instance.mesh:
+			var relative_transform := imported_root.global_transform.affine_inverse() * mesh_instance.global_transform
+			var mesh_bounds := mesh_instance.get_aabb().transformed(relative_transform)
+			combined_bounds = mesh_bounds if not has_bounds else combined_bounds.merge(mesh_bounds)
+			has_bounds = true
+	if has_bounds and combined_bounds.size.y > 0.001:
+		var fit_scale := 1.7 / combined_bounds.size.y
+		imported_root.scale = Vector3.ONE * fit_scale
+		imported_root.position.y = -combined_bounds.position.y * fit_scale
+	for child in visual_root.get_children():
+		if child != imported_root and child is Node3D:
+			child.visible = false
+	var model_animation := instance.find_child("AnimationPlayer", true, false)
+	if model_animation is AnimationPlayer:
+		if model_animation.has_animation("idle"):
+			model_animation.play("idle")
+		elif model_animation.get_animation_list().size() > 0:
+			model_animation.play(model_animation.get_animation_list()[0])
 
 func _physics_process(delta: float) -> void:
 	if is_dead:
@@ -183,6 +235,7 @@ func set_character_class(new_cls: String) -> void:
 	character_class = new_cls
 	if ClassProgressionManager:
 		ClassProgressionManager.configure_for_character(character_class)
+	_apply_character_model()
 	if GameManager:
 		GameManager.post_notification("تم تغيير فئة البطل إلى " + new_cls, false)
 
