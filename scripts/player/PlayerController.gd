@@ -161,6 +161,7 @@ func _validate_character_candidate(candidate: Node, animation_node: Node) -> Dic
 	if candidate == null:
 		return {"ok": false, "reason": "missing instantiated model root"}
 	var mesh_count := 0
+	var textured_surface_count := 0
 	var morph_mesh_count := 0
 	var skinned_mesh_count := 0
 	var skeleton_count := 0
@@ -183,8 +184,14 @@ func _validate_character_candidate(candidate: Node, animation_node: Node) -> Dic
 			var surface_material := mesh_instance.get_active_material(surface_index)
 			if surface_material == null:
 				return {"ok": false, "reason": "mesh surface has no active material"}
+			if surface_material is BaseMaterial3D:
+				var albedo_texture := (surface_material as BaseMaterial3D).albedo_texture
+				if albedo_texture != null and albedo_texture.get_width() > 1 and albedo_texture.get_height() > 1:
+					textured_surface_count += 1
 	if mesh_count == 0:
 		return {"ok": false, "reason": "no renderable mesh surfaces"}
+	if textured_surface_count == 0:
+		return {"ok": false, "reason": "no valid texture-backed material surfaces"}
 	if not animation_node is AnimationPlayer:
 		return {"ok": false, "reason": "no AnimationPlayer"}
 	var animation_player := animation_node as AnimationPlayer
@@ -214,7 +221,7 @@ func _validate_character_candidate(candidate: Node, animation_node: Node) -> Dic
 	if not skeletal_animation_valid and not morph_animation_valid:
 		return {"ok": false, "reason": "requires bound skeletal idle/move clips or at least 8 morph meshes with semantic idle/move clips"}
 	var mode := "skeletal" if skeletal_animation_valid else "morph"
-	return {"ok": true, "reason": "renderable materials and complete %s idle/move animation path present" % mode}
+	return {"ok": true, "reason": "renderable texture-backed materials and complete %s idle/move animation path present" % mode}
 
 func _physics_process(delta: float) -> void:
 	if is_dead:
