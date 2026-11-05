@@ -111,6 +111,16 @@ func _validate_packages() -> void:
 	for issue in invalid_models:
 		push_warning("MODEL VISUAL REJECTED: " + issue)
 
+	var converted_c3_count := 0
+	for category in ["characters", "monsters", "equipment", "world"]:
+		for entry in assets.get(category, []):
+			if str(entry.get("extension", "")).to_lower() == ".glb" and str(entry.get("source", "")).begins_with("C3 conversion:"):
+				converted_c3_count += 1
+	if converted_c3_count == 0:
+		_fail("No converted C3 GLB assets were merged into the runtime catalog.")
+		return
+	print("PCK C3 CONVERSION SUMMARY: ", converted_c3_count, " converted GLB models are catalogued for runtime.")
+
 	# Confirm at least one real original C3 source file is retained for future conversion.
 	var c3_found := false
 	for entry in assets.get("models", []):
