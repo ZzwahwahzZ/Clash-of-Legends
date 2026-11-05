@@ -107,7 +107,8 @@ func _process(delta: float) -> void:
 	if not _running or _materials.is_empty() or _frame_count <= 1:
 		return
 	_frame = fposmod(_frame + delta * _fps, float(_frame_count))
-	_material.set_shader_parameter("vat_frame", _frame)
+	for surface_material in _materials:
+		surface_material.set_shader_parameter("vat_frame", _frame)
 
 
 # C3's v_slot/v_zero meshes are tiny attachment-reference markers, not
