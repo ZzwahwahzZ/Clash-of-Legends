@@ -152,6 +152,12 @@ jobs:
             reports/resource-source-index.csv
             reports/source-archive-extension-audit.json
             reports/source-format-samples.txt
+            reports/c3-model-audit.json
+            reports/c3-conversion-report.json
+            reports/c3-runtime-integration.json
+            reports/pvr-texture-audit.json
+            reports/pvr-decode-report.json
+            reports/map-audit.json
             reports/tpi-extraction-audit.json
             reports/tpi-indexes.zip
           if-no-files-found: error
