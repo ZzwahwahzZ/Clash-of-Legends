@@ -1,0 +1,46 @@
+name: Audit original C3 models
+on:
+  push:
+    paths:
+      - ".github/workflows/audit-c3-models.yml"
+      - "tools/c3_audit/**"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit-c3:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download v4 original model pack and source index
+        run: |
+          mkdir -p build reports
+          base="https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/resource-packs-v4"
+          curl --fail --location --retry 5 "$base/models.pck" -o build/models.pck
+          curl --fail --location --retry 5 "$base/resource-source-index.csv" -o resource-source-index.csv
+      - name: Configure Godot 4.3
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.3.0
+          use-dotnet: false
+          include-templates: false
+      - name: Extract C3 files from verified PCK
+        run: godot --headless --path . --script tools/c3_audit/extract_c3_for_audit.gd
+      - name: Unpack C3 extraction bundle
+        run: python3 tools/c3_audit/unpack_c3_bundle.py
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Fetch pinned Apache-2.0 C3 parser
+        run: |
+          git clone --filter=blob:none https://github.com/deklol/Preservation-CO-Client.git build/preservation
+          git -C build/preservation checkout 090541d10d8a7d001fe804dd1c23325c344f861d
+      - name: Audit all original C3 models
+        run: cargo run --manifest-path tools/c3_audit/Cargo.toml --release -- build/c3-source reports/c3-model-audit.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Original-C3-Model-Audit
+          path: |
+            reports/c3-model-audit.json
+            tools/c3_audit/THIRD_PARTY_NOTICES.md
+          if-no-files-found: error
+          retention-days: 30
