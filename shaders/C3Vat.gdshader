@@ -11,7 +11,8 @@ void vertex() {
 	float frame_a = floor(clamp(vat_frame, 0.0, vat_height - 1.0));
 	float frame_b = min(frame_a + 1.0, vat_height - 1.0);
 	float blend = fract(clamp(vat_frame, 0.0, vat_height - 1.0));
-	float vertex_u = (float(VERTEX_ID) + 0.5) / vat_width;
+	// UV2.x is TEXCOORD_1: the original C3 source vertex index survives Godot vertex splits.
+	float vertex_u = UV2.x;
 	vec3 position_a = textureLod(vat_texture, vec2(vertex_u, (frame_a + 0.5) / vat_height), 0.0).xyz;
 	vec3 position_b = textureLod(vat_texture, vec2(vertex_u, (frame_b + 0.5) / vat_height), 0.0).xyz;
 	VERTEX = mix(position_a, position_b, blend);
