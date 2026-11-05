@@ -29,6 +29,19 @@ jobs:
           python3 tools/gameplay_source_audit/audit_source_tables.py \
             build/source/extracted-assets-001.zip \
             --output reports/gameplay-source-table-audit.json
+      - name: Validate report JSON and print concise inventory
+        run: |
+          python3 -m json.tool reports/gameplay-source-table-audit.json > /dev/null
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          data=json.loads(Path("reports/gameplay-source-table-audit.json").read_text(encoding="utf-8"))
+          print("Version-matched members:", data["version_matched_member_count"])
+          print("Itemtype files/records:", data["itemtype_catalog"]["file_count"], data["itemtype_catalog"]["record_count"])
+          print("Unlabelled column-59 candidates:", data["itemtype_catalog"].get("column_59_candidate_count", 0))
+          for category, value in data["categories"].items():
+              print(category, value["file_count"])
+          PY
       - name: Upload source table audit report
         if: always()
         uses: actions/upload-artifact@v4
