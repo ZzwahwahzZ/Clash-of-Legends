@@ -18,6 +18,7 @@ const RESOURCE_RELEASE_TAG := "resource-packs-v4"
 const MAX_PARALLEL_DOWNLOADS := 3
 const DOWNLOAD_MAX_ATTEMPTS := 4
 const DOWNLOAD_TIMEOUT_SECONDS := 1200.0
+const DOWNLOAD_CHUNK_BYTES := 16 * 1024 * 1024
 
 var manifest: Dictionary = {}
 var packages: Dictionary = {}
@@ -204,9 +205,7 @@ func _emit_aggregate_progress() -> void:
 			completed += 1
 		elif _active_downloads.has(package_id):
 			var info: Dictionary = _active_downloads[package_id]
-			var request_node: HTTPRequest = info.get("request")
-			if is_instance_valid(request_node):
-				received_bytes += mini(maxi(request_node.get_downloaded_bytes(), 0), expected)
+			received_bytes += mini(maxi(int(info.get("received_bytes", 0)), 0), expected)
 	aggregate_progress.emit(received_bytes, total_bytes, completed, packages.size(), _active_downloads.size())
 
 func is_package_installed(package_id: String) -> bool:
@@ -279,37 +278,161 @@ func _start_download(package_id: String) -> bool:
 	var url := str(entry.download_url)
 	var final_path := INSTALL_DIR.path_join(filename)
 	var temp_path := INSTALL_DIR.path_join("." + filename + ".download")
+	var received_bytes := 0
+	if FileAccess.file_exists(temp_path):
+		var partial := FileAccess.open(temp_path, FileAccess.READ)
+		if partial:
+			received_bytes = partial.get_length()
+			partial.close()
+		if received_bytes > expected_size:
+			DirAccess.remove_absolute(ProjectSettings.globalize_path(temp_path))
+			received_bytes = 0
 	var request_node := HTTPRequest.new()
 	request_node.timeout = DOWNLOAD_TIMEOUT_SECONDS
-	request_node.download_file = temp_path
-	request_node.body_size_limit = expected_size
+	request_node.body_size_limit = DOWNLOAD_CHUNK_BYTES
+	request_node.use_threads = true
+	request_node.accept_gzip = false
 	add_child(request_node)
 	_active_downloads[package_id] = {
 		"request": request_node,
 		"temp_path": temp_path,
 		"final_path": final_path,
 		"expected_size": expected_size,
-		"expected_hash": expected_hash
+		"expected_hash": expected_hash,
+		"url": url,
+		"received_bytes": received_bytes
 	}
 	busy = true
-	request_node.request_completed.connect(_on_download_completed.bind(package_id), CONNECT_ONE_SHOT)
-	var error := request_node.request(url)
-	if error != OK:
-		_finish_failure(package_id, "فشل بدء التنزيل: %s" % error)
-		return false
+	call_deferred("_download_package_chunks", package_id)
 	return true
 
 func _process(_delta: float) -> void:
 	for package_id in _active_downloads:
 		var info: Dictionary = _active_downloads[package_id]
-		var request_node: HTTPRequest = info.get("request")
-		if is_instance_valid(request_node):
-			var total := request_node.get_body_size()
-			var received := request_node.get_downloaded_bytes()
-			download_progress.emit(str(package_id), received, total)
+		download_progress.emit(
+			str(package_id),
+			int(info.get("received_bytes", 0)),
+			int(info.get("expected_size", 0))
+		)
 	_emit_aggregate_progress()
 
-func _on_download_completed(result: int, response_code: int, _headers: PackedStringArray, _body: PackedByteArray, package_id: String) -> void:
+func _download_package_chunks(package_id: String) -> void:
+	if not _active_downloads.has(package_id):
+		return
+	var info: Dictionary = _active_downloads[package_id]
+	var request_node: HTTPRequest = info.get("request")
+	if not is_instance_valid(request_node):
+		_finish_failure(package_id, "تعذر إنشاء اتصال التنزيل", true)
+		return
+	var temp_path := str(info.get("temp_path", ""))
+	var url := str(info.get("url", ""))
+	var expected_size := int(info.get("expected_size", 0))
+	var offset := int(info.get("received_bytes", 0))
+	while offset < expected_size:
+		var end_byte := mini(offset + DOWNLOAD_CHUNK_BYTES - 1, expected_size - 1)
+		var chunk_result: Dictionary = await _fetch_range_chunk(
+			request_node, url, offset, end_byte, expected_size
+		)
+		if not _active_downloads.has(package_id):
+			return
+		if not bool(chunk_result.get("success", false)):
+			_finish_failure(
+				package_id,
+				str(chunk_result.get("reason", "فشل تنزيل جزء من الحزمة")),
+				bool(chunk_result.get("preserve_partial", true))
+			)
+			return
+		var body: PackedByteArray = chunk_result.get("body", PackedByteArray())
+		if not FileAccess.file_exists(temp_path):
+			var create_file := FileAccess.open(temp_path, FileAccess.WRITE)
+			if create_file == null:
+				_finish_failure(package_id, "تعذر إنشاء ملف التنزيل المؤقت", true)
+				return
+			create_file.close()
+		var output := FileAccess.open(temp_path, FileAccess.READ_WRITE)
+		if output == null:
+			_finish_failure(package_id, "تعذر فتح ملف التنزيل لاستكمال الكتابة", true)
+			return
+		output.seek_end()
+		output.store_buffer(body)
+		var written_size := output.get_length()
+		output.close()
+		if written_size != end_byte + 1:
+			_finish_failure(package_id, "حجم الجزء المكتوب لا يطابق نطاق التنزيل", false)
+			return
+		offset = written_size
+		info["received_bytes"] = offset
+		_active_downloads[package_id] = info
+		download_progress.emit(package_id, offset, expected_size)
+		_emit_aggregate_progress()
+		await get_tree().process_frame
+	await _verify_and_install_package(package_id)
+
+func _fetch_range_chunk(
+	request_node: HTTPRequest,
+	url: String,
+	start_byte: int,
+	end_byte: int,
+	total_bytes: int
+) -> Dictionary:
+	var headers := PackedStringArray([
+		"Range: bytes=%d-%d" % [start_byte, end_byte],
+		"Accept-Encoding: identity"
+	])
+	var request_error := request_node.request(url, headers, HTTPClient.METHOD_GET)
+	if request_error != OK:
+		return {
+			"success": false,
+			"reason": "تعذر بدء جزء التنزيل: %s" % request_error,
+			"preserve_partial": true
+		}
+	var response: Array = await request_node.request_completed
+	if response.size() < 4:
+		return {"success": false, "reason": "استجابة تنزيل غير مكتملة", "preserve_partial": true}
+	var result_code := int(response[0])
+	var response_code := int(response[1])
+	var response_headers: PackedStringArray = response[2]
+	var body: PackedByteArray = response[3]
+	if result_code != HTTPRequest.RESULT_SUCCESS:
+		return {
+			"success": false,
+			"reason": "انقطع اتصال تنزيل الحزمة (result %d)" % result_code,
+			"preserve_partial": true
+		}
+	if response_code != 206:
+		return {
+			"success": false,
+			"reason": "خادم الموارد لم يقبل نطاق التنزيل (HTTP %d)" % response_code,
+			"preserve_partial": false
+		}
+	var expected_range := "bytes %d-%d/%d" % [start_byte, end_byte, total_bytes]
+	var actual_range := _response_header(response_headers, "content-range").to_lower()
+	if not actual_range.begins_with(expected_range):
+		return {
+			"success": false,
+			"reason": "ترويسة Content-Range لا تطابق الجزء المطلوب",
+			"preserve_partial": false
+		}
+	var expected_chunk_size := end_byte - start_byte + 1
+	if body.size() != expected_chunk_size:
+		return {
+			"success": false,
+			"reason": "حجم جزء التنزيل لا يطابق النطاق المطلوب",
+			"preserve_partial": false
+		}
+	return {"success": true, "body": body}
+
+func _response_header(headers: PackedStringArray, header_name: String) -> String:
+	for header in headers:
+		var separator := header.find(":")
+		if separator < 0:
+			continue
+		var name := header.substr(0, separator).strip_edges().to_lower()
+		if name == header_name.to_lower():
+			return header.substr(separator + 1).strip_edges()
+	return ""
+
+func _verify_and_install_package(package_id: String) -> void:
 	if not _active_downloads.has(package_id):
 		return
 	var info: Dictionary = _active_downloads[package_id]
@@ -317,29 +440,27 @@ func _on_download_completed(result: int, response_code: int, _headers: PackedStr
 	var final_path := str(info.final_path)
 	var expected_size := int(info.expected_size)
 	var expected_hash := str(info.expected_hash)
-	if result != HTTPRequest.RESULT_SUCCESS or response_code != 200:
-		_finish_failure(package_id, "فشل تنزيل الحزمة (HTTP %d، result %d)" % [response_code, result])
-		return
 	var file := FileAccess.open(temp_path, FileAccess.READ)
 	if file == null:
-		_finish_failure(package_id, "ملف التنزيل غير موجود")
+		_finish_failure(package_id, "ملف التنزيل غير موجود", false)
 		return
 	var actual_size := file.get_length()
 	file.close()
 	if actual_size != expected_size:
-		_finish_failure(package_id, "حجم الحزمة لا يطابق البيان")
+		_finish_failure(package_id, "حجم الحزمة لا يطابق البيان", false)
 		return
-	# Hash large packs away from the UI thread; keep the title/download screen responsive.
 	var verifier := Thread.new()
-	var thread_error := verifier.start(Callable(self, "_verify_package_file").bind(temp_path, expected_size, expected_hash))
+	var thread_error := verifier.start(
+		Callable(self, "_verify_package_file").bind(temp_path, expected_size, expected_hash)
+	)
 	if thread_error != OK:
-		_finish_failure(package_id, "تعذر بدء فحص سلامة الحزمة")
+		_finish_failure(package_id, "تعذر بدء فحص سلامة الحزمة", true)
 		return
 	while verifier.is_started():
 		await get_tree().process_frame
-	var verified: bool = verifier.wait_to_finish()
+	var verified := bool(verifier.wait_to_finish())
 	if not verified:
-		_finish_failure(package_id, "فشل التحقق من SHA-256")
+		_finish_failure(package_id, "فشل التحقق من SHA-256", false)
 		return
 	var absolute_temp := ProjectSettings.globalize_path(temp_path)
 	var absolute_final := ProjectSettings.globalize_path(final_path)
@@ -347,10 +468,13 @@ func _on_download_completed(result: int, response_code: int, _headers: PackedStr
 		DirAccess.remove_absolute(absolute_final)
 	var rename_error := DirAccess.rename_absolute(absolute_temp, absolute_final)
 	if rename_error != OK:
-		_finish_failure(package_id, "تعذر تثبيت ملف الحزمة")
+		_finish_failure(package_id, "تعذر تثبيت ملف الحزمة", true)
 		return
 	if not ProjectSettings.load_resource_pack(final_path, true):
-		_finish_failure(package_id, "Godot رفض تحميل حزمة PCK")
+		DirAccess.remove_absolute(absolute_final)
+		if FileAccess.file_exists(final_path + ".verified"):
+			DirAccess.remove_absolute(ProjectSettings.globalize_path(final_path + ".verified"))
+		_finish_failure(package_id, "Godot رفض تحميل حزمة PCK", false)
 		return
 	var marker := FileAccess.open(final_path + ".verified", FileAccess.WRITE)
 	if marker:
@@ -365,11 +489,11 @@ func _finish_success(package_id: String) -> void:
 	_clear_download(package_id)
 	package_finished.emit(package_id, true, "")
 
-func _finish_failure(package_id: String, reason: String) -> void:
+func _finish_failure(package_id: String, reason: String, preserve_partial: bool = true) -> void:
 	if _active_downloads.has(package_id):
 		var info: Dictionary = _active_downloads[package_id]
 		var temp_path := str(info.get("temp_path", ""))
-		if not temp_path.is_empty() and FileAccess.file_exists(temp_path):
+		if not preserve_partial and not temp_path.is_empty() and FileAccess.file_exists(temp_path):
 			DirAccess.remove_absolute(ProjectSettings.globalize_path(temp_path))
 	_clear_download(package_id)
 	package_failed.emit(package_id, reason)
