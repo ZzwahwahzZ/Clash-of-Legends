@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Extract NetDragon TPI/TPD resource containers into categorized game assets."""
+"""Extract NetDragon TPI/TPD resources with explicit handling for known record variants."""
 import collections, csv, hashlib, json, re, struct, zipfile, zlib
 from pathlib import Path
 
@@ -40,16 +40,17 @@ def classify(name):
         return "animations"
     return "world"
 
-def read_c_string(data, offset):
-    if offset<0 or offset>=len(data):
-        raise ValueError("name offset outside TPI")
-    end=data.find(b"\0",offset)
-    if end<0:
-        raise ValueError("unterminated TPI resource name")
-    name=data[offset:end].decode("utf-8",errors="replace").strip()
-    if not name:
-        raise ValueError("empty TPI resource name")
-    return name
+def inflate_checked(payload, expected):
+    errors=[]
+    for wbits in (zlib.MAX_WBITS, -zlib.MAX_WBITS):
+        try:
+            decoded=zlib.decompress(payload,wbits)
+            if len(decoded)==expected:
+                return decoded
+            errors.append(f"decoded size {len(decoded)} != expected {expected}")
+        except zlib.error as exc:
+            errors.append(str(exc))
+    raise ValueError("zlib decode failed: "+"; ".join(errors)[:240])
 
 if not INDEX_CSV.exists():
     raise SystemExit("resource-source-index.csv is missing; run prepare_assets.py first.")
@@ -68,7 +69,9 @@ results=[]
 remove_paths=set()
 new_rows=[]
 index_zip=REPORTS/"tpi-indexes.zip"
-with zipfile.ZipFile(index_zip,"w",compression=zipfile.ZIP_DEFLATED,compresslevel=6) as zf:
+multiblock_zip=REPORTS/"tpi-multiblock-blocks.zip"
+with zipfile.ZipFile(index_zip,"w",compression=zipfile.ZIP_DEFLATED,compresslevel=6) as index_out, \
+     zipfile.ZipFile(multiblock_zip,"w",compression=zipfile.ZIP_DEFLATED,compresslevel=6) as blocks_out:
     for pair in pairs.values():
         tpi=pair.get(".tpi")
         tpd=pair.get(".tpd")
@@ -80,8 +83,12 @@ with zipfile.ZipFile(index_zip,"w",compression=zipfile.ZIP_DEFLATED,compressleve
             continue
         ti=tpi_path.read_bytes()
         td=tpd_path.read_bytes()
-        report={"tpi_source":tpi["source_path"],"tpd_source":tpd["source_path"],"tpi_bytes":len(ti),"tpd_bytes":len(td),"entries_declared":0,"entries_extracted":0,"entries_deduplicated":0,"entries_failed":0,"bytes_extracted":0,"extensions":{},"errors":[]}
-        if len(ti) < 0x30 or not ti.startswith(b"NetDragonDatPkg"):
+        report={"tpi_source":tpi["source_path"],"tpd_source":tpd["source_path"],
+                "tpi_bytes":len(ti),"tpd_bytes":len(td),"entries_declared":0,
+                "entries_extracted":0,"entries_deduplicated":0,"entries_failed":0,
+                "entries_empty":0,"entries_multiblock_pending":0,"bytes_extracted":0,
+                "flag_counts":{},"extensions":{},"empty_entries":[],"multiblock_entries":[],"errors":[]}
+        if len(ti)<0x30 or not ti.startswith(b"NetDragonDatPkg"):
             report["errors"].append("TPI magic header or header size mismatch")
             results.append(report)
             continue
@@ -93,32 +100,85 @@ with zipfile.ZipFile(index_zip,"w",compression=zipfile.ZIP_DEFLATED,compressleve
             report["entries_declared"]=file_count
             stem=Path(tpi["source_path"].split("!")[-1]).stem
             for idx in range(file_count):
+                entry_start=pos
                 try:
                     if pos>=len(ti):
                         raise ValueError("TPI directory ended before declared entry count")
                     path_len=ti[pos]
                     pos+=1
-                    if pos+path_len+22>len(ti):
-                        raise ValueError("TPI entry exceeds index bounds")
+                    if pos+path_len+2>len(ti):
+                        raise ValueError("TPI entry name exceeds index bounds")
                     name=ti[pos:pos+path_len].decode("cp1252",errors="replace").strip()
-                    pos+=path_len+2
-                    size,zsize,zsize_check,size_check,data_off=struct.unpack_from("<5I",ti,pos)
-                    pos+=20
-                    if zsize!=zsize_check or size!=size_check:
-                        raise ValueError("TPI duplicate size fields disagree")
+                    pos+=path_len
+                    flags=struct.unpack_from("<H",ti,pos)[0]
+                    pos+=2
+                    flag_key=str(flags)
+                    report["flag_counts"][flag_key]=report["flag_counts"].get(flag_key,0)+1
                     normalized=name.replace("\\","/").lstrip("/")
                     if not normalized or ".." in normalized.split("/"):
                         raise ValueError("unsafe or empty resource path")
-                    if size>MAX_ENTRY_BYTES or data_off+zsize>len(td):
-                        raise ValueError("resource payload bounds are invalid")
-                    payload=td[data_off:data_off+zsize]
-                    if zsize==size:
-                        decoded=payload
+
+                    if flags==0:
+                        if pos+8>len(ti):
+                            raise ValueError("empty-record header exceeds TPI bounds")
+                        empty_size,empty_comp=struct.unpack_from("<2I",ti,pos)
+                        pos+=8
+                        report["entries_empty"]+=1
+                        if len(report["empty_entries"])<100:
+                            report["empty_entries"].append({"index":idx,"path":normalized,"size":empty_size,"compressed_size":empty_comp})
+                        if empty_size!=0 or empty_comp!=0:
+                            raise ValueError("flag-0 record is not a zero-length placeholder")
+                        continue
+
+                    if flags==1:
+                        if pos+20>len(ti):
+                            raise ValueError("standard record header exceeds TPI bounds")
+                        size,zsize,zsize_check,size_check,data_off=struct.unpack_from("<5I",ti,pos)
+                        pos+=20
+                        if zsize!=zsize_check or size!=size_check:
+                            raise ValueError("flag-1 duplicate size fields disagree")
+                        if size>MAX_ENTRY_BYTES or data_off+zsize>len(td):
+                            raise ValueError("resource payload bounds are invalid")
+                        payload=td[data_off:data_off+zsize]
+                        decoded=payload if zsize==size else inflate_checked(payload,size)
+
+                    elif flags==2:
+                        # Verified two-block layout: total sizes, block-1 sizes/offset,
+                        # then block-2 sizes/offset. Keep the blocks separate until the
+                        # mobile PVR reconstruction order is independently validated.
+                        if pos+32>len(ti):
+                            raise ValueError("two-block record header exceeds TPI bounds")
+                        total_size,total_comp,block1_comp,block1_size,block1_off=struct.unpack_from("<5I",ti,pos)
+                        block2_comp,block2_size,block2_off=struct.unpack_from("<3I",ti,pos+20)
+                        pos+=32
+                        if total_size!=block1_size+block2_size:
+                            raise ValueError("two-block uncompressed size totals disagree")
+                        if total_comp!=block1_comp+block2_comp:
+                            raise ValueError("two-block compressed size totals disagree")
+                        if block2_off!=block1_off+block1_comp:
+                            raise ValueError("two-block payload offsets are not contiguous")
+                        if total_size>MAX_ENTRY_BYTES or block1_off+block1_comp>len(td) or block2_off+block2_comp>len(td):
+                            raise ValueError("two-block payload bounds are invalid")
+                        raw1=td[block1_off:block1_off+block1_comp]
+                        raw2=td[block2_off:block2_off+block2_comp]
+                        decoded1=inflate_checked(raw1,block1_size) if block1_comp!=block1_size else raw1
+                        decoded2=inflate_checked(raw2,block2_size) if block2_comp!=block2_size else raw2
+                        base=f"{stem}/{safe_name(normalized)}"
+                        blocks_out.writestr(base+".block1.bin",decoded1)
+                        blocks_out.writestr(base+".block2.bin",decoded2)
+                        pending={"index":idx,"path":normalized,"flags":flags,
+                                 "total_size":total_size,"total_compressed_size":total_comp,
+                                 "block1":{"compressed_size":block1_comp,"size":block1_size,"offset":block1_off,
+                                           "sha256":hashlib.sha256(decoded1).hexdigest(),"header_hex":decoded1[:64].hex(" ")},
+                                 "block2":{"compressed_size":block2_comp,"size":block2_size,"offset":block2_off,
+                                           "sha256":hashlib.sha256(decoded2).hexdigest(),"header_hex":decoded2[:64].hex(" ")},
+                                 "reconstruction_status":"PENDING_MOBILE_BLOCK_ORDER_VALIDATION"}
+                        report["entries_multiblock_pending"]+=1
+                        report["multiblock_entries"].append(pending)
+                        continue
                     else:
-                        try:
-                            decoded=zlib.decompress(payload)
-                        except zlib.error:
-                            decoded=zlib.decompress(payload,-15)
+                        raise ValueError(f"unsupported TPI entry flags: {flags}")
+
                     if len(decoded)!=size:
                         raise ValueError(f"decoded size mismatch ({len(decoded)} != {size})")
                     digest=hashlib.sha256(decoded).hexdigest()
@@ -130,7 +190,9 @@ with zipfile.ZipFile(index_zip,"w",compression=zipfile.ZIP_DEFLATED,compressleve
                     dest.parent.mkdir(parents=True,exist_ok=True)
                     dest.write_bytes(decoded)
                     staged=dest.relative_to(ROOT).as_posix()
-                    new_rows.append({"category":category,"source_archive":tpi["source_archive"],"source_path":tpi["source_path"]+"!"+normalized,"staged_path":staged,"size_bytes":len(decoded),"sha256":digest})
+                    new_rows.append({"category":category,"source_archive":tpi["source_archive"],
+                                     "source_path":tpi["source_path"]+"!"+normalized,
+                                     "staged_path":staged,"size_bytes":len(decoded),"sha256":digest})
                     seen.add(digest)
                     report["entries_extracted"]+=1
                     report["bytes_extracted"]+=len(decoded)
@@ -138,10 +200,10 @@ with zipfile.ZipFile(index_zip,"w",compression=zipfile.ZIP_DEFLATED,compressleve
                     report["extensions"][ext]=report["extensions"].get(ext,0)+1
                 except Exception as error:
                     report["entries_failed"]+=1
-                    if len(report["errors"])<30:
-                        report["errors"].append(f"entry {idx}: {str(error)[:180]}")
-            if report["entries_extracted"]>0:
-                zf.write(tpi_path,arcname=f"{stem}.tpi")
+                    if len(report["errors"])<50:
+                        report["errors"].append(f"entry {idx} at 0x{entry_start:x}: {str(error)[:180]}")
+            if report["entries_extracted"]>0 or report["entries_multiblock_pending"]>0:
+                index_out.write(ti,arcname=f"{stem}.tpi")
                 remove_paths.update([tpi["staged_path"],tpd["staged_path"]])
         except Exception as error:
             report["errors"].append(str(error)[:240])
@@ -161,9 +223,12 @@ with INDEX_CSV.open("w",newline="",encoding="utf-8") as file:
 
 catalog={}
 for row in rows:
-    catalog.setdefault(row["category"],[]).append({"path":row["staged_path"],"source":row["source_path"],"extension":Path(row["source_path"].split("!")[-1]).suffix.lower(),"size_bytes":row["size_bytes"],"sha256":row["sha256"]})
+    catalog.setdefault(row["category"],[]).append({"path":row["staged_path"],"source":row["source_path"],
+        "extension":Path(row["source_path"].split("!")[-1]).suffix.lower(),
+        "size_bytes":row["size_bytes"],"sha256":row["sha256"]})
 CATALOG_JSON.parent.mkdir(parents=True,exist_ok=True)
-CATALOG_JSON.write_text(json.dumps({"catalog_version":2,"asset_counts":{k:len(v) for k,v in catalog.items()},"assets":catalog},ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+CATALOG_JSON.write_text(json.dumps({"catalog_version":3,"asset_counts":{k:len(v) for k,v in catalog.items()},
+    "assets":catalog},ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
 
 audit=json.loads(AUDIT_JSON.read_text(encoding="utf-8")) if AUDIT_JSON.exists() else {}
 audit["unique_supported_files"]=len(rows)
@@ -172,7 +237,15 @@ audit["category_counts"]=dict(collections.Counter(row["category"] for row in row
 audit["extension_counts"]=dict(collections.Counter(Path(row["source_path"].split("!")[-1]).suffix.lower() or "<none>" for row in rows))
 audit["netdragon_tpi_tpd"]=results
 AUDIT_JSON.write_text(json.dumps(audit,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
-(REPORTS/"tpi-extraction-audit.json").write_text(json.dumps({"pairs":results,"extracted_unique_files":len(new_rows),"extracted_bytes":sum(int(r["size_bytes"]) for r in new_rows),"category_counts":dict(collections.Counter(r["category"] for r in new_rows))},ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+(REPORTS/"tpi-extraction-audit.json").write_text(json.dumps({
+    "pairs":results,"extracted_unique_files":len(new_rows),
+    "extracted_bytes":sum(int(r["size_bytes"]) for r in new_rows),
+    "category_counts":dict(collections.Counter(r["category"] for r in new_rows)),
+    "flag_counts":dict(collections.Counter(flag for pair in results for flag,count in pair.get("flag_counts",{}).items() for _ in range(count))),
+    "multiblock_pending":sum(r["entries_multiblock_pending"] for r in results),
+    "empty_placeholders":sum(r["entries_empty"] for r in results),
+    "failed_entries":sum(r["entries_failed"] for r in results)
+},ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
 with (REPORTS/"source-format-samples.txt").open("a",encoding="utf-8") as file:
     for row in new_rows:
         ext=Path(row["source_path"].split("!")[-1]).suffix.lower()
@@ -182,6 +255,11 @@ with (REPORTS/"source-format-samples.txt").open("a",encoding="utf-8") as file:
             file.write("HEX: "+sample.hex(" ")+"\n")
             file.write("ASCII: "+sample[:32].decode("ascii",errors="replace")+"\n")
             break
-print(json.dumps({"tpi_tpd_pairs":len(results),"extracted_unique_files":len(new_rows),"extracted_bytes":sum(int(r["size_bytes"]) for r in new_rows),"categories":dict(collections.Counter(r["category"] for r in new_rows)),"failures":sum(int(r["entries_failed"]) for r in results)},ensure_ascii=False,indent=2))
-if not new_rows:
-    raise SystemExit("No TPI/TPD assets extracted; refusing to publish empty model-resource generation.")
+total_failed=sum(int(r["entries_failed"]) for r in results)
+total_multi=sum(int(r["entries_multiblock_pending"]) for r in results)
+print(json.dumps({"tpi_tpd_pairs":len(results),"extracted_unique_files":len(new_rows),
+    "extracted_bytes":sum(int(r["size_bytes"]) for r in new_rows),
+    "categories":dict(collections.Counter(r["category"] for r in new_rows)),
+    "multiblock_pending":total_multi,"failures":total_failed},ensure_ascii=False,indent=2))
+if not new_rows and not total_multi:
+    raise SystemExit("No TPI/TPD assets extracted; refusing to publish empty resource generation.")
