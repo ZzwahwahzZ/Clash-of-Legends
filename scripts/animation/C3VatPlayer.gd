@@ -7,7 +7,7 @@ var _fps: float = 30.0
 var _frame: float = 0.0
 var _running: bool = false
 
-func configure(mesh_instance: MeshInstance3D, metadata_path: String, binary_path: String, albedo: Texture2D = null, fps_override: float = 0.0) -> bool:
+func configure(mesh_instance: MeshInstance3D, metadata_path: String, binary_path: String, albedo: Texture2D = null, fps_override: float = 0.0, debug_unshaded: bool = false) -> bool:
 	if mesh_instance == null or not is_instance_valid(mesh_instance):
 		push_error("C3 VAT: target MeshInstance3D is invalid.")
 		return false
@@ -75,8 +75,13 @@ func configure(mesh_instance: MeshInstance3D, metadata_path: String, binary_path
 		return false
 	var normal_texture := ImageTexture.create_from_image(normal_image)
 	_materials.clear()
-	var shader_opaque := load("res://shaders/C3Vat.gdshader") as Shader
-	var shader_alpha := load("res://shaders/C3VatAlpha.gdshader") as Shader
+	var shader_opaque_path := "res://shaders/C3Vat.gdshader"
+	var shader_alpha_path := "res://shaders/C3VatAlpha.gdshader"
+	if debug_unshaded:
+		shader_opaque_path = "res://shaders/C3VatUnlit.gdshader"
+		shader_alpha_path = "res://shaders/C3VatAlphaUnlit.gdshader"
+	var shader_opaque := load(shader_opaque_path) as Shader
+	var shader_alpha := load(shader_alpha_path) as Shader
 	if shader_opaque == null or shader_alpha == null:
 		push_error("C3 VAT: opaque or alpha-preserving shader failed to load.")
 		return false
