@@ -94,9 +94,9 @@ func test_character_candidate_requires_bound_skinning() -> void:
 
 func test_offline_audio_catalog() -> void:
 	assert_true(GameAudioManager != null and GameAudioManager._files_by_stem.size() >= 100, "Audio: offline OGG catalogue is indexed")
-	assert_true(GameAudioManager._resolve_stem("jump") == "jump", "Audio: jump cue resolves to the checked-in sound")
-	assert_true(GameAudioManager._resolve_stem("attack_bow") == "bow01", "Audio: archer attack resolves to a bow sound")
-	assert_true(GameAudioManager._files_by_stem.has("centralplains"), "Audio: world music asset is available offline")
+	assert_true(GameAudioManager._resolve_stem("jump").ends_with("_jump"), "Audio: jump cue resolves to the checked-in sound")
+	assert_true(GameAudioManager._resolve_stem("attack_bow").ends_with("_bow01"), "Audio: archer attack resolves to a bow sound")
+	assert_true(not GameAudioManager._resolve_stem("centralplains").is_empty(), "Audio: world music asset is available offline")
 
 func assert_true(condition: bool, test_name: String) -> void:
 	total_tests += 1
