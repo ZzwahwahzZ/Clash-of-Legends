@@ -11,7 +11,7 @@ func _initialize() -> void:
 
 func _run() -> void:
 	var database := Database.new()
-	var class_ids := database.get_class_ids()
+	var class_ids := database.get_selectable_class_ids()
 	if class_ids.size() != EXPECTED_CLASSES.size():
 		push_error("CLASS SOURCE PARITY FAILED: expected 11 selectable classes, got %d: %s" % [class_ids.size(), str(class_ids)])
 		quit(1)
@@ -57,8 +57,8 @@ func _run() -> void:
 		push_error("CLASS SOURCE PARITY FAILED: Thunderstriker must remain an original project class.")
 		quit(1)
 		return
-	if database.get_class_definition("Taoist").is_empty() or class_ids.has("Taoist"):
-		push_error("CLASS SOURCE PARITY FAILED: shared Taoist base family must not appear as a twelfth selectable class.")
+	if database.get_class_definition("Taoist").is_empty() or class_ids.has("Taoist") or not database.get_class_ids().has("Taoist"):
+		push_error("CLASS SOURCE PARITY FAILED: shared Taoist base family must remain registered but not selectable.")
 		quit(1)
 		return
 	if not database.validate_registry():
