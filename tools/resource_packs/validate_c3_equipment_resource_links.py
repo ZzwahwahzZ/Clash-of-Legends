@@ -32,6 +32,12 @@ for table_name, table in catalog.get("tables", {}).items():
     missing_texture = []
     missing_mix_texture = []
     missing_motion = []
+    unique_mesh_paths = set()
+    unique_texture_paths = set()
+    unique_mix_texture_paths = set()
+    found_mesh_paths = set()
+    found_texture_paths = set()
+    found_mix_texture_paths = set()
     for record in table.get("records", []):
         for part in record.get("parts", []):
             mesh_path = str(part.get("mesh_path") or "").replace("\\", "/").lower()
@@ -40,6 +46,12 @@ for table_name, table in catalog.get("tables", {}).items():
             mesh_refs += bool(mesh_path)
             texture_refs += bool(texture_path)
             mix_texture_refs += bool(mix_texture_path)
+            if mesh_path:
+                unique_mesh_paths.add(mesh_path)
+            if texture_path:
+                unique_texture_paths.add(texture_path)
+            if mix_texture_path:
+                unique_mix_texture_paths.add(mix_texture_path)
             mesh_rows = source_paths.get(mesh_path, [])
             texture_rows = source_paths.get(texture_path, [])
             mix_texture_rows = source_paths.get(mix_texture_path, []) if mix_texture_path else []
@@ -49,6 +61,12 @@ for table_name, table in catalog.get("tables", {}).items():
             mesh_found += mesh_exists
             texture_found += texture_exists
             mix_texture_found += bool(mix_texture_path and mix_texture_exists)
+            if mesh_path and mesh_exists:
+                found_mesh_paths.add(mesh_path)
+            if texture_path and texture_exists:
+                found_texture_paths.add(texture_path)
+            if mix_texture_path and mix_texture_exists:
+                found_mix_texture_paths.add(mix_texture_path)
             fully_found += mesh_exists and texture_exists and mix_texture_exists
             if mesh_path and not mesh_exists and len(missing_mesh) < 100:
                 missing_mesh.append({"unique_id": record.get("unique_id"), "path": mesh_path, "source_index_matches": len(mesh_rows)})
@@ -70,10 +88,19 @@ for table_name, table in catalog.get("tables", {}).items():
         "record_count": table.get("record_count", 0),
         "mesh_path_reference_count": mesh_refs,
         "mesh_file_found_count": mesh_found,
+        "unique_mesh_path_count": len(unique_mesh_paths),
+        "unique_mesh_path_file_found_count": len(found_mesh_paths),
+        "unique_mesh_path_missing_count": len(unique_mesh_paths - found_mesh_paths),
         "texture_path_reference_count": texture_refs,
         "texture_file_found_count": texture_found,
+        "unique_texture_path_count": len(unique_texture_paths),
+        "unique_texture_path_file_found_count": len(found_texture_paths),
+        "unique_texture_path_missing_count": len(unique_texture_paths - found_texture_paths),
         "mix_texture_path_reference_count": mix_texture_refs,
         "mix_texture_file_found_count": mix_texture_found,
+        "unique_mix_texture_path_count": len(unique_mix_texture_paths),
+        "unique_mix_texture_path_file_found_count": len(found_mix_texture_paths),
+        "unique_mix_texture_path_missing_count": len(unique_mix_texture_paths - found_mix_texture_paths),
         "fully_present_part_count": fully_found,
         "motion_path_reference_count": motion_refs,
         "motion_file_found_count": motion_found,
@@ -103,7 +130,9 @@ print("C3_EQUIPMENT_RESOURCE_LINK_AUDIT", json.dumps({
     key: {
         "records": value["record_count"],
         "mesh_found": value["mesh_file_found_count"],
+        "mesh_unique": f"{value['unique_mesh_path_file_found_count']}/{value['unique_mesh_path_count']}",
         "texture_found": value["texture_file_found_count"],
+        "texture_unique": f"{value['unique_texture_path_file_found_count']}/{value['unique_texture_path_count']}",
         "mix_texture_found": value["mix_texture_file_found_count"],
         "motion_found": value["motion_file_found_count"],
         "status": value["status"],
