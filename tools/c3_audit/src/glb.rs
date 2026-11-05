@@ -195,6 +195,12 @@ pub fn export_document(document: &C3Document, texture_png: &[u8], source: &str, 
         let flat_normals: Vec<f32> = normals.iter().flat_map(|p| p.iter().copied()).collect();
         let flat_uvs: Vec<f32> = mesh.vertices.iter()
             .flat_map(|v| [v.texture_coordinate.x, v.texture_coordinate.y]).collect();
+        // TEXCOORD_1 preserves the original C3 vertex ID. Godot may split
+        // imported vertices along normal/material boundaries; duplicates keep
+        // this source index so VAT lookup remains stable after import.
+        let source_width = mesh.vertices.len() as f32;
+        let flat_source_indices: Vec<f32> = (0..mesh.vertices.len())
+            .flat_map(|index| [(index as f32 + 0.5) / source_width, 0.5]).collect();
         let (min, max) = accessor_min_max(positions);
 
         let pos_view = builder.add_view(&f32_bytes(&flat_positions), Some(34962));
@@ -203,6 +209,8 @@ pub fn export_document(document: &C3Document, texture_png: &[u8], source: &str, 
         let normal_accessor = builder.add_accessor(normal_view, 5126, normals.len(), "VEC3", None, None);
         let uv_view = builder.add_view(&f32_bytes(&flat_uvs), Some(34962));
         let uv_accessor = builder.add_accessor(uv_view, 5126, mesh.vertices.len(), "VEC2", None, None);
+        let source_index_view = builder.add_view(&f32_bytes(&flat_source_indices), Some(34962));
+        let source_index_accessor = builder.add_accessor(source_index_view, 5126, mesh.vertices.len(), "VEC2", None, None);
 
         let mut targets: Vec<Value> = Vec::new();
         if animated {
@@ -223,7 +231,7 @@ pub fn export_document(document: &C3Document, texture_png: &[u8], source: &str, 
         if !mesh.opaque_indices.is_empty() {
             let view = builder.add_view(&u16_bytes(&mesh.opaque_indices), Some(34963));
             let accessor = builder.add_accessor(view, 5123, mesh.opaque_indices.len(), "SCALAR", None, None);
-            let mut primitive = json!({"attributes":{"POSITION":pos_accessor,"NORMAL":normal_accessor,"TEXCOORD_0":uv_accessor},"indices":accessor,"material":0,"mode":4});
+            let mut primitive = json!({"attributes":{"POSITION":pos_accessor,"NORMAL":normal_accessor,"TEXCOORD_0":uv_accessor,"TEXCOORD_1":source_index_accessor},"indices":accessor,"material":0,"mode":4});
             if animated { primitive["targets"] = json!(targets); }
             primitives.push(primitive);
         }
@@ -480,6 +488,8 @@ mod tests {
         assert_eq!(json["animations"][0]["channels"].as_array().unwrap().len(), 1);
         assert_eq!(json["animations"][0]["samplers"].as_array().unwrap().len(), 1);
         assert_eq!(json["meshes"][1]["primitives"][0]["targets"].as_array().unwrap().len(), 2);
+        let source_index_accessor = json["meshes"][1]["primitives"][0]["attributes"]["TEXCOORD_1"].as_u64().unwrap() as usize;
+        assert_eq!(json["accessors"][source_index_accessor]["count"], 3);
         fs::remove_file(output).unwrap();
     }
 }
