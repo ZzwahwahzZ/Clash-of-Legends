@@ -372,6 +372,35 @@ mod tests {
     }
 
     #[test]
+    fn classifies_static_meshes_from_evaluated_weighted_affine_positions() {
+        let static_motion = C3Motion {
+            bone_count: 1,
+            frame_count: 2,
+            keys: vec![
+                MotionKey { frame: 0, bone_matrices: vec![Matrix4::IDENTITY] },
+                MotionKey { frame: 1, bone_matrices: vec![Matrix4::IDENTITY] }
+            ],
+            morph_count: 0,
+            morph_values: Vec::new(),
+        };
+        assert!(!is_deforming(&triangle_mesh(), &static_motion).unwrap());
+
+        let mut moved = Matrix4::IDENTITY;
+        moved.values[12] = 2.0;
+        let moving_motion = C3Motion {
+            bone_count: 1,
+            frame_count: 2,
+            keys: vec![
+                MotionKey { frame: 0, bone_matrices: vec![Matrix4::IDENTITY] },
+                MotionKey { frame: 1, bone_matrices: vec![moved] }
+            ],
+            morph_count: 0,
+            morph_values: Vec::new(),
+        };
+        assert!(is_deforming(&triangle_mesh(), &moving_motion).unwrap());
+    }
+
+    #[test]
     fn exports_real_glb_skin_and_full_frame_animation_without_morph_targets() {
         let mut moved = Matrix4::IDENTITY;
         moved.values[12] = 4.0;
