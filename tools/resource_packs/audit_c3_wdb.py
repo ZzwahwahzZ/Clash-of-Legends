@@ -479,26 +479,53 @@ def parse_wdb(data: bytes) -> dict:
         mount_motion_by_base.setdefault(base, []).append({
             "motion_key": key, "motion_path": str(row["path"])
         })
+    mount_full_records = full_mesh_records_by_table.get("ini/mount.dbc", [])
+    mount_motion_sets = {}
+    for record in mount_full_records:
+        motions = mount_motion_by_base.get(int(record["unique_id"]), [])
+        if not motions or not record.get("parts"):
+            continue
+        base_mesh_id = str(record["parts"][0].get("mesh_id", ""))
+        if not base_mesh_id:
+            continue
+        motion_set = mount_motion_sets.setdefault(base_mesh_id, {
+            "base_mesh_id": int(base_mesh_id),
+            "source_record_ids": [],
+            "motion_records_by_key": {},
+        })
+        motion_set["source_record_ids"].append(int(record["unique_id"]))
+        for motion in motions:
+            motion_set["motion_records_by_key"][str(motion["motion_key"])] = motion
+    for base_mesh_id, motion_set in mount_motion_sets.items():
+        motion_set["source_record_ids"] = sorted(set(motion_set["source_record_ids"]))
+        motion_set["motion_records"] = sorted(
+            motion_set.pop("motion_records_by_key").values(),
+            key=lambda row: int(row["motion_key"]),
+        )
+        motion_set["record_count"] = len(motion_set["motion_records"])
+        motion_set["unique_path_count"] = len({row["motion_path"] for row in motion_set["motion_records"] if row.get("motion_path")})
+    for record in mount_full_records:
+        parts = record.get("parts", [])
+        base_mesh_id = str(parts[0].get("mesh_id", "")) if parts else ""
+        record["motion_set_mesh_id"] = int(base_mesh_id) if base_mesh_id in mount_motion_sets else None
+        record["motion_set_source_record_ids"] = mount_motion_sets.get(base_mesh_id, {}).get("source_record_ids", [])
     mount_table = mesh_family_catalog.get("ini/mount.dbc", {})
     mount_motion_matches = 0
     mount_motion_unmatched = []
     for sample in mount_table.get("sample_records", []):
-        base = int(sample["unique_id"])
-        motions = mount_motion_by_base.get(base, [])
-        sample["motion_records"] = motions[:30]
-        if motions:
+        parts = sample.get("parts", [])
+        base_mesh_id = str(parts[0].get("mesh_id", "")) if parts else ""
+        sample["motion_set_mesh_id"] = int(base_mesh_id) if base_mesh_id in mount_motion_sets else None
+        if base_mesh_id in mount_motion_sets:
             mount_motion_matches += 1
         elif len(mount_motion_unmatched) < 60:
-            mount_motion_unmatched.append(base)
+            mount_motion_unmatched.append(int(sample["unique_id"]))
     mount_table["mount_motion_base_divisor"] = 1000
     mount_table["mount_motion_matched_sample_count"] = mount_motion_matches
     mount_table["mount_motion_unmatched_sample_ids"] = mount_motion_unmatched
     mount_table["mount_motion_record_count"] = len(mount_motion_rows)
-    mount_table["mount_motion_status"] = "PREFIX_JOIN_CANDIDATE_REQUIRES_RUNTIME_CONFIRMATION"
-    mount_full_records = full_mesh_records_by_table.get("ini/mount.dbc", [])
-    for record in mount_full_records:
-        motions = mount_motion_by_base.get(int(record["unique_id"]), [])
-        record["motion_records"] = motions
+    mount_table["mount_motion_set_count"] = len(mount_motion_sets)
+    mount_table["mount_motion_status"] = "MOUNTMOTION_JOIN_PROPAGATED_TO_VARIANTS_BY_SHARED_BASE_MESH_ID_REQUIRES_RUNTIME_PLAYBACK"
 
     catalog_dir = Path("resource_stage/world/resource_mappings")
     catalog_dir.mkdir(parents=True, exist_ok=True)
@@ -518,10 +545,12 @@ def parse_wdb(data: bytes) -> dict:
             }
             for table_name, records in full_mesh_records_by_table.items()
         },
+        "mount_motion_sets": mount_motion_sets,
         "mount_motion_join": {
-            "rule": "mountmotion key // 1000 == mount.dbc unique ID",
-            "status": "PREFIX_JOIN_CANDIDATE_REQUIRES_RUNTIME_CONFIRMATION",
+            "rule": "mountmotion key // 1000 == mount.dbc unique ID; propagate the resulting animation set to mount variants sharing the first-part mesh ID",
+            "status": "SOURCE_ID_JOIN_AND_SHARED_BASE_MESH_PROPAGATION_REQUIRES_RUNTIME_PLAYBACK",
             "record_count": len(mount_motion_rows),
+            "motion_set_count": len(mount_motion_sets),
         },
         "note": "Source ID/path catalog only. Mobile MESZ part extensions are preserved as eight raw float32 values per part. Texture file presence, C3 geometry correctness, rig attachment and runtime rendering are validated separately."
     }
