@@ -5,6 +5,9 @@ on:
       - ".github/workflows/audit-c3-models.yml"
       - "tools/c3_audit/**"
       - "tools/external_assets/audit_c3_equipment_families.py"
+      - "tools/external_assets/render_c3_equipment_previews.py"
+      - "tools/external_assets/assemble_c3_equipment_contact_sheets.py"
+      - "tools/c3_audit/prepare_c3_validation_subset.py"
       - "scripts/animation/C3VatPlayer.gd"
       - "shaders/C3Vat.gdshader"
       - "shaders/C3VatAlpha.gdshader"
@@ -55,7 +58,20 @@ jobs:
       - name: Build per-family helmet, weapon and equipment candidate inventory
         run: |
           python3 tools/external_assets/audit_c3_equipment_families.py reports/c3-model-audit.json --project-root . --output reports/equipment/c3-equipment-family-audit.json
-      - name: Import and validate converted C3 GLB models
+      - name: Install Blender and NumPy for diagnostic equipment renders
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y blender python3-numpy
+          PYTHONPATH=/usr/lib/python3/dist-packages blender --background --factory-startup --python-expr "import numpy; print('BLENDER_NUMPY_OK', numpy.__version__)"
+      - name: Render all helmet, weapon and equipment C3 candidates
+        env:
+          PYTHONPATH: /usr/lib/python3/dist-packages
+        run: |
+          blender --background --factory-startup --python tools/external_assets/render_c3_equipment_previews.py -- --input-root build/c3-glb/equipment/c3 --output-root reports/equipment/previews/models --report reports/equipment/previews/equipment-preview-audit.json
+          python3 tools/external_assets/assemble_c3_equipment_contact_sheets.py reports/equipment/previews/equipment-preview-audit.json
+      - name: Prepare focused Godot import subset
+        run: python3 tools/c3_audit/prepare_c3_validation_subset.py
+      - name: Import and validate converted C3 equipment GLB candidates and animation POCs
         run: |
           godot --headless --editor --path . --import --quit
           godot --headless --path . --script tools/c3_audit/validate_c3_glb.gd
@@ -71,6 +87,9 @@ jobs:
           path: |
             reports/c3-model-audit.json
             reports/equipment/c3-equipment-family-audit.json
+            reports/equipment/c3-validation-subset.json
+            reports/equipment/previews/**
+            build/c3-glb/equipment/**/*.glb
             reports/c3-motion-poc-validation.json
             reports/c3-skeletal-poc-frame-a.png
             reports/c3-skeletal-poc-frame-b.png
