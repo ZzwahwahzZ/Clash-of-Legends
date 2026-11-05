@@ -383,9 +383,9 @@ jobs:
             adb shell screencap -p /sdcard/clash-launch.png
             adb pull /sdcard/clash-launch.png emulator-evidence/launch-screen.png
             # Exercise common touch paths without assuming UI-specific button coordinates.
-            adb shell input tap 540 2100
+            adb shell input tap 1200 540
             sleep 2
-            adb shell input swipe 850 1200 250 1200 450
+            adb shell input swipe 280 900 420 900 700
             sleep 2
             adb shell input keyevent 4
             sleep 2
