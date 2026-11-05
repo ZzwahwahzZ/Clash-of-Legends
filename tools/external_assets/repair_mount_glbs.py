@@ -2,7 +2,7 @@ import bpy, bmesh, json, os, sys, math
 from mathutils import Vector
 
 def mesh_stats(obj):
-    bm=bmesh.new(); bm.from_mesh(obj.data); bm.verts.ensure_lookup_table(); bm.edges.ensure_lookup_table(); bm.faces.ensure_lookup_table()
+    bm=bmesh.new(); bm.from_mesh(obj.data); bm.verts.ensure_lookup_table(); bm.edges.ensure_lookup_table(); bm.faces.ensure_lookup_table(); bm.faces.index_update()
     unseen=set(bm.verts); components=[]
     while unseen:
         seed=unseen.pop(); stack=[seed]; verts=[seed]
@@ -55,7 +55,7 @@ def main():
         out=os.path.join(out_dir,name.replace(".glb","_conservative_repair_candidate.glb"))
         bpy.ops.object.select_all(action="SELECT")
         bpy.ops.export_scene.gltf(filepath=out,export_format="GLB",use_selection=False,export_apply=False)
-        records.append({"file":name,"source":src,"output":out,"bbox_diagonal":bbox,"weld_tolerance":eps,"mesh_count":len(meshes),"materials":[{"mesh":o.name,"slots":[m.name if m else None for m in o.material_slots]} for o in meshes],"before":before,"after":cleaned,"status":"CANDIDATE_REQUIRES_VISUAL_REVIEW"})
+        records.append({"file":name,"source":src,"output":out,"bbox_diagonal":bbox,"weld_tolerance":eps,"mesh_count":len(meshes),"materials":[{"mesh":o.name,"slots":[m.name if m else None for m in o.material_slots],"uv_layers":[u.name for u in o.data.uv_layers]} for o in meshes],"armatures":[o.name for o in bpy.context.scene.objects if o.type=="ARMATURE"],"actions":[a.name for a in bpy.data.actions],"images":[i.name for i in bpy.data.images],"before":before,"after":cleaned,"status":"CANDIDATE_REQUIRES_VISUAL_REVIEW"})
     with open(os.path.join(out_dir,"mount_repair_audit.json"),"w") as f: json.dump({"tool":"Blender bmesh conservative cleanup","blender_version":bpy.app.version_string,"policy":"Only near-coincident vertices and degenerate edges are processed; no disconnected islands are deleted; original files remain untouched.","records":records},f,indent=2)
     print("MOUNT_REPAIR_AUDIT_COUNT",len(records))
 if __name__=="__main__": main()
