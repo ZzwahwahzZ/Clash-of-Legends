@@ -21,6 +21,7 @@ config/icon="res://public/clash_launcher_icon.svg"
 
 GameManager="*res://scripts/core/GameManager.gd"
 ClassProgressionManager="*res://scripts/progression/ClassProgressionManager.gd"
+GameContentDatabase="*res://scripts/core/GameContentDatabase.gd"
 FeatureGuidanceManager="*res://scripts/ui/FeatureGuidanceManager.gd"
 LocalSaveEngine="*res://scripts/core/LocalSaveEngine.gd"
 ResourcePackManager="*res://scripts/core/ResourcePackManager.gd"
