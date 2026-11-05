@@ -11,7 +11,18 @@ func _initialize() -> void:
 		return
 	file.close()
 	var pack_bytes := FileAccess.get_file_as_bytes(pack_path)
-	if pack_bytes.find("assets/shaders/weapon_glow.gdshader".to_utf8_buffer()) < 0:
+	var expected_path := "assets/shaders/weapon_glow.gdshader".to_utf8_buffer()
+	var path_found := false
+	for i in range(maxi(0, pack_bytes.size() - expected_path.size() + 1)):
+		var matches := true
+		for j in range(expected_path.size()):
+			if pack_bytes[i + j] != expected_path[j]:
+				matches = false
+				break
+		if matches:
+			path_found = true
+			break
+	if not path_found:
 		_fail("The PCK index does not contain the allowlisted shader path.")
 		return
 	if not ProjectSettings.load_resource_pack(pack_path, true):
