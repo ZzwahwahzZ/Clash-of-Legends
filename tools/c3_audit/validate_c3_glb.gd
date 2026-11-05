@@ -27,6 +27,8 @@ func _validate() -> void:
 		quit(1)
 		return
 	var valid := 0
+	var animated := 0
+	var total_surfaces := 0
 	for path in files:
 		var packed := ResourceLoader.load(path) as PackedScene
 		if packed == null:
@@ -40,14 +42,34 @@ func _validate() -> void:
 			instance.free()
 			quit(1)
 			return
+		var model_surfaces := 0
 		for mesh_node in meshes:
-			if mesh_node.mesh == null:
-				push_error("C3 GLB validation: empty mesh in " + path)
+			var mesh_instance := mesh_node as MeshInstance3D
+			if mesh_instance.mesh == null or mesh_instance.mesh.get_surface_count() <= 0:
+				push_error("C3 GLB validation: empty mesh or no surfaces in " + path)
 				instance.free()
 				quit(1)
 				return
-		print("C3 GLB OK: ", path, " | MeshInstance3D: ", meshes.size())
+			var bounds := mesh_instance.get_aabb()
+			if bounds.size.x <= 0.0001 or bounds.size.y <= 0.0001 or bounds.size.z <= 0.0001:
+				push_error("C3 GLB validation: degenerate geometry bounds in " + path)
+				instance.free()
+				quit(1)
+				return
+			model_surfaces += mesh_instance.mesh.get_surface_count()
+		var animation_player := instance.find_child("*", "AnimationPlayer", true, false)
+		var animation_count := 0
+		if animation_player is AnimationPlayer:
+			animation_count = animation_player.get_animation_list().size()
+		if animation_count > 0:
+			animated += 1
+		total_surfaces += model_surfaces
+		print("C3 GLB OK: ", path, " | MeshInstance3D: ", meshes.size(), " | surfaces: ", model_surfaces, " | animations: ", animation_count)
 		instance.free()
 		valid += 1
-	print("C3 GLB VALIDATION PASSED: ", valid, " textured models imported.")
+	if animated == 0:
+		push_error("C3 GLB validation: no converted C3 model exposes an imported animation.")
+		quit(1)
+		return
+	print("C3 GLB VALIDATION PASSED: ", valid, " textured models imported; ", total_surfaces, " surfaces; ", animated, " models expose animation tracks.")
 	quit(0)
