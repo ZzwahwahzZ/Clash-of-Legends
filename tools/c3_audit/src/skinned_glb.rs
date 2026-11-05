@@ -174,6 +174,7 @@ pub fn export_document(
                         let mut rotations = Vec::with_capacity(frame_count * 4);
                         let mut scales = Vec::with_capacity(frame_count * 3);
                         let mut previous_rotation: Option<Quat> = None;
+                        let mut previous_matrix: Option<Mat4> = None;
                         let mut changed = false;
                         for frame in 0..frame_count {
                             let matrix = joint_matrix(mesh, motion, bone as u32, frame as f32);
@@ -181,16 +182,16 @@ pub fn export_document(
                             if let Some(previous) = previous_rotation {
                                 if previous.dot(r) < 0.0 { r = -r; }
                             }
-                            if frame > 0 {
-                                let offset = frame * 3;
-                                changed |= (translations[offset] - t.x).abs() > 1e-6
-                                    || (translations[offset+1] - t.y).abs() > 1e-6
-                                    || (translations[offset+2] - t.z).abs() > 1e-6;
+                            if let Some(previous) = previous_matrix {
+                                let a = matrix.to_cols_array();
+                                let b = previous.to_cols_array();
+                                changed |= a.iter().zip(b.iter()).any(|(x, y)| (x - y).abs() > 1e-6);
                             }
                             translations.extend_from_slice(&t.to_array());
                             rotations.extend_from_slice(&r.to_array());
                             scales.extend_from_slice(&s.to_array());
                             previous_rotation = Some(r);
+                            previous_matrix = Some(matrix);
                         }
                         if changed {
                             for (values, kind, path) in [
