@@ -79,14 +79,15 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Publish verified generated resource pack manifest"
-          file_pattern: RESOURCE_MANIFEST build/resource-source-index.csv
+          file_pattern: RESOURCE_MANIFEST reports/resource-source-index.csv reports/source-archive-extension-audit.json
       - name: Upload PCKs and source index as workflow artifact
         uses: actions/upload-artifact@v4
         with:
           name: ClashOfLegends-Godot43-Resource-PCKs
           path: |
             build/pcks/*.pck
-            build/resource-source-index.csv
+            reports/resource-source-index.csv
+            reports/source-archive-extension-audit.json
             RESOURCE_MANIFEST
           if-no-files-found: error
           retention-days: 30
@@ -99,5 +100,6 @@ jobs:
           files: |
             build/pcks/*.pck
             RESOURCE_MANIFEST
-            build/resource-source-index.csv
+            reports/resource-source-index.csv
+            reports/source-archive-extension-audit.json
           fail_on_unmatched_files: true
