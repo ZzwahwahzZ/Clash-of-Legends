@@ -324,15 +324,24 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         let vat_dir = glb_root.join("motion-poc-vat");
                         for (mesh_index, mesh) in body_document.meshes.iter().enumerate() {
                             let Some(mesh_motion) = motion_document.motions.get(mesh_index) else {
-                                if !mesh.vertices.is_empty() && (!mesh.opaque_indices.is_empty() || !mesh.alpha_indices.is_empty()) {
-                                    vat_mesh_failures.push(format!("mesh {mesh_index} ({}) has no paired motion", mesh.name));
-                                }
+                                vat_static_meshes.push(json!({
+                                    "mesh_index":mesh_index,"mesh_name":mesh.name,
+                                    "vertex_count":mesh.vertices.len(),
+                                    "status":"STATIC_RETAINED_IN_COMPLETE_GLB_NO_PAIRED_MOTION"
+                                }));
                                 continue;
                             };
                             if mesh.vertices.is_empty() || (mesh.opaque_indices.is_empty() && mesh.alpha_indices.is_empty()) {
                                 continue;
                             }
-                            if mesh_motion.bone_count == 0 || mesh_motion.keys.is_empty() { continue; }
+                            if mesh_motion.bone_count == 0 || mesh_motion.keys.is_empty() {
+                                vat_static_meshes.push(json!({
+                                    "mesh_index":mesh_index,"mesh_name":mesh.name,
+                                    "vertex_count":mesh.vertices.len(),
+                                    "status":"STATIC_RETAINED_IN_COMPLETE_GLB_NO_DEFORMING_KEYS"
+                                }));
+                                continue;
+                            }
                             let deforming = match skinned_glb::is_deforming(mesh, mesh_motion) {
                                 Ok(value) => value,
                                 Err(error) => {
@@ -362,10 +371,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 Err(error) => vat_mesh_failures.push(format!("mesh {mesh_index} ({}): {error}", mesh.name))
                             }
                         }
+                        let source_renderable_mesh_count = body_document.meshes.iter()
+                            .filter(|mesh| !mesh.vertices.is_empty() && (!mesh.opaque_indices.is_empty() || !mesh.alpha_indices.is_empty()))
+                            .count();
                         let vat_clip_ok = !vat_mesh_results.is_empty() && vat_mesh_failures.is_empty();
                         vat_motion_poc.push(json!({
                             "model_id":model_id,"look":look,"weapon":weapon,"action":action,
-                            "clip_id":clip_id,"mesh_count":vat_mesh_results.len(),
+                            "clip_id":clip_id,"source_renderable_mesh_count":source_renderable_mesh_count,"mesh_count":vat_mesh_results.len(),
                             "deforming_meshes":vat_mesh_results,
                             "static_meshes_retained_without_vat":vat_static_meshes,
                             "failures":vat_mesh_failures,
