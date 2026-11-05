@@ -52,6 +52,8 @@ func _ready() -> void:
 		GameManager.register_player(self)
 	if ClassProgressionManager:
 		ClassProgressionManager.configure_for_character(character_class)
+	if inventory and not inventory.equipment_updated.is_connected(_on_equipment_updated):
+		inventory.equipment_updated.connect(_on_equipment_updated)
 	if AssetCatalog:
 		AssetCatalog.catalog_loaded.connect(_on_asset_catalog_loaded)
 	sync_stats_to_hud()
@@ -59,6 +61,48 @@ func _ready() -> void:
 		anim_player.play("idle")
 	call_deferred("_apply_character_model")
 	call_deferred("_apply_mount_model")
+
+func _on_equipment_updated() -> void:
+	_apply_refinement_glow()
+
+func _apply_refinement_glow() -> void:
+	if not inventory:
+		return
+	var weapon: Variant = inventory.equipment.get("weapon", null)
+	var refine_level := int(weapon.get("refine_level", 0)) if weapon is Dictionary else 0
+	var weapon_nodes: Array[MeshInstance3D] = []
+	if weapon_mount:
+		for node in weapon_mount.find_children("*", "MeshInstance3D", true, false):
+			weapon_nodes.append(node as MeshInstance3D)
+	if visual_root:
+		var imported := visual_root.get_node_or_null("ImportedModelRoot")
+		if imported:
+			for node in imported.find_children("*", "MeshInstance3D", true, false):
+				var node_name := str(node.name).to_lower()
+				if "weapon" in node_name or "sword" in node_name or "blade" in node_name or "dagger" in node_name or "axe" in node_name:
+					weapon_nodes.append(node as MeshInstance3D)
+	if weapon_nodes.is_empty():
+		return
+	var shader := load("res://assets/shaders/weapon_glow.gdshader") as Shader
+	if shader == null:
+		return
+	var glow := Color(0.18, 0.55, 1.0)
+	if refine_level >= 9:
+		glow = Color(1.0, 0.24, 0.12)
+	elif refine_level >= 6:
+		glow = Color(0.72, 0.28, 1.0)
+	elif refine_level >= 3:
+		glow = Color(0.18, 0.85, 0.55)
+	var energy := 0.0 if refine_level <= 0 else 1.0 + float(refine_level) * 0.48
+	for mesh_node in weapon_nodes:
+		var material := ShaderMaterial.new()
+		material.shader = shader
+		material.set_shader_parameter("base_color", Color(0.72, 0.76, 0.82))
+		material.set_shader_parameter("glow_color", glow)
+		material.set_shader_parameter("emission_energy", energy)
+		material.set_shader_parameter("pulse_speed", 1.8 + float(refine_level) * 0.12)
+		material.set_shader_parameter("pulse_intensity", 0.12 + float(refine_level) * 0.025)
+		mesh_node.material_override = material
 
 func _on_asset_catalog_loaded(_asset_count: int) -> void:
 	_apply_character_model()
