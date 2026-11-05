@@ -209,6 +209,22 @@ for archive_name in ARCHIVES:
             else:
                 stage_stream(archive_name, raw, raw, info.file_size, lambda z=outer, i=info: z.open(i))
 
+catalog_assets = {}
+for row in rows:
+    catalog_assets.setdefault(row["category"], []).append({
+        "path": row["staged_path"],
+        "source": row["source_path"],
+        "extension": Path(row["source_path"].split("!")[-1]).suffix.lower(),
+        "size_bytes": row["size_bytes"],
+        "sha256": row["sha256"],
+    })
+world_dir = STAGE / "world"
+world_dir.mkdir(parents=True, exist_ok=True)
+(world_dir / "resource_catalog.json").write_text(
+    json.dumps({"catalog_version": 1, "asset_counts": {key: len(value) for key, value in catalog_assets.items()}, "assets": catalog_assets}, ensure_ascii=False, indent=2) + "\n",
+    encoding="utf-8",
+)
+
 with open(REPORTS / "resource-source-index.csv", "w", newline="", encoding="utf-8") as file:
     writer = csv.DictWriter(file, fieldnames=["category", "source_archive", "source_path", "staged_path", "size_bytes", "sha256"])
     writer.writeheader()
