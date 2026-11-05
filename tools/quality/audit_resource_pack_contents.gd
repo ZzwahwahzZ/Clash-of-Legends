@@ -27,6 +27,7 @@ func _run_audit() -> void:
 		"model_samples": [],
 		"catalog_found": false,
 		"catalog_categories": {},
+		"catalog_model_entries": 0,
 		"catalog_missing_paths": [],
 		"verified_character_mappings": [],
 		"missing_character_classes": [],
@@ -53,8 +54,10 @@ func _run_audit() -> void:
 
 	var model_paths: Array[String] = []
 	_walk_directory("res://", report["extension_counts"], model_paths, report["extension_samples"])
+	_audit_resource_catalog(report, model_paths)
+	model_paths = model_paths.duplicate()
+	model_paths.sort()
 	report["model_files_found"] = model_paths.size()
-	_audit_resource_catalog(report)
 	model_paths.sort()
 	var inspect_count := mini(model_paths.size(), MAX_MODEL_INSPECTIONS)
 	for index in range(inspect_count):
@@ -118,7 +121,7 @@ func _run_audit() -> void:
 	quit(0)
 
 
-func _audit_resource_catalog(report: Dictionary) -> void:
+func _audit_resource_catalog(report: Dictionary, model_paths: Array[String]) -> void:
 	var catalog_path := "res://resource_stage/world/resource_catalog.json"
 	if not FileAccess.file_exists(catalog_path):
 		return
@@ -148,11 +151,16 @@ func _audit_resource_catalog(report: Dictionary) -> void:
 			if typeof(entry) != TYPE_DICTIONARY:
 				continue
 			var relative_path := str(entry.get("path", ""))
-			if relative_path.is_empty() or not FileAccess.file_exists("res://" + relative_path):
+			if relative_path.is_empty() or (not FileAccess.file_exists("res://" + relative_path) and not ResourceLoader.exists("res://" + relative_path)):
 				report["catalog_missing_paths"].append(relative_path)
 			if str(category) != "characters":
 				continue
 			var extension := str(entry.get("extension", "")).to_lower()
+			if extension in [".glb", ".gltf"]:
+				var model_path := "res://" + relative_path
+				if not model_paths.has(model_path):
+					model_paths.append(model_path)
+				report["catalog_model_entries"] += 1
 			if extension not in [".glb", ".gltf"]:
 				continue
 			if str(entry.get("asset_role", "")) != "complete_character":
