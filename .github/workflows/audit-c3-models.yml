@@ -34,7 +34,7 @@ jobs:
       - name: Unpack C3 and PVR extraction bundles
         run: python3 tools/c3_audit/unpack_c3_bundle.py
       - name: Install Pillow for texture conversion
-        run: python3 -m pip install --disable-pip-version-check numpy pillow
+        run: python3 -m pip install --disable-pip-version-check numpy pillow texture2ddecoder==1.0.6
       - name: Audit PVR texture headers
         run: python3 tools/c3_audit/audit_pvr_headers.py
       - name: Decode original PVR textures to PNG
