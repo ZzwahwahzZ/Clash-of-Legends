@@ -1,23 +1,23 @@
 extends Node
 
-	# Presence of node names is not visual proof: every required part must own
-	# a real mesh with at least one surface and non-degenerate bounds.
-	func _has_renderable_mesh(root: Node, node_path: String) -> bool:
-		var node := root.get_node_or_null(node_path)
-		if not node is MeshInstance3D:
-			return false
-		var mesh_instance := node as MeshInstance3D
-		if mesh_instance.mesh == null or mesh_instance.mesh.get_surface_count() <= 0:
-			return false
-		var bounds := mesh_instance.get_aabb()
-		return is_finite(bounds.position.x) and is_finite(bounds.position.y) and is_finite(bounds.position.z) and is_finite(bounds.size.x) and is_finite(bounds.size.y) and is_finite(bounds.size.z) and bounds.size.length() > 0.001
+# Presence of node names is not visual proof: every required part must own
+# a real mesh with at least one surface and non-degenerate bounds.
+func _has_renderable_mesh(root: Node, node_path: String) -> bool:
+	var node := root.get_node_or_null(node_path)
+	if not node is MeshInstance3D:
+		return false
+	var mesh_instance := node as MeshInstance3D
+	if mesh_instance.mesh == null or mesh_instance.mesh.get_surface_count() <= 0:
+		return false
+	var bounds := mesh_instance.get_aabb()
+	return is_finite(bounds.position.x) and is_finite(bounds.position.y) and is_finite(bounds.position.z) and is_finite(bounds.size.x) and is_finite(bounds.size.y) and is_finite(bounds.size.z) and bounds.size.length() > 0.001
 
-	func _all_required_meshes_exist(root: Node, paths: Array[String]) -> bool:
-		for node_path in paths:
-			if not _has_renderable_mesh(root, node_path):
-				push_warning("VISUAL GEOMETRY MISSING OR EMPTY: " + node_path)
-				return false
-		return true
+func _all_required_meshes_exist(root: Node, paths: Array[String]) -> bool:
+	for node_path in paths:
+		if not _has_renderable_mesh(root, node_path):
+			push_warning("VISUAL GEOMETRY MISSING OR EMPTY: " + node_path)
+			return false
+	return true
 
 func _ready() -> void:
 	print("=======================================================")
