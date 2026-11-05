@@ -366,8 +366,10 @@ def parse_wdb(data: bytes) -> dict:
 
     # Resolve MESH family records against the 3DObj / 3DTexture path tables.
     mesh_family_catalog = {}
+    full_mesh_records_by_table = {}
     for table_name, rows in mesh_table_rows.items():
         resolved_records = []
+        full_records = []
         part_total = object_resolved = texture_resolved = fully_resolved = 0
         missing_mesh_ids = set()
         missing_texture_ids = set()
@@ -394,11 +396,14 @@ def parse_wdb(data: bytes) -> dict:
                     "mesh_path_resolved": mesh_path is not None,
                     "texture_path_resolved": texture_path is not None,
                 })
+            full_record = {
+                "unique_id": int(row["id"]), "part_count": int(row["part_count"]),
+                "parts": resolved_parts,
+            }
+            full_records.append(full_record)
             if len(resolved_records) < 60:
-                resolved_records.append({
-                    "unique_id": int(row["id"]), "part_count": int(row["part_count"]),
-                    "parts": resolved_parts,
-                })
+                resolved_records.append(full_record)
+        full_mesh_records_by_table[table_name] = full_records
         mesh_family_catalog[table_name] = {
             "record_count": len(rows), "part_count": part_total,
             "mesh_id_matches": object_resolved, "texture_id_matches": texture_resolved,
@@ -434,9 +439,35 @@ def parse_wdb(data: bytes) -> dict:
     mount_table["mount_motion_unmatched_sample_ids"] = mount_motion_unmatched
     mount_table["mount_motion_record_count"] = len(mount_motion_rows)
     mount_table["mount_motion_status"] = "PREFIX_JOIN_CANDIDATE_REQUIRES_RUNTIME_CONFIRMATION"
+    mount_full_records = full_mesh_records_by_table.get("ini/mount.dbc", [])
+    for record in mount_full_records:
+        motions = mount_motion_by_base.get(int(record["unique_id"]), [])
+        record["motion_records"] = motions
 
     catalog_dir = Path("resource_stage/world/resource_mappings")
     catalog_dir.mkdir(parents=True, exist_ok=True)
+    equipment_catalog_path = catalog_dir / "mesh_equipment_catalog.json"
+    equipment_catalog = {
+        "schema_version": "1.0.0",
+        "source_container_sha256": hashlib.sha256(data).hexdigest(),
+        "source_tables": list(mesh_table_names) + ["ini/3DObj.dbc", "ini/3DTexture.dbc", "ini/mountmotion.dbc"],
+        "schema_status": "MESH_ID_TO_C3_AND_TEXTURE_PATH_LINKED",
+        "tables": {
+            table_name: {
+                "record_count": len(records),
+                "records": records,
+                "status": mesh_family_catalog[table_name]["status"],
+            }
+            for table_name, records in full_mesh_records_by_table.items()
+        },
+        "mount_motion_join": {
+            "rule": "mountmotion key // 1000 == mount.dbc unique ID",
+            "status": "PREFIX_JOIN_CANDIDATE_REQUIRES_RUNTIME_CONFIRMATION",
+            "record_count": len(mount_motion_rows),
+        },
+        "note": "Source ID/path catalog only. Texture file presence, C3 geometry correctness, rig attachment and runtime rendering are validated separately."
+    }
+    equipment_catalog_path.write_text(json.dumps(equipment_catalog, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     catalog_path = catalog_dir / "simple_object_catalog.json"
     catalog_data = {
         "schema_version": "1.0.0",
@@ -487,6 +518,8 @@ def parse_wdb(data: bytes) -> dict:
         "table_offset": table_offset, "entry_count": entry_count,
         "table_end": table_offset + entry_count * WDB_ENTRY_SIZE,
         "mesh_family_catalog": mesh_family_catalog,
+        "mesh_equipment_catalog_path": str(equipment_catalog_path),
+        "mesh_equipment_catalog_sha256": hashlib.sha256(equipment_catalog_path.read_bytes()).hexdigest(),
         "mount_model_motion_audit": {
             "mount_mesh_record_count": mesh_family_catalog.get("ini/mount.dbc", {}).get("record_count", 0),
             "mount_mesh_part_count": mesh_family_catalog.get("ini/mount.dbc", {}).get("part_count", 0),
