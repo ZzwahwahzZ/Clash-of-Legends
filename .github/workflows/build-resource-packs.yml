@@ -42,7 +42,9 @@ jobs:
         run: python3 -m unittest tools/resource_packs/test_nested_audio_7z.py
       - name: Extract and index audio embedded in nested 7z archives
         run: python3 tools/resource_packs/extract_nested_audio_7z.py
-      - name: Audit C3 WDB motion, object and texture tables
+      - name: Test MESH and Mobile MESZ parser
+        run: python3 -m unittest tools.resource_packs.test_c3_wdb_mesh
+      - name: Audit C3 WDB motion, object, texture and equipment tables
         run: python3 tools/resource_packs/audit_c3_wdb.py
       - name: Extract NetDragon TPI/TPD resources
         run: python3 tools/resource_packs/extract_netdragon.py
