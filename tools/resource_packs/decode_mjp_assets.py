@@ -52,7 +52,20 @@ def decode_alpha(data: bytes,width: int,height: int):
 
 def decode_mjp(blob: bytes):
     if len(blob)<36 or blob[:3]!=b"MJP":
-        raise ValueError("MJP magic/header mismatch")
+        # Some source archives retain ordinary PNG/JPEG payloads under an
+        # .mjp virtual filename. Sniff the bytes instead of assuming the
+        # extension proves the container; never reinterpret unknown bytes.
+        try:
+            with Image.open(BytesIO(blob)) as source:
+                source.load()
+                rgba = source.convert("RGBA")
+                return rgba, {"width": rgba.width, "height": rgba.height,
+                              "num_blocks": 0, "alpha_mode": "NATIVE_IMAGE",
+                              "alpha_prefix_bytes": 0, "jpeg_bytes": len(blob),
+                              "source_container": source.format}
+        except Exception as exc:
+            signature = blob[:16].hex(" ")
+            raise ValueError(f"MJP magic/header mismatch and not a recognized PNG/JPEG image (header {signature}): {exc}") from exc
     data_offset,block1_total,block1_comp,block1_decomp,block2_offset,block2_comp,block2_decomp,num_blocks=struct.unpack_from("<8I",blob,4)
     if data_offset<36 or block1_comp>block1_total or data_offset+block1_total>len(blob):
         raise ValueError("MJP first-block bounds are invalid")
