@@ -65,3 +65,15 @@ Each record must contain:
 - `APPROVED`: all relevant data, functional, visual, runtime, and rights checks pass for that individual entry.
 
 A successful build, imported icon, non-empty skill list, or generic VFX is never sufficient for `APPROVED`.
+
+## Additional source inventory evidence — 2026-11-05
+
+The source-index artifact from run 42000137006 confirms the following version-matched candidates exist in the supplied archive set:
+
+- Skill-related sources: `weaponskillname.ini`, `weaponskilllevelexp.ini`, `magic.ani`, `magic1.ani`, `autousemagic.dat`, `3deffectinfo.ini`, `action3deffect.ini`, `actionlee3deffect.ini`, `weaponeffect.ini`, and skill-named OGG files. These remain candidate sources until skill IDs are joined and visually/behaviorally checked.
+- Gem definitions: `gemtip.ini` was parsed as 52 sections (source SHA-256 `2987be6487b345b31028b3d59bf8a7cf7f3bbdd26d571318e50e831fc7136ad4`). Its visible key/value strings include stat-description candidates, but this alone does not establish socket acceptance, material recipes, grade rules, or full runtime effects.
+- Refinement sources: `item_refine_attr.dat`, `item_refine_cost.dat`, `item_refine_upgrade.dat`, `item_refine_effect.dat`, and `item_refine_effect_ex.dat` are present in the source index. Their record schemas and field semantics are not yet validated.
+- Socket/solidification sources: `equiphole.ini` and `equipsolidify.ini` are present; no complete item-to-socket/material rule mapping is approved.
+- Fashion/equipment progression candidates include `suittype.dat`, `wenzhang_suit_effect.ini`, `weapon_trans.ini`, and `armor_trans.ini`; source presence is not a complete fashion or paid-equipment catalogue.
+
+A dedicated CI audit was added at `.github/workflows/audit-gameplay-source-tables.yml`, using `tools/gameplay_source_audit/audit_source_tables.py`. It downloads and checksum-verifies the exact mobile source archive, parses only visible INI section/key structure and itemtype record IDs/names, records source hashes, and leaves undocumented binary fields opaque. Its output is inventory evidence only, not runtime approval. The audit must complete and its artifact must be reviewed before any newly discovered record is promoted to `SCHEMA_VERIFIED`.
