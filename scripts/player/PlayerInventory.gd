@@ -84,33 +84,69 @@ func _initialize_starter_items() -> void:
 		"rarity": "refined"
 	})
 
+func can_add_item(item_data: Dictionary) -> bool:
+	var item_id := str(item_data.get("id", "")).strip_edges()
+	var quantity := int(item_data.get("quantity", 1))
+	var max_stack := maxi(1, int(item_data.get("max_stack", 1)))
+	if item_id.is_empty() or quantity <= 0:
+		return false
+
+	var remaining := quantity
+	if max_stack > 1:
+		for slot in slots:
+			if slot is Dictionary and str(slot.get("id", "")) == item_id:
+				var slot_limit := maxi(1, int(slot.get("max_stack", max_stack)))
+				var current_quantity := maxi(0, int(slot.get("quantity", 1)))
+				remaining -= maxi(0, slot_limit - current_quantity)
+				if remaining <= 0:
+					return true
+
+	var empty_slots := 0
+	for slot in slots:
+		if slot == null:
+			empty_slots += 1
+	var required_slots := int(ceil(float(remaining) / float(max_stack))) if max_stack > 1 else remaining
+	return empty_slots >= required_slots
+
+
 func add_item(item_data: Dictionary) -> bool:
-	# Try stack with existing item
-	if item_data.get("max_stack", 1) > 1:
+	if not can_add_item(item_data):
+		if GameManager:
+			GameManager.post_notification("الحقيبة ممتلئة!" if GameManager.current_language == "ar" else "Inventory is Full!", true)
+		return false
+
+	var item_id := str(item_data.get("id", ""))
+	var remaining := int(item_data.get("quantity", 1))
+	var max_stack := maxi(1, int(item_data.get("max_stack", 1)))
+
+	if max_stack > 1:
 		for i in range(MAX_SLOTS):
-			var slot = slots[i]
-			if slot != null and slot["id"] == item_data["id"]:
-				var max_s = slot.get("max_stack", 99)
-				var cur_q = slot.get("quantity", 1)
-				if cur_q < max_s:
-					var space = max_s - cur_q
-					var to_add = min(space, item_data.get("quantity", 1))
-					slot["quantity"] += to_add
-					item_data["quantity"] -= to_add
-					if item_data["quantity"] <= 0:
-						emit_signal("inventory_updated")
-						return true
-						
-	# Put in first empty slot
-	for i in range(MAX_SLOTS):
-		if slots[i] == null:
-			slots[i] = item_data.duplicate(true)
-			emit_signal("inventory_updated")
-			return true
-			
-	if GameManager:
-		GameManager.post_notification("الحقيبة ممتلئة!" if GameManager.current_language == "ar" else "Inventory is Full!", true)
-	return false
+			var slot: Variant = slots[i]
+			if slot is Dictionary and str(slot.get("id", "")) == item_id:
+				var slot_limit := maxi(1, int(slot.get("max_stack", max_stack)))
+				var current_quantity := maxi(0, int(slot.get("quantity", 1)))
+				var space := maxi(0, slot_limit - current_quantity)
+				var to_add := mini(space, remaining)
+				if to_add > 0:
+					slot["quantity"] = current_quantity + to_add
+					remaining -= to_add
+				if remaining <= 0:
+					emit_signal("inventory_updated")
+					return true
+
+	while remaining > 0:
+		var empty_index := slots.find(null)
+		if empty_index < 0:
+			# Capacity was preflighted; this is a defensive guard against concurrent mutation.
+			return false
+		var stack_quantity := mini(max_stack, remaining) if max_stack > 1 else 1
+		var new_item := item_data.duplicate(true)
+		new_item["quantity"] = stack_quantity
+		slots[empty_index] = new_item
+		remaining -= stack_quantity
+
+	emit_signal("inventory_updated")
+	return true
 
 func remove_item_at(index: int, quantity: int = 1) -> bool:
 	if quantity <= 0 or index < 0 or index >= MAX_SLOTS or slots[index] == null:
