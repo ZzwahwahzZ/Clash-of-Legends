@@ -161,6 +161,9 @@ func _run() -> void:
 				all_passed = false
 				vat_player.queue_free()
 				continue
+			if target_mesh.skin != null or not target_mesh.skeleton.is_empty():
+				push_error("C3 six-clip visual proof: baked VAT mesh is still linked to a glTF skin/skeleton: " + mesh_name)
+				all_passed = false
 			vat_player.pause()
 			vat_player.set_frame(0.0)
 			vat_players.append({"player":vat_player,"middle_frame":float(maxi(1, int(int(metadata_value.get("height", 2)) / 2)))})
