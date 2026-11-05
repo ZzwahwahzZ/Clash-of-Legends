@@ -46,6 +46,8 @@ jobs:
         run: python3 tools/resource_packs/probe_gameplay_data.py
       - name: Build provenance-safe readable gameplay reference catalogs
         run: python3 tools/resource_packs/build_gameplay_reference_catalog.py
+      - name: Build provenance-preserving runtime resource catalog
+        run: python3 tools/resource_packs/build_runtime_resource_catalog.py
       - name: Prepare source model path lists
         run: |
           cp reports/resource-source-index.csv resource-source-index.csv
