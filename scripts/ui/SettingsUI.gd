@@ -183,6 +183,7 @@ func _on_class_selected(idx: int) -> void:
 	var player = GameManager.player_reference
 	if player and player.has_method("set_character_class"):
 		player.set_character_class(cls_id)
+	_setup_options()
 
 func _on_save_pressed() -> void:
 	var player = GameManager.player_reference if GameManager else null
@@ -246,6 +247,7 @@ func _on_load_pressed() -> void:
 			AutoLootManager.apply_filter_settings(data["loot_filters"])
 			_build_loot_filter_controls()
 		player.sync_stats_to_hud()
+	_setup_options()
 
 func _on_resource_packs_pressed() -> void:
 	var panel := get_tree().get_first_node_in_group("resource_packs_ui")
