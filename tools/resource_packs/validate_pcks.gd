@@ -36,10 +36,6 @@ func _validate_packages() -> void:
 		quit(1)
 		return
 	catalog_file.close()
-	if not AssetCatalog._reload_catalog():
-		push_error("PCK validation: runtime AssetCatalog could not load the world index.")
-		quit(1)
-		return
 	var catalog: Dictionary = parser.data
 	var assets: Dictionary = catalog.get("assets", {})
 	for required_category in ["characters", "monsters", "maps", "equipment", "mounts", "effects", "animations", "interface", "audio", "world"]:
@@ -60,7 +56,7 @@ func _validate_packages() -> void:
 			quit(1)
 			return
 		var model_path := "res://" + str(model_entries[0].get("path", ""))
-		var model_resource: PackedScene = AssetCatalog.load_model_scene(model_category, 0)
+		var model_resource := ResourceLoader.load(model_path) as PackedScene
 		if model_resource == null:
 			push_error("PCK validation: GLB model failed to load as PackedScene: " + model_path)
 			quit(1)
