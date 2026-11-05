@@ -59,6 +59,9 @@ jobs:
       - name: Verify Godot
         run: godot --version
 
+      - name: Test Godot HTTPRequest byte-range downloads against the actual PCK host
+        run: godot --headless --path . --script tools/quality/test_pck_range_http.gd
+
       - name: Import project
         run: |
           mkdir -p ci-logs
