@@ -309,25 +309,36 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         "mesh_count":mesh_count,"animated_mesh_count":animated_mesh_count,
                         "status":"EXPORTED_PENDING_GODOT_IMPORT_VALIDATION"
                     }));
-                    let mut skinned_document = body_document.clone();
-                    skinned_document.motions = motion_document.motions.clone();
-                    let skinned_relative = Path::new("motion-poc-skinned").join(format!("look{look}_model{model_id}_weapon{weapon}_action{action}.glb"));
-                    let skinned_path = glb_root.join(&skinned_relative);
-                    let skinned_source = format!("{body_relative} + {motion_relative}");
-                    match skinned_glb::export_document(&skinned_document, &texture_bytes, &skinned_source, &skinned_path) {
-                        Ok((skinned_bytes, skinned_meshes, skinned_animated_meshes)) => {
-                            skeletal_motion_poc.push(json!({
+                    if let Some(body_mesh_index) = body_document.meshes.iter().position(|mesh| mesh.name.eq_ignore_ascii_case("v_body")) {
+                        let skinned_document = C3Document {
+                            version: body_document.version.clone(),
+                            meshes: vec![body_document.meshes[body_mesh_index].clone()],
+                            motions: vec![motion_document.motions[body_mesh_index].clone()],
+                            unknown_chunks: Vec::new(),
+                        };
+                        let skinned_relative = Path::new("motion-poc-skinned").join(format!("look{look}_model{model_id}_weapon{weapon}_action{action}.glb"));
+                        let skinned_path = glb_root.join(&skinned_relative);
+                        let skinned_source = format!("{body_relative} + {motion_relative} [v_body only]");
+                        match skinned_glb::export_document(&skinned_document, &texture_bytes, &skinned_source, &skinned_path) {
+                            Ok((skinned_bytes, skinned_meshes, skinned_animated_meshes)) => {
+                                skeletal_motion_poc.push(json!({
+                                    "model_id":model_id,"look":look,"weapon":weapon,"action":action,
+                                    "output":skinned_relative.to_string_lossy().replace('\\', "/"),
+                                    "glb_bytes":skinned_bytes,"mesh_count":skinned_meshes,
+                                    "animated_mesh_count":skinned_animated_meshes,
+                                    "status":"EXPORTED_PENDING_GODOT_SKELETON_VALIDATION"
+                                }));
+                            },
+                            Err(error) => skeletal_motion_poc.push(json!({
                                 "model_id":model_id,"look":look,"weapon":weapon,"action":action,
-                                "output":skinned_relative.to_string_lossy().replace('\\', "/"),
-                                "glb_bytes":skinned_bytes,"mesh_count":skinned_meshes,
-                                "animated_mesh_count":skinned_animated_meshes,
-                                "status":"EXPORTED_PENDING_GODOT_SKELETON_VALIDATION"
-                            }));
-                        },
-                        Err(error) => skeletal_motion_poc.push(json!({
+                                "status":"REJECTED","reason":error.to_string()
+                            }))
+                        }
+                    } else {
+                        skeletal_motion_poc.push(json!({
                             "model_id":model_id,"look":look,"weapon":weapon,"action":action,
-                            "status":"REJECTED","reason":error.to_string()
-                        }))
+                            "status":"REJECTED","reason":"base C3 document has no v_body mesh"
+                        }));
                     }
                 },
                 Err(error) => external_motion_poc.push(json!({
