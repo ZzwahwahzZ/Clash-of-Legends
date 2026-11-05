@@ -21,7 +21,7 @@ A successful build, a GLB import, or animation tracks in a headless test do not 
 - This is an internal debug build, not a production game and not proof of real-device performance.
 
 ### Original C3 conversion and external-motion proof of concept
-- Latest C3 audit and import run: [41999396204](https://github.com/ZzwahwahzZ/Clash-of-Legends/actions/runs/41999396204)
+- Latest C3 audit and import run: [42000129691](https://github.com/ZzwahwahzZ/Clash-of-Legends/actions/runs/42000129691)
 - 1,944 C3 files found; 1,904 parsed; 40 parser failures remain, all in effect paths with unparsed 4- or 8-byte tails.
 - 8,340 meshes, 709,677 vertices, 936,015 triangles, and 18,029 MOTI chunks were reported.
 - 569 GLBs imported and passed the current geometry/morph/animation validator: 2,562 surfaces, 2,307 morph-capable mesh nodes, 509 animated models, 13,163 animation tracks, and 57,012 keys.
