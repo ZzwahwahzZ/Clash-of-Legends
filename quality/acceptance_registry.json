@@ -15,7 +15,7 @@
         "device_performance": false
       },
       "evidence": [
-        "C3 motion POC CI run 41999396204: six look-7/look-8 candidate clips imported and passed Godot 4.3 mesh/morph/animation-track validation; this is not class identity or visual acceptance.",
+        "C3 motion POC CI run 42000129691: six look-7/look-8 candidate clips imported and passed Godot 4.3 mesh/morph/animation-track validation; this is not class identity or visual acceptance.",
         "docs/CHARACTER_MODEL_MAPPING_RESEARCH.md: ordered PHY/MOTI signatures and candidate look/weapon/action path keys."
       ],
       "open_issues": [
@@ -37,7 +37,7 @@
       },
       "evidence": [
         "Base body C3 candidates contain 18 ordered PHY/MOTI slots; the look-7 and look-8 motion-only documents match their respective ordered bone-count signatures.",
-        "C3 motion POC CI run 41999396204: six external-motion GLBs passed Godot 4.3 import and animation-track validation."
+        "C3 motion POC CI run 42000129691: six external-motion GLBs passed Godot 4.3 import and animation-track validation."
       ],
       "open_issues": [
         "Virtual socket transforms for v_armet, v_l_weapon, v_r_weapon, v_back, v_pelvis and other attachment points are not yet exported and runtime-verified.",
