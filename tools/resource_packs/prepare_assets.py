@@ -28,15 +28,19 @@ EXTS = {
     ".json", ".material", ".shader", ".gdshader", ".cfg", ".xml", ".ini",
     ".bin", ".dat", ".pak", ".atlas", ".plist",
     ".c3b", ".c3t", ".c3a", ".c3i", ".c3e", ".c3s", ".c3m", ".c3d", ".c3p",
-    ".skel", ".skeleton", ".anim", ".mesh", ".model",
+    ".skel", ".skeleton", ".anim", ".ani", ".mesh", ".model",
+    ".scene", ".tme", ".pul", ".pux", ".otherdata", ".fui", ".rgn",
+    ".tpd", ".tpi", ".wdb", ".fcs", ".dmap", ".map", ".terrain", ".bytes",
 }
 RULES = [
     ("audio", re.compile(r"audio|sound|music|voice|(^|[/_.-])sfx([/_.-]|$)|\.ogg$|\.wav$|\.mp3$|\.flac$", re.I)),
-    ("maps", re.compile(r"map|terrain|scene|world|city|village|dungeon|height", re.I)),
+    ("interface", re.compile(r"fgui|interface|ui/|layout|font|sprite|icon|\.fui$|\.rgn$", re.I)),
+    ("maps", re.compile(r"map|terrain|scene|world|city|village|dungeon|height|\.dmap$|\.pul$|\.pux$|\.otherdata$", re.I)),
     ("characters", re.compile(r"character|player|role|human|body|hair|face|skeleton|(^|[/_.-])hero([/_.-]|$)", re.I)),
-    ("equipment", re.compile(r"weapon|armor|armour|equip|sword|bow|dagger|staff|shield|helmet|boot|glove|garment|ring|necklace", re.I)),
+    ("equipment", re.compile(r"weapon|armor|armour|equip|sword|bow|dagger|staff|shield|helmet|boot|glove|garment|ring|necklace|(^|/)item(/|$)", re.I)),
     ("mounts", re.compile(r"mount|horse|pet|ride|dragon", re.I)),
-    ("effects", re.compile(r"effect|particle|skill|spell|magic|vfx|(^|[/_.-])fx([/_.-]|$)|trail|projectile", re.I)),
+    ("effects", re.compile(r"effect|particle|skill|spell|magic|vfx|terrainmagic|(^|[/_.-])fx([/_.-]|$)|trail|projectile|\.tme$", re.I)),
+    ("animations", re.compile(r"(^|/)ani(/|$)|animation|\.ani$", re.I)),
     ("monsters", re.compile(r"monster|(^|[/_.-])mob([/_.-]|$)|creature|beast|boss|npc_enemy", re.I)),
 ]
 seen = set()
