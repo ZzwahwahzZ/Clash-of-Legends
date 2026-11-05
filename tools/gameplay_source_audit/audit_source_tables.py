@@ -167,7 +167,7 @@ def main() -> None:
             for nested in nested_archives:
                 nested.close()
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+    args.output.write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({k: ({"file_count": v["file_count"]} if isinstance(v, dict) and "file_count" in v else v)
                       for k, v in summary["categories"].items()}, ensure_ascii=False))
     print(json.dumps(summary["itemtype_catalog"], ensure_ascii=False))
