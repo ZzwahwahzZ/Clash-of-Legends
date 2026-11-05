@@ -244,11 +244,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         })
     }).collect();
     let total_structural_pairs: usize = motion_pairing_report.iter()
-        .map(|row| row["structural_candidate_model_count"].as_u64().unwrap_or(0) as usize)
+        .map(|row| row["bone_signature_candidate_model_count"].as_u64().unwrap_or(0) as usize)
         .sum();
     let uniquely_pairable_motion_files = motion_pairing_report.iter()
-        .filter(|row| row["structural_candidate_model_count"].as_u64() == Some(1))
+        .filter(|row| row["bone_signature_candidate_model_count"].as_u64() == Some(1))
         .count();
+    let parsed_motion_path_keys = motion_pairing_report.iter()
+        .filter(|row| row["motion_path_key"].is_object())
+        .count();
+    let body_look_candidate_pairs: usize = motion_pairing_report.iter()
+        .map(|row| row["body_look_candidate_model_count"].as_u64().unwrap_or(0) as usize)
+        .sum();
 
     let report: Value = json!({
         "format": "Conquer C3 model audit and GLB conversion",
@@ -264,6 +270,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "motion_only_documents": motion_pairing_report.len(),
         "motion_only_structural_candidate_pairs": total_structural_pairs,
         "motion_only_uniquely_pairable_documents": uniquely_pairable_motion_files,
+        "motion_only_parsed_path_keys": parsed_motion_path_keys,
+        "motion_only_body_look_candidate_pairs": body_look_candidate_pairs,
         "motion_only_pairing_status": "PATH_KEY_AND_BONE_SIGNATURE_CANDIDATES_ONLY_NOT_RUNTIME_PAIRED",
         "motion_only_pairing": motion_pairing_report,
         "converted_models": converted.len(),
