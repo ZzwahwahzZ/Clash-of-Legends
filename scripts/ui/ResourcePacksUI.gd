@@ -24,11 +24,15 @@ func _ready() -> void:
 		call_deferred("_startup_resource_check")
 
 func _startup_resource_check() -> void:
-	# Give the autoload bootstrap a moment to read its cached manifest first.
-	for _attempt in range(120):
-		if not ResourcePackManager.busy:
-			break
+	# Wait for the autoload bootstrap/manifest request instead of timing out
+	# after two seconds on slower DNS, TLS handshakes, or a cold connection.
+	var wait_frames := 0
+	while ResourcePackManager.busy and wait_frames < 3600:
+		wait_frames += 1
 		await get_tree().process_frame
+	if ResourcePackManager.busy:
+		_set_status("ما زال الاتصال ببيان الموارد جاريًا..." if _is_ar() else "Still connecting to the resource manifest...")
+		return
 	await get_tree().process_frame
 	if ResourcePackManager.packages.is_empty():
 		_set_status("جارٍ فحص موارد اللعبة..." if _is_ar() else "Checking game resources...")
