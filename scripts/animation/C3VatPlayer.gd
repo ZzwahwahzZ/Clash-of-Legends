@@ -34,6 +34,11 @@ func configure(mesh_instance: MeshInstance3D, metadata_path: String, binary_path
 	if raw.size() != width * _frame_count * 16:
 		push_error("C3 VAT: binary size does not match metadata dimensions.")
 		return false
+	for surface in range(mesh_instance.mesh.get_surface_count()):
+		var imported_count := mesh_instance.mesh.surface_get_array_len(surface)
+		if imported_count != width:
+			push_error("C3 VAT: imported surface vertex count %d does not match VAT width %d." % [imported_count, width])
+			return false
 	var image := Image.create_from_data(width, _frame_count, false, Image.FORMAT_RGBAF, raw)
 	if image == null or image.is_empty():
 		push_error("C3 VAT: could not create RGBA32F animation texture.")
