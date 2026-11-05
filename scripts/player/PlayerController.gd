@@ -56,9 +56,11 @@ func _ready() -> void:
 	if anim_player and anim_player.has_animation("idle"):
 		anim_player.play("idle")
 	call_deferred("_apply_character_model")
+	call_deferred("_apply_mount_model")
 
 func _on_asset_catalog_loaded(_asset_count: int) -> void:
 	_apply_character_model()
+	_apply_mount_model()
 
 func _apply_character_model() -> void:
 	if not visual_root or not AssetCatalog:
@@ -213,6 +215,22 @@ func get_mp() -> int:
 
 func get_character_class() -> String:
 	return character_class
+
+func _apply_mount_model() -> void:
+	if not mount_mesh or not AssetCatalog:
+		return
+	var mount_entries := AssetCatalog.get_asset_entries("mounts", [".glb", ".gltf"])
+	if mount_entries.is_empty():
+		return
+	var old_root := mount_mesh.get_node_or_null("ImportedMountRoot")
+	if old_root:
+		old_root.queue_free()
+	var imported_root := AssetCatalog.instantiate_fitted_model("mounts", 0, mount_mesh, 1.6, "ImportedMountRoot")
+	if imported_root == null:
+		return
+	for child in mount_mesh.get_children():
+		if child != imported_root and child is Node3D:
+			child.visible = false
 
 func set_character_class(new_cls: String) -> void:
 	character_class = new_cls
