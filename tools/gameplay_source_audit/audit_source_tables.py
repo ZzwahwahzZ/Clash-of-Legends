@@ -18,12 +18,17 @@ from pathlib import Path
 
 VERSION = "ConquerOnline-1.1.2.3"
 ROOT_MARKER = "assets/ConquerRes/"
-TARGET_PREFIXES = {"skills": ["data/interface/style01/skill/"]}\nTARGETS = {
+TARGET_PREFIXES = {"skills": ["data/interface/style01/skill/"]}
+TARGETS = {
     "mounts": ["ini/mountinfo.ini", "ini/mounttype.dat", "ani/dragon.ani", "ani/sdragon.ani"],
     "skills": [
         "ini/weaponskillname.ini", "ini/weaponskilllevelexp.ini", "ani/magic.ani",
         "ani/magic1.ani", "ini/autousemagic.dat", "ini/3deffectinfo.ini",
-        "ini/action3deffect.ini", "ini/actionlee3deffect.ini", "ini/weaponeffect.ini",\n        "ini/luacfg/magic.dat", "ini/luacfg/newskill.dat", "ini/luacfg/prize_newskill.dat",\n        "ini/luacfg/runemagic.dat", "ini/luacfg/skilltag.dat", "ini/luacfg/skilltip.dat",\n        "ini/magic_group_rate.dat", "ini/magiceffect.dat", "ini/magictype.dat",\n        "ini/magictypeex.dat", "ini/magictypeop.dat", "ini/recommend_magic_group.dat",
+        "ini/action3deffect.ini", "ini/actionlee3deffect.ini", "ini/weaponeffect.ini",
+        "ini/luacfg/magic.dat", "ini/luacfg/newskill.dat", "ini/luacfg/prize_newskill.dat",
+        "ini/luacfg/runemagic.dat", "ini/luacfg/skilltag.dat", "ini/luacfg/skilltip.dat",
+        "ini/magic_group_rate.dat", "ini/magiceffect.dat", "ini/magictype.dat",
+        "ini/magictypeex.dat", "ini/magictypeop.dat", "ini/recommend_magic_group.dat",
     ],
     "equipment": [
         "ini/weapon_trans.ini", "ini/armor_trans.ini", "ini/weaponmatch.ini",
