@@ -467,6 +467,36 @@ mod tests {
         assert_eq!(json["accessors"][time_accessor]["count"], 2);
         fs::remove_file(output).unwrap();
     }
+
+    #[test]
+    fn exports_frame_specific_normals_for_vat_lighting() {
+        let mut moved = Matrix4::IDENTITY;
+        moved.values[12] = 2.0;
+        let motion = C3Motion {
+            bone_count: 1,
+            frame_count: 2,
+            keys: vec![
+                MotionKey { frame: 0, bone_matrices: vec![Matrix4::IDENTITY] },
+                MotionKey { frame: 1, bone_matrices: vec![moved] }
+            ],
+            morph_count: 0,
+            morph_values: Vec::new(),
+        };
+        let prefix = std::env::temp_dir().join(format!("c3-vat-normal-{}", std::process::id()));
+        let (total_bytes, vertices, frames) = export_vat(&triangle_mesh(), &motion, &prefix, "test", 0).unwrap();
+        let position_path = prefix.with_extension("rgba32f");
+        let normal_path = prefix.with_extension("normalrgba8");
+        let metadata_path = prefix.with_extension("json");
+        assert_eq!(fs::metadata(&position_path).unwrap().len(), (vertices * frames * 16) as u64);
+        assert_eq!(fs::metadata(&normal_path).unwrap().len(), (vertices * frames * 4) as u64);
+        assert_eq!(total_bytes, (vertices * frames * 20) as u64);
+        let metadata: Value = serde_json::from_slice(&fs::read(&metadata_path).unwrap()).unwrap();
+        assert_eq!(metadata["normal_format"], "C3_VAT_NORMAL_RGBA8");
+        assert_eq!(metadata["normal_binary_file"], normal_path.file_name().unwrap().to_string_lossy().as_ref());
+        fs::remove_file(position_path).unwrap();
+        fs::remove_file(normal_path).unwrap();
+        fs::remove_file(metadata_path).unwrap();
+    }
 }
 
 
