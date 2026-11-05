@@ -240,8 +240,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             continue;
         };
         let body_relative = body_path.strip_prefix(&root).unwrap_or(body_path).to_string_lossy().replace('\\', "/");
-        let body_inner = c3_inner_path(Path::new(&body_relative));
-        let texture_path = pvr_root.join(body_inner.with_extension("png"));
+        let texture_path = pvr_root.join(Path::new(&body_relative).with_extension("png"));
         if !texture_path.is_file() {
             external_motion_poc.push(json!({"model_id":model_id,"status":"SKIPPED","reason":"decoded body PVR texture not found","body_source":body_relative}));
             continue;
