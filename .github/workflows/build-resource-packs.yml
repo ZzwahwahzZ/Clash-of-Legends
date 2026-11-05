@@ -201,6 +201,8 @@ jobs:
             reports/c3-runtime-integration.json
             reports/pvr-texture-audit.json
             reports/pvr-decode-report.json
+            reports/mjp-decode-report.json
+            resource_stage/world/resource_mappings/mjp_texture_map.json
             reports/map-audit.json
             reports/tpi-extraction-audit.json
             reports/tpi-indexes.zip
