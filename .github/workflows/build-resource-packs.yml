@@ -188,6 +188,8 @@ jobs:
             reports/tpi-extraction-audit.json
             reports/tpi-indexes.zip
             reports/gameplay-data-source-probe.json
+            reports/gameplay-readable-catalog-report.json
+            resource_stage/world/gameplay_reference/*.json
           if-no-files-found: error
           retention-days: 30
       - name: Publish resource pack release
