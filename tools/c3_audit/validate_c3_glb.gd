@@ -321,12 +321,15 @@ func _validate() -> void:
 		push_error("C3 motion POC validation failed: expected six fully animated imported clips.")
 		quit(1)
 		return
-	if (skeletal_poc_results.size() != 6 or skeletal_poc_failed) and vat_status != "PASSED":
-		push_error("C3 motion validation failed: neither six skeletal clips nor six exact-affine VAT clips passed.")
+	if skeletal_poc_results.size() != 6 or skeletal_poc_failed:
+		push_error("C3 skeletal POC validation failed: all six reference clips must import with valid skeleton animation.")
 		quit(1)
 		return
-	if vat_status == "PASSED" and (skeletal_poc_results.size() != 6 or skeletal_poc_failed):
-		print("C3 MOTION FALLBACK: skeletal TRS is not representable for every clip; exact-affine VAT validated for all six clips.")
+	if vat_status != "PASSED":
+		push_error("C3 VAT validation failed: all six clips, deforming meshes, source vertex order, and static-part retention must pass.")
+		quit(1)
+		return
+
 	if animated == 0 or morph_mesh_nodes == 0 or total_animation_tracks == 0:
 		push_error("C3 GLB validation: converted models did not expose usable morph animation tracks.")
 		quit(1)
