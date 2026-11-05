@@ -241,6 +241,14 @@ func _on_damage_dealt(_target: Node3D, amount: int, is_critical: bool, _position
 func _on_language_changed(_new_language: String) -> void:
 	_refresh_hud_labels()
 	_update_skill_buttons()
+	var agent := get_tree().get_first_node_in_group("quest_agents")
+	if agent and agent.has_method("get_active_quest"):
+		var quest: Dictionary = agent.get_active_quest()
+		var is_ar := GameManager.current_language == "ar"
+		if quest_title:
+			quest_title.text = str(quest.get("title_ar", "")) if is_ar else str(quest.get("title_en", ""))
+		if quest_description:
+			quest_description.text = str(quest.get("desc_ar", "")) if is_ar else str(quest.get("desc_en", ""))
 
 func _refresh_hud_labels() -> void:
 	var is_ar = GameManager and GameManager.current_language == "ar"
