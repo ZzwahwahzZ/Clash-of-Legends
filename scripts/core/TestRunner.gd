@@ -144,6 +144,18 @@ func test_inventory_and_equipment_refinement() -> void:
 	assert_true(not inv.insert_gem("weapon", gem_index, 0), "Sockets: occupied socket rejects duplicate insertion")
 	assert_true(inv.remove_gem("weapon", 0, 100), "Sockets: gem can be safely removed for Gold")
 	assert_true(inv.equipment["weapon"].socket_gems[0] == null, "Sockets: removed gem leaves empty socket")
+	for material_id in ["perfection_stone", "blessing_stone", "enchant_scroll", "purification_stone", "anima_core"]:
+		assert_true(inv.add_item({"id":material_id,"type":"material","quantity":1,"max_stack":99}), "Equipment Progression: %s material is available" % material_id)
+	assert_true(inv.apply_equipment_upgrade("weapon", "perfection"), "Perfection: consumes material and upgrades equipment")
+	assert_true(int(inv.equipment["weapon"].perfection_level) == 1, "Perfection: level is persisted on the item")
+	assert_true(inv.apply_equipment_upgrade("weapon", "blessing"), "Blessing: consumes material and upgrades equipment")
+	assert_true(is_equal_approx(inv.get_total_blessing_reduction(), 0.02), "Blessing: adds two percent incoming damage reduction")
+	assert_true(inv.apply_equipment_upgrade("weapon", "enchant", "attack"), "Enchant: attack enchant is applied")
+	assert_true(int(inv.equipment["weapon"].enchant_attack_bonus) == 5, "Enchant: attack bonus is reflected in item data")
+	assert_true(inv.apply_equipment_upgrade("weapon", "purification", "defense"), "Purification: selected defensive attribute is applied")
+	assert_true(inv.equipment["weapon"].purification.stat == "defense", "Purification: selected attribute is stored")
+	assert_true(inv.apply_equipment_upgrade("weapon", "anima"), "Anima: consumes core and upgrades equipment")
+	assert_true(int(inv.equipment["weapon"].anima_level) == 1, "Anima: level is stored on equipment")
 	inv.equipment["weapon"]["refine_level"] = 12
 	assert_true(bool(inv.get_refine_preview("weapon").get("maxed", false)), "Refinement: +12 cap is enforced")
 	assert_true(not inv.refine_equipment("weapon"), "Refinement: cannot exceed +12")
