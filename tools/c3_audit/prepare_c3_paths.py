@@ -31,7 +31,7 @@ for row in rows:
             source_by_inner.setdefault(inner, []).append(row)
         if category == "models" and inner.endswith(".c3") and staged.startswith("resource_stage/models/") and staged_path_available(staged):
             c3_paths.add(staged)
-        if category == "models" and inner.endswith(".pvr") and inner.startswith("c3/") and staged.startswith("resource_stage/models/") and Path(staged).is_file():
+        if category == "models" and inner.endswith(".pvr") and inner.startswith("c3/") and staged.startswith("resource_stage/models/") and staged_path_available(staged):
             pvr_paths.add(staged)
 
 catalog = json.loads(catalog_path.read_text(encoding="utf-8")) if catalog_available else {"tables": {}}
