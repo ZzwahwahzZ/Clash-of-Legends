@@ -12,6 +12,7 @@ class_name MainHUDController
 @onready var quest_banner: Button = get_node_or_null("TopRight/QuestBanner")
 @onready var quest_title: Label = get_node_or_null("TopRight/QuestBanner/QuestTitle")
 @onready var quest_progress: Label = get_node_or_null("TopRight/QuestBanner/QuestProgress")
+@onready var quest_description: Label = get_node_or_null("TopRight/QuestBanner/QuestDescription")
 
 @onready var auto_hunt_btn: Button = get_node_or_null("TopRight/AutoControls/AutoHuntBtn")
 @onready var auto_loot_btn: Button = get_node_or_null("TopRight/AutoControls/AutoLootBtn")
@@ -36,6 +37,7 @@ func _ready() -> void:
 	if GameManager:
 		GameManager.player_stats_changed.connect(_on_player_stats_changed)
 		GameManager.quest_updated.connect(_on_quest_updated)
+		GameManager.quest_description_changed.connect(_on_quest_description_changed)
 		GameManager.notification_posted.connect(_on_notification_posted)
 		GameManager.language_changed.connect(_on_language_changed)
 
@@ -217,7 +219,7 @@ func _on_quest_updated(_quest_id: String, objective_title: String, progress: int
 	if quest_progress:
 		var is_ar = GameManager and GameManager.current_language == "ar"
 		if is_done:
-			quest_progress.text = "مكتملة! انقر للاستلام" if is_ar else "Completed! Tap to turn in"
+			quest_progress.text = "اكتملت وأضيفت المكافأة تلقائياً" if is_ar else "Completed; reward added automatically"
 		else:
 			quest_progress.text = "التقدم: %d / %d (انقر للملاحة)" % [progress, goal] if is_ar else "Progress: %d / %d (Tap to navigate)" % [progress, goal]
 
@@ -260,3 +262,7 @@ func _refresh_hud_labels() -> void:
 		jump_btn.text = "قفز" if is_ar else "Jump"
 	if mount_btn:
 		mount_btn.text = "الحصان" if is_ar else "Mount"
+
+func _on_quest_description_changed(description: String) -> void:
+	if quest_description:
+		quest_description.text = description
