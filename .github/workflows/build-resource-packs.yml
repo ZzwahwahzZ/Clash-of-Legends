@@ -54,6 +54,7 @@ jobs:
           path: |
             reports/c3-wdb-audit.json
             reports/c3-motion-source-path-audit.json
+            reports/c3-motion-conversion-audit.json
             resource_stage/world/resource_mappings/motion_catalog.json
           if-no-files-found: error
           retention-days: 30
@@ -114,6 +115,7 @@ jobs:
           godot --headless --editor --path . --import --quit
           godot --headless --path . --script tools/c3_audit/validate_c3_glb.gd
           python3 tools/c3_audit/merge_c3_glb_assets.py
+          python3 tools/resource_packs/validate_motion_c3_conversion.py
       - name: Audit original DMap terrain and map catalog
         run: cargo run --manifest-path tools/c3_audit/Cargo.toml --release --bin audit_maps -- resource_stage reports/map-audit.json
       - name: Build category PCK files
