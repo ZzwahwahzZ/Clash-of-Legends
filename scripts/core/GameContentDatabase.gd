@@ -103,18 +103,21 @@ const CLASSES := {
 }
 
 const SKILLS := {
- "archer_shadow_dagger":{"name_ar":"خنجر الظل","name_en":"Shadow Dagger","class_req":"Archer","weapon_style":"flying_daggers","cooldown":2.5,"mp_cost":18,"damage_multiplier":1.8,"range":4.0,"is_aoe":false,"effect":"damage"},
- "archer_eastern_tempest":{"name_ar":"عاصفة الشرق","name_en":"Eastern Tempest","class_req":"Archer","weapon_style":"flying_daggers","cooldown":7.0,"mp_cost":38,"damage_multiplier":2.0,"range":5.0,"is_aoe":true,"aoe_radius":5.5,"effect":"damage"},
+ "archer_shadow_dagger":{"name_ar":"خنجر الظل","name_en":"Shadow Dagger","class_req":"Archer","weapon_style":"throwing_knives","cooldown":2.5,"mp_cost":18,"damage_multiplier":1.8,"range":4.0,"is_aoe":false,"effect":"damage"},
+ "archer_eastern_tempest":{"name_ar":"عاصفة الشرق","name_en":"Eastern Tempest","class_req":"Archer","weapon_style":"throwing_knives","cooldown":7.0,"mp_cost":38,"damage_multiplier":2.0,"range":5.0,"is_aoe":true,"aoe_radius":5.5,"effect":"damage"},
  "dragon_warrior_dragon_surge":{"name_ar":"اندفاع التنين","name_en":"Dragon Surge","class_req":"DragonWarrior","cooldown":5.0,"mp_cost":32,"damage_multiplier":2.25,"range":5.0,"is_aoe":true,"aoe_radius":4.5,"effect":"damage"},
  "dragon_warrior_scale_guard":{"name_ar":"درع الحراشف","name_en":"Scale Guard","class_req":"DragonWarrior","cooldown":12.0,"mp_cost":24,"damage_multiplier":0.0,"range":0.0,"effect":"buff_defense"},
  "windwalker_gale_step":{"name_ar":"خطوة العاصفة","name_en":"Gale Step","class_req":"Windwalker","cooldown":4.0,"mp_cost":18,"damage_multiplier":1.7,"range":8.0,"is_aoe":false,"effect":"damage"},
  "windwalker_tempest":{"name_ar":"إعصار الرياح","name_en":"Tempest","class_req":"Windwalker","cooldown":8.0,"mp_cost":38,"damage_multiplier":2.0,"range":12.0,"is_aoe":true,"aoe_radius":6.0,"effect":"damage"},
  "thunderstriker_chain_lightning":{"name_ar":"سلسلة البرق","name_en":"Chain Lightning","class_req":"Thunderstriker","cooldown":6.0,"mp_cost":34,"damage_multiplier":2.1,"range":13.0,"is_aoe":true,"aoe_radius":5.0,"effect":"damage"},
  "thunderstriker_storm_fist":{"name_ar":"قبضة العاصفة","name_en":"Storm Fist","class_req":"Thunderstriker","cooldown":3.0,"mp_cost":16,"damage_multiplier":1.6,"range":3.5,"is_aoe":false,"effect":"damage"},
- "water_taoist_healing_rain":{"name_ar":"مطر الشفاء","name_en":"Healing Rain","class_req":"WaterTaoist","cooldown":5.0,"mp_cost":36,"damage_multiplier":0.0,"range":10.0,"heal_amount":360,"effect":"heal"},
- "water_taoist_jade_barrier":{"name_ar":"حاجز اليشم","name_en":"Jade Barrier","class_req":"WaterTaoist","cooldown":12.0,"mp_cost":30,"damage_multiplier":0.0,"range":0.0,"effect":"buff_defense"},
- "fire_taoist_flame_burst":{"name_ar":"انفجار اللهب","name_en":"Flame Burst","class_req":"FireTaoist","cooldown":4.0,"mp_cost":28,"damage_multiplier":2.2,"range":12.0,"is_aoe":true,"aoe_radius":5.5,"effect":"damage"},
- "fire_taoist_meteor_fall":{"name_ar":"سقوط النيازك","name_en":"Meteor Fall","class_req":"FireTaoist","cooldown":9.0,"mp_cost":48,"damage_multiplier":2.8,"range":14.0,"is_aoe":true,"aoe_radius":7.0,"effect":"damage"}
+ "water_taoist_healing_rain":{"name_ar":"مطر الشفاء","name_en":"Healing Rain","class_req":"WaterTaoist","required_branch":"WaterTaoist","cooldown":5.0,"mp_cost":36,"damage_multiplier":0.0,"range":10.0,"heal_amount":360,"effect":"heal"},
+ "water_taoist_jade_barrier":{"name_ar":"حاجز اليشم","name_en":"Jade Barrier","class_req":"WaterTaoist","required_branch":"WaterTaoist","cooldown":12.0,"mp_cost":30,"damage_multiplier":0.0,"range":0.0,"effect":"buff_defense"},
+ "fire_taoist_flame_burst":{"name_ar":"انفجار اللهب","name_en":"Flame Burst","class_req":"FireTaoist","required_branch":"FireTaoist","cooldown":4.0,"mp_cost":28,"damage_multiplier":2.2,"range":12.0,"is_aoe":true,"aoe_radius":5.5,"effect":"damage"},
+ "fire_taoist_meteor_fall":{"name_ar":"سقوط النيازك","name_en":"Meteor Fall","class_req":"FireTaoist","required_branch":"FireTaoist","cooldown":9.0,"mp_cost":48,"damage_multiplier":2.8,"range":14.0,"is_aoe":true,"aoe_radius":7.0,"effect":"damage"},
+ "trojan_windigo":{"name_ar":"وينديجو","name_en":"Windigo","class_req":"Trojan","required_trait":"Windigo","cooldown":10.0,"mp_cost":50,"damage_multiplier":2.7,"range":4.5,"is_aoe":true,"aoe_radius":5.5,"effect":"damage"},
+ "windwalker_stomper_crush":{"name_ar":"سحق ستومبر","name_en":"Stomper Crush","class_req":"Windwalker","required_branch":"Stomper","cooldown":5.0,"mp_cost":28,"damage_multiplier":2.25,"range":4.0,"is_aoe":true,"aoe_radius":4.5,"effect":"damage"},
+ "windwalker_chaser_thundercloud":{"name_ar":"سحابة تشيسر الرعدية","name_en":"Chaser Thundercloud","class_req":"Windwalker","required_branch":"Chaser","cooldown":7.0,"mp_cost":36,"damage_multiplier":2.1,"range":12.0,"is_aoe":true,"aoe_radius":6.0,"effect":"damage"}
 }
 
 func get_class_ids() -> Array[String]:

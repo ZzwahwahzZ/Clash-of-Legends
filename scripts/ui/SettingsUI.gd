@@ -9,6 +9,8 @@ class_name SettingsUI
 @onready var resource_packs_button: Button = get_node_or_null("Panel/ResourcePacksButton")
 @onready var guide_button: Button = get_node_or_null("Panel/GuideButton")
 @onready var title_label: Label = get_node_or_null("Panel/TitleLabel")
+@onready var progression_label: Label = get_node_or_null("Panel/ProgressionLabel")
+@onready var progression_option: OptionButton = get_node_or_null("Panel/ProgressionOption")
 @onready var loot_filters_label: Label = get_node_or_null("Panel/LootFiltersLabel")
 @onready var loot_filters_grid: GridContainer = get_node_or_null("Panel/LootFiltersGrid")
 
@@ -29,6 +31,8 @@ func _ready() -> void:
 		lang_option.item_selected.connect(_on_language_selected)
 	if class_option:
 		class_option.item_selected.connect(_on_class_selected)
+	if progression_option:
+		progression_option.item_selected.connect(_on_progression_selected)
 	_setup_options()
 
 func open_ui() -> void:
@@ -51,6 +55,8 @@ func _setup_options() -> void:
 		title_label.text = "إعدادات صراع الأساطير" if is_ar else "Clash of Legends Settings"
 	if loot_filters_label:
 		loot_filters_label.text = "فلاتر الجمع التلقائي" if is_ar else "Auto-Loot Filters"
+	if progression_label:
+		progression_label.text = "مسار التقدم" if is_ar else "Progression Path"
 	if save_button:
 		save_button.text = "حفظ اللعبة محلياً" if is_ar else "Save Game Locally"
 	if load_button:
@@ -87,7 +93,49 @@ func _setup_options() -> void:
 				if class_option.get_item_metadata(i) == current_class:
 					class_option.select(i)
 					break
+	_setup_progression_options()
 	_build_loot_filter_controls()
+
+func _setup_progression_options() -> void:
+	if not progression_option:
+		return
+	progression_option.clear()
+	var player = GameManager.player_reference if GameManager else null
+	var choices: Array[String] = player.get_available_progression_choices() if player and player.has_method("get_available_progression_choices") else []
+	if choices.size() <= 1:
+		progression_option.visible = false
+		if progression_label:
+			progression_label.visible = false
+		return
+	progression_option.visible = true
+	if progression_label:
+		progression_label.visible = true
+	var selected_choice := str(player.get_selected_progression_choice()) if player and player.has_method("get_selected_progression_choice") else ""
+	var labels := {
+		"bow":["القوس","Bow"],
+		"throwing_knives":["الخناجر الرامية","Throwing Knives"],
+		"WaterTaoist":["طاوي الماء","Water Taoist"],
+		"FireTaoist":["طاوي النار","Fire Taoist"],
+		"Stomper":["ستومبر","Stomper"],
+		"Chaser":["تشيسر","Chaser"]
+	}
+	for choice_id in choices:
+		var label_pair: Array = labels.get(choice_id, [choice_id, choice_id])
+		var display := "%s (%s)" % [label_pair[0], label_pair[1]] if GameManager and GameManager.current_language == "ar" else str(label_pair[1])
+		progression_option.add_item(display)
+		var item_index := progression_option.get_item_count() - 1
+		progression_option.set_item_metadata(item_index, choice_id)
+		if choice_id == selected_choice:
+			progression_option.select(item_index)
+
+func _on_progression_selected(index: int) -> void:
+	if not progression_option:
+		return
+	var choice_id := str(progression_option.get_item_metadata(index))
+	var player = GameManager.player_reference if GameManager else null
+	if player and player.has_method("select_progression_choice"):
+		player.select_progression_choice(choice_id)
+	_setup_progression_options()
 
 func _build_loot_filter_controls() -> void:
 	if not loot_filters_grid or not AutoLootManager:

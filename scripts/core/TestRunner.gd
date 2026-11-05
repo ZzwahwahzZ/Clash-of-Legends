@@ -23,6 +23,7 @@ func run_all_tests() -> Dictionary:
 	test_autoload_presence()
 	test_class_and_skill_database()
 	test_archer_advancement_path()
+	test_reference_class_progression_paths()
 	test_arabic_ui_direction()
 	test_gold_only_economy()
 	test_offline_social_and_population_rules()
@@ -77,10 +78,10 @@ func test_archer_advancement_path() -> void:
 	ClassProgressionManager.configure_for_character("Archer")
 	assert_true(ClassProgressionManager.selected_weapon_style == "bow", "Archer: starts with bow combat style")
 	assert_true(not ClassProgressionManager.refresh_level_unlocks(39), "Archer: Oriental Assassin path remains locked below level 40")
-	assert_true(not ClassProgressionManager.get_available_weapon_styles().has("flying_daggers"), "Archer: flying daggers unavailable before level 40")
+	assert_true(not ClassProgressionManager.get_available_weapon_styles().has("throwing_knives"), "Archer: flying daggers unavailable before level 40")
 	assert_true(ClassProgressionManager.refresh_level_unlocks(40), "Archer: Oriental Assassin path unlocks at level 40")
 	assert_true(ClassProgressionManager.get_form_id() == "OrientalAssassin", "Archer: advancement keeps one character progression family")
-	assert_true(ClassProgressionManager.select_weapon_style("flying_daggers"), "Archer: can select flying daggers after advancement")
+	assert_true(ClassProgressionManager.select_weapon_style("throwing_knives"), "Archer: can select flying daggers after advancement")
 	assert_true(not CombatEngine.is_skill_compatible(CombatEngine.skill_database["archer_rapid_arrow"]), "Archer: bow skill is not cast while flying daggers are selected")
 	assert_true(CombatEngine.is_skill_compatible(CombatEngine.skill_database["archer_shadow_dagger"]), "Archer: flying dagger skill is available after level-40 advancement")
 	assert_true(ClassProgressionManager.select_weapon_style("bow"), "Archer: can return to bow after advancement")
@@ -91,7 +92,45 @@ func test_archer_advancement_path() -> void:
 	ClassProgressionManager.deserialize(saved_path)
 	assert_true(ClassProgressionManager.get_form_id() == "OrientalAssassin" and ClassProgressionManager.selected_weapon_style == "bow", "Archer: advancement and selected weapon style survive serialization")
 	ClassProgressionManager.configure_for_character("Trojan")
-	assert_true(not ClassProgressionManager.select_weapon_style("flying_daggers"), "Other classes cannot select Archer weapon paths")
+	assert_true(not ClassProgressionManager.select_weapon_style("throwing_knives"), "Other classes cannot select Archer weapon paths")
+
+func test_reference_class_progression_paths() -> void:
+	ClassProgressionManager.configure_for_character("Trojan")
+	assert_true(not ClassProgressionManager.has_unlocked_trait("Windigo"), "Trojan: Windigo remains locked before level 40")
+	assert_true(not ClassProgressionManager.refresh_level_unlocks(39), "Trojan: level-40 Windigo gate is enforced")
+	assert_true(ClassProgressionManager.refresh_level_unlocks(40), "Trojan: Windigo unlocks at level 40")
+	assert_true(ClassProgressionManager.has_unlocked_trait("Windigo"), "Trojan: Windigo trait is persisted in progression state")
+	var windigo_skill: Dictionary = GameContentDatabase.get_skill_database().get("trojan_windigo", {})
+	assert_true(ClassProgressionManager.is_skill_compatible(windigo_skill), "Trojan: Windigo skill is available after its trait unlock")
+
+	ClassProgressionManager.configure_for_character("Taoist")
+	assert_true(not ClassProgressionManager.refresh_level_unlocks(39), "Taoist: Water/Fire branches remain locked below level 40")
+	assert_true(ClassProgressionManager.refresh_level_unlocks(40), "Taoist: Water/Fire branches unlock at level 40")
+	assert_true(ClassProgressionManager.get_available_branches().has("WaterTaoist") and ClassProgressionManager.get_available_branches().has("FireTaoist"), "Taoist: both source branches are available at level 40")
+	assert_true(ClassProgressionManager.select_branch("WaterTaoist"), "Taoist: Water branch can be selected")
+	var water_skill: Dictionary = GameContentDatabase.get_skill_database()["water_taoist_healing_rain"]
+	var fire_skill: Dictionary = GameContentDatabase.get_skill_database()["fire_taoist_flame_burst"]
+	assert_true(ClassProgressionManager.is_skill_compatible(water_skill), "Taoist: Water skills require and accept the Water branch")
+	assert_true(not ClassProgressionManager.is_skill_compatible(fire_skill), "Taoist: Fire skills are blocked while Water is selected")
+	assert_true(ClassProgressionManager.select_branch("FireTaoist"), "Taoist: Fire branch can be selected")
+	assert_true(ClassProgressionManager.is_skill_compatible(fire_skill) and not ClassProgressionManager.is_skill_compatible(water_skill), "Taoist: branch switching changes skill access")
+
+	ClassProgressionManager.configure_for_character("WaterTaoist")
+	assert_true(ClassProgressionManager.get_selected_progression_choice() == "WaterTaoist", "Water Taoist: selected class initializes its shared-family branch")
+	assert_true(ClassProgressionManager.refresh_level_unlocks(40) and ClassProgressionManager.get_available_branches().has("FireTaoist"), "Water Taoist: alternate branch becomes available at level 40")
+
+	ClassProgressionManager.configure_for_character("Windwalker")
+	assert_true(ClassProgressionManager.get_available_branches().has("Stomper") and ClassProgressionManager.get_available_branches().has("Chaser"), "Windwalker: both source combat branches are available")
+	assert_true(ClassProgressionManager.select_branch("Chaser"), "Windwalker: Chaser branch can be selected")
+	var chaser_skill: Dictionary = GameContentDatabase.get_skill_database()["windwalker_chaser_thundercloud"]
+	var stomper_skill: Dictionary = GameContentDatabase.get_skill_database()["windwalker_stomper_crush"]
+	assert_true(ClassProgressionManager.is_skill_compatible(chaser_skill), "Windwalker: Chaser skill is available in Chaser form")
+	assert_true(not ClassProgressionManager.is_skill_compatible(stomper_skill), "Windwalker: Stomper skill is blocked in Chaser form")
+	var saved_progression := ClassProgressionManager.serialize()
+	ClassProgressionManager.configure_for_character("Trojan")
+	ClassProgressionManager.deserialize(saved_progression)
+	assert_true(ClassProgressionManager.get_form_id() == "Chaser" and ClassProgressionManager.selected_branch == "Chaser", "Progression: selected Windwalker branch survives save/load")
+	ClassProgressionManager.configure_for_character("Trojan")
 
 func test_arabic_ui_direction() -> void:
 	var root := Control.new()

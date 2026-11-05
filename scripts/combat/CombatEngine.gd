@@ -39,7 +39,10 @@ func can_cast_skill(skill_id: String, caster: CharacterBody3D) -> bool:
 	if not skill_database.has(skill_id):
 		return false
 	var def = skill_database[skill_id]
-	if caster.has_method("get_character_class") and caster.get_character_class() != def["class_req"]:
+	if ClassProgressionManager:
+		if not ClassProgressionManager.is_class_compatible(str(def.get("class_req", ""))):
+			return false
+	elif caster.has_method("get_character_class") and caster.get_character_class() != def["class_req"]:
 		return false
 	if not is_skill_compatible(def):
 		return false

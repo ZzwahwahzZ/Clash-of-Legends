@@ -321,6 +321,22 @@ func select_archer_weapon_style(style_id: String) -> bool:
 		return false
 	return ClassProgressionManager.select_weapon_style(style_id)
 
+func select_progression_choice(choice_id: String) -> bool:
+	if not ClassProgressionManager:
+		return false
+	var selected := ClassProgressionManager.select_progression_choice(choice_id)
+	if selected and GameManager:
+		var message := ClassProgressionManager.get_selection_message(choice_id, GameManager.current_language)
+		if not message.is_empty():
+			GameManager.post_notification(message, false)
+	return selected
+
+func get_available_progression_choices() -> Array[String]:
+	return ClassProgressionManager.get_available_progression_choices() if ClassProgressionManager else []
+
+func get_selected_progression_choice() -> String:
+	return ClassProgressionManager.get_selected_progression_choice() if ClassProgressionManager else ""
+
 func get_archer_weapon_style() -> String:
 	return ClassProgressionManager.selected_weapon_style if ClassProgressionManager else ""
 
@@ -358,7 +374,9 @@ func _level_up() -> void:
 	max_xp = int(max_xp * 1.35)
 	if ClassProgressionManager:
 		if ClassProgressionManager.refresh_level_unlocks(current_level) and GameManager:
-			GameManager.post_notification("تم فتح مسار السفاح الشرقي! يمكنك الآن الاختيار بين القوس والخناجر الطائرة." if GameManager.current_language == "ar" else "Oriental Assassin path unlocked! Choose between bow and flying daggers.", false)
+			var unlock_message := ClassProgressionManager.get_last_unlock_message(GameManager.current_language)
+			if not unlock_message.is_empty():
+				GameManager.post_notification(unlock_message, false)
 	for agent in get_tree().get_nodes_in_group("quest_agents"):
 		if agent.has_method("on_level_reached"):
 			agent.on_level_reached(current_level)
