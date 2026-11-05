@@ -44,7 +44,7 @@ func _run_range_resume_test() -> void:
 
 	# Second request: a fresh manager resumes at byte 1024 and appends the next 1 KiB.
 	var resume_manager := preload("res://scripts/core/ResourcePackManager.gd").new()
-	var resume_request := _new_request(1024)
+	var resume_request := _new_request(2048)
 	var second: Dictionary = await resume_manager._fetch_range_chunk(resume_request, url, 1024, 2047, total_size)
 	if not bool(second.get("success", false)):
 		push_error("PCK RANGE RESUME TEST FAILED on resumed chunk: " + str(second.get("reason", "unknown")))
