@@ -61,11 +61,12 @@ jobs:
       - name: Install Blender and NumPy for diagnostic equipment renders
         run: |
           sudo apt-get update
-          sudo apt-get install -y blender python3-numpy
+          sudo apt-get install -y blender python3-numpy libegl1 libgl1 libgles2
           PYTHONPATH=/usr/lib/python3/dist-packages blender --background --factory-startup --python-expr "import numpy; print('BLENDER_NUMPY_OK', numpy.__version__)"
       - name: Render all helmet, weapon and equipment C3 candidates
         env:
           PYTHONPATH: /usr/lib/python3/dist-packages
+          LIBGL_ALWAYS_SOFTWARE: 1
         run: |
           blender --background --factory-startup --python tools/external_assets/render_c3_equipment_previews.py -- --input-root build/c3-glb/equipment/c3 --output-root reports/equipment/previews/models --report reports/equipment/previews/equipment-preview-audit.json
           python3 tools/external_assets/assemble_c3_equipment_contact_sheets.py reports/equipment/previews/equipment-preview-audit.json
