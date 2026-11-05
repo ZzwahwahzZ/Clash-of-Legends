@@ -47,7 +47,7 @@ func _render() -> void:
 		var mesh_node := node as MeshInstance3D
 		if mesh_node.mesh == null:
 			continue
-		var world_bounds := mesh_node.get_aabb().transformed(mesh_node.global_transform)
+		var world_bounds: AABB = _transform_aabb(mesh_node.get_aabb(), mesh_node.global_transform)
 		if first_bounds:
 			bounds = world_bounds
 			first_bounds = false
@@ -136,3 +136,23 @@ func _count_bones(root: Node) -> int:
 	for node in root.find_children("*", "Skeleton3D", true, false):
 		total += (node as Skeleton3D).get_bone_count()
 	return total
+
+func _transform_aabb(bounds: AABB, transform: Transform3D) -> AABB:
+	var corners := [
+		bounds.position,
+		bounds.position + Vector3(bounds.size.x, 0.0, 0.0),
+		bounds.position + Vector3(0.0, bounds.size.y, 0.0),
+		bounds.position + Vector3(0.0, 0.0, bounds.size.z),
+		bounds.position + Vector3(bounds.size.x, bounds.size.y, 0.0),
+		bounds.position + Vector3(bounds.size.x, 0.0, bounds.size.z),
+		bounds.position + Vector3(0.0, bounds.size.y, bounds.size.z),
+		bounds.position + bounds.size
+	]
+	var first_point: Vector3 = transform * corners[0]
+	var minimum := first_point
+	var maximum := first_point
+	for index in range(1, corners.size()):
+		var point: Vector3 = transform * corners[index]
+		minimum = Vector3(minf(minimum.x, point.x), minf(minimum.y, point.y), minf(minimum.z, point.z))
+		maximum = Vector3(maxf(maximum.x, point.x), maxf(maximum.y, point.y), maxf(maximum.z, point.z))
+	return AABB(minimum, maximum - minimum)
