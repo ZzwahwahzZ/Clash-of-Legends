@@ -10,9 +10,11 @@ var failed_tests: int = 0
 var test_log: Array[String] = []
 
 func _ready() -> void:
-	print("\n=======================================================")
+	print("
+=======================================================")
 	print("   CLASH OF LEGENDS — AUTOMATED SUITE AUDIT & TEST RUNNER   ")
-	print("=======================================================\n")
+	print("=======================================================
+")
 	run_all_tests()
 
 func run_all_tests() -> Dictionary:
@@ -32,9 +34,11 @@ func run_all_tests() -> Dictionary:
 	test_quest_progression_lifecycle()
 	test_auto_hunt_and_loot_systems()
 	test_combat_damage_calculations()
-	print("\n-------------------------------------------------------")
+	print("
+-------------------------------------------------------")
 	print("TEST RESULTS SUMMARY: %d Total | %d PASSED | %d FAILED" % [total_tests, passed_tests, failed_tests])
-	print("-------------------------------------------------------\n")
+	print("-------------------------------------------------------
+")
 	return {"total":total_tests,"passed":passed_tests,"failed":failed_tests,"log":test_log}
 
 func assert_true(condition: bool, test_name: String) -> void:
@@ -60,7 +64,9 @@ func test_autoload_presence() -> void:
 	assert_true(AutoLootManager != null, "Autoload: AutoLootManager is loaded and active")
 
 func test_class_and_skill_database() -> void:
-	var classes = ["Trojan", "Warrior", "Archer", "Ninja", "Monk", "Pirate", "DragonWarrior", "Windwalker", "Thunderstriker", "WaterTaoist", "FireTaoist", "Taoist"]\n\tassert_true(GameContentDatabase.validate_registry(), "Content DB: class and skill references are internally valid")\n\tassert_true(GameContentDatabase.get_class_ids().size() == 12, "Content DB: all 11 canonical classes plus legacy Taoist alias are registered")
+	var classes = ["Trojan", "Warrior", "Archer", "Ninja", "Monk", "Pirate", "DragonWarrior", "Windwalker", "Thunderstriker", "WaterTaoist", "FireTaoist", "Taoist"]
+	assert_true(GameContentDatabase.validate_registry(), "Content DB: class and skill references are internally valid")
+	assert_true(GameContentDatabase.get_class_ids().size() == 12, "Content DB: all 11 canonical classes plus legacy Taoist alias are registered")
 	for c in classes:
 		var skills = CombatEngine.get_class_skills(c)
 		assert_true(skills.size() > 0, "Class Verification: %s has functional combat skills" % c)
