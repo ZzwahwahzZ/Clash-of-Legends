@@ -177,6 +177,29 @@ func test_quest_progression_lifecycle() -> void:
 	var persisted = LocalSaveEngine.save_game({"quest_agents":quest_states})
 	var loaded_state = LocalSaveEngine.load_game()
 	assert_true(persisted and LocalSaveEngine.restore_quest_states(loaded_state.get("quest_agents", {})) >= 1, "Quest: Agent state restores from local save payload")
+	var event_quest = QuestNavigationAgentScript.new()
+	add_child(event_quest)
+	event_quest.add_to_group("quest_agents")
+	assert_true(event_quest._validate_quest_database(), "Quest: expanded objective catalogue has valid links and targets")
+	event_quest.active_quest_id = "quest_meteor_gather"
+	event_quest.on_enemy_killed("wolf")
+	assert_true(event_quest.quest_progress == 0, "Quest: kill event cannot advance a collection objective")
+	event_quest.on_item_collected("meteor_stone", 2)
+	assert_true(event_quest.quest_progress == 2, "Quest: collected item quantity advances the objective")
+	event_quest.on_item_collected("meteor_stone", 1)
+	assert_true(event_quest.active_quest_id == "quest_blacksmith_visit", "Quest: collection completion advances to NPC visit")
+	event_quest.on_npc_talked("npc_merchant")
+	assert_true(event_quest.quest_progress == 0, "Quest: wrong NPC cannot complete dialogue objective")
+	event_quest.on_npc_talked("npc_blacksmith")
+	assert_true(event_quest.active_quest_id == "quest_guardian", "Quest: correct NPC interaction completes dialogue objective")
+	event_quest.active_quest_id = "quest_level_10"
+	event_quest.quest_progress = 0
+	event_quest.is_quest_completed = false
+	event_quest.on_level_reached(9)
+	assert_true(event_quest.quest_progress == 0, "Quest: level gate remains locked below target")
+	event_quest.on_level_reached(10)
+	assert_true(event_quest.active_quest_id == "quest_dragon", "Quest: reaching required level advances the chain")
+	event_quest.queue_free()
 	qa.queue_free()
 	restored_quest.queue_free()
 
