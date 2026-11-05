@@ -18,6 +18,7 @@ jobs:
           mkdir -p build reports
           base="https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/resource-packs-v4"
           curl --fail --location --retry 5 "$base/models.pck" -o build/models.pck
+          curl --fail --location --retry 5 "$base/maps.pck" -o build/maps.pck
           curl --fail --location --retry 5 "$base/resource-source-index.csv" -o resource-source-index.csv
       - name: Configure Godot 4.3
         uses: chickensoft-games/setup-godot@v2
@@ -27,10 +28,12 @@ jobs:
           include-templates: false
       - name: Prepare C3 path list from source index
         run: python3 tools/c3_audit/prepare_c3_paths.py
-      - name: Extract C3 files from verified PCK
+      - name: Extract C3 and PVR resources from verified PCKs
         run: godot --headless --path . --script tools/c3_audit/extract_c3_for_audit.gd
-      - name: Unpack C3 extraction bundle
+      - name: Unpack C3 and PVR extraction bundles
         run: python3 tools/c3_audit/unpack_c3_bundle.py
+      - name: Audit PVR texture headers
+        run: python3 tools/c3_audit/audit_pvr_headers.py
       - uses: dtolnay/rust-toolchain@stable
       - name: Fetch pinned Apache-2.0 C3 parser
         run: |
@@ -43,6 +46,7 @@ jobs:
           name: Original-C3-Model-Audit
           path: |
             reports/c3-model-audit.json
+            reports/pvr-texture-audit.json
             tools/c3_audit/THIRD_PARTY_NOTICES.md
           if-no-files-found: error
           retention-days: 30
