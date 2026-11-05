@@ -54,7 +54,7 @@ jobs:
           git -C build/preservation checkout 090541d10d8a7d001fe804dd1c23325c344f861d
       - name: Convert original C3 models and validate Godot imports
         run: |
-          cargo run --manifest-path tools/c3_audit/Cargo.toml --release -- build/c3-source build/pvr-png build/c3-glb reports/c3-model-audit.json
+          cargo run --manifest-path tools/c3_audit/Cargo.toml --release --bin clash-c3-audit -- build/c3-source build/pvr-png build/c3-glb reports/c3-model-audit.json
           godot --headless --editor --path . --quit
           godot --headless --path . --script tools/c3_audit/validate_c3_glb.gd
           python3 tools/c3_audit/merge_c3_glb_assets.py
