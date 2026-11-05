@@ -86,6 +86,15 @@ jobs:
             RESOURCE_MANIFEST
           if-no-files-found: error
           retention-days: 30
+      - name: Upload compact source audit reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: ClashOfLegends-Source-Audit-Reports
+          path: |
+            reports/resource-source-index.csv
+            reports/source-archive-extension-audit.json
+          if-no-files-found: error
+          retention-days: 30
       - name: Publish resource pack release
         uses: softprops/action-gh-release@v2
         with:
