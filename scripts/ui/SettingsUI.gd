@@ -111,6 +111,7 @@ func _build_loot_filter_controls() -> void:
 	for definition in definitions:
 		var filter_key := str(definition.key)
 		var checkbox := CheckBox.new()
+		checkbox.name = filter_key
 		checkbox.text = str(definition.ar) if is_ar else str(definition.en)
 		checkbox.button_pressed = bool(settings.get(filter_key, true))
 		checkbox.toggled.connect(_on_loot_filter_toggled.bind(filter_key))
