@@ -418,3 +418,60 @@ mod tests {
         fs::remove_file(output).unwrap();
     }
 }
+
+
+/// Exact C3 Vertex Animation Texture payload. RGBA32F rows preserve full affine
+/// transforms (including shear) without forcing matrices through glTF TRS.
+pub fn export_vat(mesh: &C3Mesh, motion: &C3Motion, output_prefix: &Path) -> Result<(u64, usize, usize), Box<dyn std::error::Error>> {
+    if mesh.vertices.is_empty() || motion.bone_count == 0 || motion.frame_count == 0 {
+        return Err("VAT requires vertices and a non-empty C3 motion".into());
+    }
+    let vertex_count = mesh.vertices.len();
+    let frame_count = motion.frame_count as usize;
+    let mut bytes = Vec::<u8>::with_capacity(vertex_count * frame_count * 16);
+    let mut min = [f32::INFINITY; 3];
+    let mut max = [f32::NEG_INFINITY; 3];
+    for frame in 0..frame_count {
+        for (vertex_index, vertex) in mesh.vertices.iter().enumerate() {
+            let mut selected = None;
+            for slot in 0..2 {
+                if vertex.bone_weights[slot] > 0.0 {
+                    let bone = u32::from(vertex.bone_indices[slot]);
+                    if bone >= motion.bone_count {
+                        return Err(format!("vertex {vertex_index} references bone {bone} outside {}", motion.bone_count).into());
+                    }
+                    selected = Some(bone);
+                    break;
+                }
+            }
+            let bone = selected.ok_or_else(|| format!("vertex {vertex_index} has no positive C3 bone influence"))?;
+            // This is the same complete affine product used by the source C3 renderer.
+            let point = mesh.initial_matrix.multiply(motion.matrix_at(bone, frame as f32)).transform_point(vertex.position);
+            let p = [point.x * 0.01, -point.z * 0.01, point.y * 0.01];
+            for axis in 0..3 {
+                if !p[axis].is_finite() { return Err(format!("non-finite VAT position at frame {frame}").into()); }
+                min[axis] = min[axis].min(p[axis]);
+                max[axis] = max[axis].max(p[axis]);
+                bytes.extend_from_slice(&p[axis].to_le_bytes());
+            }
+            bytes.extend_from_slice(&1.0_f32.to_le_bytes());
+        }
+    }
+    let binary_path = output_prefix.with_extension("rgba32f");
+    let metadata_path = output_prefix.with_extension("json");
+    if let Some(parent) = binary_path.parent() { fs::create_dir_all(parent)?; }
+    fs::write(&binary_path, &bytes)?;
+    let metadata = json!({
+        "format":"C3_VAT_RGBA32F","version":1,"width":vertex_count,"height":frame_count,
+        "vertex_count":vertex_count,"frame_count":frame_count,"fps":30,
+        "bytes_per_texel":16,"binary_bytes":bytes.len(),
+        "sampling":"one texel per source vertex per frame; RGBA=(x,y,z,1)",
+        "matrix_semantics":"initial_matrix * motion.matrix_at(first_positive_influence, frame)",
+        "preserves_affine_shear":true,
+        "coordinate_conversion":"C3 centimeters Z-down to meters Y-up: (x*0.01,-z*0.01,y*0.01)",
+        "bounds_min":min,"bounds_max":max,
+        "binary_file":binary_path.file_name().unwrap_or_default().to_string_lossy()
+    });
+    fs::write(&metadata_path, serde_json::to_vec_pretty(&metadata)?)?;
+    Ok((bytes.len() as u64, vertex_count, frame_count))
+}
