@@ -108,42 +108,53 @@ fn accessor_min_max(values: &[[f32; 3]]) -> (Value, Value) {
     (json!([min[0],min[1],min[2]]), json!([max[0],max[1],max[2]]))
 }
 
-pub fn export_document(document: &C3Document, texture_png: &[u8], source: &str, output: &Path) -> Result<(u64, usize), Box<dyn std::error::Error>> {
+pub fn export_document(document: &C3Document, texture_png: &[u8], source: &str, output: &Path) -> Result<(u64, usize, usize), Box<dyn std::error::Error>> {
     let mut builder = GlbBuilder::new();
     let mut gltf_meshes: Vec<Value> = Vec::new();
     let mut nodes: Vec<Value> = vec![json!({"name":"C3_Root","children":[]})];
     let mut children: Vec<usize> = Vec::new();
-    let motion = document.motions.first();
-    // Keep a compact but useful set of original C3 motion keys as glTF morph animation.
-    // This preserves the parsed per-bone deformation instead of freezing every model at frame zero.
-    let mut sample_frames: Vec<f32> = Vec::new();
-    if let Some(motion) = motion {
-        if motion.keys.len() > 1 {
-            let sample_count = motion.keys.len().min(12);
-            for sample_index in 0..sample_count {
-                let key_index = sample_index * (motion.keys.len() - 1) / (sample_count - 1);
-                sample_frames.push(motion.keys[key_index].frame as f32);
-            }
-        } else if let Some(key) = motion.keys.first() {
-            sample_frames.push(key.frame as f32);
-        }
-    }
-    if sample_frames.is_empty() { sample_frames.push(0.0); }
-    let animated = sample_frames.len() > 1;
-    let target_count = if animated { sample_frames.len() - 1 } else { 0 };
-    let mut animated_node_indices: Vec<usize> = Vec::new();
+    let mut animation_samplers: Vec<Value> = Vec::new();
+    let mut animation_channels: Vec<Value> = Vec::new();
+    let mut animation_frame_report: Vec<Value> = Vec::new();
     let mut mesh_count = 0usize;
+    let mut animated_mesh_count = 0usize;
 
+    // C3 documents commonly store one MOTI chunk per PHY mesh. Do not reuse
+    // document.motions.first() for every mesh: that freezes most body parts.
     for (mesh_index, mesh) in document.meshes.iter().enumerate() {
-        if mesh.vertices.is_empty() || (mesh.opaque_indices.is_empty() && mesh.alpha_indices.is_empty()) { continue; }
+        if mesh.vertices.is_empty() || (mesh.opaque_indices.is_empty() && mesh.alpha_indices.is_empty()) {
+            continue;
+        }
+        let motion = document.motions.get(mesh_index);
+        let mut sample_frames: Vec<f32> = Vec::new();
+        if let Some(motion) = motion {
+            if motion.keys.len() > 1 {
+                let sample_count = motion.keys.len().min(12);
+                for sample_index in 0..sample_count {
+                    let key_index = sample_index * (motion.keys.len() - 1) / (sample_count - 1);
+                    sample_frames.push(motion.keys[key_index].frame as f32);
+                }
+            } else if let Some(key) = motion.keys.first() {
+                sample_frames.push(key.frame as f32);
+            }
+        }
+        if sample_frames.is_empty() {
+            sample_frames.push(0.0);
+        }
+        let animated = sample_frames.len() > 1;
+        let target_count = if animated { sample_frames.len() - 1 } else { 0 };
+
         let positions_by_frame: Vec<Vec<[f32; 3]>> = sample_frames.iter()
             .map(|frame| transformed_positions(mesh, motion, *frame))
             .collect();
         let positions = &positions_by_frame[0];
-        let normals = compute_normals(positions, &mesh.opaque_indices.iter().chain(mesh.alpha_indices.iter()).copied().collect::<Vec<_>>());
+        let all_indices: Vec<u16> = mesh.opaque_indices.iter()
+            .chain(mesh.alpha_indices.iter()).copied().collect();
+        let normals = compute_normals(positions, &all_indices);
         let flat_positions: Vec<f32> = positions.iter().flat_map(|p| p.iter().copied()).collect();
         let flat_normals: Vec<f32> = normals.iter().flat_map(|p| p.iter().copied()).collect();
-        let flat_uvs: Vec<f32> = mesh.vertices.iter().map(|v| [v.texture_coordinate.x, v.texture_coordinate.y]).into_iter().flat_map(|p| p).collect();
+        let flat_uvs: Vec<f32> = mesh.vertices.iter()
+            .flat_map(|v| [v.texture_coordinate.x, v.texture_coordinate.y]).collect();
         let (min, max) = accessor_min_max(positions);
 
         let pos_view = builder.add_view(&f32_bytes(&flat_positions), Some(34962));
@@ -160,7 +171,7 @@ pub fn export_document(document: &C3Document, texture_png: &[u8], source: &str, 
                 let position_delta = morph_deltas(positions, frame_positions);
                 let pos_delta_view = builder.add_view(&f32_bytes(&position_delta), Some(34962));
                 let pos_delta_accessor = builder.add_accessor(pos_delta_view, 5126, positions.len(), "VEC3", None, None);
-                let frame_normals = compute_normals(frame_positions, &mesh.opaque_indices.iter().chain(mesh.alpha_indices.iter()).copied().collect::<Vec<_>>());
+                let frame_normals = compute_normals(frame_positions, &all_indices);
                 let normal_delta = normal_deltas(&normals, &frame_normals);
                 let normal_delta_view = builder.add_view(&f32_bytes(&normal_delta), Some(34962));
                 let normal_delta_accessor = builder.add_accessor(normal_delta_view, 5126, normals.len(), "VEC3", None, None);
@@ -183,7 +194,9 @@ pub fn export_document(document: &C3Document, texture_png: &[u8], source: &str, 
             if animated { primitive["targets"] = json!(targets); }
             primitives.push(primitive);
         }
-        if primitives.is_empty() { continue; }
+        if primitives.is_empty() {
+            continue;
+        }
         let name = if mesh.name.is_empty() { format!("mesh_{mesh_index}") } else { mesh.name.clone() };
         let gltf_index = gltf_meshes.len();
         let weights = vec![0.0_f32; target_count];
@@ -192,15 +205,40 @@ pub fn export_document(document: &C3Document, texture_png: &[u8], source: &str, 
         gltf_meshes.push(gltf_mesh);
         let node_index = nodes.len();
         let mut node = json!({"name":name.clone(),"mesh":gltf_index});
-        if animated {
-            node["weights"] = json!(weights);
-            animated_node_indices.push(node_index);
-        }
+        if animated { node["weights"] = json!(weights); }
         nodes.push(node);
         children.push(node_index);
         mesh_count += 1;
+
+        if animated {
+            let first_frame = sample_frames[0];
+            let times: Vec<f32> = sample_frames.iter()
+                .map(|frame| (*frame - first_frame).max(0.0) / 30.0).collect();
+            let time_view = builder.add_view(&f32_bytes(&times), None);
+            let time_accessor = builder.add_accessor(
+                time_view, 5126, times.len(), "SCALAR",
+                Some(json!([times[0]])),
+                Some(json!([*times.last().unwrap()])),
+            );
+            let mut weight_values: Vec<f32> = Vec::with_capacity(sample_frames.len() * target_count);
+            for key_index in 0..sample_frames.len() {
+                for target_index in 0..target_count {
+                    weight_values.push(if key_index == 0 { 0.0 } else if target_index == key_index - 1 { 1.0 } else { 0.0 });
+                }
+            }
+            let weight_view = builder.add_view(&f32_bytes(&weight_values), None);
+            let weight_accessor = builder.add_accessor(weight_view, 5126, weight_values.len(), "SCALAR", None, None);
+            let sampler_index = animation_samplers.len();
+            animation_samplers.push(json!({"input":time_accessor,"output":weight_accessor,"interpolation":"LINEAR"}));
+            animation_channels.push(json!({"sampler":sampler_index,"target":{"node":node_index,"path":"weights"}}));
+            animation_frame_report.push(json!({"mesh":name,"motion_index":mesh_index,"sample_frames":sample_frames}));
+            animated_mesh_count += 1;
+        }
     }
-    if mesh_count == 0 { return Err("C3 document contains no renderable triangle meshes".into()); }
+
+    if mesh_count == 0 {
+        return Err("C3 document contains no renderable triangle meshes".into());
+    }
     nodes[0]["children"] = json!(children);
 
     let image_view = builder.add_view(texture_png, None);
@@ -208,30 +246,17 @@ pub fn export_document(document: &C3Document, texture_png: &[u8], source: &str, 
         json!({"name":"C3 opaque texture","pbrMetallicRoughness":{"baseColorFactor":[1.0,1.0,1.0,1.0],"baseColorTexture":{"index":0},"metallicFactor":0.0,"roughnessFactor":1.0},"doubleSided":true}),
         json!({"name":"C3 alpha texture","pbrMetallicRoughness":{"baseColorFactor":[1.0,1.0,1.0,1.0],"baseColorTexture":{"index":0},"metallicFactor":0.0,"roughnessFactor":1.0},"alphaMode":"BLEND","doubleSided":true})
     ];
-
-    let mut animations: Vec<Value> = Vec::new();
-    if animated && !animated_node_indices.is_empty() {
-        let first_frame = sample_frames[0];
-        let times: Vec<f32> = sample_frames.iter().map(|frame| (*frame - first_frame).max(0.0) / 30.0).collect();
-        let time_view = builder.add_view(&f32_bytes(&times), None);
-        let time_accessor = builder.add_accessor(time_view, 5126, times.len(), "SCALAR", Some(json!([times[0]])), Some(json!([*times.last().unwrap()])));
-        let mut weight_values: Vec<f32> = Vec::with_capacity(sample_frames.len() * target_count);
-        for key_index in 0..sample_frames.len() {
-            for target_index in 0..target_count {
-                weight_values.push(if key_index == 0 { 0.0 } else if target_index == key_index - 1 { 1.0 } else { 0.0 });
-            }
-        }
-        let weight_view = builder.add_view(&f32_bytes(&weight_values), None);
-        let weight_accessor = builder.add_accessor(weight_view, 5126, weight_values.len(), "SCALAR", None, None);
-        let sampler = json!({"input":time_accessor,"output":weight_accessor,"interpolation":"LINEAR"});
-        let channels: Vec<Value> = animated_node_indices.iter().map(|node_index| json!({"sampler":0,"target":{"node":node_index,"path":"weights"}})).collect();
-        animations.push(json!({"name":"C3_Motion_0","samplers":[sampler],"channels":channels}));
-    }
-
-    let motion_info: Vec<Value> = document.motions.iter().map(|m| json!({"bone_count":m.bone_count,"frame_count":m.frame_count,"key_count":m.keys.len(),"morph_count":m.morph_count})).collect();
+    let animations = if animation_channels.is_empty() {
+        Vec::new()
+    } else {
+        vec![json!({"name":"C3_Motion_0","samplers":animation_samplers,"channels":animation_channels})]
+    };
+    let motion_info: Vec<Value> = document.motions.iter()
+        .map(|m| json!({"bone_count":m.bone_count,"frame_count":m.frame_count,"key_count":m.keys.len(),"morph_count":m.morph_count}))
+        .collect();
     let bin_length = builder.bin.len();
     let gltf = json!({
-        "asset":{"version":"2.0","generator":"Clash of Legends C3/PVR converter with sampled motion morphs"},
+        "asset":{"version":"2.0","generator":"Clash of Legends C3/PVR converter with per-mesh sampled motion morphs"},
         "scene":0,
         "scenes":[{"nodes":[0]}],
         "nodes":nodes,
@@ -244,7 +269,16 @@ pub fn export_document(document: &C3Document, texture_png: &[u8], source: &str, 
         "accessors":builder.accessors,
         "buffers":[{"byteLength":bin_length}],
         "animations":animations,
-        "extras":{"source_c3":source,"coordinate_conversion":"C3 Z-down to glTF Y-up","unit_scale":0.01,"motion_tracks":motion_info,"motion_export":"sampled morph animation from first C3 motion track","animation_fps":30,"motion_sample_frames":sample_frames}
+        "extras":{
+            "source_c3":source,
+            "coordinate_conversion":"C3 Z-down to glTF Y-up",
+            "unit_scale":0.01,
+            "motion_chunks":motion_info,
+            "motion_export":"per-mesh sampled morph animation",
+            "animation_fps":30,
+            "animated_mesh_count":animated_mesh_count,
+            "motion_sample_frames":animation_frame_report
+        }
     });
     let mut json_bytes = serde_json::to_vec(&gltf)?;
     while json_bytes.len() % 4 != 0 { json_bytes.push(b' '); }
@@ -263,5 +297,74 @@ pub fn export_document(document: &C3Document, texture_png: &[u8], source: &str, 
     glb.extend_from_slice(&bin_bytes);
     if let Some(parent) = output.parent() { fs::create_dir_all(parent)?; }
     fs::write(output, &glb)?;
-    Ok((glb.len() as u64, mesh_count))
+    Ok((glb.len() as u64, mesh_count, animated_mesh_count))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use sandbox_data::c3::{C3Document, C3Mesh, C3Motion, C3Vertex, Matrix4, MotionKey, Vector2, Vector3};
+
+    fn mesh(name: &str) -> C3Mesh {
+        C3Mesh {
+            name: name.to_owned(),
+            blend_count: 0,
+            opaque_vertex_count: 3,
+            alpha_vertex_count: 0,
+            vertices: vec![
+                C3Vertex { position: Vector3 { x: 0.0, y: 0.0, z: 0.0 }, texture_coordinate: Vector2 { x: 0.0, y: 0.0 }, colour: 0, bone_indices: [0, 0], bone_weights: [1.0, 0.0] },
+                C3Vertex { position: Vector3 { x: 1.0, y: 0.0, z: 0.0 }, texture_coordinate: Vector2 { x: 1.0, y: 0.0 }, colour: 0, bone_indices: [0, 0], bone_weights: [1.0, 0.0] },
+                C3Vertex { position: Vector3 { x: 0.0, y: 1.0, z: 0.0 }, texture_coordinate: Vector2 { x: 0.0, y: 1.0 }, colour: 0, bone_indices: [0, 0], bone_weights: [1.0, 0.0] }
+            ],
+            opaque_indices: vec![0, 1, 2],
+            alpha_indices: Vec::new(),
+            texture_name: String::new(),
+            bounds_minimum: Vector3 { x: 0.0, y: 0.0, z: 0.0 },
+            bounds_maximum: Vector3 { x: 1.0, y: 1.0, z: 0.0 },
+            initial_matrix: Matrix4::IDENTITY,
+            texture_rows: 1,
+            transparency_keys: Vec::new(),
+            draw_keys: Vec::new(),
+            texture_keys: Vec::new(),
+            extension_tag: None,
+        }
+    }
+
+    fn motion(frame_count: u32, frames: &[u32]) -> C3Motion {
+        let keys = frames.iter().map(|frame| {
+            let mut matrix = Matrix4::IDENTITY;
+            matrix.values[12] = *frame as f32;
+            MotionKey { frame: *frame, bone_matrices: vec![matrix] }
+        }).collect();
+        C3Motion { bone_count: 1, frame_count, keys, morph_count: 0, morph_values: Vec::new() }
+    }
+
+    #[test]
+    fn exports_animation_from_the_motion_matching_each_mesh() {
+        let document = C3Document {
+            version: "test".to_owned(),
+            meshes: vec![mesh("static_mesh"), mesh("animated_mesh")],
+            motions: vec![motion(1, &[0]), motion(21, &[0, 10, 20])],
+            unknown_chunks: Vec::new(),
+        };
+        let png = [
+            137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,1,0,0,0,1,
+            8,6,0,0,0,31,21,196,137,0,0,0,13,73,68,65,84,120,156,99,248,207,192,
+            240,31,0,5,0,1,255,137,153,61,29,0,0,0,0,73,69,78,68,174,66,96,130
+        ];
+        let output = std::env::temp_dir().join(format!("c3-per-mesh-motion-{}.glb", std::process::id()));
+        let (bytes_written, meshes_written, animated_meshes) =
+            export_document(&document, &png, "test.c3", &output).unwrap();
+        assert!(bytes_written > 0);
+        assert_eq!(meshes_written, 2);
+        assert_eq!(animated_meshes, 1);
+        let glb = fs::read(&output).unwrap();
+        let json_length = u32::from_le_bytes(glb[12..16].try_into().unwrap()) as usize;
+        let json: Value = serde_json::from_slice(&glb[20..20 + json_length]).unwrap();
+        assert_eq!(json["animations"].as_array().unwrap().len(), 1);
+        assert_eq!(json["animations"][0]["channels"].as_array().unwrap().len(), 1);
+        assert_eq!(json["animations"][0]["samplers"].as_array().unwrap().len(), 1);
+        assert_eq!(json["meshes"][1]["primitives"][0]["targets"].as_array().unwrap().len(), 2);
+        fs::remove_file(output).unwrap();
+    }
 }
