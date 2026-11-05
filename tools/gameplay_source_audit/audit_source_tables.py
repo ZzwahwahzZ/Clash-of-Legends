@@ -39,6 +39,13 @@ TARGETS = {
     "fashion": ["ini/suittype.dat", "ini/wenzhang_suit_effect.ini"],
 }
 
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
 def decode_text(data: bytes) -> str:
     for encoding in ("utf-8-sig", "utf-8", "gb18030", "cp1252", "latin-1"):
         try:
@@ -126,7 +133,7 @@ def main() -> None:
             "source_version": VERSION,
             "archive_name": args.archive.name,
             "archive_size_bytes": args.archive.stat().st_size,
-            "archive_sha256": hashlib.sha256(args.archive.read_bytes()).hexdigest(),
+            "archive_sha256": sha256_file(args.archive),
             "version_matched_member_count": len(version_members),
             "categories": {k: {"file_count": len(v), "files": v} for k, v in results.items()},
             "itemtype_catalog": {
