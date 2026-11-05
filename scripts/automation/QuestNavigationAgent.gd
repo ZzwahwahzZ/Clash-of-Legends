@@ -233,15 +233,14 @@ func _claim_completed_quest() -> void:
 		is_quest_completed = true
 		emit_signal("quest_state_changed", completed_id, "chain_completed")
 
-func navigate_to_quest_target() -> void:
-	if not GameManager or not is_instance_valid(GameManager.player_reference):
-		return
+func _get_navigation_target() -> Dictionary:
 	var destination := Vector3(18.0, 0.0, 15.0)
 	var travel_id := "twin_city"
+	var turn_in_npc := ""
 	if is_quest_completed:
 		var active_data := get_active_quest()
-		var turn_in_id := str(active_data.get("turn_in_npc_id", "npc_sage"))
-		if turn_in_id == "npc_blacksmith":
+		turn_in_npc = str(active_data.get("turn_in_npc_id", "npc_sage"))
+		if turn_in_npc == "npc_blacksmith":
 			destination = Vector3(-5.0, 0.0, 4.0)
 		else:
 			destination = Vector3(4.0, 0.0, 3.0)
@@ -262,13 +261,26 @@ func navigate_to_quest_target() -> void:
 			"quest_final_sage":
 				travel_id = "twin_city"
 				destination = Vector3(4.0, 0.0, 3.0)
+	return {
+		"travel_id": travel_id,
+		"destination": destination,
+		"turn_in": is_quest_completed,
+		"turn_in_npc_id": turn_in_npc
+	}
+
+func navigate_to_quest_target() -> void:
+	if not GameManager or not is_instance_valid(GameManager.player_reference):
+		return
+	var target := _get_navigation_target()
+	var destination: Vector3 = target.get("destination", Vector3.ZERO)
+	var travel_id := str(target.get("travel_id", "twin_city"))
 	var travel_manager := get_tree().get_first_node_in_group("world_travel_manager")
 	if travel_manager and travel_manager.has_method("travel_to"):
 		if not travel_manager.travel_to(travel_id, "quest"):
 			return
 	if GameManager.player_reference.has_method("move_towards_target_position"):
 		GameManager.player_reference.move_towards_target_position(destination, 0.0)
-		var message := "الملاحة التلقائية إلى موقع المهمة..." if GameManager.current_language == "ar" else "Navigating to quest objective..."
+		var message := "العودة إلى صاحب المهمة لاستلام المكافأة..." if bool(target.get("turn_in", false)) and GameManager.current_language == "ar" else ("الملاحة التلقائية إلى موقع المهمة..." if GameManager.current_language == "ar" else ("Returning to the quest NPC to claim the reward..." if bool(target.get("turn_in", false)) else "Navigating to quest objective..."))
 		GameManager.post_notification(message, false)
 
 func _notify_game_manager() -> void:
