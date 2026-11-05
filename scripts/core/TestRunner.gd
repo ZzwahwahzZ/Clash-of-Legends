@@ -82,7 +82,7 @@ func test_character_candidate_requires_bound_skinning() -> void:
 	animation_library.add_animation("walk", walk)
 	animation_player.add_animation_library("", animation_library)
 	var result: Dictionary = controller._validate_character_candidate(candidate, animation_player)
-	assert_true(not bool(result.get("ok", true)) and str(result.get("reason", "")).contains("skinned mesh"), "Character: unbound primitive mesh cannot pass skeletal replacement gate")
+	assert_true(not bool(result.get("ok", true)) and str(result.get("reason", "")).contains("morph meshes"), "Character: unbound primitive mesh cannot pass skeletal replacement gate")
 	candidate.free()
 	animation_player.free()
 	controller.free()
