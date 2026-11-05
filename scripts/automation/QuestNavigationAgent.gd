@@ -234,6 +234,8 @@ func _claim_completed_quest() -> void:
 		emit_signal("quest_state_changed", completed_id, "chain_completed")
 
 func _get_navigation_target() -> Dictionary:
+	if active_quest_id.is_empty():
+		return {}
 	var destination := Vector3(18.0, 0.0, 15.0)
 	var travel_id := "twin_city"
 	var turn_in_npc := ""
@@ -272,6 +274,8 @@ func navigate_to_quest_target() -> void:
 	if not GameManager or not is_instance_valid(GameManager.player_reference):
 		return
 	var target := _get_navigation_target()
+	if target.is_empty():
+		return
 	var destination: Vector3 = target.get("destination", Vector3.ZERO)
 	var travel_id := str(target.get("travel_id", "twin_city"))
 	var travel_manager := get_tree().get_first_node_in_group("world_travel_manager")
