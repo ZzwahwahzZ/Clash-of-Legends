@@ -134,6 +134,60 @@ func _validate() -> void:
 		print("C3 GLB OK: ", path, " | MeshInstance3D: ", meshes.size(), " | surfaces: ", model_surfaces, " | morph meshes: ", model_morph_meshes, " | animation tracks: ", model_animation_tracks, " | animation keys: ", model_animation_keys)
 		instance.free()
 		valid += 1
+	var vat_results: Array[Dictionary] = []
+	var vat_failed := false
+	var vat_dir := DirAccess.open("res://build/c3-glb/motion-poc-vat")
+	if vat_dir != null:
+		var vat_files := vat_dir.get_files()
+		vat_files.sort()
+		for metadata_name in vat_files:
+			if not metadata_name.ends_with(".json"):
+				continue
+			var metadata_file := FileAccess.open("res://build/c3-glb/motion-poc-vat".path_join(metadata_name), FileAccess.READ)
+			if metadata_file == null:
+				vat_failed = true
+				continue
+			var metadata_parser := JSON.new()
+			var parse_error := metadata_parser.parse(metadata_file.get_as_text())
+			metadata_file.close()
+			if parse_error != OK or not (metadata_parser.data is Dictionary):
+				vat_failed = true
+				continue
+			var metadata: Dictionary = metadata_parser.data
+			var width := int(metadata.get("width", 0))
+			var height := int(metadata.get("height", 0))
+			var binary_name := str(metadata.get("binary_file", ""))
+			var binary_path := "res://build/c3-glb/motion-poc-vat".path_join(binary_name)
+			var data := FileAccess.get_file_as_bytes(binary_path) if not binary_name.is_empty() else PackedByteArray()
+			var expected_bytes := width * height * 16
+			var finite_values := data.size() == expected_bytes and width > 0 and height > 1
+			var changed := false
+			if finite_values:
+				for offset in range(0, data.size(), 4):
+					if not is_finite(data.decode_float(offset)):
+						finite_values = false
+						break
+				if finite_values:
+					for vertex_index in range(width):
+						var first_offset := vertex_index * 16
+						var last_offset := ((height - 1) * width + vertex_index) * 16
+						for axis in range(3):
+							if absf(data.decode_float(first_offset + axis * 4) - data.decode_float(last_offset + axis * 4)) > 0.000001:
+								changed = true
+								break
+						if changed:
+							break
+			var valid_vat := finite_values and changed and metadata.get("format", "") == "C3_VAT_RGBA32F" and metadata.get("preserves_affine_shear", false)
+				vat_results.append({
+					"metadata": metadata_name, "width": width, "height": height,
+					"bytes": data.size(), "finite": finite_values, "frame_positions_change": changed,
+					"preserves_affine_shear": metadata.get("preserves_affine_shear", false),
+					"status": "VAT_DATA_VALIDATED" if valid_vat else "FAILED"
+				})
+			if not valid_vat:
+				vat_failed = true
+	var vat_validated_count := vat_results.filter(func(row): return row.get("status") == "VAT_DATA_VALIDATED").size()
+	var vat_status := "PASSED" if vat_results.size() == 6 and vat_validated_count == 6 and not vat_failed else "FAILED"
 	var poc_report := {
 		"expected_clip_count": 6,
 		"validated_clip_count": motion_poc_results.filter(func(row): return row.get("status") == "GODOT_IMPORT_VALIDATED").size(),
@@ -142,7 +196,11 @@ func _validate() -> void:
 		"expected_skeletal_clip_count": 6,
 		"validated_skeletal_clip_count": skeletal_poc_results.filter(func(row): return row.get("status") == "GODOT_SKELETON_VALIDATED").size(),
 		"skeletal_status": "PASSED" if skeletal_poc_results.size() == 6 and not skeletal_poc_failed else "FAILED",
-		"skeletal_clips": skeletal_poc_results
+		"skeletal_clips": skeletal_poc_results,
+		"expected_vat_clip_count": 6,
+		"validated_vat_clip_count": vat_validated_count,
+		"vat_status": vat_status,
+		"vat_clips": vat_results
 	}
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://reports"))
 	var poc_file := FileAccess.open("res://reports/c3-motion-poc-validation.json", FileAccess.WRITE)
@@ -158,10 +216,12 @@ func _validate() -> void:
 		push_error("C3 motion POC validation failed: expected six fully animated imported clips.")
 		quit(1)
 		return
-	if skeletal_poc_results.size() != 6 or skeletal_poc_failed:
-		push_error("C3 skeletal POC validation failed: expected six GLB skin/armature clips with imported bones and animation.")
+	if (skeletal_poc_results.size() != 6 or skeletal_poc_failed) and vat_status != "PASSED":
+		push_error("C3 motion validation failed: neither six skeletal clips nor six exact-affine VAT clips passed.")
 		quit(1)
 		return
+	if vat_status == "PASSED" and (skeletal_poc_results.size() != 6 or skeletal_poc_failed):
+		print("C3 MOTION FALLBACK: skeletal TRS is not representable for every clip; exact-affine VAT validated for all six clips.")
 	if animated == 0 or morph_mesh_nodes == 0 or total_animation_tracks == 0:
 		push_error("C3 GLB validation: converted models did not expose usable morph animation tracks.")
 		quit(1)
