@@ -137,13 +137,11 @@ func _validate() -> void:
 	var vat_results: Array[Dictionary] = []
 	var vat_failed := false
 	var vat_clip_meshes: Dictionary = {}
+	var vat_scene_cache: Dictionary = {}
+	var vat_mesh_cache: Dictionary = {}
 	var expected_vat_clips := [
-		"look7_model7130000_weapon500_action100",
-		"look7_model7130000_weapon500_action110",
-		"look7_model7130000_weapon500_action120",
-		"look8_model8133010_weapon500_action100",
-		"look8_model8133010_weapon500_action110",
-		"look8_model8133010_weapon500_action120"
+		"look7_model7130000_weapon500_action100", "look7_model7130000_weapon500_action110", "look7_model7130000_weapon500_action120",
+		"look8_model8133010_weapon500_action100", "look8_model8133010_weapon500_action110", "look8_model8133010_weapon500_action120"
 	]
 	var vat_dir := DirAccess.open("res://build/c3-glb/motion-poc-vat")
 	if vat_dir != null:
@@ -176,27 +174,60 @@ func _validate() -> void:
 					if not is_finite(data.decode_float(offset)):
 						finite_values = false
 						break
-				if finite_values:
-					# Compare every exported frame against frame zero. A loop whose
-					# first and last frames coincide is still valid if intermediate
-					# frames contain real vertex displacement.
-					for frame in range(1, height):
-						for vertex_index in range(width):
-							var first_offset := vertex_index * 16
-							var frame_offset := (frame * width + vertex_index) * 16
-							for axis in range(3):
-								if absf(data.decode_float(first_offset + axis * 4) - data.decode_float(frame_offset + axis * 4)) > 0.00001:
-									changed = true
-									break
-							if changed:
+			if finite_values:
+				# Compare every frame against frame zero; a loop can end at its initial pose.
+				for frame_index in range(1, height):
+					for vertex_index in range(width):
+						var first_offset := vertex_index * 16
+						var frame_offset := (frame_index * width + vertex_index) * 16
+						for axis in range(3):
+							if absf(data.decode_float(first_offset + axis * 4) - data.decode_float(frame_offset + axis * 4)) > 0.00001:
+								changed = true
 								break
 						if changed:
 							break
+					if changed:
+						break
 			var clip_id := str(metadata.get("clip_id", ""))
 			var mesh_index := int(metadata.get("mesh_index", -1))
 			var mesh_name := str(metadata.get("mesh_name", ""))
+			var vertex_order_matches := false
+			if not clip_id.is_empty() and not mesh_name.is_empty():
+				if not vat_scene_cache.has(clip_id):
+					var glb_path := "res://build/c3-glb/motion-poc".path_join(clip_id + ".glb")
+					var clip_packed := ResourceLoader.load(glb_path) as PackedScene
+					if clip_packed != null:
+						var clip_instance := clip_packed.instantiate()
+						vat_scene_cache[clip_id] = clip_instance
+						var named_meshes: Dictionary = {}
+						for candidate in clip_instance.find_children("*", "MeshInstance3D", true, false):
+							var candidate_mesh := candidate as MeshInstance3D
+							if named_meshes.has(candidate_mesh.name):
+								named_meshes.clear()
+								break
+							named_meshes[candidate_mesh.name] = candidate_mesh
+						vat_mesh_cache[clip_id] = named_meshes
+				if vat_mesh_cache.has(clip_id):
+					var named_clip_meshes: Dictionary = vat_mesh_cache[clip_id]
+					if named_clip_meshes.has(mesh_name):
+						var imported_mesh := named_clip_meshes[mesh_name] as MeshInstance3D
+						vertex_order_matches = imported_mesh.mesh != null and imported_mesh.mesh.get_surface_count() > 0
+						for surface in range(imported_mesh.mesh.get_surface_count()):
+							var arrays: Array = imported_mesh.mesh.surface_get_arrays(surface)
+							var imported_vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+							if imported_vertices.size() != width:
+								vertex_order_matches = false
+								break
+							for vertex_index in range(width):
+								var offset := vertex_index * 16
+								var vat_position := Vector3(data.decode_float(offset), data.decode_float(offset + 4), data.decode_float(offset + 8))
+								if imported_vertices[vertex_index].distance_to(vat_position) > 0.0001:
+									vertex_order_matches = false
+									break
+							if not vertex_order_matches:
+								break
 			var weighted_affine := str(metadata.get("influence_semantics", "")).contains("all positive C3 bone_weights")
-			var valid_vat: bool = finite_values and changed and str(metadata.get("format", "")) == "C3_VAT_RGBA32F" and bool(metadata.get("preserves_affine_shear", false)) and weighted_affine and not clip_id.is_empty() and mesh_index >= 0 and not mesh_name.is_empty()
+			var valid_vat: bool = finite_values and changed and vertex_order_matches and str(metadata.get("format", "")) == "C3_VAT_RGBA32F" and str(metadata.get("classification", "")) == "deforming" and weighted_affine and bool(metadata.get("preserves_affine_shear", false)) and str(metadata.get("vertex_order", "")).begins_with("source C3 vertex index") and not clip_id.is_empty() and mesh_index >= 0 and not mesh_name.is_empty()
 			if valid_vat:
 				if not vat_clip_meshes.has(clip_id):
 					vat_clip_meshes[clip_id] = {}
@@ -209,7 +240,8 @@ func _validate() -> void:
 			vat_results.append({
 				"metadata": metadata_name, "clip_id": clip_id, "mesh_index": mesh_index, "mesh_name": mesh_name,
 				"width": width, "height": height, "bytes": data.size(), "finite": finite_values,
-				"frame_positions_change": changed, "weighted_affine_influences": weighted_affine,
+				"frame_positions_change": changed, "source_vertex_order_matches_glb": vertex_order_matches,
+				"weighted_affine_influences": weighted_affine,
 				"preserves_affine_shear": metadata.get("preserves_affine_shear", false),
 				"status": "VAT_DATA_VALIDATED" if valid_vat else "FAILED"
 			})
@@ -227,7 +259,36 @@ func _validate() -> void:
 	for clip_key in vat_clip_meshes.keys():
 		if not expected_vat_clips.has(str(clip_key)):
 			unexpected_vat_clips.append(str(clip_key))
-	var vat_status := "PASSED" if clips_with_moving_mesh == 6 and vat_validated_count == vat_results.size() and vat_results.size() >= 6 and not vat_failed and unexpected_vat_clips.is_empty() else "FAILED"
+	var vat_static_parts_retained := true
+	var audit_path := "res://reports/c3-model-audit.json"
+	var audit_data = JSON.parse_string(FileAccess.get_file_as_string(audit_path)) if FileAccess.file_exists(audit_path) else null
+	if not (audit_data is Dictionary):
+		vat_static_parts_retained = false
+	else:
+		for clip_report in audit_data.get("vat_motion_poc", []):
+			var static_clip_id := str(clip_report.get("clip_id", ""))
+			if not expected_vat_clips.has(static_clip_id):
+				continue
+			if not vat_mesh_cache.has(static_clip_id):
+				vat_static_parts_retained = false
+				continue
+			var imported_scene_meshes: Dictionary = vat_mesh_cache[static_clip_id]
+			var exported_meshes: Dictionary = vat_clip_meshes.get(static_clip_id, {})
+			var static_parts: Array = clip_report.get("static_meshes_retained_without_vat", [])
+			var expected_mesh_count := int(clip_report.get("source_renderable_mesh_count", -1))
+			if expected_mesh_count < 1 or imported_scene_meshes.size() != expected_mesh_count or exported_meshes.size() + static_parts.size() != expected_mesh_count:
+				vat_static_parts_retained = false
+			for static_part in static_parts:
+				var static_name := str(static_part.get("mesh_name", ""))
+				if static_name.is_empty() or not imported_scene_meshes.has(static_name) or exported_meshes.values().has(static_name):
+					vat_static_parts_retained = false
+			for dynamic_name in exported_meshes.values():
+				if not imported_scene_meshes.has(str(dynamic_name)):
+					vat_static_parts_retained = false
+	for clip_instance_value in vat_scene_cache.values():
+		if is_instance_valid(clip_instance_value):
+			clip_instance_value.free()
+	var vat_status := "PASSED" if clips_with_moving_mesh == 6 and vat_validated_count == vat_results.size() and vat_results.size() >= 6 and not vat_failed and unexpected_vat_clips.is_empty() and vat_static_parts_retained else "FAILED"
 	var poc_report := {
 		"expected_clip_count": 6,
 		"validated_clip_count": motion_poc_results.filter(func(row): return row.get("status") == "GODOT_IMPORT_VALIDATED").size(),
@@ -240,6 +301,7 @@ func _validate() -> void:
 		"expected_vat_clip_count": 6,
 		"validated_vat_clip_count": clips_with_moving_mesh,
 		"vat_exported_deforming_mesh_count": vat_validated_count,
+		"vat_static_parts_retained": vat_static_parts_retained,
 		"vat_missing_clips": missing_vat_clips,
 		"vat_unexpected_clips": unexpected_vat_clips,
 		"vat_status": vat_status,
