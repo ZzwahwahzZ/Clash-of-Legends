@@ -292,7 +292,15 @@ def parse_wdb(data: bytes) -> dict:
     object_rows = take_rows("ini/3DObj.dbc")
     texture_rows = take_rows("ini/3DTexture.dbc")
     simple_rows = take_rows("ini/3DSimpleObj.dbc")
-    mount_motion_rows = take_rows("ini/mountmotion.dbc")
+    motion_table_names = tuple(
+        entry["name"] for entry in entries
+        if "motion" in entry["name"].lower() and entry["parsed"].get("parse_status") == "PARSED"
+    )
+    motion_table_rows = {
+        name: (take_rows(name) if name.lower() != "ini/mountmotion.dbc" else take_rows(name))
+        for name in motion_table_names
+    }
+    mount_motion_rows = motion_table_rows.get("ini/mountmotion.dbc", [])
     mesh_table_names = (
         "ini/mount.dbc", "ini/armet.dbc", "ini/armet1.dbc", "ini/armor.dbc",
         "ini/weapon.dbc", "ini/head.dbc", "ini/misc.dbc", "ini/shield.dbc",
@@ -420,9 +428,53 @@ def parse_wdb(data: bytes) -> dict:
             "status": "ID_PATH_JOINED_REQUIRES_FILE_PRESENCE_AND_VISUAL_REVIEW" if rows else "TABLE_NOT_PARSED",
         }
 
+    motion_catalog_tables = {}
+    all_motion_paths = set()
+    for table_name, rows in motion_table_rows.items():
+        records = []
+        unique_paths = set()
+        for row in rows:
+            motion_id = int(row.get("id", row.get("key", 0)))
+            motion_path = str(row.get("path", ""))
+            if motion_path:
+                unique_paths.add(motion_path)
+                all_motion_paths.add(motion_path)
+            records.append({"motion_id": motion_id, "motion_path": motion_path})
+        motion_catalog_tables[table_name] = {
+            "record_count": len(rows),
+            "unique_path_count": len(unique_paths),
+            "records": records,
+            "status": "SOURCE_ID_TO_C3_MOTION_PATH_JOINED",
+        }
+    motion_catalog_dir = Path("resource_stage/world/resource_mappings")
+    motion_catalog_dir.mkdir(parents=True, exist_ok=True)
+    motion_catalog_path = motion_catalog_dir / "motion_catalog.json"
+    motion_catalog = {
+        "schema_version": "1.0.0",
+        "source_container_sha256": hashlib.sha256(data).hexdigest(),
+        "tables": motion_catalog_tables,
+        "unique_motion_path_count": len(all_motion_paths),
+        "unique_motion_paths": sorted(all_motion_paths),
+        "note": "Motion ID to source C3 path joins only; imported animation clips and runtime retargeting require separate validation.",
+    }
+    motion_catalog_path.write_text(json.dumps(motion_catalog, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    motion_report_path = Path("reports/c3-motion-source-path-audit.json")
+    motion_report_path.parent.mkdir(parents=True, exist_ok=True)
+    motion_report = {
+        "schema_version": "1.0.0",
+        "table_summaries": {
+            name: {"record_count": value["record_count"], "unique_path_count": value["unique_path_count"]}
+            for name, value in motion_catalog_tables.items()
+        },
+        "unique_motion_path_count": len(all_motion_paths),
+        "motion_catalog_path": str(motion_catalog_path),
+        "motion_catalog_sha256": hashlib.sha256(motion_catalog_path.read_bytes()).hexdigest(),
+        "status": "SOURCE_MOTION_PATHS_CATALOGUED_REQUIRES_C3_CONVERSION_AND_RUNTIME_ANIMATION_TEST",
+    }
+    motion_report_path.write_text(json.dumps(motion_report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     mount_motion_by_base = {}
     for row in mount_motion_rows:
-        key = int(row["id"])
+        key = int(row.get("id", row.get("key", 0)))
         base = key // 1000
         mount_motion_by_base.setdefault(base, []).append({
             "motion_key": key, "motion_path": str(row["path"])
@@ -454,7 +506,9 @@ def parse_wdb(data: bytes) -> dict:
     equipment_catalog = {
         "schema_version": "1.0.0",
         "source_container_sha256": hashlib.sha256(data).hexdigest(),
-        "source_tables": list(mesh_table_names) + ["ini/3DObj.dbc", "ini/3DTexture.dbc", "ini/mountmotion.dbc"],
+        "source_tables": list(mesh_table_names) + ["ini/3DObj.dbc", "ini/3DTexture.dbc"] + list(motion_table_names),
+        "motion_catalog_path": str(motion_catalog_path),
+        "motion_catalog_sha256": hashlib.sha256(motion_catalog_path.read_bytes()).hexdigest(),
         "schema_status": "MESH_ID_TO_C3_AND_TEXTURE_PATH_LINKED",
         "tables": {
             table_name: {
@@ -534,6 +588,7 @@ def parse_wdb(data: bytes) -> dict:
             "note": "MESH records resolve part mesh/texture IDs through 3DObj and 3DTexture path tables. File existence and rendered fit remain separate gates."
         },
         "resource_reference_audit": resource_reference_audit,
+        "motion_source_path_audit": motion_report,
         "entries": entries
     }
 
