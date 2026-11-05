@@ -491,8 +491,8 @@ pub fn c3_vertex_position(mesh: &C3Mesh, motion: &C3Motion, vertex_index: usize,
 }
 
 /// A mesh is VAT-animated only when its evaluated vertex positions actually
-/// change over the clip. Weighted affine matrices, not bone-name heuristics,
-/// decide whether it is static.
+/// change over the clip. The stock C3 first-positive-influence affine rule,
+/// not bone-name heuristics, decides whether it is static.
 pub fn is_deforming(mesh: &C3Mesh, motion: &C3Motion) -> Result<bool, String> {
     if mesh.vertices.is_empty() || motion.bone_count == 0 || motion.frame_count <= 1 || motion.keys.is_empty() {
         return Ok(false);
@@ -556,8 +556,9 @@ pub fn export_vat(mesh: &C3Mesh, motion: &C3Motion, output_prefix: &Path, clip_i
         "vertex_count":vertex_count,"referenced_vertex_count":referenced_vertex_count,"frame_count":frame_count,"fps":30,
         "bytes_per_texel":16,"binary_bytes":bytes.len(),
         "sampling":"one texel per source vertex per frame; RGBA=(x,y,z,1)",
-        "matrix_semantics":"weighted blend of initial_matrix * motion.matrix_at(each_positive_influence, frame)",
-        "influence_semantics":"all positive C3 bone_weights are used and normalized",
+        "matrix_semantics":"mesh.initial_matrix * motion.matrix_at(first_positive_influence_bone, frame); full affine transform",
+        "influence_semantics":"first positive C3 bone_weights slot selects the bone; second slot is consulted only when the first weight is non-positive; weight magnitudes are not blended",
+        "source_influence_rule":"stock C3 first-positive-influence rule",
         "classification":"deforming",
         "vertex_order":"source C3 vertex index; one RGBA texel per original vertex index",
         "preserves_affine_shear":true,
