@@ -122,6 +122,27 @@ func test_inventory_and_equipment_refinement() -> void:
 	assert_true(inv.slots.size() == PlayerInventoryScript.MAX_SLOTS, "Inventory: 40 slots initialized")
 	var test_item = {"id":"meteor_stone","name_ar":"حجر النيزك","name_en":"Meteor","type":"material","quantity":10,"max_stack":99,"sell_price":150}
 	assert_true(inv.add_item(test_item), "Inventory: Item addition succeeds")
+	inv.equipment["weapon"] = {"id":"test_blade","slot":"weapon","type":"equipment","attack_bonus":20,"defense_bonus":5,"refine_level":0,"sockets":1,"name_ar":"سيف الاختبار"}
+	GameManager.current_gold = 10000
+	var preview := inv.get_refine_preview("weapon")
+	assert_true(not preview.is_empty() and int(preview.gold_cost) == 200 and is_equal_approx(float(preview.success_chance), 1.0), "Refinement: shared preview defines first-tier cost and guaranteed success")
+	assert_true(inv.refine_equipment("weapon"), "Refinement: first tier succeeds with valid Meteor and Gold")
+	assert_true(int(inv.equipment["weapon"].refine_level) == 1 and int(inv.equipment["weapon"].attack_bonus) == 32, "Refinement: +1 applies deterministic attack progression")
+	var gem := {"id":"ruby_test","name_ar":"ياقوتة اختبار","name_en":"Test Ruby","type":"gem","quantity":1,"max_stack":1,"attack_bonus":7,"defense_bonus":3}
+	assert_true(inv.add_item(gem), "Sockets: gem can be stored in inventory")
+	var gem_index := -1
+	for i in range(inv.MAX_SLOTS):
+		if inv.slots[i] != null and str(inv.slots[i].get("id", "")) == "ruby_test":
+			gem_index = i
+			break
+	assert_true(gem_index >= 0 and inv.insert_gem("weapon", gem_index, 0), "Sockets: valid gem insertion consumes inventory item")
+	assert_true(inv.equipment["weapon"].socket_gems[0].id == "ruby_test", "Sockets: inserted gem is attached to equipment")
+	assert_true(not inv.insert_gem("weapon", gem_index, 0), "Sockets: occupied socket rejects duplicate insertion")
+	assert_true(inv.remove_gem("weapon", 0, 100), "Sockets: gem can be safely removed for Gold")
+	assert_true(inv.equipment["weapon"].socket_gems[0] == null, "Sockets: removed gem leaves empty socket")
+	inv.equipment["weapon"]["refine_level"] = 12
+	assert_true(bool(inv.get_refine_preview("weapon").get("maxed", false)), "Refinement: +12 cap is enforced")
+	assert_true(not inv.refine_equipment("weapon"), "Refinement: cannot exceed +12")
 	inv.queue_free()
 
 func test_local_save_and_backup_recovery() -> void:
