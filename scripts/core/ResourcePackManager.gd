@@ -15,7 +15,8 @@ const MAX_MANIFEST_BYTES := 1024 * 1024
 const APPLICATION_ID := "com.zwahwahzz.clashoflegends"
 const GODOT_VERSION := "4.3"
 const RESOURCE_RELEASE_TAG := "resource-packs-v4"
-const MAX_PARALLEL_DOWNLOADS := 6
+const MAX_PARALLEL_DOWNLOADS := 3
+const DOWNLOAD_MAX_ATTEMPTS := 4
 const DOWNLOAD_TIMEOUT_SECONDS := 1200.0
 
 var manifest: Dictionary = {}
@@ -223,21 +224,31 @@ func download_all_packages() -> bool:
 	if pending.is_empty():
 		return true
 
-	var any_failed := false
-	# Keep up to four independent HTTPS transfers active. Each file is verified
-	# and mounted as soon as it completes; a failed pack does not corrupt others.
+	var attempts: Dictionary = {}
+	var all_success := true
 	while not pending.is_empty() or not _active_downloads.is_empty():
-		while not pending.is_empty() and _active_downloads.size() < MAX_PARALLEL_DOWNLOADS and not any_failed:
+		while not pending.is_empty() and _active_downloads.size() < MAX_PARALLEL_DOWNLOADS:
 			var next_id := str(pending.pop_front())
+			attempts[next_id] = int(attempts.get(next_id, 0)) + 1
 			if not _start_download(next_id):
-				any_failed = true
-				break
+				if int(attempts[next_id]) < DOWNLOAD_MAX_ATTEMPTS:
+					pending.append(next_id)
+				else:
+					all_success = false
 		if _active_downloads.is_empty():
-			break
+			continue
 		var completion: Array = await package_finished
-		if completion.size() >= 2 and not bool(completion[1]):
-			any_failed = true
-	return not any_failed and pending.is_empty() and _active_downloads.is_empty()
+		if completion.size() >= 3 and not bool(completion[1]):
+			var failed_id := str(completion[0])
+			var used_attempts := int(attempts.get(failed_id, DOWNLOAD_MAX_ATTEMPTS))
+			if used_attempts < DOWNLOAD_MAX_ATTEMPTS:
+				# Retry transient network/server failures without discarding already
+				# verified packages. A short backoff avoids hammering the release host.
+				await get_tree().create_timer(float(used_attempts)).timeout
+				pending.append(failed_id)
+			else:
+				all_success = false
+	return all_success and pending.is_empty() and _active_downloads.is_empty() and get_missing_package_count() == 0
 
 func download_package(package_id: String) -> bool:
 	if is_package_installed(package_id):
