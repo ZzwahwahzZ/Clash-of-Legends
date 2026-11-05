@@ -113,7 +113,7 @@ func add_item(item_data: Dictionary) -> bool:
 	return false
 
 func remove_item_at(index: int, quantity: int = 1) -> bool:
-	if index < 0 or index >= MAX_SLOTS or slots[index] == null:
+	if quantity <= 0 or index < 0 or index >= MAX_SLOTS or slots[index] == null:
 		return false
 	var slot = slots[index]
 	var current_q = slot.get("quantity", 1)
@@ -326,11 +326,14 @@ func serialize() -> Dictionary:
 
 func deserialize(data: Dictionary) -> void:
 	if data.has("slots") and typeof(data["slots"]) == TYPE_ARRAY:
-		slots = data["slots"]
-		if slots.size() < MAX_SLOTS:
-			slots.resize(MAX_SLOTS)
+		slots = data["slots"].duplicate(true)
+		slots.resize(MAX_SLOTS)
 	if data.has("equipment") and typeof(data["equipment"]) == TYPE_DICTIONARY:
-		equipment = data["equipment"]
+		var restored_equipment: Dictionary = data["equipment"].duplicate(true)
+		for slot_name in equipment.keys():
+			if not restored_equipment.has(slot_name):
+				restored_equipment[slot_name] = null
+		equipment = restored_equipment
 	emit_signal("inventory_updated")
 	emit_signal("equipment_updated")
 	_recalculate_player_stats()
