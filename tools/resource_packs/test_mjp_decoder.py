@@ -46,6 +46,14 @@ class MJPDecoderTests(unittest.TestCase):
         self.assertEqual(image.size,(16,12))
         self.assertEqual(meta["alpha_mode"],"A4")
 
+    def test_standard_jpeg_with_mjp_extension_is_sniffed(self):
+        buffer = BytesIO()
+        Image.new("RGB", (7, 5), (30, 120, 210)).save(buffer, format="JPEG")
+        image, meta = decode_mjp(buffer.getvalue())
+        self.assertEqual(image.size, (7, 5))
+        self.assertEqual(meta["source_container"], "JPEG")
+        self.assertEqual(meta["alpha_mode"], "NATIVE_IMAGE")
+
     def test_invalid_magic_is_rejected(self):
         with self.assertRaises(ValueError):
             decode_mjp(b"not-an-mjp-file")
