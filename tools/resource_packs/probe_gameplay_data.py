@@ -33,6 +33,56 @@ def printable_runs(data: bytes, pattern: bytes, min_len: int = 4, limit: int = 8
                     break
     return found
 
+def tq_decrypt_candidate(data: bytes, seed: int) -> bytes:
+    """Research-only candidate decoder; seed is not assumed valid for the mobile APK."""
+    state = seed & 0xFFFFFFFF
+    key = []
+    for _ in range(128):
+        state = (state * 0x343FD + 0x269EC3) & 0xFFFFFFFF
+        key.append(((state >> 16) & 0x7FFF) & 0xFF)
+    out = bytearray(len(data))
+    for i, value in enumerate(data):
+        x = value ^ key[i % 128]
+        shift = i % 8
+        out[i] = x if shift == 0 else ((x >> shift) | (x << (8 - shift))) & 0xFF
+    return bytes(out)
+
+
+def candidate_text_signals(data: bytes) -> dict:
+    if not data:
+        return {"printable_ratio": 0.0, "at_at_lines": 0, "ini_sections": 0, "key_value_lines": 0, "looks_like_known_text": False}
+    sample = data[:min(len(data), 2 * 1024 * 1024)]
+    printable = sum(1 for b in sample if b in (9, 10, 13) or 32 <= b <= 126 or b >= 0xC0)
+    ratio = printable / len(sample)
+    text = sample.decode("utf-8", errors="ignore")
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    at_at = sum(1 for line in lines if "@@" in line and line.split("@@", 1)[0].isdigit())
+    sections = sum(1 for line in lines if line.startswith("[") and "]" in line)
+    kv = sum(1 for line in lines if "=" in line and not line.startswith(("#", ";")))
+    plausible = ratio >= 0.90 and (at_at >= 3 or (sections >= 2 and kv >= 5))
+    return {"printable_ratio": round(ratio, 4), "at_at_lines": at_at, "ini_sections": sections, "key_value_lines": kv, "looks_like_known_text": plausible}
+
+
+def inspect_tq_cipher_candidates(path: Path, role: str, data: bytes) -> list:
+    # Seeds 9527 and 1234 are documented for specific older desktop-client files only.
+    # Trying them here is a falsifiable diagnostic, not a claim about the mobile APK.
+    results = []
+    for seed in (9527, 1234):
+        decoded = tq_decrypt_candidate(data, seed)
+        signals = candidate_text_signals(decoded)
+        entry = {"cipher_candidate": "TQ_FILE_CIPHER_RESEARCH_ONLY", "seed": seed, **signals, "accepted_as_mobile_format": False}
+        if signals["looks_like_known_text"]:
+            out = Path("build/gameplay_decode_candidates") / f"{role}_{path.stem}_seed_{seed}.txt"
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_bytes(decoded)
+            entry["candidate_output"] = str(out)
+            entry["review_status"] = "PLAUSIBLE_TEXT_NEEDS_MOBILE_VERSION_VALIDATION"
+        else:
+            entry["review_status"] = "NO_KNOWN_TEXT_SIGNATURE"
+        results.append(entry)
+    return results
+
+
 def inspect(path: Path, role: str) -> dict:
     data = path.read_bytes()
     head = data[:32]
@@ -57,6 +107,7 @@ def inspect(path: Path, role: str) -> dict:
         pass
     return {
         "role": role,
+        "candidate_tq_cipher_diagnostics": inspect_tq_cipher_candidates(path, role, data),
         "path": str(path),
         "size_bytes": len(data),
         "sha256": hashlib.sha256(data).hexdigest(),
