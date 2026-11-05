@@ -101,6 +101,7 @@ func _update_interact_button() -> void:
 		interact_btn.visible = GameManager != null and is_instance_valid(GameManager.nearby_npc)
 
 func _on_interact_pressed() -> void:
+	FeatureGuidanceManager.show_feature_intro("interact")
 	var npc = GameManager.nearby_npc if GameManager else null
 	var player = GameManager.player_reference if GameManager else null
 	if is_instance_valid(npc) and is_instance_valid(player) and npc.has_method("interact"):
@@ -132,10 +133,12 @@ func _on_attack_pressed() -> void:
 		player.execute_basic_attack()
 
 func _on_skill_1_pressed() -> void:
+	FeatureGuidanceManager.show_feature_intro("skills")
 	if current_skills.size() > 0:
 		_cast_skill(current_skills[0])
 
 func _on_skill_2_pressed() -> void:
+	FeatureGuidanceManager.show_feature_intro("skills")
 	if current_skills.size() > 1:
 		_cast_skill(current_skills[1])
 
@@ -152,23 +155,27 @@ func _on_jump_pressed() -> void:
 		player.perform_jump()
 
 func _on_mount_pressed() -> void:
+	FeatureGuidanceManager.show_feature_intro("mount")
 	var player = GameManager.player_reference if GameManager else null
 	if player and player.has_method("toggle_mount"):
 		player.toggle_mount()
 
 func _on_auto_hunt_pressed() -> void:
+	FeatureGuidanceManager.show_feature_intro("auto_hunt")
 	if AutoHuntManager:
 		var active = AutoHuntManager.toggle_auto_hunt()
 		if auto_hunt_btn:
 			auto_hunt_btn.modulate = Color(0.4, 1.0, 0.4) if active else Color(1, 1, 1)
 
 func _on_auto_loot_pressed() -> void:
+	FeatureGuidanceManager.show_feature_intro("auto_loot")
 	if AutoLootManager:
 		var active = AutoLootManager.toggle_auto_loot()
 		if auto_loot_btn:
 			auto_loot_btn.modulate = Color(0.4, 1.0, 0.4) if active else Color(1, 1, 1)
 
 func _on_inventory_pressed() -> void:
+	FeatureGuidanceManager.show_feature_intro("inventory")
 	var tree = get_tree()
 	if tree:
 		var inventory_ui = tree.get_first_node_in_group("inventory_ui")
@@ -176,6 +183,7 @@ func _on_inventory_pressed() -> void:
 			inventory_ui.toggle_ui()
 
 func _on_blacksmith_pressed() -> void:
+	FeatureGuidanceManager.show_feature_intro("blacksmith")
 	var tree = get_tree()
 	if tree:
 		var blacksmith_ui = tree.get_first_node_in_group("blacksmith_ui")
@@ -183,6 +191,7 @@ func _on_blacksmith_pressed() -> void:
 			blacksmith_ui.open_ui()
 
 func _on_settings_pressed() -> void:
+	FeatureGuidanceManager.show_feature_intro("settings")
 	var tree = get_tree()
 	if tree:
 		var settings_ui = tree.get_first_node_in_group("settings_ui")
@@ -190,6 +199,7 @@ func _on_settings_pressed() -> void:
 			settings_ui.toggle_ui()
 
 func _on_quest_banner_pressed() -> void:
+	FeatureGuidanceManager.show_feature_intro("quest")
 	var tree = get_tree()
 	if tree:
 		var quest_agent = tree.get_first_node_in_group("quest_agents")
