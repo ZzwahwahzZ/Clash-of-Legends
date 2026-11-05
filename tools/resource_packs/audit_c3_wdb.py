@@ -162,7 +162,17 @@ def parse_mesh(data: bytes) -> dict:
     if len(data) < 8:
         raise ValueError("MESH table is shorter than its header")
     magic = data[:4]
-    if magic not in (b"MESH", b"MESZ"):
+    if magic == b"MESZ":
+        words = [struct.unpack_from("<I", data, off)[0] for off in range(4, min(len(data) - 3, 68), 4)]
+        floats = [struct.unpack_from("<f", data, off)[0] for off in range(4, min(len(data) - 3, 68), 4)]
+        return {
+            "format": "MESZ", "record_count": None,
+            "parse_status": "MESZ_LAYOUT_UNRESOLVED",
+            "header_hex": data[:128].hex(" "),
+            "u32_probe": words, "f32_probe": floats,
+            "_records": [],
+        }
+    if magic != b"MESH":
         raise ValueError(f"Unsupported MESH identifier: {magic!r}")
     count = struct.unpack_from("<I", data, 4)[0]
     offset = 8
