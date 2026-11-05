@@ -23,9 +23,13 @@ var pulse := 0.0
 var class_status: Label
 var enter_button: Button
 var class_grid: GridContainer
+var intro_overlay: Control
+var intro_tween: Tween
+var intro_finished := false
 
 func _ready() -> void:
 	_build_screen()
+	_build_cinematic_intro()
 	_start_music()
 	set_process(true)
 
@@ -150,6 +154,92 @@ func _build_screen() -> void:
 	footer.add_theme_font_size_override("font_size", 12)
 	root.add_child(footer)
 	_select_class(0)
+
+
+func _build_cinematic_intro() -> void:
+	intro_overlay = Control.new()
+	intro_overlay.name = "CinematicIntroOverlay"
+	intro_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	intro_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(intro_overlay)
+
+	var veil := ColorRect.new()
+	veil.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	veil.color = Color(0.012, 0.018, 0.045, 0.88)
+	veil.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	intro_overlay.add_child(veil)
+
+	var center := VBoxContainer.new()
+	center.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	center.anchor_left = 0.12
+	center.anchor_top = 0.25
+	center.anchor_right = 0.88
+	center.anchor_bottom = 0.75
+	center.alignment = BoxContainer.ALIGNMENT_CENTER
+	center.add_theme_constant_override("separation", 16)
+	intro_overlay.add_child(center)
+
+	var crest := Label.new()
+	crest.text = "✦     ⚔     ✦"
+	crest.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	crest.add_theme_font_size_override("font_size", 38)
+	crest.add_theme_color_override("font_color", Color("#f7d98e"))
+	center.add_child(crest)
+
+	var cinematic_title := Label.new()
+	cinematic_title.text = "صِـــراعُ الأَساطِير"
+	cinematic_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	cinematic_title.add_theme_font_size_override("font_size", 48)
+	cinematic_title.add_theme_color_override("font_color", Color("#ffe6a6"))
+	cinematic_title.add_theme_color_override("font_shadow_color", Color(0.95, 0.55, 0.12, 0.9))
+	cinematic_title.add_theme_constant_override("shadow_offset_x", 0)
+	cinematic_title.add_theme_constant_override("shadow_offset_y", 3)
+	cinematic_title.add_theme_constant_override("shadow_outline_size", 8)
+	cinematic_title.pivot_offset = Vector2(240, 35)
+	cinematic_title.scale = Vector2(0.72, 0.72)
+	center.add_child(cinematic_title)
+
+	var cinematic_subtitle := Label.new()
+	cinematic_subtitle.text = "حينَ تَستَيقِظُ الأَساطِير… يُولَدُ البَطَل"
+	cinematic_subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	cinematic_subtitle.add_theme_font_size_override("font_size", 19)
+	cinematic_subtitle.add_theme_color_override("font_color", Color("#d9e5fa"))
+	center.add_child(cinematic_subtitle)
+
+	var skip := Button.new()
+	skip.text = "ادخل إلى عالم الأساطير"
+	skip.custom_minimum_size = Vector2(260, 52)
+	skip.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	skip.add_theme_font_size_override("font_size", 20)
+	skip.pressed.connect(_finish_cinematic_intro)
+	center.add_child(skip)
+
+	intro_tween = create_tween()
+	intro_tween.set_parallel(true)
+	intro_tween.tween_property(cinematic_title, "scale", Vector2.ONE, 0.95).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	intro_tween.tween_property(crest, "modulate:a", 1.0, 0.7).from(0.0)
+	intro_tween.set_parallel(false)
+	intro_tween.tween_interval(2.1)
+	intro_tween.tween_property(intro_overlay, "modulate:a", 0.0, 0.8).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	intro_tween.tween_callback(_remove_cinematic_intro)
+
+func _finish_cinematic_intro() -> void:
+	if intro_finished:
+		return
+	if is_instance_valid(intro_tween):
+		intro_tween.kill()
+	intro_tween = create_tween()
+	intro_tween.tween_property(intro_overlay, "modulate:a", 0.0, 0.25)
+	intro_tween.tween_callback(_remove_cinematic_intro)
+
+func _remove_cinematic_intro() -> void:
+	if intro_finished:
+		return
+	intro_finished = true
+	if is_instance_valid(intro_overlay):
+		intro_overlay.queue_free()
+	intro_overlay = null
+
 
 func _select_class(index: int) -> void:
 	selected_class = clampi(index, 0, CLASSES.size() - 1)
