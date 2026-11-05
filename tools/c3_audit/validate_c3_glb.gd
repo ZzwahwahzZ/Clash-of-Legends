@@ -57,9 +57,10 @@ func _validate() -> void:
 				quit(1)
 				return
 			model_surfaces += mesh_instance.mesh.get_surface_count()
-		var animation_player := instance.find_child("*", "AnimationPlayer", true, false)
+		var animation_nodes := instance.find_children("*", "AnimationPlayer", true, false)
 		var animation_count := 0
-		if animation_player is AnimationPlayer:
+		if not animation_nodes.is_empty():
+			var animation_player := animation_nodes[0] as AnimationPlayer
 			animation_count = animation_player.get_animation_list().size()
 		if animation_count > 0:
 			animated += 1
