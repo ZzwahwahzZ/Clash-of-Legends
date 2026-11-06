@@ -369,6 +369,7 @@ func _show_production_content_block(missing: Array[String]) -> void:
 	if class_status:
 		class_status.visible = true
 		var detail := "، ".join(PackedStringArray(missing))
+		print("WORLD_ENTRY_BLOCKED: missing verified character models: " + detail)
 		class_status.text = "لن أبدأ العالم بنماذج مؤقتة. ما زالت نماذج الشخصيات التالية غير موثّقة: %s" % detail
 
 func _enter_world() -> void:
