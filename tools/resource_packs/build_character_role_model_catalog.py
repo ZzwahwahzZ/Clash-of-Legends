@@ -176,7 +176,6 @@ def main() -> None:
             "selection_ui_direct_section_join_candidates": direct_section_joins,
             "source_role_identity_candidates": source_identity_candidates,
             "joined_source_role_identities": joined_source_role_identities,
-            "class_gender_mappings_approved": 0,
             "standby_motion_id_fields_found": sum(1 for row in role_rows if row["standby_motion_id"] > 0),
             "blaze_motion_id_fields_found": sum(1 for row in role_rows if row["blaze_motion_id"] > 0),
             "class_gender_mappings_approved": 0,
