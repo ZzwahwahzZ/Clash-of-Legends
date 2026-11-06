@@ -25,11 +25,17 @@ jobs:
 
       - name: Download and verify the exact uploaded archive
         shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           mkdir -p build/original-conquer reports/original-conquer
+          : "${GH_TOKEN:?GITHUB_TOKEN is required to read the private draft release asset}"
           curl --fail --location --retry 5 --retry-all-errors \
-            'https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/untagged-4406b3bcf98aaafd485f/ConquerOnline.zip' \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/octet-stream" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            'https://api.github.com/repos/ZzwahwahzZ/Clash-of-Legends/releases/assets/716478589' \
             -o build/original-conquer/ConquerOnline.zip
           echo 'b1c6958109a07c237631943fc0442d3161563d89e1020b143d95437ba9a6fdb0  build/original-conquer/ConquerOnline.zip' | sha256sum -c -
           stat -c 'archive_bytes=%s' build/original-conquer/ConquerOnline.zip
