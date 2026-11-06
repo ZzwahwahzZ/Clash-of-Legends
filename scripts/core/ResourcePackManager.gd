@@ -19,6 +19,8 @@ var packages: Dictionary = {}
 var installed_packages: Dictionary = {}
 var busy := false
 var last_error := ""
+var _mount_started := false
+var _mount_in_progress := false
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -91,10 +93,19 @@ func refresh_manifest(_unused_url: String = "") -> bool:
 	return true
 
 func _load_embedded_packages() -> void:
-	installed_packages.clear()
+	if _mount_in_progress:
+		while _mount_in_progress:
+			await get_tree().process_frame
+		return
+	if _mount_started and get_missing_package_count() == 0:
+		return
+	_mount_in_progress = true
+	_mount_started = true
 	var ids: Array = packages.keys()
 	ids.sort()
 	for package_id in ids:
+		if is_package_installed(str(package_id)):
+			continue
 		await get_tree().process_frame
 		var entry: Dictionary = packages[package_id]
 		var path := BUNDLED_DIR.path_join(str(entry.get("file_name", "")))
@@ -115,6 +126,7 @@ func _load_embedded_packages() -> void:
 			package_failed.emit(str(package_id), reason)
 			package_finished.emit(str(package_id), false, reason)
 		_emit_aggregate_progress()
+	_mount_in_progress = false
 
 func emit_current_progress() -> void:
 	_emit_aggregate_progress()
@@ -148,9 +160,9 @@ func _emit_aggregate_progress() -> void:
 
 # Compatibility wrappers for old UI/startup callers. These methods never download.
 func download_all_packages() -> bool:
-	if packages.is_empty():
-		if not await refresh_manifest():
-			return false
+	if packages.is_empty() and not await refresh_manifest():
+		return false
+	if get_missing_package_count() > 0:
 		await _load_embedded_packages()
 	return get_missing_package_count() == 0
 
