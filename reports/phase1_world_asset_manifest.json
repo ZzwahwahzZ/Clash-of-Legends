@@ -7,13 +7,13 @@
   "nature_source": "https://github.com/Hidencod/tge-assets",
   "nature_commit": "ea2f2aa1ca8da0898330c97df8a5489976b051d0",
   "nature_license": "CC0-1.0; retained in kenney-nature/LICENSE-CC0.txt",
-  "asset_count": 21,
+  "asset_count": 22,
   "model_count": 7,
   "files": [
     {
       "path": "assets/environment/phase1/SOURCES.md",
-      "bytes": 1077,
-      "sha256": "1e3b207d29757a46d76cd9566875d9fc827809e725d7f786edcac4f67667c1d0"
+      "bytes": 1090,
+      "sha256": "30a0032ae056d08d10921989bbc65f1c27671c8756fe6f183d9f1c82c229ae19"
     },
     {
       "path": "assets/environment/phase1/kenney-nature/LICENSE-CC0.txt",
@@ -134,6 +134,11 @@
       "path": "assets/environment/phase1/sapphire/ground.png",
       "bytes": 130911,
       "sha256": "4de1f4281953b468ad641646dab2e103188321d4175b90f3e22e6420d851db5b"
+    },
+    {
+      "path": "assets/environment/phase1/sapphire/ground.png.import",
+      "bytes": 787,
+      "sha256": "e8039e9bb304b1d5b88fe2a614839f321f0b4a0e55ed8b3cab62e487c889ed45"
     },
     {
       "path": "assets/environment/phase1/sapphire/pavilion.glb",

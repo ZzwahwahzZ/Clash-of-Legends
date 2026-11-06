@@ -1,0 +1,1501 @@
+{
+  "source_repository": "https://github.com/AetherRadar/operation-steel-tide",
+  "source_commit": "d6a33b932e00fb9016dea407eca3f909aeaf2dcb",
+  "source_glb": "assets/models/jianghai_old_city/jianghai_old_city.glb",
+  "source_license": "MIT project composition; third-party source components remain under their recorded licenses in LICENSE_EVIDENCE.md",
+  "input_bytes": 63204100,
+  "output_bytes": 7679236,
+  "output_sha256": "241c8ca5391c1518763efecc7f6fd83906bdbb785ed177bdd746e9a314c5b87a",
+  "selected_node_count": 78,
+  "selected_node_names": [
+    "EastGateRow02",
+    "EastHarborResidence",
+    "EastHardwareHouse",
+    "EastHardwareRow02",
+    "EastMarketResidence",
+    "EastMarketRow01",
+    "EastOldHotel",
+    "EastPhotoRow00",
+    "EastPhotoRow02",
+    "EastSquareRow01",
+    "EastSquareRow02",
+    "EastTeaRow01",
+    "FarEastResidence",
+    "FarEastSouthResidence",
+    "FarWestNorthResidence",
+    "FarWestResidence",
+    "JianghaiClanHallDoubleGateAnchor",
+    "JianghaiCleared_FactoryAdmin",
+    "JianghaiCleared_FactoryOfficeEast",
+    "JianghaiCleared_FactoryOfficeWest",
+    "JianghaiCleared_FactoryWorkshopEast",
+    "JianghaiCleared_FactoryWorkshopWest",
+    "JianghaiCleared_MarketLantern00",
+    "JianghaiCleared_MarketLantern01",
+    "JianghaiCleared_MarketLantern02",
+    "JianghaiCleared_MarketLantern03",
+    "JianghaiCleared_MarketLantern04",
+    "JianghaiCleared_MarketRearHouseEast",
+    "JianghaiCleared_MarketRearHouseWest",
+    "JianghaiCleared_MarketShop00",
+    "JianghaiCleared_MarketShop01",
+    "JianghaiCleared_MarketShop02",
+    "JianghaiCleared_MarketShop03",
+    "JianghaiCleared_MarketShop04",
+    "JianghaiCleared_PawnshopWestHouse00",
+    "JianghaiCleared_PawnshopWestHouse01",
+    "JianghaiExpansion_PawnshopBackdrop",
+    "JianghaiExpansion_WestClockLantern",
+    "NortheastGateHouse",
+    "OuterEastHarborResidence",
+    "OuterEastMarketResidence",
+    "OuterEastNorthResidence",
+    "OuterEastTeaResidence",
+    "OuterNortheastResidence",
+    "OuterNorthwestResidence",
+    "OuterWestClockResidence",
+    "OuterWestHarborResidence",
+    "OuterWestMarketResidence",
+    "OuterWestNorthResidence",
+    "OuterWestSouthResidence",
+    "PawnshopAuthoredWing_EastReturn_F0_Insert",
+    "PawnshopAuthoredWing_EastReturn_F0_Wall",
+    "PawnshopAuthoredWing_East_F0_C0_Insert",
+    "PawnshopAuthoredWing_East_F0_C0_Wall",
+    "PawnshopAuthoredWing_East_F0_C1_Insert",
+    "PawnshopAuthoredWing_East_F0_C1_Wall",
+    "PawnshopAuthoredWing_East_F0_C2_Insert",
+    "PawnshopAuthoredWing_East_F0_C2_Wall",
+    "PawnshopAuthoredWing_WestReturn_F0_Insert",
+    "PawnshopAuthoredWing_WestReturn_F0_Wall",
+    "PawnshopAuthoredWing_West_F0_C0_Insert",
+    "PawnshopAuthoredWing_West_F0_C0_Wall",
+    "PawnshopAuthoredWing_West_F0_C1_Insert",
+    "PawnshopAuthoredWing_West_F0_C1_Wall",
+    "PawnshopAuthoredWing_West_F0_C2_Insert",
+    "PawnshopAuthoredWing_West_F0_C2_Wall",
+    "PawnshopGuardianLionEast",
+    "PawnshopGuardianLionWest",
+    "WestClockHouse",
+    "WestGateRow01",
+    "WestGateRow02",
+    "WestHarborResidence",
+    "WestMarketRow01",
+    "WestMedicineHouse",
+    "WestSquareRow01",
+    "WestSquareRow02",
+    "WestTeaWarehouse",
+    "WestTheatreHouse"
+  ],
+  "retained_node_count": 82,
+  "mesh_node_count": 77,
+  "unique_mesh_count": 9,
+  "primitive_count": 38,
+  "unique_triangles": 105619,
+  "instanced_triangles": 1038420,
+  "material_count": 26,
+  "texture_count": 28,
+  "embedded_image_count": 28,
+  "source_node_inventory": [
+    {
+      "node": "EastGateRow00",
+      "mesh": "JianghaiEnterable_EastPhotoHouse_LOD.001"
+    },
+    {
+      "node": "EastGateRow02",
+      "mesh": "JianghaiChineseGateHouse_LOD"
+    },
+    {
+      "node": "EastHarborResidence",
+      "mesh": "JianghaiChineseTempleHall_LOD"
+    },
+    {
+      "node": "EastHardwareHouse",
+      "mesh": "JianghaiChineseTempleHall_LOD"
+    },
+    {
+      "node": "EastHardwareRow02",
+      "mesh": "JianghaiChineseTempleHall_LOD"
+    },
+    {
+      "node": "EastMarketResidence",
+      "mesh": "JianghaiChineseTempleHall_LOD"
+    },
+    {
+      "node": "EastMarketRow01",
+      "mesh": "JianghaiChineseTempleHall_LOD"
+    },
+    {
+      "node": "EastOldHotel",
+      "mesh": "JianghaiChineseGateHouse_LOD"
+    },
+    {
+      "node": "EastPhotoHouse",
+      "mesh": "JianghaiEnterable_EastPhotoHouse_LOD.001"
+    },
+    {
+      "node": "EastPhotoRow00",
+      "mesh": "JianghaiChineseTempleHall_LOD"
+    },
+    {
+      "node": "EastPhotoRow02",
+      "mesh": "JianghaiChineseTempleHall_LOD"
+    },
+    {
+      "node": "EastSquareRow01",
+      "mesh": "JianghaiChineseTempleHall_LOD"
+    },
+    {
+      "node": "EastSquareRow02",
+      "mesh": "JianghaiChineseGateHouse_LOD"
+    },
+    {
+      "node": "EastTeaHouse",
+      "mesh": "JianghaiEnterable_EastTeaHouse_LOD.001"
+    },
+    {
+      "node": "EastTeaRow01",
+      "mesh": "JianghaiChineseGateHouse_LOD"
+    },
+    {
+      "node": "FactoryEntryFacade_DoorFrame",
+      "mesh": "JianghaiEntryFacade_DoorFrameTrim"
+    },
+    {
+      "node": "FactoryEntryFacade_Wall_East_00",
+      "mesh": "JianghaiEntryFacade_BrickPlain"
+    },
+    {
+      "node": "FactoryEntryFacade_Wall_East_01",
+      "mesh": "JianghaiEntryFacade_BrickPlain"
+    },
+    {
+      "node": "FactoryEntryFacade_Wall_East_02",
+      "mesh": "JianghaiEntryFacade_BrickPlain"
+    },
+    {
+      "node": "FactoryEntryFacade_Wall_East_03",
+      "mesh": "JianghaiEntryFacade_BrickPlain"
+    },
+    {
+      "node": "FactoryEntryFacade_Wall_Lintel",
+      "mesh": "JianghaiEntryFacade_BrickPlain"
+    },
+    {
+      "node": "FactoryEntryFacade_Wall_West_00",
+      "mesh": "JianghaiEntryFacade_BrickPlain"
+    },
+    {
+      "node": "FactoryEntryFacade_Wall_West_01",
+      "mesh": "JianghaiEntryFacade_BrickPlain"
+    },
+    {
+      "node": "FactoryEntryFacade_Wall_West_02",
+      "mesh": "JianghaiEntryFacade_BrickPlain"
+    },
+    {
+      "node": "FactoryEntryFacade_Wall_West_03",
+      "mesh": "JianghaiEntryFacade_BrickPlain"
+    },
+    {
+      "node": "FactoryGatePortal_PierL",
+      "mesh": "PawnshopGatePierLMesh"
+    },
+    {
+      "node": "FactoryGatePortal_PierR",
+      "mesh": "PawnshopGatePierRMesh"
+    },
+    {
+      "node": "FactoryGatePortal_Roof",
+      "mesh": "PawnshopGateRoofMesh.001"
+    },
+    {
+      "node": "FarEastResidence",
+      "mesh": "JianghaiChineseGateHouse_LOD"
+    },
+    {
+      "node": "FarEastSouthResidence",
+      "mesh": "JianghaiChineseTempleHall_LOD"
+    },
+    {
+      "node": "FarWestNorthResidence",
+      "mesh": "JianghaiChineseTempleHall_LOD"
+    },
+    {
+      "node": "FarWestResidence",
+      "mesh": "JianghaiChineseTempleHall_LOD"
+    },
+    {
+      "node": "GuangchangClanHall",
+      "mesh": "网格.002"
+    },
+    {
+      "node": "GuangchangPawnshop",
+      "mesh": ""
+    },
+    {
+      "node": "GuangchangPawnshopDangPlaqueText",
+      "mesh": "GuangchangPawnshopDangPlaqueTextCurve"
+    },
+    {
+      "node": "GuangchangPawnshopSignText",
+      "mesh": "GuangchangPawnshopSignTextCurve"
+    },
+    {
+      "node": "JianghaiArtPass_EastAircon00",
+      "mesh": "exterior_aircon_unit_rusted"
+    },
+    {
+      "node": "JianghaiArtPass_EastAircon01",
+      "mesh": "exterior_aircon_unit"
+    },
+    {
+      "node": "JianghaiArtPass_EastAircon02",
+      "mesh": "exterior_aircon_unit_rusted"
+    },
+    {
+      "node": "JianghaiArtPass_EastAircon03",
+      "mesh": "exterior_aircon_unit"
+    },
+    {
+      "node": "JianghaiArtPass_EastAircon04",
+      "mesh": "exterior_aircon_unit_rusted"
+    },
+    {
+      "node": "JianghaiArtPass_EastAircon05",
+      "mesh": "exterior_aircon_unit"
+    },
+    {
+      "node": "JianghaiArtPass_EastBarrel00",
+      "mesh": "Circle.002"
+    },
+    {
+      "node": "JianghaiArtPass_EastBarrel01",
+      "mesh": "Circle.002"
+    },
+    {
+      "node": "JianghaiArtPass_EastCrate00",
+      "mesh": "Cube.002"
+    },
+    {
+      "node": "JianghaiArtPass_EastCrate01",
+      "mesh": "Cube.002"
+    },
+    {
+      "node": "JianghaiArtPass_EastShutter00",
+      "mesh": "Plane.016"
+    },
+    {
+      "node": "JianghaiArtPass_EastShutter01",
+      "mesh": "Plane.016"
+    },
+    {
+      "node": "JianghaiArtPass_EastShutter02",
+      "mesh": "Plane.016"
+    },
+    {
+      "node": "JianghaiArtPass_EastShutter03",
+      "mesh": "Plane.016"
+    },
+    {
+      "node": "JianghaiArtPass_EastShutter04",
+      "mesh": "Plane.016"
+    },
+    {
+      "node": "JianghaiArtPass_EastTrash00",
+      "mesh": "Plane.006"
+    },
+    {
+      "node": "JianghaiArtPass_EastTrash01",
+      "mesh": "Plane.006"
+    },
+    {
+      "node": "JianghaiArtPass_FactoryBarrel00",
+      "mesh": "Circle.002"
+    },
+    {
+      "node": "JianghaiArtPass_FactoryBarrel01",
+      "mesh": "Circle.002"
+    },
+    {
+      "node": "JianghaiArtPass_FactoryBarrel02",
+      "mesh": "Circle.002"
+    },
+    {
+      "node": "JianghaiArtPass_FactoryCameraEast",
+      "mesh": "security_camera.001"
+    },
+    {
+      "node": "JianghaiArtPass_FactoryCameraWest",
+      "mesh": "security_camera.001"
+    },
+    {
+      "node": "JianghaiArtPass_FactoryCrate00",
+      "mesh": "Cube.002"
+    },
+    {
+      "node": "JianghaiArtPass_FactoryCrate01",
+      "mesh": "Cube.002"
+    },
+    {
+      "node": "JianghaiArtPass_FactoryTrash00",
+      "mesh": "Plane.006"
+    },
+    {
+      "node": "JianghaiArtPass_FactoryTrash01",
+      "mesh": "Plane.006"
+    },
+    {
+      "node": "JianghaiArtPass_FactoryUtilityEast",
+      "mesh": "Cube.028"
+    },
+    {
+      "node": "JianghaiArtPass_FactoryUtilityWest",
+      "mesh": "Cube.028"
+    },
+    {
+      "node": "JianghaiArtPass_GrandHotelSecurityTerminalVisual_CRT",
+      "mesh": "Cube.001"
+    },
+    {
+      "node": "JianghaiArtPass_GrandHotelSecurityTerminalVisual_WeatheredCabin",
+      "mesh": "Cube.028"
+    },
+    {
+      "node": "JianghaiArtPass_MarketBarrel",
+      "mesh": "Circle.002"
+    },
+    {
+      "node": "JianghaiArtPass_MarketCrate00",
+      "mesh": "Cube.002"
+    },
+    {
+      "node": "JianghaiArtPass_MarketCrate01",
+      "mesh": "Cube.002"
+    },
+    {
+      "node": "JianghaiArtPass_MarketCrate02",
+      "mesh": "Cube.002"
+    },
+    {
+      "node": "JianghaiArtPass_MarketCrate03",
+      "mesh": "Cube.002"
+    },
+    {
+      "node": "JianghaiArtPass_MarketTrash00",
+      "mesh": "Plane.006"
+    },
+    {
+      "node": "JianghaiArtPass_MarketTrash01",
+      "mesh": "Plane.006"
+    },
+    {
+      "node": "JianghaiArtPass_MunicipalTreasuryManifestTerminalVisual_CRT",
+      "mesh": "Cube.001"
+    },
+    {
+      "node": "JianghaiArtPass_MunicipalTreasuryManifestTerminalVisual_Weather",
+      "mesh": "Cube.028"
+    },
+    {
+      "node": "JianghaiArtPass_PawnshopCamera",
+      "mesh": "security_camera.001"
+    },
+    {
+      "node": "JianghaiArtPass_WestAircon00",
+      "mesh": "exterior_aircon_unit_rusted"
+    },
+    {
+      "node": "JianghaiArtPass_WestAircon01",
+      "mesh": "exterior_aircon_unit"
+    },
+    {
+      "node": "JianghaiArtPass_WestAircon02",
+      "mesh": "exterior_aircon_unit_rusted"
+    },
+    {
+      "node": "JianghaiArtPass_WestAircon03",
+      "mesh": "exterior_aircon_unit"
+    },
+    {
+      "node": "JianghaiArtPass_WestAircon04",
+      "mesh": "exterior_aircon_unit_rusted"
+    },
+    {
+      "node": "JianghaiArtPass_WestAircon05",
+      "mesh": "exterior_aircon_unit"
+    },
+    {
+      "node": "JianghaiArtPass_WestBarrel00",
+      "mesh": "Circle.002"
+    },
+    {
+      "node": "JianghaiArtPass_WestBarrel01",
+      "mesh": "Circle.002"
+    },
+    {
+      "node": "JianghaiArtPass_WestCrate00",
+      "mesh": "Cube.002"
+    },
+    {
+      "node": "JianghaiArtPass_WestCrate01",
+      "mesh": "Cube.002"
+    },
+    {
+      "node": "JianghaiArtPass_WestShutter00",
+      "mesh": "Plane.016"
+    },
+    {
+      "node": "JianghaiArtPass_WestShutter01",
+      "mesh": "Plane.016"
+    },
+    {
+      "node": "JianghaiArtPass_WestShutter02",
+      "mesh": "Plane.016"
+    },
+    {
+      "node": "JianghaiArtPass_WestShutter03",
+      "mesh": "Plane.016"
+    },
+    {
+      "node": "JianghaiArtPass_WestShutter04",
+      "mesh": "Plane.016"
+    },
+    {
+      "node": "JianghaiArtPass_WestTrash00",
+      "mesh": "Plane.006"
+    },
+    {
+      "node": "JianghaiArtPass_WestTrash01",
+      "mesh": "Plane.006"
+    },
+    {
+      "node": "JianghaiClanHallDoubleGateAnchor",
+      "mesh": ""
+    },
+    {
+      "node": "JianghaiCleared_FactoryAdmin",
+      "mesh": "JianghaiChineseArcadeShop_LOD"
+    },
+    {
+      "node": "JianghaiCleared_FactoryOfficeEast",
+      "mesh": "JianghaiChineseTempleHall_LOD"
+    },
+    {
+      "node": "JianghaiCleared_FactoryOfficeWest",
+      "mesh": "JianghaiChineseTempleHall_LOD"
+    },
+    {
+      "node": "JianghaiCleared_FactoryWorkshopEast",
+      "mesh": "JianghaiChineseArcadeShop_LOD"
+    },
+    {
+      "node": "JianghaiCleared_FactoryWorkshopWest",
+      "mesh": "JianghaiChineseArcadeShop_LOD"
+    },
+    {
+      "node": "JianghaiCleared_MarketLantern00",
+      "mesh": "lantern"
+    },
+    {
+      "node": "JianghaiCleared_MarketLantern01",
+      "mesh": "lantern"
+    },
+    {
+      "node": "JianghaiCleared_MarketLantern02",
+      "mesh": "lantern"
+    },
+    {
+      "node": "JianghaiCleared_MarketLantern03",
+      "mesh": "lantern"
+    },
+    {
+      "node": "JianghaiCleared_MarketLantern04",
+      "mesh": "lantern"
+    },
+    {
+      "node": "JianghaiCleared_MarketRearHouseEast",
+      "mesh": "JianghaiChineseTempleHall_LOD"
+    },
+    {
+      "node": "JianghaiCleared_MarketRearHouseWest",
+      "mesh": "JianghaiChineseTempleHall_LOD"
+    },
+    {
+      "node": "JianghaiCleared_MarketShop00",
+      "mesh": "JianghaiChineseGateHouse_LOD"
+    },
+    {
+      "node": "JianghaiCleared_MarketShop01",
+      "mesh": "JianghaiChineseArcadeShop_LOD"
+    },
+    {
+      "node": "JianghaiCleared_MarketShop02",
+      "mesh": "JianghaiChineseTempleHall_LOD"
+    },
+    {
+      "node": "JianghaiCleared_MarketShop03",
+      "mesh": "JianghaiChineseArcadeShop_LOD"
+    },
+    {
+      "node": "JianghaiCleared_MarketShop04",
+      "mesh": "JianghaiChineseArcadeShop_LOD"
+    },
+    {
+      "node": "JianghaiCleared_MarketStool00",
+      "mesh": "Plane.001"
+    },
+    {
+      "node": "JianghaiCleared_MarketStool01",
+      "mesh": "Plane.001"
+    },
+    {
+      "node": "JianghaiCleared_MarketStool02",
+      "mesh": "Plane.001"
+    },
+    {
+      "node": "JianghaiCleared_MarketTeaTable",
+      "mesh": "Plane.003"
+    },
+    {
+      "node": "JianghaiCleared_PawnshopStorefront",
+      "mesh": "JianghaiPawnshopStorefrontDoorway"
+    },
+    {
+      "node": "JianghaiCleared_PawnshopWestHouse00",
+      "mesh": "JianghaiChineseTempleHall_LOD"
+    },
+    {
+      "node": "JianghaiCleared_PawnshopWestHouse01",
+      "mesh": "JianghaiChineseTempleHall_LOD"
+    },
+    {
+      "node": "JianghaiDensity_EastEdge01",
+      "mesh": "JianghaiDensity_ChineseArcadeShop_LOD"
+    },
+    {
+      "node": "JianghaiDensity_EastEdge02",
+      "mesh": "JianghaiDensity_QuaterniusHouse2_LOD"
+    },
+    {
+      "node": "JianghaiDensity_EastEdge03",
+      "mesh": "JianghaiDensity_QuaterniusBuilding1Large_LOD"
+    },
+    {
+      "node": "JianghaiDensity_EastEdge04",
+      "mesh": "JianghaiDensity_ChineseGateHouse_LOD"
+    },
+    {
+      "node": "JianghaiDensity_EastEdge05",
+      "mesh": "JianghaiDensity_ChineseArcadeShop_LOD"
+    },
+    {
+      "node": "JianghaiDensity_EastEdge06",
+      "mesh": "JianghaiDensity_ChineseGateHouse_LOD"
+    },
+    {
+      "node": "JianghaiDensity_EastEdge07",
+      "mesh": "JianghaiDensity_ChineseArcadeShop_LOD"
+    },
+    {
+      "node": "JianghaiDensity_EastEdge08",
+      "mesh": "JianghaiDensity_ChineseTempleHall_LOD"
+    },
+    {
+      "node": "JianghaiDensity_EastInfill00",
+      "mesh": "JianghaiDensity_ChineseTempleHall_LOD"
+    },
+    {
+      "node": "JianghaiDensity_EastInfill01",
+      "mesh": "JianghaiDensity_ChineseArcadeShop_LOD"
+    },
+    {
+      "node": "JianghaiDensity_EastInfill02",
+      "mesh": "JianghaiDensity_QuaterniusBuilding3Big_LOD"
+    },
+    {
+      "node": "JianghaiDensity_EastInfill03",
+      "mesh": "JianghaiDensity_ChineseArcadeShop_LOD"
+    },
+    {
+      "node": "JianghaiDensity_EastInfill04",
+      "mesh": "JianghaiDensity_QuaterniusBuilding4_LOD"
+    },
+    {
+      "node": "JianghaiDensity_EastInfill05",
+      "mesh": "JianghaiDensity_QuaterniusBuilding1Large_LOD"
+    },
+    {
+      "node": "JianghaiDensity_EastInfill06",
+      "mesh": "JianghaiDensity_QuaterniusBuilding3Big_LOD"
+    },
+    {
+      "node": "JianghaiDensity_EastInfill07",
+      "mesh": "JianghaiDensity_QuaterniusBuilding4_LOD"
+    },
+    {
+      "node": "JianghaiDensity_EastInfill08",
+      "mesh": "JianghaiDensity_QuaterniusHouse2_LOD"
+    },
+    {
+      "node": "JianghaiDensity_NorthWall01",
+      "mesh": "JianghaiDensity_ChineseArcadeShop_LOD"
+    },
+    {
+      "node": "JianghaiDensity_NorthWall02",
+      "mesh": "JianghaiDensity_ChineseTempleHall_LOD"
+    },
+    {
+      "node": "JianghaiDensity_NorthWall03",
+      "mesh": "JianghaiDensity_QuaterniusBuilding1Large_LOD"
+    },
+    {
+      "node": "JianghaiDensity_NorthWall04",
+      "mesh": "JianghaiDensity_ChineseArcadeShop_LOD"
+    },
+    {
+      "node": "JianghaiDensity_NorthWall05",
+      "mesh": "JianghaiDensity_ChineseTempleHall_LOD"
+    },
+    {
+      "node": "JianghaiDensity_NorthWall06",
+      "mesh": "JianghaiDensity_ChineseArcadeShop_LOD"
+    },
+    {
+      "node": "JianghaiDensity_NorthWall07",
+      "mesh": "JianghaiDensity_QuaterniusBuilding3Big_LOD"
+    },
+    {
+      "node": "JianghaiDensity_NorthWall08",
+      "mesh": "JianghaiDensity_QuaterniusHouse2_LOD"
+    },
+    {
+      "node": "JianghaiDensity_SouthWall01",
+      "mesh": "JianghaiDensity_ChineseArcadeShop_LOD"
+    },
+    {
+      "node": "JianghaiDensity_SouthWall02",
+      "mesh": "JianghaiDensity_ChineseTempleHall_LOD"
+    },
+    {
+      "node": "JianghaiDensity_SouthWall03",
+      "mesh": "JianghaiDensity_QuaterniusBuilding1Large_LOD"
+    },
+    {
+      "node": "JianghaiDensity_SouthWall04",
+      "mesh": "JianghaiDensity_ChineseArcadeShop_LOD"
+    },
+    {
+      "node": "JianghaiDensity_SouthWall05",
+      "mesh": "JianghaiDensity_ChineseTempleHall_LOD"
+    },
+    {
+      "node": "JianghaiDensity_SouthWall06",
+      "mesh": "JianghaiDensity_ChineseArcadeShop_LOD"
+    },
+    {
+      "node": "JianghaiDensity_SouthWall07",
+      "mesh": "JianghaiDensity_QuaterniusBuilding4_LOD"
+    },
+    {
+      "node": "JianghaiDensity_SouthWall08",
+      "mesh": "JianghaiDensity_QuaterniusHouse2_LOD"
+    },
+    {
+      "node": "JianghaiDensity_WestEdge01",
+      "mesh": "JianghaiDensity_ChineseArcadeShop_LOD"
+    },
+    {
+      "node": "JianghaiDensity_WestEdge02",
+      "mesh": "JianghaiDensity_QuaterniusHouse2_LOD"
+    },
+    {
+      "node": "JianghaiDensity_WestEdge03",
+      "mesh": "JianghaiDensity_QuaterniusBuilding1Large_LOD"
+    },
+    {
+      "node": "JianghaiDensity_WestEdge04",
+      "mesh": "JianghaiDensity_ChineseGateHouse_LOD"
+    },
+    {
+      "node": "JianghaiDensity_WestEdge05",
+      "mesh": "JianghaiDensity_ChineseArcadeShop_LOD"
+    },
+    {
+      "node": "JianghaiDensity_WestEdge06",
+      "mesh": "JianghaiDensity_ChineseGateHouse_LOD"
+    },
+    {
+      "node": "JianghaiDensity_WestEdge07",
+      "mesh": "JianghaiDensity_ChineseArcadeShop_LOD"
+    },
+    {
+      "node": "JianghaiDensity_WestEdge08",
+      "mesh": "JianghaiDensity_ChineseTempleHall_LOD"
+    },
+    {
+      "node": "JianghaiDensity_WestInfill00",
+      "mesh": "JianghaiDensity_ChineseTempleHall_LOD"
+    },
+    {
+      "node": "JianghaiDensity_WestInfill01",
+      "mesh": "JianghaiDensity_ChineseArcadeShop_LOD"
+    },
+    {
+      "node": "JianghaiDensity_WestInfill02",
+      "mesh": "JianghaiDensity_QuaterniusBuilding3Big_LOD"
+    },
+    {
+      "node": "JianghaiDensity_WestInfill03",
+      "mesh": "JianghaiDensity_ChineseArcadeShop_LOD"
+    },
+    {
+      "node": "JianghaiDensity_WestInfill04",
+      "mesh": "JianghaiDensity_QuaterniusBuilding4_LOD"
+    },
+    {
+      "node": "JianghaiDensity_WestInfill05",
+      "mesh": "JianghaiDensity_QuaterniusBuilding1Large_LOD"
+    },
+    {
+      "node": "JianghaiDensity_WestInfill06",
+      "mesh": "JianghaiDensity_QuaterniusBuilding3Big_LOD"
+    },
+    {
+      "node": "JianghaiDensity_WestInfill07",
+      "mesh": "JianghaiDensity_QuaterniusBuilding4_LOD"
+    },
+    {
+      "node": "JianghaiDensity_WestInfill08",
+      "mesh": "JianghaiDensity_QuaterniusHouse2_LOD"
+    },
+    {
+      "node": "JianghaiExpansion_Bicycle00",
+      "mesh": "JianghaiExpansion_BicycleMesh.001"
+    },
+    {
+      "node": "JianghaiExpansion_Bicycle01",
+      "mesh": "JianghaiExpansion_BicycleMesh.001"
+    },
+    {
+      "node": "JianghaiExpansion_Bicycle02",
+      "mesh": "JianghaiExpansion_BicycleMesh.001"
+    },
+    {
+      "node": "JianghaiExpansion_FactoryHandTruck",
+      "mesh": ""
+    },
+    {
+      "node": "JianghaiExpansion_FactoryHandTruck_Part00",
+      "mesh": "hand_truck"
+    },
+    {
+      "node": "JianghaiExpansion_MarketTeaCart",
+      "mesh": ""
+    },
+    {
+      "node": "JianghaiExpansion_MarketTeaCart_Part00",
+      "mesh": "Bottom_Cart"
+    },
+    {
+      "node": "JianghaiExpansion_MarketTeaCart_Part01",
+      "mesh": "Top_Cart"
+    },
+    {
+      "node": "JianghaiExpansion_MarketTeaCart_Part02",
+      "mesh": "Mugs"
+    },
+    {
+      "node": "JianghaiExpansion_MarketWickerBasket",
+      "mesh": ""
+    },
+    {
+      "node": "JianghaiExpansion_MarketWickerBasket_Part00",
+      "mesh": "Vert.001"
+    },
+    {
+      "node": "JianghaiExpansion_PawnshopBackdrop",
+      "mesh": "JianghaiChineseTempleHall_LOD"
+    },
+    {
+      "node": "JianghaiExpansion_PawnshopStool00",
+      "mesh": "Plane.001"
+    },
+    {
+      "node": "JianghaiExpansion_PawnshopStool01",
+      "mesh": "Plane.001"
+    },
+    {
+      "node": "JianghaiExpansion_PawnshopStool02",
+      "mesh": "Plane.001"
+    },
+    {
+      "node": "JianghaiExpansion_PawnshopTeaTable",
+      "mesh": "Plane.003"
+    },
+    {
+      "node": "JianghaiExpansion_StreetLife",
+      "mesh": ""
+    },
+    {
+      "node": "JianghaiExpansion_UrbanFacades",
+      "mesh": ""
+    },
+    {
+      "node": "JianghaiExpansion_WestClockLantern",
+      "mesh": "lantern"
+    },
+    {
+      "node": "JianghaiInteriorShell_EastGateRow00",
+      "mesh": "JianghaiInteriorShopLiner_LOD"
+    },
+    {
+      "node": "JianghaiInteriorShell_EastPhotoHouse",
+      "mesh": "JianghaiInteriorShopLiner_LOD"
+    },
+    {
+      "node": "JianghaiInteriorShell_EastTeaHouse",
+      "mesh": "JianghaiInteriorShopLiner_LOD"
+    },
+    {
+      "node": "JianghaiInteriorShell_NorthwestGateHouse",
+      "mesh": "JianghaiInteriorShopLiner_LOD"
+    },
+    {
+      "node": "JianghaiInteriorShell_OuterEastMidResidence",
+      "mesh": "JianghaiInteriorShopLiner_LOD"
+    },
+    {
+      "node": "JianghaiInteriorShell_OuterWestSquareResidence",
+      "mesh": "JianghaiInteriorShopLiner_LOD"
+    },
+    {
+      "node": "JianghaiInteriorShell_WeatheredRollerShop00",
+      "mesh": "JianghaiInteriorShopLiner_LOD"
+    },
+    {
+      "node": "JianghaiInteriorShell_WeatheredRollerShop01",
+      "mesh": "JianghaiInteriorShopLiner_LOD"
+    },
+    {
+      "node": "JianghaiInteriorShell_WeatheredRollerShop02",
+      "mesh": "JianghaiInteriorShopLiner_LOD"
+    },
+    {
+      "node": "JianghaiInteriorShell_WeatheredRollerShop03",
+      "mesh": "JianghaiInteriorShopLiner_LOD"
+    },
+    {
+      "node": "JianghaiInteriorShell_WestMarketResidence",
+      "mesh": "JianghaiInteriorShopLiner_LOD"
+    },
+    {
+      "node": "JianghaiInteriorShell_WestMedicineRow01",
+      "mesh": "JianghaiInteriorShopLiner_LOD"
+    },
+    {
+      "node": "JianghaiMountainMassif00",
+      "mesh": "JianghaiHeroMountainDistantLOD"
+    },
+    {
+      "node": "JianghaiMountainMassif01",
+      "mesh": "JianghaiHeroMountainDistantLOD"
+    },
+    {
+      "node": "JianghaiMountainMassif02",
+      "mesh": "JianghaiHeroMountainDistantLOD"
+    },
+    {
+      "node": "JianghaiMountainMassif03",
+      "mesh": "JianghaiHeroMountainDistantLOD"
+    },
+    {
+      "node": "JianghaiMountainMassif04",
+      "mesh": "JianghaiHeroMountainDistantLOD"
+    },
+    {
+      "node": "JianghaiMountainMassif05",
+      "mesh": "JianghaiHeroMountainDistantLOD"
+    },
+    {
+      "node": "JianghaiMountainMassif06",
+      "mesh": "JianghaiHeroMountainDistantLOD"
+    },
+    {
+      "node": "JianghaiMountainMassif07",
+      "mesh": "JianghaiHeroMountainDistantLOD"
+    },
+    {
+      "node": "JianghaiMountainMassif08",
+      "mesh": "JianghaiHeroMountainDistantLOD"
+    },
+    {
+      "node": "JianghaiMountainMassif09",
+      "mesh": "JianghaiHeroMountainDistantLOD"
+    },
+    {
+      "node": "JianghaiMountainMassif10",
+      "mesh": "JianghaiHeroMountainDistantLOD"
+    },
+    {
+      "node": "JianghaiMountainMassif11",
+      "mesh": "JianghaiHeroMountainDistantLOD"
+    },
+    {
+      "node": "JianghaiOldCityAuthoredScene",
+      "mesh": ""
+    },
+    {
+      "node": "JianghaiPerimeterGroundComposite",
+      "mesh": "JianghaiCoastLine01CompositeTerrain"
+    },
+    {
+      "node": "JianghaiTenementDistrict",
+      "mesh": ""
+    },
+    {
+      "node": "JianghaiValleyEnvironment",
+      "mesh": ""
+    },
+    {
+      "node": "NortheastGateHouse",
+      "mesh": "JianghaiChineseGateHouse_LOD"
+    },
+    {
+      "node": "NorthwestGateHouse",
+      "mesh": "JianghaiEnterable_NorthwestGateHouse_LOD"
+    },
+    {
+      "node": "OuterEastHarborResidence",
+      "mesh": "JianghaiChineseGateHouse_LOD"
+    },
+    {
+      "node": "OuterEastMarketResidence",
+      "mesh": "JianghaiChineseArcadeShop_LOD"
+    },
+    {
+      "node": "OuterEastMidResidence",
+      "mesh": "JianghaiEnterable_OuterEastMidResidence_LOD"
+    },
+    {
+      "node": "OuterEastNorthResidence",
+      "mesh": "JianghaiChineseTempleHall_LOD"
+    },
+    {
+      "node": "OuterEastTeaResidence",
+      "mesh": "JianghaiChineseArcadeShop_LOD"
+    },
+    {
+      "node": "OuterNortheastResidence",
+      "mesh": "JianghaiChineseTempleHall_LOD"
+    },
+    {
+      "node": "OuterNorthwestResidence",
+      "mesh": "JianghaiChineseArcadeShop_LOD"
+    },
+    {
+      "node": "OuterWestClockResidence",
+      "mesh": "JianghaiChineseGateHouse_LOD"
+    },
+    {
+      "node": "OuterWestHarborResidence",
+      "mesh": "JianghaiChineseTempleHall_LOD"
+    },
+    {
+      "node": "OuterWestMarketResidence",
+      "mesh": "JianghaiChineseGateHouse_LOD"
+    },
+    {
+      "node": "OuterWestNorthResidence",
+      "mesh": "JianghaiChineseTempleHall_LOD"
+    },
+    {
+      "node": "OuterWestSouthResidence",
+      "mesh": "JianghaiChineseTempleHall_LOD"
+    },
+    {
+      "node": "OuterWestSquareResidence",
+      "mesh": "JianghaiEnterable_OuterEastMidResidence_LOD"
+    },
+    {
+      "node": "PawnshopApproach",
+      "mesh": "PawnshopApproachMesh"
+    },
+    {
+      "node": "PawnshopAuthoredCanopy_00",
+      "mesh": "立方体.019"
+    },
+    {
+      "node": "PawnshopAuthoredCanopy_01",
+      "mesh": "立方体.026"
+    },
+    {
+      "node": "PawnshopAuthoredCanopy_02",
+      "mesh": "立方体.029"
+    },
+    {
+      "node": "PawnshopAuthoredCanopy_03",
+      "mesh": "柱体"
+    },
+    {
+      "node": "PawnshopAuthoredCanopy_04",
+      "mesh": "柱体.001"
+    },
+    {
+      "node": "PawnshopAuthoredCanopy_05",
+      "mesh": "柱体.009"
+    },
+    {
+      "node": "PawnshopAuthoredCanopy_06",
+      "mesh": "柱体.005"
+    },
+    {
+      "node": "PawnshopAuthoredCanopy_07",
+      "mesh": "柱体.010"
+    },
+    {
+      "node": "PawnshopAuthoredCanopy_08",
+      "mesh": "柱体.031"
+    },
+    {
+      "node": "PawnshopAuthoredCanopy_09",
+      "mesh": "立方体.018"
+    },
+    {
+      "node": "PawnshopAuthoredCanopy_10",
+      "mesh": "立方体.005"
+    },
+    {
+      "node": "PawnshopAuthoredCanopy_11",
+      "mesh": "立方体.007"
+    },
+    {
+      "node": "PawnshopAuthoredCanopy_12",
+      "mesh": "柱体.004"
+    },
+    {
+      "node": "PawnshopAuthoredCanopy_13",
+      "mesh": "立方体"
+    },
+    {
+      "node": "PawnshopAuthoredCanopy_14",
+      "mesh": "立方体.042"
+    },
+    {
+      "node": "PawnshopAuthoredPavilionGate",
+      "mesh": ""
+    },
+    {
+      "node": "PawnshopAuthoredWing_East_F0_C0_Insert",
+      "mesh": "PawnshopAuthoredInsert_Cube.115"
+    },
+    {
+      "node": "PawnshopAuthoredWing_East_F0_C0_Wall",
+      "mesh": "PawnshopAuthored_Mesh.018"
+    },
+    {
+      "node": "PawnshopAuthoredWing_East_F0_C1_Insert",
+      "mesh": "PawnshopAuthoredInsert_Cube.004"
+    },
+    {
+      "node": "PawnshopAuthoredWing_East_F0_C1_Wall",
+      "mesh": "PawnshopAuthored_Mesh.012"
+    },
+    {
+      "node": "PawnshopAuthoredWing_East_F0_C2_Insert",
+      "mesh": "PawnshopAuthoredInsert_Cube.115"
+    },
+    {
+      "node": "PawnshopAuthoredWing_East_F0_C2_Wall",
+      "mesh": "PawnshopAuthored_Mesh.018"
+    },
+    {
+      "node": "PawnshopAuthoredWing_EastReturn_F0_Insert",
+      "mesh": "PawnshopAuthoredInsert_Cube.115"
+    },
+    {
+      "node": "PawnshopAuthoredWing_EastReturn_F0_Wall",
+      "mesh": "PawnshopAuthored_Mesh.018"
+    },
+    {
+      "node": "PawnshopAuthoredWing_West_F0_C0_Insert",
+      "mesh": "PawnshopAuthoredInsert_Cube.115"
+    },
+    {
+      "node": "PawnshopAuthoredWing_West_F0_C0_Wall",
+      "mesh": "PawnshopAuthored_Mesh.018"
+    },
+    {
+      "node": "PawnshopAuthoredWing_West_F0_C1_Insert",
+      "mesh": "PawnshopAuthoredInsert_Cube.004"
+    },
+    {
+      "node": "PawnshopAuthoredWing_West_F0_C1_Wall",
+      "mesh": "PawnshopAuthored_Mesh.012"
+    },
+    {
+      "node": "PawnshopAuthoredWing_West_F0_C2_Insert",
+      "mesh": "PawnshopAuthoredInsert_Cube.115"
+    },
+    {
+      "node": "PawnshopAuthoredWing_West_F0_C2_Wall",
+      "mesh": "PawnshopAuthored_Mesh.018"
+    },
+    {
+      "node": "PawnshopAuthoredWing_WestReturn_F0_Insert",
+      "mesh": "PawnshopAuthoredInsert_Cube.115"
+    },
+    {
+      "node": "PawnshopAuthoredWing_WestReturn_F0_Wall",
+      "mesh": "PawnshopAuthored_Mesh.018"
+    },
+    {
+      "node": "PawnshopCourtyardStone",
+      "mesh": "PawnshopCourtyardStoneMesh"
+    },
+    {
+      "node": "PawnshopEastWall_00",
+      "mesh": "Cube.163"
+    },
+    {
+      "node": "PawnshopEastWall_01",
+      "mesh": "Cube.163"
+    },
+    {
+      "node": "PawnshopEastWall_02",
+      "mesh": "Cube.163"
+    },
+    {
+      "node": "PawnshopEastWall_03",
+      "mesh": "Cube.163"
+    },
+    {
+      "node": "PawnshopEastWall_04",
+      "mesh": "Cube.163"
+    },
+    {
+      "node": "PawnshopEastWall_05",
+      "mesh": "Cube.163"
+    },
+    {
+      "node": "PawnshopEastWall_06",
+      "mesh": "Cube.163"
+    },
+    {
+      "node": "PawnshopEastWall_07",
+      "mesh": "Cube.163"
+    },
+    {
+      "node": "PawnshopEastWallCap_00",
+      "mesh": "Cube.078"
+    },
+    {
+      "node": "PawnshopEastWallCap_01",
+      "mesh": "Cube.078"
+    },
+    {
+      "node": "PawnshopEastWallCap_02",
+      "mesh": "Cube.078"
+    },
+    {
+      "node": "PawnshopEastWallCap_03",
+      "mesh": "Cube.078"
+    },
+    {
+      "node": "PawnshopEastWallCap_04",
+      "mesh": "Cube.078"
+    },
+    {
+      "node": "PawnshopEastWallCap_05",
+      "mesh": "Cube.078"
+    },
+    {
+      "node": "PawnshopEastWallCap_06",
+      "mesh": "Cube.078"
+    },
+    {
+      "node": "PawnshopEastWallCap_07",
+      "mesh": "Cube.078"
+    },
+    {
+      "node": "PawnshopEntryFacade_DoorFrame",
+      "mesh": "JianghaiEntryFacade_DoorFrameTrim"
+    },
+    {
+      "node": "PawnshopEntryFacade_Wall_East_00",
+      "mesh": "JianghaiEntryFacade_BrickPlain"
+    },
+    {
+      "node": "PawnshopEntryFacade_Wall_East_01",
+      "mesh": "JianghaiEntryFacade_BrickPlain"
+    },
+    {
+      "node": "PawnshopEntryFacade_Wall_East_02",
+      "mesh": "JianghaiEntryFacade_BrickPlain"
+    },
+    {
+      "node": "PawnshopEntryFacade_Wall_East_03",
+      "mesh": "JianghaiEntryFacade_BrickPlain"
+    },
+    {
+      "node": "PawnshopEntryFacade_Wall_Lintel",
+      "mesh": "JianghaiEntryFacade_BrickPlain"
+    },
+    {
+      "node": "PawnshopEntryFacade_Wall_West_00",
+      "mesh": "JianghaiEntryFacade_BrickPlain"
+    },
+    {
+      "node": "PawnshopEntryFacade_Wall_West_01",
+      "mesh": "JianghaiEntryFacade_BrickPlain"
+    },
+    {
+      "node": "PawnshopEntryFacade_Wall_West_02",
+      "mesh": "JianghaiEntryFacade_BrickPlain"
+    },
+    {
+      "node": "PawnshopEntryFacade_Wall_West_03",
+      "mesh": "JianghaiEntryFacade_BrickPlain"
+    },
+    {
+      "node": "PawnshopGuardianLionEast",
+      "mesh": "Chinese Porcelain Lion.001"
+    },
+    {
+      "node": "PawnshopGuardianLionWest",
+      "mesh": "Chinese Porcelain Lion.001"
+    },
+    {
+      "node": "PawnshopLantern00",
+      "mesh": "lantern"
+    },
+    {
+      "node": "PawnshopLantern01",
+      "mesh": "lantern"
+    },
+    {
+      "node": "PawnshopLantern02",
+      "mesh": "lantern"
+    },
+    {
+      "node": "PawnshopLantern03",
+      "mesh": "lantern"
+    },
+    {
+      "node": "PawnshopLantern04",
+      "mesh": "lantern"
+    },
+    {
+      "node": "PawnshopLantern05",
+      "mesh": "lantern"
+    },
+    {
+      "node": "PawnshopNorthWall_00",
+      "mesh": "Cube.163"
+    },
+    {
+      "node": "PawnshopNorthWall_01",
+      "mesh": "Cube.163"
+    },
+    {
+      "node": "PawnshopNorthWall_02",
+      "mesh": "Cube.163"
+    },
+    {
+      "node": "PawnshopNorthWall_03",
+      "mesh": "Cube.163"
+    },
+    {
+      "node": "PawnshopNorthWall_04",
+      "mesh": "Cube.163"
+    },
+    {
+      "node": "PawnshopNorthWall_05",
+      "mesh": "Cube.163"
+    },
+    {
+      "node": "PawnshopNorthWall_06",
+      "mesh": "Cube.163"
+    },
+    {
+      "node": "PawnshopNorthWall_07",
+      "mesh": "Cube.163"
+    },
+    {
+      "node": "PawnshopNorthWallCap_00",
+      "mesh": "Cube.078"
+    },
+    {
+      "node": "PawnshopNorthWallCap_01",
+      "mesh": "Cube.078"
+    },
+    {
+      "node": "PawnshopNorthWallCap_02",
+      "mesh": "Cube.078"
+    },
+    {
+      "node": "PawnshopNorthWallCap_03",
+      "mesh": "Cube.078"
+    },
+    {
+      "node": "PawnshopNorthWallCap_04",
+      "mesh": "Cube.078"
+    },
+    {
+      "node": "PawnshopNorthWallCap_05",
+      "mesh": "Cube.078"
+    },
+    {
+      "node": "PawnshopNorthWallCap_06",
+      "mesh": "Cube.078"
+    },
+    {
+      "node": "PawnshopNorthWallCap_07",
+      "mesh": "Cube.078"
+    },
+    {
+      "node": "PawnshopPowerDrop",
+      "mesh": "PawnshopPowerDropCurve"
+    },
+    {
+      "node": "PawnshopWestWall_00",
+      "mesh": "Cube.163"
+    },
+    {
+      "node": "PawnshopWestWall_01",
+      "mesh": "Cube.163"
+    },
+    {
+      "node": "PawnshopWestWall_02",
+      "mesh": "Cube.163"
+    },
+    {
+      "node": "PawnshopWestWall_03",
+      "mesh": "Cube.163"
+    },
+    {
+      "node": "PawnshopWestWall_04",
+      "mesh": "Cube.163"
+    },
+    {
+      "node": "PawnshopWestWall_05",
+      "mesh": "Cube.163"
+    },
+    {
+      "node": "PawnshopWestWall_06",
+      "mesh": "Cube.163"
+    },
+    {
+      "node": "PawnshopWestWall_07",
+      "mesh": "Cube.163"
+    },
+    {
+      "node": "PawnshopWestWallCap_00",
+      "mesh": "Cube.078"
+    },
+    {
+      "node": "PawnshopWestWallCap_01",
+      "mesh": "Cube.078"
+    },
+    {
+      "node": "PawnshopWestWallCap_02",
+      "mesh": "Cube.078"
+    },
+    {
+      "node": "PawnshopWestWallCap_03",
+      "mesh": "Cube.078"
+    },
+    {
+      "node": "PawnshopWestWallCap_04",
+      "mesh": "Cube.078"
+    },
+    {
+      "node": "PawnshopWestWallCap_05",
+      "mesh": "Cube.078"
+    },
+    {
+      "node": "PawnshopWestWallCap_06",
+      "mesh": "Cube.078"
+    },
+    {
+      "node": "PawnshopWestWallCap_07",
+      "mesh": "Cube.078"
+    },
+    {
+      "node": "WeatheredRollerShop00",
+      "mesh": "JianghaiEnterable_WeatheredRollerShop00_LOD.001"
+    },
+    {
+      "node": "WeatheredRollerShop01",
+      "mesh": "JianghaiEnterable_WeatheredRollerShop01_LOD.001"
+    },
+    {
+      "node": "WeatheredRollerShop02",
+      "mesh": "JianghaiEnterable_WeatheredRollerShop02_LOD.001"
+    },
+    {
+      "node": "WeatheredRollerShop03",
+      "mesh": "JianghaiEnterable_WeatheredRollerShop02_LOD.001"
+    },
+    {
+      "node": "WestClockHouse",
+      "mesh": "JianghaiChineseTempleHall_LOD"
+    },
+    {
+      "node": "WestClockRow01",
+      "mesh": "JianghaiStreetCadence_Building1Large"
+    },
+    {
+      "node": "WestGateRow01",
+      "mesh": "JianghaiChineseGateHouse_LOD"
+    },
+    {
+      "node": "WestGateRow02",
+      "mesh": "JianghaiChineseGateHouse_LOD"
+    },
+    {
+      "node": "WestHarborResidence",
+      "mesh": "JianghaiChineseTempleHall_LOD"
+    },
+    {
+      "node": "WestMarketResidence",
+      "mesh": "JianghaiEnterable_WestMarketResidence_LOD"
+    },
+    {
+      "node": "WestMarketRow01",
+      "mesh": "JianghaiChineseArcadeShop_LOD"
+    },
+    {
+      "node": "WestMedicineHouse",
+      "mesh": "JianghaiChineseTempleHall_LOD"
+    },
+    {
+      "node": "WestMedicineRow01",
+      "mesh": "JianghaiEnterable_WestMedicineRow01_LOD"
+    },
+    {
+      "node": "WestMedicineRow02",
+      "mesh": "JianghaiStreetCadence_Building4"
+    },
+    {
+      "node": "WestSquareRow01",
+      "mesh": "JianghaiChineseTempleHall_LOD"
+    },
+    {
+      "node": "WestSquareRow02",
+      "mesh": "JianghaiChineseTempleHall_LOD"
+    },
+    {
+      "node": "WestTeaWarehouse",
+      "mesh": "JianghaiChineseGateHouse_LOD"
+    },
+    {
+      "node": "WestTheatreHouse",
+      "mesh": "JianghaiChineseGateHouse_LOD"
+    },
+    {
+      "node": "WestTheatreRow02",
+      "mesh": "JianghaiStreetCadence_House2"
+    }
+  ]
+}
