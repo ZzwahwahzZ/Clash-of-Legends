@@ -3,6 +3,7 @@ name: Phase 1 - Acquire and audit CC0 world assets
 on:
   push:
     branches:
+      - main
       - stage/phase1-world-assets
     paths:
       - ".github/workflows/phase1-world-assets.yml"
