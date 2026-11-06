@@ -264,6 +264,22 @@ def parse_wdb(data: bytes) -> dict:
             parsed = parse_simo(blob)
         elif magic in (b"MESH", b"MESZ"):
             parsed = parse_mesh(blob)
+        elif magic == b"ROPT":
+            # Preserve a bounded raw probe until the Mobile RolePart record layout
+            # is validated against independent samples; never guess field names.
+            payload = blob[8:]
+            u32_count = min(len(payload) // 4, 128)
+            u16_count = min(len(payload) // 2, 128)
+            parsed = {
+                "format": "ROPT",
+                "record_count": struct.unpack_from("<I", blob, 4)[0] if len(blob) >= 8 else None,
+                "parse_status": "RAW_LAYOUT_PROBE_ONLY",
+                "raw_size_bytes": len(blob),
+                "payload_size_bytes": len(payload),
+                "u32_probe": list(struct.unpack_from("<" + "I" * u32_count, payload, 0)) if u32_count else [],
+                "u16_probe": list(struct.unpack_from("<" + "H" * u16_count, payload, 0)) if u16_count else [],
+                "payload_hex": payload.hex(),
+            }
         elif magic == b"SIM5":
             parsed = {
                 "format": "SIM5", "record_count": struct.unpack_from("<I", blob, 4)[0] if len(blob) >= 8 else None,
