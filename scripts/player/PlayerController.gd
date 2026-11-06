@@ -242,7 +242,7 @@ func _validate_character_candidate(candidate: Node, animation_node: Node, model_
 	var morph_animation_valid := morph_mesh_count >= 8 and has_morph_idle and has_morph_move
 	var vat_animation_valid := c3_vat_animator != null and c3_vat_animator.has_vat_for_model(model_id)
 	if not skeletal_animation_valid and not morph_animation_valid and not vat_animation_valid:
-		return {"ok": false, "reason": "requires bound skeletal idle/move clips, semantic morph idle/move clips, or a verified C3 VAT idle/walk/run set"}
+		return {"ok": false, "reason": "requires bound skeletal idle/move clips, at least 8 morph meshes with semantic idle/move clips, or a verified C3 VAT idle/walk/run set"}
 	var mode := "skeletal" if skeletal_animation_valid else ("morph" if morph_animation_valid else "C3 VAT")
 	return {"ok": true, "reason": "renderable texture-backed materials and complete %s idle/move animation path present" % mode}
 
