@@ -146,7 +146,8 @@ func _run() -> void:
     var bridge_center := bridge_deck.global_position
     var bridge_camera := Camera3D.new()
     bridge_camera.fov = 58.0
-    bridge_camera.position = bridge_center + Vector3(25.0, 18.0, 25.0)
+    bridge_camera.position = bridge_center + Vector3(12.0, 10.0, 12.0)
+    bridge_camera.fov = 50.0
     root.add_child(bridge_camera)
     bridge_camera.look_at(bridge_center, Vector3.UP)
     bridge_camera.current = true
@@ -182,6 +183,9 @@ func _run_main_game_integration() -> void:
         old_ground.visible = false
     if old_city:
         old_city.visible = false
+    var old_trees := game.get_node_or_null("TwinPlainsTrees")
+    if old_trees:
+        old_trees.visible = false
     var canvas := game.get_node_or_null("CanvasLayer")
     if canvas:
         canvas.visible = false
@@ -220,7 +224,7 @@ func _run_main_game_integration() -> void:
     var bridge_camera := Camera3D.new()
     bridge_camera.fov = 62.0
     var bridge_center := bridge.global_position
-    bridge_camera.position = bridge_center + Vector3(30.0, 22.0, 30.0)
+    bridge_camera.position = bridge_center + Vector3(12.0, 9.0, 12.0)
     game.add_child(bridge_camera)
     bridge_camera.look_at(bridge_center, Vector3.UP)
     bridge_camera.current = true
