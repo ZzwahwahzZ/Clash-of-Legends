@@ -1,0 +1,142 @@
+name: Phase 1 - Acquire and audit CC0 world assets
+
+on:
+  push:
+    branches:
+      - main
+      - stage/phase1-world-assets
+    paths:
+      - ".github/workflows/phase1-world-assets.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  acquire-and-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout phase branch
+        uses: actions/checkout@v4
+        with:
+          ref: stage/phase1-world-assets
+          fetch-depth: 0
+
+      - name: Install archive and image tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y unzip python3-pil
+
+      - name: Download official CC0 asset packs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/phase1-packs assets/environment/phase1 reports
+          curl --fail --location --retry 3 --retry-delay 2 \
+            "https://kenney.nl/media/pages/assets/fantasy-town-kit/efe948d309-1754222374/kenney_fantasy-town-kit_2.0.zip" \
+            -o /tmp/phase1-packs/kenney_fantasy-town-kit_2.0.zip
+          echo "1a7530c09f4d2fa2cdee259876f089334f8b1f27fa86a0c4f54ef86cdd8676ef  /tmp/phase1-packs/kenney_fantasy-town-kit_2.0.zip" | sha256sum -c -
+          curl --fail --location --retry 3 --retry-delay 2 \
+            "https://kenney.nl/media/pages/assets/nature-kit/37ac38a37b-1677698939/kenney_nature-kit.zip" \
+            -o /tmp/phase1-packs/kenney_nature-kit.zip
+          echo "fa7974a0d342bfe63c38664ba9f8ec1a4aab8ea25f099bdc56870e33588c4d9d  /tmp/phase1-packs/kenney_nature-kit.zip" | sha256sum -c -
+          # Godot Asset Library entry, CC0 1.0. The store endpoint issues a short-lived
+          # download redirect; no account or private token is used.
+          curl --fail --location --retry 3 --retry-delay 2 \
+            "https://store.godotengine.org/asset/vvaytoyek/chinese-four-corner-pavilion-free/download/1144/" \
+            -o /tmp/phase1-packs/chinese-four-corner-pavilion.zip
+          unzip -t /tmp/phase1-packs/kenney-fantasy-town-kit_2.0.zip
+          unzip -t /tmp/phase1-packs/kenney_nature-kit.zip
+          unzip -t /tmp/phase1-packs/chinese-four-corner-pavilion.zip
+          mkdir -p assets/environment/phase1/kenney-fantasy-town-kit
+          mkdir -p assets/environment/phase1/kenney-nature-kit
+          mkdir -p assets/environment/phase1/chinese-four-corner-pavilion
+          unzip -q /tmp/phase1-packs/kenney-fantasy-town-kit_2.0.zip -d assets/environment/phase1/kenney-fantasy-town-kit
+          unzip -q /tmp/phase1-packs/kenney_nature-kit.zip -d assets/environment/phase1/kenney-nature-kit
+          unzip -q /tmp/phase1-packs/chinese-four-corner-pavilion.zip -d assets/environment/phase1/chinese-four-corner-pavilion
+          cp /tmp/phase1-packs/*.zip reports/
+
+      - name: Build provenance and model inventory
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          root = Path("assets/environment/phase1")
+          rows = []
+          for p in sorted(root.rglob("*")):
+              if not p.is_file():
+                  continue
+              rel = p.as_posix()
+              suffix = p.suffix.lower()
+              digest = hashlib.sha256(p.read_bytes()).hexdigest()
+              rows.append({"path": rel, "bytes": p.stat().st_size, "sha256": digest, "kind": suffix[1:] if suffix else "file"})
+          models = [x for x in rows if x["kind"] in {"glb", "gltf", "fbx", "obj", "blend"}]
+          (Path("reports") / "phase1_world_asset_manifest.json").write_text(
+              json.dumps({"asset_count": len(rows), "model_count": len(models), "files": rows}, indent=2),
+              encoding="utf-8")
+          print(f"PHASE1 ASSET INVENTORY: {len(rows)} files; {len(models)} model files")
+          for x in models:
+              print(f'MODEL {x["bytes"]:>9} {x["path"]}')
+          if not models:
+              raise SystemExit("No 3D model files were found in the downloaded packs.")
+          PY
+          cat > assets/environment/phase1/SOURCES.md <<'EOF'
+          # Phase 1 world asset sources
+
+          All three packs below are free downloads and are marked CC0 1.0 by their
+          respective publishers. Keep the original included license/readme files.
+
+          - Kenney Fantasy Town Kit 2.0: https://kenney.nl/assets/fantasy-town-kit
+            Official archive SHA-256:
+            1a7530c09f4d2fa2cdee259876f089334f8b1f27fa86a0c4f54ef86cdd8676ef
+          - Kenney Nature Kit 2.1: https://kenney.nl/assets/nature-kit
+            Official archive SHA-256:
+            fa7974a0d342bfe63c38664ba9f8ec1a4aab8ea25f099bdc56870e33588c4d9d
+          - Chinese Four-corner Pavilion: https://store.godotengine.org/asset/vvaytoyek/chinese-four-corner-pavilion-free/
+            Godot Asset Library lists CC0 1.0 Universal. Archive digest is recorded
+            in reports/phase1_world_asset_manifest.json after acquisition.
+
+          These are candidate assets only. No model is accepted into MainGame until
+          Godot import, visual inspection, scale/material review, and runtime tests pass.
+          EOF
+
+      - name: Import project with Godot 4.3
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.3.0
+          use-dotnet: false
+          include-templates: false
+
+      - name: Verify Godot import
+        shell: bash
+        run: |
+          set -o pipefail
+          godot --headless --editor --path . --quit 2>&1 | tee reports/phase1_godot_import.log
+          if grep -Eq "SCRIPT ERROR:|Parse Error:|Compile Error:|ERROR: Failed to load" reports/phase1_godot_import.log; then
+            echo "Godot reported import or script errors"
+            exit 1
+          fi
+
+      - name: Commit acquired CC0 source assets and audit inventory to phase branch
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/environment/phase1 reports/phase1_world_asset_manifest.json reports/phase1_godot_import.log
+          git diff --cached --quiet && { echo "No asset changes to commit"; exit 0; }
+          git commit -m "Acquire and audit CC0 world assets for phase 1"
+          git push origin HEAD:stage/phase1-world-assets
+
+      - name: Upload acquisition evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Phase1-CC0-World-Asset-Audit
+          path: |
+            reports/phase1_world_asset_manifest.json
+            reports/phase1_godot_import.log
+            reports/kenney-*.zip
+            reports/chinese-four-corner-pavilion.zip
+            assets/environment/phase1/SOURCES.md
+          if-no-files-found: warn
+          retention-days: 30
