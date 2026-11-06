@@ -48,7 +48,10 @@ def record(records,scope,name,size,crc=None):
 
 def extract_zip(zf,dest,scope,records,limit):
  out=[]
- for i in zf.infolist():
+ infos=zf.infolist()
+ print(f"[ZIP] بدء استخراج {len(infos)} مدخلًا إلى {dest}",flush=True)
+ done=0
+ for i in infos:
   if i.is_dir(): continue
   rel=safe_rel(i.filename); mode=(i.external_attr>>16)&0xffff
   if stat.S_ISLNK(mode): continue
@@ -60,6 +63,8 @@ def extract_zip(zf,dest,scope,records,limit):
     if not b: break
     dst.write(b); h.update(b)
   limit[0]+=i.file_size; r=record(records,scope,i.filename,i.file_size,i.CRC); r["sha256"]=h.hexdigest(); r["signature"]=signature(target); out.append(target)
+  done+=1
+  if done%100==0 or done==len(infos): print(f"[ZIP] {done}/{len(infos)} ملف | {limit[0]/1024**2:.1f} MiB مستخرج",flush=True)
  return out
 
 def extract_tar(tf,dest,scope,records,limit):
@@ -105,12 +110,12 @@ def main():
  while queue:
   cur,dest,depth,scope=queue.pop(0)
   try:
+   print(f"[SCAN] فحص: {cur.name} | العمق {depth}",flush=True)
    sig=signature(cur)
    if sig=="zip":
     with zipfile.ZipFile(cur) as z:
-     bad=z.testzip()
-     if bad: raise RuntimeError("ZIP CRC failure: "+bad)
-     report["archives"].append({"path":str(cur),"format":"zip","entries":len(z.infolist()),"test":"passed"})
+     print(f"[ZIP] فهرس الأرشيف سليم مبدئيًا؛ {len(z.infolist())} مدخلًا. سلامة CRC تُراجع أثناء الاستخراج.",flush=True)
+     report["archives"].append({"path":str(cur),"format":"zip","entries":len(z.infolist()),"test":"CRC checked during extraction"})
      children=extract_zip(z,dest,scope,report["files"],limit)
    elif cur.suffix.lower() in {".tar",".tgz",".gz",".bz2",".xz"}:
     with tarfile.open(cur,"r:*") as t:
@@ -123,6 +128,7 @@ def main():
     if child.suffix.lower() in ARCHIVE_EXT and depth<x.max_depth and child not in seen:
      seen.add(child); queue.append((child,child.parent/(child.stem+"_contents"),depth+1,str(child.relative_to(stage))))
   except Exception as e: report["errors"].append({"path":str(cur),"error":str(e)})
+ print("[REPORT] حفظ التقارير النهائية...",flush=True)
  report["file_count"]=len(report["files"]); report["extracted_bytes"]=limit[0]
  report["category_counts"]={k:sum(k in f["categories"] for f in report["files"]) for k in KEYWORDS}
  report["extension_counts"]=dict(collections.Counter(f["extension"] or "[none]" for f in report["files"]))
