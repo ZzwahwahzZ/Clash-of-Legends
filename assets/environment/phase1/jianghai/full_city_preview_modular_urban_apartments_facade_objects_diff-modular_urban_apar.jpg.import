@@ -1,0 +1,37 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://b75i6m5v4hlmj"
+path="res://.godot/imported/full_city_preview_modular_urban_apartments_facade_objects_diff-modular_urban_apar.jpg-6cff2ac113b08bc3d212a32d2aa83288.ctex"
+metadata={
+"vram_texture": false
+}
+generator_parameters={
+"md5": "ff722f73f41f479eeda5402a75126f0c"
+}
+
+[deps]
+
+source_file="res://assets/environment/phase1/jianghai/full_city_preview_modular_urban_apartments_facade_objects_diff-modular_urban_apar.jpg"
+dest_files=["res://.godot/imported/full_city_preview_modular_urban_apartments_facade_objects_diff-modular_urban_apar.jpg-6cff2ac113b08bc3d212a32d2aa83288.ctex"]
+
+[params]
+
+compress/mode=0
+compress/high_quality=false
+compress/lossy_quality=0.7
+compress/hdr_compression=1
+compress/normal_map=0
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode=0
+roughness/src_normal=""
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=0
+detect_3d/compress_to=1
