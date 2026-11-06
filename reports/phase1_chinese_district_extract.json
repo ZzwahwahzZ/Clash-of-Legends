@@ -1775,7 +1775,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketEastRamp",
@@ -1791,7 +1791,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRail_-123.95_4.85",
@@ -1807,7 +1807,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRail_-123.95_5.45",
@@ -1823,7 +1823,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRail_-128.05_4.85",
@@ -1839,7 +1839,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRail_-128.05_5.45",
@@ -1855,7 +1855,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-123.95_-12",
@@ -1871,7 +1871,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-123.95_-15",
@@ -1887,7 +1887,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-123.95_-18",
@@ -1903,7 +1903,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-123.95_-21",
@@ -1919,7 +1919,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-123.95_-3",
@@ -1935,7 +1935,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-123.95_-6",
@@ -1951,7 +1951,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-123.95_-9",
@@ -1967,7 +1967,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-123.95_0",
@@ -1983,7 +1983,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-123.95_12",
@@ -1999,7 +1999,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-123.95_15",
@@ -2015,7 +2015,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-123.95_18",
@@ -2031,7 +2031,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-123.95_21",
@@ -2047,7 +2047,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-123.95_3",
@@ -2063,7 +2063,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-123.95_6",
@@ -2079,7 +2079,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-123.95_9",
@@ -2095,7 +2095,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-128.05_-12",
@@ -2111,7 +2111,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-128.05_-15",
@@ -2127,7 +2127,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-128.05_-18",
@@ -2143,7 +2143,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-128.05_-21",
@@ -2159,7 +2159,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-128.05_-3",
@@ -2175,7 +2175,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-128.05_-6",
@@ -2191,7 +2191,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-128.05_-9",
@@ -2207,7 +2207,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-128.05_0",
@@ -2223,7 +2223,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-128.05_12",
@@ -2239,7 +2239,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-128.05_15",
@@ -2255,7 +2255,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-128.05_18",
@@ -2271,7 +2271,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-128.05_21",
@@ -2287,7 +2287,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-128.05_3",
@@ -2303,7 +2303,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-128.05_6",
@@ -2319,7 +2319,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-128.05_9",
@@ -2335,7 +2335,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketWestRamp",
@@ -2351,7 +2351,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     }
   ],
   "omitted_mesh_nodes": [
@@ -3108,598 +3108,6 @@
       "selected_by_name": false
     },
     {
-      "node": "MarketBridgeDeck",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketBridgeDeckMesh",
-      "translation": [
-        0,
-        4.179999828338623,
-        -126
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketEastRamp",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketEastRampMesh",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRail_-123.95_4.85",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRail_-123.95_4.85Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRail_-123.95_5.45",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRail_-123.95_5.45Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRail_-128.05_4.85",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRail_-128.05_4.85Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRail_-128.05_5.45",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRail_-128.05_5.45Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRailPost_-123.95_-12",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRailPost_-123.95_-12Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRailPost_-123.95_-15",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRailPost_-123.95_-15Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRailPost_-123.95_-18",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRailPost_-123.95_-18Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRailPost_-123.95_-21",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRailPost_-123.95_-21Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRailPost_-123.95_-3",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRailPost_-123.95_-3Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRailPost_-123.95_-6",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRailPost_-123.95_-6Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRailPost_-123.95_-9",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRailPost_-123.95_-9Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRailPost_-123.95_0",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRailPost_-123.95_0Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRailPost_-123.95_12",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRailPost_-123.95_12Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRailPost_-123.95_15",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRailPost_-123.95_15Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRailPost_-123.95_18",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRailPost_-123.95_18Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRailPost_-123.95_21",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRailPost_-123.95_21Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRailPost_-123.95_3",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRailPost_-123.95_3Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRailPost_-123.95_6",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRailPost_-123.95_6Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRailPost_-123.95_9",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRailPost_-123.95_9Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRailPost_-128.05_-12",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRailPost_-128.05_-12Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRailPost_-128.05_-15",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRailPost_-128.05_-15Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRailPost_-128.05_-18",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRailPost_-128.05_-18Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRailPost_-128.05_-21",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRailPost_-128.05_-21Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRailPost_-128.05_-3",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRailPost_-128.05_-3Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRailPost_-128.05_-6",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRailPost_-128.05_-6Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRailPost_-128.05_-9",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRailPost_-128.05_-9Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRailPost_-128.05_0",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRailPost_-128.05_0Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRailPost_-128.05_12",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRailPost_-128.05_12Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRailPost_-128.05_15",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRailPost_-128.05_15Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRailPost_-128.05_18",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRailPost_-128.05_18Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRailPost_-128.05_21",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRailPost_-128.05_21Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRailPost_-128.05_3",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRailPost_-128.05_3Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRailPost_-128.05_6",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRailPost_-128.05_6Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketRailPost_-128.05_9",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketRailPost_-128.05_9Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MarketWestRamp",
-      "parent_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
-      "mesh": "MarketWestRampMesh",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
       "node": "UtilityCable00",
       "parent_path": "JianghaiOldCityAuthoredScene/OverheadUtilityWires",
       "mesh": "UtilityCable00Curve",
@@ -4200,9 +3608,9 @@
   "source_glb": "assets/models/jianghai_old_city/jianghai_old_city.glb",
   "source_license": "MIT project composition; third-party source components remain under their recorded licenses in LICENSE_EVIDENCE.md",
   "input_bytes": 63204100,
-  "output_bytes": 52293292,
-  "output_sha256": "e598a9615d7677170c84d194443191d096917ba876882dc0167d1da89ffeeea7",
-  "selected_node_count": 451,
+  "output_bytes": 52432344,
+  "output_sha256": "67c93103d8b9272473db194c448d2fc879fa937b69b4608f632a088d813a9303",
+  "selected_node_count": 488,
   "selected_node_names": [
     "AuthoredStreetNetwork",
     "CentralAvenue",
@@ -4444,6 +3852,43 @@
     "Manhole01",
     "Manhole02",
     "Manhole03",
+    "MarketBridgeDeck",
+    "MarketEastRamp",
+    "MarketRailPost_-123.95_-12",
+    "MarketRailPost_-123.95_-15",
+    "MarketRailPost_-123.95_-18",
+    "MarketRailPost_-123.95_-21",
+    "MarketRailPost_-123.95_-3",
+    "MarketRailPost_-123.95_-6",
+    "MarketRailPost_-123.95_-9",
+    "MarketRailPost_-123.95_0",
+    "MarketRailPost_-123.95_12",
+    "MarketRailPost_-123.95_15",
+    "MarketRailPost_-123.95_18",
+    "MarketRailPost_-123.95_21",
+    "MarketRailPost_-123.95_3",
+    "MarketRailPost_-123.95_6",
+    "MarketRailPost_-123.95_9",
+    "MarketRailPost_-128.05_-12",
+    "MarketRailPost_-128.05_-15",
+    "MarketRailPost_-128.05_-18",
+    "MarketRailPost_-128.05_-21",
+    "MarketRailPost_-128.05_-3",
+    "MarketRailPost_-128.05_-6",
+    "MarketRailPost_-128.05_-9",
+    "MarketRailPost_-128.05_0",
+    "MarketRailPost_-128.05_12",
+    "MarketRailPost_-128.05_15",
+    "MarketRailPost_-128.05_18",
+    "MarketRailPost_-128.05_21",
+    "MarketRailPost_-128.05_3",
+    "MarketRailPost_-128.05_6",
+    "MarketRailPost_-128.05_9",
+    "MarketRail_-123.95_4.85",
+    "MarketRail_-123.95_5.45",
+    "MarketRail_-128.05_4.85",
+    "MarketRail_-128.05_5.45",
+    "MarketWestRamp",
     "NorthCrossStreet",
     "NortheastGateHouse",
     "NorthwestGateHouse",
@@ -4656,12 +4101,12 @@
     "WestTheatreHouse",
     "WestTheatreRow02"
   ],
-  "retained_node_count": 453,
-  "mesh_node_count": 438,
-  "unique_mesh_count": 150,
-  "primitive_count": 336,
-  "unique_triangles": 981919,
-  "instanced_triangles": 2895323,
+  "retained_node_count": 490,
+  "mesh_node_count": 475,
+  "unique_mesh_count": 187,
+  "primitive_count": 373,
+  "unique_triangles": 988851,
+  "instanced_triangles": 2902255,
   "material_count": 82,
   "texture_count": 112,
   "embedded_image_count": 112,
@@ -12392,7 +11837,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketEastRamp",
@@ -12408,7 +11853,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRail_-123.95_4.85",
@@ -12424,7 +11869,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRail_-123.95_5.45",
@@ -12440,7 +11885,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRail_-128.05_4.85",
@@ -12456,7 +11901,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRail_-128.05_5.45",
@@ -12472,7 +11917,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-123.95_-12",
@@ -12488,7 +11933,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-123.95_-15",
@@ -12504,7 +11949,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-123.95_-18",
@@ -12520,7 +11965,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-123.95_-21",
@@ -12536,7 +11981,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-123.95_-3",
@@ -12552,7 +11997,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-123.95_-6",
@@ -12568,7 +12013,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-123.95_-9",
@@ -12584,7 +12029,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-123.95_0",
@@ -12600,7 +12045,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-123.95_12",
@@ -12616,7 +12061,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-123.95_15",
@@ -12632,7 +12077,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-123.95_18",
@@ -12648,7 +12093,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-123.95_21",
@@ -12664,7 +12109,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-123.95_3",
@@ -12680,7 +12125,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-123.95_6",
@@ -12696,7 +12141,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-123.95_9",
@@ -12712,7 +12157,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-128.05_-12",
@@ -12728,7 +12173,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-128.05_-15",
@@ -12744,7 +12189,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-128.05_-18",
@@ -12760,7 +12205,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-128.05_-21",
@@ -12776,7 +12221,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-128.05_-3",
@@ -12792,7 +12237,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-128.05_-6",
@@ -12808,7 +12253,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-128.05_-9",
@@ -12824,7 +12269,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-128.05_0",
@@ -12840,7 +12285,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-128.05_12",
@@ -12856,7 +12301,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-128.05_15",
@@ -12872,7 +12317,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-128.05_18",
@@ -12888,7 +12333,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-128.05_21",
@@ -12904,7 +12349,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-128.05_3",
@@ -12920,7 +12365,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-128.05_6",
@@ -12936,7 +12381,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketRailPost_-128.05_9",
@@ -12952,7 +12397,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MarketWestRamp",
@@ -12968,7 +12413,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "OverheadUtilityWires",
