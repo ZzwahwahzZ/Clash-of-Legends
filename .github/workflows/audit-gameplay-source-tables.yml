@@ -57,6 +57,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Gameplay-Source-Table-Audit
-          path: |\n            reports/gameplay-source-table-audit.json\n            reports/comprehensive-asset-inventory.json\n            reports/polyfile-mobile-*.json
+          path: |
+            reports/gameplay-source-table-audit.json
+            reports/comprehensive-asset-inventory.json
+            reports/polyfile-mobile-*.json
           if-no-files-found: error
           retention-days: 30
