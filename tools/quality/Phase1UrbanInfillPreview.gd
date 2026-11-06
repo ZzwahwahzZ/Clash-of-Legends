@@ -220,8 +220,24 @@ func _write_bounds_audit(district:Node,root:Node3D)->void:
     "street_network_overlaps":street_overlaps,
     "terrain_overlap_count":terrain_overlaps.size(),
     "terrain_overlaps":terrain_overlaps,
-    "placement_status":"REJECT" if building_overlaps.size()>0 or street_overlaps.size()>0 else "REVIEW"
+    "placement_status":"REJECT" if building_overlaps.size()>0 or street_overlaps.size()>0 else "REVIEW_VISUAL_AND_NAV",\n    "_audit_aabb":b,\n    "candidate_overlaps":[]
    })
+ for i in range(rows.size()):
+  for j in range(i+1,rows.size()):
+   var a:AABB=rows[i]["_audit_aabb"]
+   var b:AABB=rows[j]["_audit_aabb"]
+   var ox:=minf(a.end.x,b.end.x)-maxf(a.position.x,b.position.x)
+   var oz:=minf(a.end.z,b.end.z)-maxf(a.position.z,b.position.z)
+   var oy:=minf(a.end.y,b.end.y)-maxf(a.position.y,b.position.y)
+   if ox>0.35 and oz>0.35 and oy>0.35:
+    var detail={"other_candidate":rows[j]["candidate"],"overlap_volume":snappedf(ox*oy*oz,0.01)}
+    var reverse={"other_candidate":rows[i]["candidate"],"overlap_volume":snappedf(ox*oy*oz,0.01)}
+    rows[i]["candidate_overlaps"].append(detail)
+    rows[j]["candidate_overlaps"].append(reverse)
+ for row in rows:
+  if row["candidate_overlaps"].size()>0:
+   row["placement_status"]="REJECT"
+  row.erase("_audit_aabb")
  var report={
   "district_bounds":_aabb_dict(_subtree_bounds(district)),
   "candidate_bounds":rows,
@@ -242,7 +258,7 @@ func _collect_authored_mesh_bounds(node:Node,rows:Array)->void:
   var instance:=node as MeshInstance3D
   if instance.mesh!=null:
    var label: String=(str(instance.name)+" "+str(instance.get_path())+" "+instance.mesh.resource_name).to_lower()
-   var terrain:=label.contains("terrain") or label.contains("groundcomposite") or label.contains("foundation")
+   var terrain:=label.contains("terrain") or label.contains("groundcomposite") or label.contains("foundation") or label.contains("utilitycable")
    var road:=label.contains("authoredstreetnetwork") or label.contains("street") or label.contains("road") or label.contains("avenue") or label.contains("curb") or label.contains("cross") or label.contains("lane") or label.contains("bridge") or label.contains("ramp") or label.contains("pawnshopapproach")
    rows.append({"name":str(instance.name),"path":str(instance.get_path()),"road":road and not terrain,"terrain":terrain,"bounds":instance.global_transform*instance.get_aabb()})
  for child in node.get_children():
