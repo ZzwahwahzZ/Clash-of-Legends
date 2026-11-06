@@ -212,6 +212,7 @@ jobs:
           test -s reports/phase1_chinese_district_preview.png
           test -s reports/phase1_chinese_district_closeup.png
           test -s reports/phase1_chinese_district_gate_detail.png
+          test -s reports/phase1_market_bridge_detail.png
           xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --path . --rendering-method gl_compatibility --script res://tools/quality/Phase1FullCityPreview.gd 2>&1 | tee reports/phase1_full_city_preview.log
           test -s reports/phase1_full_city_preview.png
           test -s reports/phase1_full_city_closeup.png
@@ -226,7 +227,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add assets/environment/phase1 reports/phase1_world_asset_manifest.json reports/phase1_chinese_district_extract.json reports/phase1_chinese_district_preview.png
-          git add -f reports/phase1_chinese_district_closeup.png reports/phase1_chinese_district_gate_detail.png reports/phase1_full_city_preview.png reports/phase1_full_city_closeup.png
+          git add -f reports/phase1_chinese_district_closeup.png reports/phase1_chinese_district_gate_detail.png reports/phase1_market_bridge_detail.png reports/phase1_full_city_preview.png reports/phase1_full_city_closeup.png
           rm -f assets/environment/phase1/jianghai/full_city_preview.glb assets/environment/phase1/jianghai/full_city_preview.glb.import
           git diff --cached --quiet && { echo "No asset changes to commit"; exit 0; }
           git commit -m "Acquire and audit phase 1 production world assets"
@@ -246,6 +247,7 @@ jobs:
             reports/phase1_chinese_district_preview.png
             reports/phase1_chinese_district_closeup.png
             reports/phase1_chinese_district_gate_detail.png
+            reports/phase1_market_bridge_detail.png
             reports/phase1_full_city_preview.log
             reports/phase1_full_city_preview.png
             reports/phase1_full_city_closeup.png
