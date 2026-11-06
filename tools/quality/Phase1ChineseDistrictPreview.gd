@@ -16,19 +16,19 @@ func _run() -> void:
     environment.background_mode = Environment.BG_SKY
     var sky := Sky.new()
     var sky_material := ProceduralSkyMaterial.new()
-    sky_material.sky_top_color = Color(0.18, 0.25, 0.38)
-    sky_material.sky_horizon_color = Color(0.72, 0.68, 0.60)
+    sky_material.sky_top_color = Color(0.16, 0.24, 0.37)
+    sky_material.sky_horizon_color = Color(0.78, 0.66, 0.52)
     sky.sky_material = sky_material
     environment.sky = sky
     environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-    environment.ambient_light_color = Color(0.72, 0.74, 0.78)
-    environment.ambient_light_energy = 0.65
+    environment.ambient_light_color = Color(0.68, 0.70, 0.74)
+    environment.ambient_light_energy = 0.72
     environment.tonemap_mode = Environment.TONE_MAPPER_FILMIC
     world.environment = environment
     root.add_child(world)
 
     var sun := DirectionalLight3D.new()
-    sun.rotation_degrees = Vector3(-48, 28, 0)
+    sun.rotation_degrees = Vector3(-42, 28, 0)
     sun.light_energy = 1.25
     sun.shadow_enabled = true
     root.add_child(sun)
@@ -46,17 +46,24 @@ func _run() -> void:
     root.add_child(city)
     await process_frame
 
-    var initial_bounds := _collect_bounds(city)
-    var center := initial_bounds.position + initial_bounds.size * 0.5
-    var horizontal_span := maxf(initial_bounds.size.x, initial_bounds.size.z)
+    var anchor := _find_named_node(city, "JianghaiClanHallDoubleGateAnchor")
+    var horizontal_bounds := _collect_bounds(city)
+    var horizontal_span := maxf(horizontal_bounds.size.x, horizontal_bounds.size.z)
     if horizontal_span <= 0.01:
         push_error("Chinese district has no measurable horizontal geometry.")
         quit(3)
         return
-    var target_span := 150.0
-    var factor := target_span / horizontal_span
+    var factor := 150.0 / horizontal_span
+    var anchor_local := Vector3.ZERO
+    if anchor != null:
+        anchor_local = city.to_local(anchor.global_position)
+        print("CHINESE DISTRICT GATE ANCHOR ", anchor_local)
+    else:
+        var center := horizontal_bounds.position + horizontal_bounds.size * 0.5
+        anchor_local = center
+        print("WARNING: gate anchor missing; centering on district bounds.")
     city.scale = Vector3.ONE * factor
-    city.position = Vector3(-center.x * factor, -initial_bounds.position.y * factor, -center.z * factor)
+    city.position = -anchor_local * factor
     await process_frame
 
     var final_bounds := _collect_bounds(city)
@@ -73,26 +80,34 @@ func _run() -> void:
     floor_material.albedo_color = Color(0.22, 0.25, 0.22)
     floor_material.roughness = 0.95
     floor.material_override = floor_material
-    floor.position.y = final_bounds.position.y - 0.25
+    floor.position.y = final_bounds.position.y - 0.5
     root.add_child(floor)
 
-    var camera := Camera3D.new()
-    camera.fov = 48.0
-    camera.position = final_center + Vector3(span * 1.05, span * 0.72, span * 1.25)
-    root.add_child(camera)
-    camera.look_at(final_center, Vector3.UP)
-    camera.current = true
+    var overview_camera := Camera3D.new()
+    overview_camera.fov = 48.0
+    overview_camera.position = final_center + Vector3(span * 1.05, span * 0.72, span * 1.25)
+    root.add_child(overview_camera)
+    overview_camera.look_at(final_center, Vector3.UP)
+    overview_camera.current = true
+    await _capture(root, "reports/phase1_chinese_district_preview.png")
 
-    await process_frame
-    await process_frame
-    await process_frame
-    var image := get_root().get_viewport().get_texture().get_image()
-    var error := image.save_png("reports/phase1_chinese_district_preview.png")
-    if error != OK:
-        push_error("Could not save Chinese district preview.")
-        quit(4)
-        return
+    var close_camera := Camera3D.new()
+    close_camera.fov = 48.0
+    close_camera.position = Vector3(38, 27, 48)
+    root.add_child(close_camera)
+    close_camera.look_at(Vector3(0, 5, -8), Vector3.UP)
+    close_camera.current = true
+    await _capture(root, "reports/phase1_chinese_district_closeup.png")
     quit(0)
+
+func _find_named_node(node: Node, target: String) -> Node3D:
+    if node.name == target and node is Node3D:
+        return node as Node3D
+    for child in node.get_children():
+        var found := _find_named_node(child, target)
+        if found != null:
+            return found
+    return null
 
 func _count_mesh_nodes(node: Node) -> int:
     var count := 1 if node is MeshInstance3D else 0
@@ -134,3 +149,13 @@ func _collect_bounds_recursive(node: Node, accumulator: Dictionary) -> void:
             accumulator["has_bounds"] = true
     for child in node.get_children():
         _collect_bounds_recursive(child, accumulator)
+
+func _capture(_root: Node3D, output_path: String) -> void:
+    await process_frame
+    await process_frame
+    await process_frame
+    var image := get_root().get_viewport().get_texture().get_image()
+    var error := image.save_png(output_path)
+    if error != OK:
+        push_error("Could not save preview: " + output_path)
+        quit(4)
