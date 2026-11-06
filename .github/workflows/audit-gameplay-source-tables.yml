@@ -44,8 +44,8 @@ jobs:
             --output reports/gameplay-source-table-audit.json
       - name: Inspect GLB skeleton hierarchies, skin weights and embedded animations
         run: |
-          python3 tools/gameplay_source_audit/audit_glb_rigs.py \\
-            build/source/extracted-assets-001.zip \\
+          python3 tools/gameplay_source_audit/audit_glb_rigs.py \
+            build/source/extracted-assets-001.zip \
             --output reports/glb-rig-animation-audit.json
           python3 -m json.tool reports/glb-rig-animation-audit.json > /dev/null
           python3 - <<'PY'
