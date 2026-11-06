@@ -30,6 +30,7 @@ class_name MainHUDController
 @onready var mount_btn: Button = get_node_or_null("BottomRight/UtilityButtons/MountBtn")
 
 @onready var joystick: VirtualJoystickController = get_node_or_null("BottomLeft/VirtualJoystick")
+@onready var run_toggle_btn: Button = get_node_or_null("BottomLeft/RunToggle")
 @onready var notification_label: Label = get_node_or_null("Center/NotificationLabel")
 
 var current_skills: Array[String] = []
@@ -77,6 +78,9 @@ func _ready() -> void:
 		interact_btn.visible = false
 	if joystick:
 		joystick.joystick_moved.connect(_on_joystick_moved)
+	if run_toggle_btn:
+		run_toggle_btn.pressed.connect(_on_run_toggle_pressed)
+		_refresh_run_toggle_label()
 
 	_refresh_hud_labels()
 	_update_interact_button()
