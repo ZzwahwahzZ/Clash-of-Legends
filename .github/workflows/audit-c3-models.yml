@@ -58,14 +58,14 @@ jobs:
       - name: Build per-family helmet, weapon and equipment candidate inventory
         run: |
           python3 tools/external_assets/audit_c3_equipment_families.py reports/c3-model-audit.json --project-root . --output reports/equipment/c3-equipment-family-audit.json
-      - name: Install Blender and NumPy for diagnostic equipment renders
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y blender python3-numpy libegl1 libgl1 libgles2
-          PYTHONPATH=/usr/lib/python3/dist-packages blender --background --factory-startup --python-expr "import numpy; print('BLENDER_NUMPY_OK', numpy.__version__)"
+      - name: Install Blender 4.3.2 for diagnostic equipment renders
+        uses: bradyajohnston/setup-blender@v5
+        with:
+          version: 4.3.2
+      - name: Verify Blender and bundled NumPy
+        run: blender --background --factory-startup --python-expr "import bpy, numpy; print('BLENDER_OK', bpy.app.version_string, 'NUMPY_OK', numpy.__version__)"
       - name: Render all helmet, weapon and equipment C3 candidates
         env:
-          PYTHONPATH: /usr/lib/python3/dist-packages
           LIBGL_ALWAYS_SOFTWARE: 1
         run: |
           blender --background --factory-startup --python tools/external_assets/render_c3_equipment_previews.py -- --input-root build/c3-glb/equipment/c3 --output-root reports/equipment/previews/models --report reports/equipment/previews/equipment-preview-audit.json
