@@ -137,7 +137,14 @@ func _dump_dmap_format_sample(report: Dictionary) -> void:
 	if samples.is_empty():
 		report["dmap_format_sample"] = {"status": "NO_DMAP_FILES_FOUND"}
 		return
-	var source_path := str(samples[0])
+	var source_path := ""
+	for candidate in samples:
+		var candidate_path := str(candidate)
+		if candidate_path.contains("/maps/"):
+			source_path = candidate_path
+			break
+	if source_path.is_empty():
+		source_path = str(samples[0])
 	var source := FileAccess.open(source_path, FileAccess.READ)
 	if source == null:
 		report["dmap_format_sample"] = {"status": "SOURCE_OPEN_FAILED", "path": source_path}
@@ -260,7 +267,8 @@ func _walk_directory(path: String, counts: Dictionary, model_paths: Array[String
 			counts[extension] = int(counts.get(extension, 0)) + 1
 			if not samples.has(extension):
 				samples[extension] = []
-			if samples[extension].size() < 15:
+			var sample_limit := 500 if extension == "dmap" else 15
+			if samples[extension].size() < sample_limit:
 				samples[extension].append(full_path)
 			if extension in MODEL_EXTENSIONS:
 				model_paths.append(full_path)
