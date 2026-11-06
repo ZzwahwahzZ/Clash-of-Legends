@@ -8,6 +8,7 @@ signal catalog_loaded(asset_count: int)
 
 var assets_by_category: Dictionary = {}
 var catalog_version: int = 0
+var character_vat_clips: Dictionary = {}
 
 func _ready() -> void:
 	if ResourcePackManager:
@@ -35,6 +36,7 @@ func _reload_catalog() -> bool:
 	if typeof(assets) != TYPE_DICTIONARY:
 		return false
 	assets_by_category = assets
+	character_vat_clips = candidate.get("character_vat_clips", {}) if candidate.get("character_vat_clips", {}) is Dictionary else {}
 	catalog_version = int(candidate.get("catalog_version", 0))
 	var count := 0
 	for category in assets_by_category:
@@ -133,6 +135,35 @@ func get_category_counts() -> Dictionary:
 	for category in assets_by_category:
 		counts[category] = assets_by_category[category].size() if assets_by_category[category] is Array else 0
 	return counts
+
+func get_character_vat_base_model_path(model_id: int) -> String:
+	var record: Variant = character_vat_clips.get(str(model_id), {})
+	if not (record is Dictionary):
+		return ""
+	var path := str(record.get("base_model_path", ""))
+	return "res://" + path if not path.is_empty() else ""
+
+func get_character_vat_clip(model_id: int, state: String) -> Dictionary:
+	var record: Variant = character_vat_clips.get(str(model_id), {})
+	if not (record is Dictionary):
+		return {}
+	var states: Variant = record.get("states", {})
+	if not (states is Dictionary):
+		return {}
+	var clip: Variant = states.get(state.to_lower(), {})
+	if not (clip is Dictionary):
+		return {}
+	var result: Dictionary = clip.duplicate(true)
+	var paths: Array[String] = []
+	for relative_path in result.get("metadata_paths", []):
+		var relative := str(relative_path)
+		paths.append("res://" + relative if not relative.is_empty() else "")
+	result["metadata_paths"] = paths
+	return result
+
+func has_character_vat_animation(model_id: int) -> bool:
+	var record: Variant = character_vat_clips.get(str(model_id), {})
+	return record is Dictionary and record.get("states", {}) is Dictionary and (record.get("states", {}) as Dictionary).size() >= 3
 
 func get_verified_character_model_index(requested_class: String, requested_gender: String = "") -> int:
 	var entries := get_asset_entries("characters", [".glb", ".gltf"])
