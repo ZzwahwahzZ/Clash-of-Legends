@@ -40,6 +40,8 @@ jobs:
   mobile-apk-static-analysis:
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
@@ -48,9 +50,13 @@ jobs:
         with:
           python-version: "3.12"
       - name: Download and verify the exact supplied Mobile source archive
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           curl -fL --retry 3 --retry-delay 2 \
-            "https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/untagged-4406b3bcf98aaafd485f/ConquerOnline.zip" \
+            -H "Accept: application/octet-stream" \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            "https://api.github.com/repos/ZzwahwahzZ/Clash-of-Legends/releases/assets/716478589" \
             -o /tmp/ConquerOnline.zip
           echo "b1c6958109a07c237631943fc0442d3161563d89e1020b143d95437ba9a6fdb0  /tmp/ConquerOnline.zip" | sha256sum -c -
       - name: Inventory nested APKs, DEX, native libraries and loader clues
