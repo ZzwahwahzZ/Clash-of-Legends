@@ -544,7 +544,7 @@ jobs:
           set -euo pipefail
           test -s /tmp/clash-dmap-format-sample.bin
           test -s /tmp/clash-map-pux-format-sample.bin
-          args=(--dmap /tmp/clash-dmap-format-sample.bin --pux /tmp/clash-map-pux-format-sample.bin --output reports/twin-city-map-format-audit.json)
+          args=(--dmap /tmp/clash-dmap-format-sample.bin --pux /tmp/clash-map-pux-format-sample.bin --pux-name citys.pux --output reports/twin-city-map-format-audit.json)
           for ani in /tmp/clash-zf-ani-sample.txt /tmp/clash-mapscene-new-ani-sample.txt; do
             if test -s "$ani"; then args+=(--ani "$ani"); fi
           done
