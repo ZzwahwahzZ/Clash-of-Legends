@@ -50,6 +50,15 @@ func _run() -> void:
   quit(6)
   return
  print("JIANGHAI TASK LANDMARKS VALIDATED: ",JSON.stringify(interaction_registry.get_anchor_ids()))
+ var npc_anchor_ids:PackedStringArray=PackedStringArray(["jianghai.pawnshop_courtyard","jianghai.hotel_frontage","jianghai.medicine_frontage","jianghai.tea_frontage"])
+ for npc_anchor_id in npc_anchor_ids:
+  var spawn_candidate:Dictionary=interaction_registry.get_npc_spawn_candidate(npc_anchor_id)
+  if not bool(spawn_candidate.get("ok",false)) or bool(spawn_candidate.get("spawn_enabled",true)):
+   push_error("Invalid or prematurely enabled NPC spawn anchor: "+npc_anchor_id)
+   quit(7)
+   return
+  print("JIANGHAI NPC SPAWN CANDIDATE: ",npc_anchor_id," -> ",spawn_candidate.get("npc_id")," @ ",spawn_candidate.get("candidate_position"))
+ print("JIANGHAI NPC SPAWN ANCHORS VALIDATED (DEFERRED): ",npc_anchor_ids.size())
  city.position=-SOURCE_GATE_ANCHOR
  _tint_landscape(city)
  await process_frame
