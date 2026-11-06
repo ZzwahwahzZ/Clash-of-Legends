@@ -600,6 +600,16 @@ def parse_wdb(data: bytes) -> dict:
     catalog_dir = Path("resource_stage/world/resource_mappings")
     catalog_dir.mkdir(parents=True, exist_ok=True)
     equipment_catalog_path = catalog_dir / "mesh_equipment_catalog.json"
+    rolepart_entry = by_name.get("ini/rolepart.dbc")
+    if rolepart_entry is None or rolepart_entry["parsed"].get("parse_status") != "PARSED":
+        raise ValueError("Version-matched RolePart ROPT table is missing or was not parsed.")
+    rolepart_catalog = {
+        "record_count": rolepart_entry["parsed"]["record_count"],
+        "dummy_record_count": rolepart_entry["parsed"]["dummy_record_count"],
+        "parts": rolepart_entry["parsed"]["parts"],
+        "dummy_parts": rolepart_entry["parsed"]["dummy_parts"],
+        "schema_reference": rolepart_entry["parsed"]["schema_reference"],
+    }
     equipment_catalog = {
         "schema_version": "1.0.0",
         "source_container_sha256": hashlib.sha256(data).hexdigest(),
@@ -607,6 +617,8 @@ def parse_wdb(data: bytes) -> dict:
         "motion_catalog_path": str(motion_catalog_path),
         "motion_catalog_sha256": hashlib.sha256(motion_catalog_path.read_bytes()).hexdigest(),
         "schema_status": "MESH_ID_TO_C3_AND_TEXTURE_PATH_LINKED",
+        "role_parts": rolepart_catalog,
+        "simple_objects": simple_object_catalog,
         "tables": {
             table_name: {
                 "record_count": len(records),
