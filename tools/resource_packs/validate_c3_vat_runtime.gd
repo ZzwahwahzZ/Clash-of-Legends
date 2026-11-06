@@ -138,7 +138,7 @@ func _run() -> void:
 			for _frame in range(2):
 				await process_frame
 			var image_a := get_root().get_texture().get_image()
-			var stem := str(model["gender"]) + "_" + state
+			var stem: String = str(model["gender"]) + "_" + state
 			var frame_a_path := OUTPUT_DIR.path_join(stem + "_frame_a.png")
 			if image_a.save_png(frame_a_path) != OK:
 				push_error("C3 VAT runtime validation: failed to save frame A for " + stem)
