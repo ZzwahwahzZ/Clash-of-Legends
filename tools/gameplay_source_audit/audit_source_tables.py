@@ -18,7 +18,11 @@ from pathlib import Path
 
 VERSION = "ConquerOnline-1.1.2.3"
 ROOT_MARKER = "assets/ConquerRes/"
-TARGET_PREFIXES = {"skills": ["data/interface/style01/skill/"]}
+TARGET_PREFIXES = {
+    "skills": ["data/interface/style01/skill/"],
+    "motion_ui": ["data/interface/style01/"],
+}
+MOTION_PATH_PATTERN = re.compile(r"(3dmotion|miscmotion|mountmotion|armetmotion|weaponmotion|headmotion|3dsimplerole|motion|\\.ani$|/\\d{3,4}\\.c3$|/body/\\d+\\.c3$)", re.I)
 TARGETS = {
     "mounts": ["ini/mountinfo.ini", "ini/mounttype.dat", "ani/dragon.ani", "ani/sdragon.ani"],
     "skills": [
@@ -255,6 +259,30 @@ def main() -> None:
                 results[category] = entries
             # Inventory the complete mobile skill-icon/UI directory, not only the named INI/DAT files.
             # This captures the actual skill button assets and any per-skill metadata stored beside them.
+            # Inventory motion tables and action clips in parallel with skill definitions.
+            # This is discovery only; it does not infer undocumented table joins.
+            motion_assets = []
+            for rel, candidates in sources.items():
+                normalized = rel.lower().replace("\\\\", "/")
+                if not MOTION_PATH_PATTERN.search(normalized):
+                    continue
+                for source_zip, member, display in candidates:
+                    data = source_zip.read(member)
+                    ext = Path(rel).suffix.lower()
+                    entry = {
+                        "relative_path": rel, "source_member": display,
+                        "size_bytes": len(data), "sha256": hashlib.sha256(data).hexdigest(),
+                        "extension": ext, "asset_role": "MOTION_OR_ACTION_CANDIDATE",
+                        "parse_status": "BINARY_OR_METADATA_ONLY"
+                    }
+                    if ext in (".ini", ".txt", ".lua", ".json", ".xml"):
+                        entry.update(parse_ini_opaque(data))
+                    elif ext in (".dat", ".ani", ".dbc", ".wdb"):
+                        entry["content_probe"] = candidate_text_signals(data)
+                        if ext in (".dat", ".ani"):
+                            entry["cipher_probe"] = probe_tq_candidates(data)
+                    motion_assets.append(entry)
+
             skill_assets = []
             for rel, candidates in sources.items():
                 normalized = rel.lower().replace("\\", "/")
@@ -344,6 +372,12 @@ def main() -> None:
                 "archive_sha256": sha256_file(args.archive),
                 "version_matched_member_count": sum(len(v) for v in sources.values()),
                 "categories": {k: {"file_count": len(v), "files": v} for k, v in results.items()},
+                "motion_asset_inventory": {
+                    "file_count": len(motion_assets),
+                    "extension_counts": {ext: sum(1 for item in motion_assets if item["extension"] == ext) for ext in sorted({item["extension"] for item in motion_assets})},
+                    "files": motion_assets,
+                    "policy": "Mobile-version-matched motion/action candidates; schemas and joins remain unconfirmed until validated."
+                },
                 "skill_ui_asset_inventory": {"file_count": len(skill_assets), "extension_counts": {ext: sum(1 for item in skill_assets if item["extension"] == ext) for ext in sorted({item["extension"] for item in skill_assets})}, "files": skill_assets, "policy": "Icon/UI assets are inventoried by exact source path and hash; no icon-to-skill or icon-to-animation association is inferred."},
                 "asset_path_inventory": {
                     "c3_model_path_count": len(c3_model_paths),
