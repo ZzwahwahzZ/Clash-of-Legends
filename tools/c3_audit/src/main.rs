@@ -446,11 +446,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // while exact bone-count signatures and vertex bone-index bounds gate the join.
     let mut skeleton_catalog_poc: Vec<Value> = Vec::new();
     let mut body_paths: Vec<PathBuf> = files.iter()
-        .filter(|path| path.to_string_lossy().replace('\\\\', "/").contains("/c3/body/"))
+        .filter(|path| path.to_string_lossy().replace('\\', "/").contains("/c3/body/"))
         .cloned().collect();
     body_paths.sort();
     for body_path in body_paths {
-        let body_relative = body_path.strip_prefix(&root).unwrap_or(&body_path).to_string_lossy().replace('\\\\', "/");
+        let body_relative = body_path.strip_prefix(&root).unwrap_or(&body_path).to_string_lossy().replace('\\', "/");
         let Some(look) = parse_body_model_look(&body_relative) else { continue; };
         if look != 7 && look != 8 { continue; }
         let Some(model_id) = Path::new(&body_relative).file_stem().and_then(|s| s.to_str()).and_then(|s| s.parse::<u32>().ok()) else { continue; };
@@ -467,11 +467,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             continue;
         };
         let motion_suffix = format!("/c3/{look:04}/500/100.c3");
-        let Some(motion_path) = files.iter().find(|path| path.to_string_lossy().replace('\\\\', "/").ends_with(&motion_suffix)) else {
+        let Some(motion_path) = files.iter().find(|path| path.to_string_lossy().replace('\\', "/").ends_with(&motion_suffix)) else {
             skeleton_catalog_poc.push(json!({"model_id":model_id,"look":look,"source":body_relative,"status":"SKIPPED_ACTION_100_NOT_FOUND"}));
             continue;
         };
-        let motion_relative = motion_path.strip_prefix(&root).unwrap_or(motion_path).to_string_lossy().replace('\\\\', "/");
+        let motion_relative = motion_path.strip_prefix(&root).unwrap_or(motion_path).to_string_lossy().replace('\\', "/");
         let motion_bytes = fs::read(motion_path)?;
         let motion_document = match C3Document::parse(&motion_bytes) {
             Ok(document) => document,
@@ -523,7 +523,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         match skinned_glb::export_document(&skinned_document, &texture_bytes, &source_pair, &output_path) {
             Ok((glb_bytes, mesh_count, animated_mesh_count)) => skeleton_catalog_poc.push(json!({
                 "model_id":model_id,"look":look,"source":body_relative,"motion_source":motion_relative,
-                "texture_source":texture_source,"output":output_relative.to_string_lossy().replace('\\\\', "/"),
+                "texture_source":texture_source,"output":output_relative.to_string_lossy().replace('\\', "/"),
                 "glb_bytes":glb_bytes,"mesh_count":mesh_count,"animated_mesh_count":animated_mesh_count,
                 "bone_count":source_motion.bone_count,"skinned_vertex_count":source_mesh.vertices.iter().filter(|v| v.bone_weights[0] > 0.0 || v.bone_weights[1] > 0.0).count(),
                 "status":"EXPORTED_PENDING_GODOT_CATALOG_VALIDATION"
