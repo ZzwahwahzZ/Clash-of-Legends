@@ -131,7 +131,27 @@ func _run() -> void:
     gate_camera.look_at(Vector3(0, 2, -3), Vector3.UP)
     gate_camera.current = true
     await _capture("reports/phase1_chinese_district_gate_detail.png")
-    print("CHINESE DISTRICT PREVIEWS SAVED full-world, authored-district, and gate-detail; full_span=", span, " authored_span=", authored_span)
+
+    # Dedicated bridge framing: the source gate anchor shifts the city, so a
+    # fixed origin-facing camera can miss the market bridge entirely.
+    var bridge_deck := city.find_child("MarketBridgeDeck", true, false) as MeshInstance3D
+    var east_ramp := city.find_child("MarketEastRamp", true, false) as MeshInstance3D
+    var west_ramp := city.find_child("MarketWestRamp", true, false) as MeshInstance3D
+    if bridge_deck == null or east_ramp == null or west_ramp == null:
+        push_error("Market bridge deck or one of its ramps is missing from the imported district.")
+        quit(5)
+        return
+    var bridge_center := bridge_deck.global_position
+    var bridge_camera := Camera3D.new()
+    bridge_camera.fov = 58.0
+    bridge_camera.position = bridge_center + Vector3(25.0, 18.0, 25.0)
+    root.add_child(bridge_camera)
+    bridge_camera.look_at(bridge_center, Vector3.UP)
+    bridge_camera.current = true
+    print("PHASE1 MARKET BRIDGE CAMERA TARGET ", bridge_center,
+        " deck=", bridge_deck.name, " east_ramp=", east_ramp.name, " west_ramp=", west_ramp.name)
+    await _capture("reports/phase1_market_bridge_detail.png")
+    print("CHINESE DISTRICT PREVIEWS SAVED full-world, authored-district, gate-detail, and market-bridge-detail; full_span=", span, " authored_span=", authored_span)
     quit(0)
 
 func _collect_authored_city_bounds(node: Node) -> AABB:
