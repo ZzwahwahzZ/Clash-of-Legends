@@ -11,6 +11,9 @@ var _active_mesh_names: Dictionary = {}
 var _current_state: String = ""
 var _configured: bool = false
 
+func _asset_catalog() -> Node:
+	return get_node_or_null("/root/AssetCatalog")
+
 const C3_SOCKET_HELPERS := {
 	"v_armet": true, "v_l_weapon": true, "v_r_weapon": true,
 	"v_l_forearm": true, "v_l_shoulder": true, "v_r_forearm": true,
@@ -21,7 +24,8 @@ const C3_SOCKET_HELPERS := {
 }
 
 func has_vat_for_model(model_id: int) -> bool:
-	return AssetCatalog != null and AssetCatalog.has_character_vat_animation(model_id)
+	var catalog := _asset_catalog()
+	return catalog != null and catalog.has_method("has_character_vat_animation") and catalog.has_character_vat_animation(model_id)
 
 func configure_character(model_root: Node3D, model_id: int) -> bool:
 	if model_root == null or not is_instance_valid(model_root):
@@ -82,7 +86,11 @@ func play_state(state: String) -> bool:
 		return false
 	if _current_state == normalized:
 		return true
-	var clip: Dictionary = AssetCatalog.get_character_vat_clip(_model_id, normalized)
+	var catalog := _asset_catalog()
+	if catalog == null or not catalog.has_method("get_character_vat_clip"):
+		push_error("C3 VAT Animator: AssetCatalog is not available.")
+		return false
+	var clip: Dictionary = catalog.get_character_vat_clip(_model_id, normalized)
 	var metadata_paths: Array = clip.get("metadata_paths", [])
 	if metadata_paths.is_empty():
 		push_error("C3 VAT Animator: validated metadata paths are missing for model %d state %s." % [_model_id, normalized])
