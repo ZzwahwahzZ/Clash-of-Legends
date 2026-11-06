@@ -128,9 +128,57 @@ def read_cstring(data: bytes, offset: int) -> str:
     return data[offset:end].decode("latin-1", errors="replace")
 
 
+def _probe_rsdb_layout(data: bytes, count: int) -> tuple[int, str, list[dict]] | None:
+    """Accept an unknown RSDB layout only when every key/path pair is bounded and plausible."""
+    candidates = [
+        (8, "<II", 0, 1, "u32_id_u32_path"),
+        (8, "<II", 1, 0, "u32_path_u32_id"),
+        (12, "<QI", 0, 1, "u64_id_u32_path"),
+        (12, "<IQ", 0, 1, "u32_id_u64_path"),
+        (12, "<QI", 1, 0, "u32_path_u64_id"),
+        (12, "<IQ", 1, 0, "u64_path_u32_id"),
+        (16, "<QQ", 0, 1, "u64_id_u64_path"),
+        (16, "<QQ", 1, 0, "u64_path_u64_id"),
+    ]
+    accepted = []
+    for entry_size, fmt, key_index, offset_index, label in candidates:
+        table_end = 8 + count * entry_size
+        if table_end > len(data):
+            continue
+        records = []
+        keys = set()
+        valid = True
+        for index in range(count):
+            values = struct.unpack_from(fmt, data, 8 + index * entry_size)
+            key = int(values[key_index])
+            path_offset = int(values[offset_index])
+            if key in keys or path_offset < table_end or path_offset >= len(data):
+                valid = False
+                break
+            try:
+                path = read_cstring(data, path_offset)
+            except (ValueError, UnicodeError):
+                valid = False
+                break
+            if not path or any(ord(ch) < 32 or ord(ch) == 127 for ch in path):
+                valid = False
+                break
+            if not ("/" in path or "\\\\" in path or "." in path):
+                valid = False
+                break
+            keys.add(key)
+            records.append({"id": key, "path": path})
+        if valid and len(records) == count:
+            accepted.append((entry_size, label, records))
+    return accepted[0] if len(accepted) == 1 else None
+
+
 def parse_rsdb(data: bytes, stem: str) -> dict:
     magic = data[:4]
     count = struct.unpack_from("<I", data, 4)[0]
+    if count == 0:
+        return {"format": magic.decode("ascii", errors="replace"), "record_count": 0,
+                "entry_size": 0, "parse_status": "EMPTY_TABLE", "sample_records": [], "_records": []}
     if stem in BIG_TABLES or magic == b"RSDC":
         entry_size = 12
         records = []
@@ -140,6 +188,7 @@ def parse_rsdb(data: bytes, stem: str) -> dict:
         for i in range(count):
             key, path_offset = struct.unpack_from("<QI", data, 8 + i * entry_size)
             records.append({"id": key, "path": read_cstring(data, path_offset)})
+        layout = "explicit_u64_id_u32_path"
     elif stem in SMALL_TABLES:
         entry_size = 8
         records = []
@@ -149,11 +198,18 @@ def parse_rsdb(data: bytes, stem: str) -> dict:
         for i in range(count):
             key, path_offset = struct.unpack_from("<II", data, 8 + i * entry_size)
             records.append({"id": key, "path": read_cstring(data, path_offset)})
+        layout = "explicit_u32_id_u32_path"
     else:
-        return {"format": magic.decode("ascii", errors="replace"), "record_count": count,
-                "parse_status": "UNKNOWN_RSDB_KEY_WIDTH"}
+        probed = _probe_rsdb_layout(data, count)
+        if probed is None:
+            return {"format": magic.decode("ascii", errors="replace"), "record_count": count,
+                    "parse_status": "UNKNOWN_RSDB_LAYOUT",
+                    "layout_probe_candidates": ["u32_id_u32_path", "u32_path_u32_id", "u64_id_u32_path",
+                                                "u32_id_u64_path", "u32_path_u64_id", "u64_path_u32_id",
+                                                "u64_id_u64_path", "u64_path_u64_id"]}
+        entry_size, layout, records = probed
     return {"format": magic.decode("ascii", errors="replace"), "record_count": count,
-            "entry_size": entry_size, "parse_status": "PARSED",
+            "entry_size": entry_size, "layout": layout, "parse_status": "PARSED",
             "sample_records": records[:20], "_records": records}
 
 
