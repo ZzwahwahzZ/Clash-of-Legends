@@ -24,20 +24,20 @@ def sha256_file(p):
  return h.hexdigest()
 
 def safe_rel(name):
- p=PurePosixPath(name.replace("\\\\","/"))
+ p=PurePosixPath(name.replace("\\","/"))
  if p.is_absolute() or any(x in ("..","") for x in p.parts) or (p.parts and ":" in p.parts[0]):
   raise ValueError("unsafe archive path: "+repr(name))
  return Path(*p.parts)
 
 def classify(name):
- low=name.lower().replace("\\\\","/")
+ low=name.lower().replace("\\","/")
  return [k for k,terms in KEYWORDS.items() if any(t in low for t in terms)]
 
 def signature(p):
  try:
   with p.open("rb") as f: b=f.read(16)
  except OSError: return "unreadable"
- for magic,label in [(b"PK\\x03\\x04","zip"),(b"7z\\xbc\\xaf\\x27\\x1c","7z"),(b"Rar!","rar"),(b"UnityFS","unityfs"),(b"GDPC","godot_pck"),(b"\\x7fELF","elf"),(b"OggS","ogg"),(b"RIFF","riff"),(b"DDS ","dds"),(b"\\x89PNG","png"),(b"\\xff\\xd8\\xff","jpeg"),(b"glTF","gltf_binary")]:
+ for magic,label in [(b"PK\x03\x04","zip"),(b"7z\xbc\xaf\x27\x1c","7z"),(b"Rar!","rar"),(b"UnityFS","unityfs"),(b"GDPC","godot_pck"),(b"\x7fELF","elf"),(b"OggS","ogg"),(b"RIFF","riff"),(b"DDS ","dds"),(b"\x89PNG","png"),(b"\xff\xd8\xff","jpeg"),(b"glTF","gltf_binary")]:
   if b.startswith(magic): return label
  return "unknown"
 
