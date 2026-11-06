@@ -1,5 +1,5 @@
 name: Phase 1 - Acquire and audit CC0 world assets
-# Re-run the Godot visual audit at original world scale with full street and workshop groups.
+# Compare the extracted district against the complete source city at original scale.
 
 on:
   push:
@@ -147,6 +147,7 @@ jobs:
           npm install --prefix /tmp/phase1-gltf-tools --no-save @gltf-transform/core @gltf-transform/extensions @gltf-transform/functions
           cp tools/quality/extract_phase1_chinese_city.mjs /tmp/phase1-gltf-tools/extract.mjs
           node /tmp/phase1-gltf-tools/extract.mjs /tmp/phase1-city-source/jianghai_old_city.glb assets/environment/phase1/jianghai/chinese_district.glb reports/phase1_chinese_district_extract.json
+          cp /tmp/phase1-city-source/jianghai_old_city.glb assets/environment/phase1/jianghai/full_city_preview.glb
 
       - name: Import project with Godot 4.3
         uses: chickensoft-games/setup-godot@v2
@@ -173,6 +174,9 @@ jobs:
           xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --path . --rendering-method gl_compatibility --script res://tools/quality/Phase1ChineseDistrictPreview.gd 2>&1 | tee reports/phase1_chinese_district_preview.log
           test -s reports/phase1_chinese_district_preview.png
           test -s reports/phase1_chinese_district_closeup.png
+          xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --path . --rendering-method gl_compatibility --script res://tools/quality/Phase1FullCityPreview.gd 2>&1 | tee reports/phase1_full_city_preview.log
+          test -s reports/phase1_full_city_preview.png
+          test -s reports/phase1_full_city_closeup.png
           if grep -Eq 'SCRIPT ERROR:|ERROR: Node not inside tree|Parse Error:' reports/phase1_chinese_district_preview.log; then
             echo 'Godot visual preview reported a script or scene-tree error'
             exit 1
@@ -184,7 +188,8 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add assets/environment/phase1 reports/phase1_world_asset_manifest.json reports/phase1_chinese_district_extract.json reports/phase1_chinese_district_preview.png
-          git add -f reports/phase1_chinese_district_closeup.png
+          git add -f reports/phase1_chinese_district_closeup.png reports/phase1_full_city_preview.png reports/phase1_full_city_closeup.png
+          rm -f assets/environment/phase1/jianghai/full_city_preview.glb assets/environment/phase1/jianghai/full_city_preview.glb.import
           git diff --cached --quiet && { echo "No asset changes to commit"; exit 0; }
           git commit -m "Acquire and audit phase 1 production world assets"
           git push origin HEAD:stage/phase1-world-assets
@@ -202,6 +207,9 @@ jobs:
             reports/phase1_chinese_district_preview.log
             reports/phase1_chinese_district_preview.png
             reports/phase1_chinese_district_closeup.png
+            reports/phase1_full_city_preview.log
+            reports/phase1_full_city_preview.png
+            reports/phase1_full_city_closeup.png
             assets/environment/phase1/SOURCES.md
           if-no-files-found: warn
           retention-days: 30
