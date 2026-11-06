@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "world_id": "jianghai_old_city",
+  "purpose": "Stable semantic landmark IDs for future quest objectives, navigation targets and NPC placement. These are references only, not enabled gameplay triggers.",
+  "anchors": [
+    {
+      "id": "jianghai.central_avenue",
+      "node_path": "JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/CentralAvenue",
+      "kind": "street_landmark",
+      "task_tags": [
+        "visit",
+        "travel",
+        "escort"
+      ],
+      "requires_navmesh_projection": true,
+      "requires_runtime_trigger": true,
+      "interaction_enabled": false,
+      "npc_spawn_anchor": false
+    },
+    {
+      "id": "jianghai.pawnshop_approach",
+      "node_path": "JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/PawnshopApproach",
+      "kind": "approach_route",
+      "task_tags": [
+        "reach",
+        "deliver",
+        "escort"
+      ],
+      "requires_navmesh_projection": true,
+      "requires_runtime_trigger": true,
+      "interaction_enabled": false,
+      "npc_spawn_anchor": false
+    },
+    {
+      "id": "jianghai.pawnshop_courtyard",
+      "node_path": "JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopCourtyardStone",
+      "kind": "service_landmark",
+      "task_tags": [
+        "visit",
+        "deliver",
+        "collect"
+      ],
+      "requires_navmesh_projection": true,
+      "requires_runtime_trigger": true,
+      "interaction_enabled": false,
+      "npc_spawn_anchor": true
+    },
+    {
+      "id": "jianghai.market_bridge",
+      "node_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
+      "kind": "landmark",
+      "task_tags": [
+        "visit",
+        "cross",
+        "escort"
+      ],
+      "requires_navmesh_projection": true,
+      "requires_runtime_trigger": true,
+      "interaction_enabled": false,
+      "npc_spawn_anchor": false
+    },
+    {
+      "id": "jianghai.factory_approach",
+      "node_path": "JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/FactoryApproach",
+      "kind": "approach_route",
+      "task_tags": [
+        "reach",
+        "deliver",
+        "escort"
+      ],
+      "requires_navmesh_projection": true,
+      "requires_runtime_trigger": true,
+      "interaction_enabled": false,
+      "npc_spawn_anchor": false
+    },
+    {
+      "id": "jianghai.hotel_frontage",
+      "node_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict/AvenueHotelBladeBacking",
+      "kind": "service_frontage",
+      "task_tags": [
+        "visit",
+        "talk",
+        "deliver"
+      ],
+      "requires_navmesh_projection": true,
+      "requires_runtime_trigger": true,
+      "interaction_enabled": false,
+      "npc_spawn_anchor": true
+    },
+    {
+      "id": "jianghai.medicine_frontage",
+      "node_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict/AvenueMedicineBladeBacking",
+      "kind": "service_frontage",
+      "task_tags": [
+        "visit",
+        "talk",
+        "deliver",
+        "collect"
+      ],
+      "requires_navmesh_projection": true,
+      "requires_runtime_trigger": true,
+      "interaction_enabled": false,
+      "npc_spawn_anchor": true
+    },
+    {
+      "id": "jianghai.tea_frontage",
+      "node_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict/AvenueTeaBladeBacking",
+      "kind": "service_frontage",
+      "task_tags": [
+        "visit",
+        "talk",
+        "deliver",
+        "collect"
+      ],
+      "requires_navmesh_projection": true,
+      "requires_runtime_trigger": true,
+      "interaction_enabled": false,
+      "npc_spawn_anchor": true
+    }
+  ]
+}
