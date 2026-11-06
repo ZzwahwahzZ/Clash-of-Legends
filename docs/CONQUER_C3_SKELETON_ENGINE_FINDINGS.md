@@ -65,7 +65,7 @@ The following accessor behavior is now confirmed at instruction level:
 
 ## Rig-to-motion catalog cross-check (2026-11-06)
 
-A parsed catalog is now available as `C3-Rig-Motion-Catalog.csv` in the project research workspace. It contains 994 indexed C3 resources and separates body tracks from attachment/effect tracks. Representative verified rows:
+A parsed catalog is now available as `C3-Rig-Motion-Catalog.csv` in the project research workspace. It contains 1,626 indexed C3 resources and separates body tracks from attachment/effect tracks. Representative verified rows:
 
 - `c3/0007/000/100.c3`: 18 MOTI sections, 66-bone body track, 17 additional one-bone tracks, 18 named attachment points including `v_body`, `v_armet`, weapon/forearm/shoulder sockets, feet, pelvis and slot points.
 - `c3/0007/423/100.c3`: same 66-bone body-track pattern, with 18 MOTI sections.
@@ -97,3 +97,19 @@ Next gate: obtain the exact original archive bytes in the active analysis worksp
 `interface.fui`, `ui_main.fui`, their atlas pages, `interface_ar.ani`, `control_ar.ani`, `3dskeleton.ini`, `3dobjprop.ini`, `bodymotiontrans.ini`, `3DMotion.dbc`, and representative C3 body/motion pairs.
 
 No guessed UI icons, skeleton names, parent links, transformation skill IDs or animation mappings are to be committed as original data.
+
+
+### Full catalog statistics (verified by parsing the 238,495-byte CSV)
+
+- Total records: **1,626**, all currently attributed to `assets/ConquerRes/c31.tpi`.
+- Body-track count distribution: **423 records with 66 bones**, **426 records with 60 bones**, and **635 records with one track bone**. The remaining records belong to smaller or distinct rigs (NPC/monster/equipment/effects and other resource types) and must not be collapsed into the two player-body families.
+- Character resource path groups in this catalog:
+  - `c3/0007/`: 180 records, all with 66-bone body tracks.
+  - `c3/0008/`: 183 records, all with 60-bone body tracks.
+  - `c3/1007/`: 112 records, all with 66-bone body tracks.
+  - `c3/1008/`: 123 records, all with 60-bone body tracks.
+  - `c3/71007/`: 100 records, all with 66-bone body tracks.
+  - `c3/71008/`: 94 records, all with 60-bone body tracks.
+- The 15 catalogued `c3/body/` models with multi-bone body tracks split into 11 models at 66 bones and 4 models at 60 bones.
+
+This gives a strong data-backed partition for candidate character rig families and their motion-resource groups. It does **not** yet tell us the actual human-readable skeleton names or prove semantic identity between every asset in a family. Keep the 60- and 66-track groups separate until the native skeleton resources, name-pointer resolution and rest-pose compatibility are recovered.
