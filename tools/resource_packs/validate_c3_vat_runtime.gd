@@ -140,16 +140,16 @@ func _run() -> void:
 				await get_tree().process_frame
 			var image_a: Image = get_viewport().get_texture().get_image()
 			var stem: String = str(model["gender"]) + "_" + state
-			var frame_a_path := OUTPUT_DIR.path_join(stem + "_frame_a.png")
-			if image_a.save_png(frame_a_path) != OK:
+			var frame_a_path := "res://" + OUTPUT_DIR.path_join(stem + "_frame_a.png")
+			if image_a.save_png(ProjectSettings.globalize_path(frame_a_path)) != OK:
 				push_error("C3 VAT runtime validation: failed to save frame A for " + stem)
 				all_passed = false
 			animator.set_frame(float(maxi(1, int(frame_count / 2))))
 			for _frame in range(2):
 				await get_tree().process_frame
 			var image_b: Image = get_viewport().get_texture().get_image()
-			var frame_b_path := OUTPUT_DIR.path_join(stem + "_frame_b.png")
-			if image_b.save_png(frame_b_path) != OK:
+			var frame_b_path := "res://" + OUTPUT_DIR.path_join(stem + "_frame_b.png")
+			if image_b.save_png(ProjectSettings.globalize_path(frame_b_path)) != OK:
 				push_error("C3 VAT runtime validation: failed to save frame B for " + stem)
 				all_passed = false
 			var bytes_a: PackedByteArray = image_a.get_data()
