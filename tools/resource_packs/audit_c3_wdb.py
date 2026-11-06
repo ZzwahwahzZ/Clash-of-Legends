@@ -253,7 +253,7 @@ def parse_ropt(data: bytes) -> dict:
         )
 
     def fixed_string(raw: bytes) -> str:
-        return raw.split(b"\\0", 1)[0].decode("latin-1", errors="replace").strip()
+        return raw.split(bytes([0]), 1)[0].decode("latin-1", errors="replace").strip()
 
     parts = []
     offset = 12
