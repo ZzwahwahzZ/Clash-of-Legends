@@ -135,6 +135,54 @@ for model_id, look, gender in ((7130000, 7, "male"), (8133010, 8, "female")):
 
 catalog["character_vat_clips"] = character_vat_clips
 
+# Keep the separately validated true-skeleton GLBs in the runtime character
+# resource pack. They remain proof/catalog assets until class and gender
+# identity mappings are independently approved.
+skeleton_report_path = root / "reports/c3-motion-poc-validation.json"
+if not skeleton_report_path.is_file():
+    raise SystemExit("Missing Godot skeletal validation report.")
+skeleton_report = json.loads(skeleton_report_path.read_text(encoding="utf-8"))
+if skeleton_report.get("skeleton_catalog_status") != "PASSED":
+    raise SystemExit("C3 skeleton catalog did not pass Godot validation.")
+skeleton_rows = skeleton_report.get("skeleton_catalog", [])
+expected_skeletons = int(skeleton_report.get("expected_skeleton_catalog_count", 0))
+if expected_skeletons <= 0 or len(skeleton_rows) != expected_skeletons:
+    raise SystemExit("C3 skeleton catalog report is incomplete.")
+skeleton_catalog = []
+for row in skeleton_rows:
+    source = source_root / "skeleton-poc" / Path(str(row.get("path", "")).replace("\\\\", "/")).name
+    if not source.is_file() or row.get("status") != "GODOT_SKELETON_CATALOG_VALIDATED":
+        raise SystemExit(f"Missing or unvalidated C3 skeleton GLB: {source}")
+    filename = source.name
+    destination = stage_root / "characters" / "c3_skeleton_poc" / filename
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source, destination)
+    digest = hashlib.sha256(destination.read_bytes()).hexdigest()
+    entry = {
+        "path": destination.relative_to(root).as_posix(),
+        "source": "Godot-validated C3 skeletal catalog POC",
+        "extension": ".glb",
+        "size_bytes": destination.stat().st_size,
+        "sha256": digest,
+        "asset_role": "skeletal_character_poc",
+        "mapping_status": "godot_skeleton_catalog_validated_identity_mapping_pending",
+        "skeleton_count": int(row.get("skeleton_count", 0)),
+        "bone_count": int(row.get("skeleton_bone_count", 0)),
+        "skinned_mesh_count": int(row.get("skinned_mesh_count", 0)),
+        "animation_track_count": int(row.get("animation_track_count", 0)),
+        "animation_key_count": int(row.get("animation_key_count", 0))
+    }
+    assets.setdefault("characters", []).append(entry)
+    skeleton_catalog.append(entry)
+
+catalog["c3_skeleton_catalog"] = {
+    "status": "GODOT_VALIDATED",
+    "expected_count": expected_skeletons,
+    "validated_count": len(skeleton_catalog),
+    "assets": skeleton_catalog,
+    "identity_mapping_status": "PENDING_CLASS_AND_GENDER_SOURCE_JOIN"
+}
+
 catalog["asset_counts"] = {key: len(value) for key, value in assets.items() if isinstance(value, list)}
 catalog["catalog_version"] = int(catalog.get("catalog_version", 1)) + 1
 catalog["c3_conversion"] = {
