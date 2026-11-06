@@ -57,7 +57,8 @@ func _run_audit() -> void:
 		if valid_meshes == 0 and scene_path == "res://scenes/characters/Player.tscn":
 			var visual_root := body.get_node_or_null("VisualRoot")
 			var vat_animator := body.get_node_or_null("C3VatAnimator")
-			deferred_c3_visual = visual_root is Node3D and vat_animator is C3VatCharacterAnimator
+			var animator_script := vat_animator.get_script() if vat_animator != null else null
+			deferred_c3_visual = visual_root is Node3D and animator_script != null and animator_script.resource_path.ends_with("C3VatCharacterAnimator.gd")
 		if valid_meshes == 0 and not deferred_c3_visual:
 			_fail("No renderable visual meshes or validated deferred C3 model loader found beside physics body: " + scene_path)
 			body.free()
