@@ -73,7 +73,7 @@ const selected = allNodes.filter((node) => {
   if (keepPatterns.some((pattern) => names.some((name) => pattern.test(name)))) return true;
   let ancestor = node.getParentNode();
   while (ancestor instanceof Node) {
-    if (/^(AuthoredStreetNetwork|AuthoredCityClutter)$/i.test(ancestor.getName())) return true;
+    if (/^(AuthoredStreetNetwork|AuthoredCityClutter|OldCityMarketBridge)$/i.test(ancestor.getName())) return true;
     ancestor = ancestor.getParentNode();
   }
   return false;
