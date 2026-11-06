@@ -89,7 +89,8 @@ func _run() -> void:
     var factor := 1.0
     city.scale = Vector3.ONE * factor
     city.position = -SOURCE_GATE_ANCHOR * factor
-    # Keep source-authored gravel, rocky terrain and mountain materials unchanged.
+    _tint_landscape(city)
+    # Audit-only landscape palette override: source GLB remains unchanged.
     await process_frame
 
     var final_bounds := _collect_bounds(city)
@@ -201,6 +202,7 @@ func _run_main_game_integration() -> void:
         return
     city.name = "Phase1ChineseDistrict_AuditOnly"
     city.position = -SOURCE_GATE_ANCHOR
+    _tint_landscape(city)
     game.add_child(city)
     await process_frame
     var player := game.get_node_or_null("Player")
