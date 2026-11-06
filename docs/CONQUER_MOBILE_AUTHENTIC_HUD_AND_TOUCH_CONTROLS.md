@@ -77,18 +77,18 @@ These references verify control semantics and the separate pathfinding panel onl
 A source review of `MainHUD.tscn`, `MainHUDController.gd`, `VirtualJoystickController.gd`, and `PlayerController.gd` confirms the following gaps; these are implementation findings, not visual guesses:
 
 - The current HUD has HP/MP/XP bars, gold, a quest banner, auto-hunt/auto-loot, inventory/blacksmith/settings/travel buttons, two text-labelled skill buttons, attack/jump/mount buttons and a virtual joystick.
-- It does not yet contain a minimap node, target/target-health presentation, quick potion/item slots, a real icon-based skill hotbar, or a dedicated walk/run mode control.
+- It still does not contain a minimap node, target/target-health presentation, quick potion/item slots, or a real icon-based skill hotbar. A dedicated walk/run toggle has now been added beside the joystick.
 - The current skill buttons receive translated skill **names** from the skill database, not reviewed source icon textures; they remain generic text controls.
-- The current joystick sets `touch_index` on every new screen-touch press. A second finger pressing inside the joystick control can therefore take ownership from the first finger. The current release/focus reset logic does not by itself solve that ownership race.
-- The controller's movement speed currently has a base value and a mount multiplier, but no separate walk/run mode state or mode-change signal is present in the inspected script.
+- The joystick now assigns ownership only when `touch_index == -1`; additional fingers are ignored until the owning finger releases or cancels. Focus-loss reset remains in place.
+- `PlayerController.gd` now has `walk_speed_multiplier`, `is_running` (default true), and `toggle_run_mode()`. Movement speed applies the walk/run multiplier before the mount multiplier.
 - The jump button and world-tap leap are separate triggers; retain the dedicated button only as an additional accessibility action, not as the sole way to jump.
 
 ## Required implementation order from this audit
 
 1. Decode and legally source the original interface layout/art and icon atlases before skinning the scene. Do not invent a visual match from the current placeholder rectangles.
-2. Add a single-owner touch capture rule to the joystick: only the first active finger may own it; ignore other finger presses until release/cancel; release only on the owning pointer; always reset on focus loss.
-3. Add a real walk/run mode state and a visible mode control, then verify joystick speed and movement animation state in both modes.
+2. Implemented: single-owner touch capture; only the first active finger controls the joystick, and only that finger's release/cancel resets it.
+3. Implemented in source: walk/run mode state, speed multiplier and visible Arabic/English mode toggle. Runtime speed and animation behavior still require Godot/Android verification.
 4. Add reviewed minimap, target feedback, quick slots and icon-backed skill buttons with functional signals and cooldown/resource states.
 5. Test simultaneous joystick + skill touches, cancellation, focus loss, screen rotation, safe areas and the Redmi Note 11 aspect ratio.
 
-No code changes were made for these new audit findings in this commit. The prototype remains a prototype; these gaps must be fixed and device-tested before visual or control acceptance.
+The joystick ownership fix and walk/run source implementation are committed on `feature/conquer-mobile-authentic-hud`. The toggle is wired to the scene and controller. These source changes are not yet runtime/device-tested. The HUD remains a prototype until the remaining missing elements are implemented and the visual comparison/device acceptance checks pass.
