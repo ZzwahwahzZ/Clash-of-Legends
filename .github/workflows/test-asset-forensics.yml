@@ -22,9 +22,9 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install image decoder test dependency
-        run: python -m pip install Pillow
+        run: python -m pip install Pillow texture2ddecoder
       - name: Compile scanner
-        run: python -m py_compile tools/asset_forensics/run_forensics.py tools/asset_forensics/process_standard_assets.py tools/asset_forensics/build_godot_catalog.py tests/test_asset_forensics.py tests/test_native_library_inventory.py tests/test_fui_headers.py tests/test_mobile_apk_inventory.py tools/asset_forensics/inspect_mobile_apks.py tools/asset_forensics/inspect_native_libraries.py tools/asset_forensics/inspect_fui_headers.py tools/asset_forensics/decode_mobile_mjp.py tests/test_mobile_mjp.py tools/asset_forensics/extract_mobile_tpi.py tests/test_mobile_tpi.py
+        run: python -m py_compile tools/asset_forensics/run_forensics.py tools/asset_forensics/process_standard_assets.py tools/asset_forensics/build_godot_catalog.py tests/test_asset_forensics.py tests/test_native_library_inventory.py tests/test_fui_headers.py tests/test_mobile_apk_inventory.py tools/asset_forensics/inspect_mobile_apks.py tools/asset_forensics/inspect_native_libraries.py tools/asset_forensics/inspect_fui_headers.py tools/asset_forensics/decode_mobile_mjp.py tests/test_mobile_mjp.py tools/asset_forensics/extract_mobile_tpi.py tests/test_mobile_tpi.py tools/asset_forensics/decode_mobile_pvr.py tests/test_mobile_pvr.py
       - name: Validate JavaScript parser syntax
         run: node --check tools/asset_forensics/parse_fui_packages.mjs
       - name: Validate Colab notebook JSON and single-cell contract
