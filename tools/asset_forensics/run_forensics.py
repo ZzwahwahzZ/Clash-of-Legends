@@ -116,7 +116,7 @@ def main():
     report["archives"].append({"path":str(cur),"format":sig,"test":"external-list-only"}); children=[]
    for child in children:
     if child.suffix.lower() in ARCHIVE_EXT and depth<x.max_depth and child not in seen:
-     seen.add(child); queue.append((child,dest/(child.stem+"_contents"),depth+1,str(child.relative_to(stage))))
+     seen.add(child); queue.append((child,child.parent/(child.stem+"_contents"),depth+1,str(child.relative_to(stage))))
   except Exception as e: report["errors"].append({"path":str(cur),"error":str(e)})
  report["file_count"]=len(report["files"]); report["extracted_bytes"]=limit[0]
  report["category_counts"]={k:sum(k in f["categories"] for f in report["files"]) for k in KEYWORDS}
