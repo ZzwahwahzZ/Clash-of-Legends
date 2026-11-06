@@ -43,7 +43,16 @@
       "requires_navmesh_projection": true,
       "requires_runtime_trigger": true,
       "interaction_enabled": false,
-      "npc_spawn_anchor": true
+      "npc_spawn_anchor": true,
+      "npc_id": "npc_jianghai_pawnshop",
+      "role": "merchant",
+      "spawn_offset_local": [
+        0,
+        0,
+        4
+      ],
+      "spawn_enabled": false,
+      "requires_clearance_validation": true
     },
     {
       "id": "jianghai.market_bridge",
@@ -85,7 +94,16 @@
       "requires_navmesh_projection": true,
       "requires_runtime_trigger": true,
       "interaction_enabled": false,
-      "npc_spawn_anchor": true
+      "npc_spawn_anchor": true,
+      "npc_id": "npc_jianghai_innkeeper",
+      "role": "innkeeper",
+      "spawn_offset_local": [
+        0,
+        0,
+        3
+      ],
+      "spawn_enabled": false,
+      "requires_clearance_validation": true
     },
     {
       "id": "jianghai.medicine_frontage",
@@ -100,7 +118,16 @@
       "requires_navmesh_projection": true,
       "requires_runtime_trigger": true,
       "interaction_enabled": false,
-      "npc_spawn_anchor": true
+      "npc_spawn_anchor": true,
+      "npc_id": "npc_jianghai_apothecary",
+      "role": "apothecary",
+      "spawn_offset_local": [
+        0,
+        0,
+        3
+      ],
+      "spawn_enabled": false,
+      "requires_clearance_validation": true
     },
     {
       "id": "jianghai.tea_frontage",
@@ -115,7 +142,16 @@
       "requires_navmesh_projection": true,
       "requires_runtime_trigger": true,
       "interaction_enabled": false,
-      "npc_spawn_anchor": true
+      "npc_spawn_anchor": true,
+      "npc_id": "npc_jianghai_tea_merchant",
+      "role": "merchant",
+      "spawn_offset_local": [
+        0,
+        0,
+        3
+      ],
+      "spawn_enabled": false,
+      "requires_clearance_validation": true
     }
   ]
 }
