@@ -295,3 +295,5 @@ jobs:
 
 # Validation workflow revision: keep phase audit runs traceable to the latest branch snapshot.
 # Quest landmark validation is part of the urban-infill visual audit.
+
+# Navigation route resolver added to the task landmark contract.
