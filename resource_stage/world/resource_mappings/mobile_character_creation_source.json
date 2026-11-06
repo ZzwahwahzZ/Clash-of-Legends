@@ -1,0 +1,176 @@
+{
+  "schema_version": "1.0.0",
+  "purpose": "Source-backed mobile character creation reference. Not a runtime character-model catalog and does not authorize attaching unverified meshes.",
+  "source_archive": "extracted-assets-001.zip",
+  "source_archive_sha256": "0d21a110c09b762ed5f1a5f4da022857b0534e489eb85052d15da460cb229d2a",
+  "embedded_apk": "ConquerOnline-1.1.2.3.apk",
+  "extraction_report_artifact_id": 13466315369,
+  "source_files": {
+    "role_creation_table": "assets/ConquerRes/ini/luacfg/cqm_createrole.dat",
+    "role_selection": "assets/ConquerRes/ini/rolechoose.ini",
+    "role_selection_js": "assets/ConquerRes/ini/rolechoose_js.ini",
+    "class_descriptions": "assets/ConquerRes/ini/selectcharacter.ini",
+    "simple_role_variants": "assets/ConquerRes/ini/3dsimplerole.ini",
+    "equipment_translation": [
+      "assets/ConquerRes/ini/armor_trans.ini",
+      "assets/ConquerRes/ini/armet_trans.ini",
+      "assets/ConquerRes/ini/weapon_trans.ini"
+    ]
+  },
+  "decoded_creation_records": [
+    {
+      "table_key": "0",
+      "profession_id": "0",
+      "armor_id": "134080",
+      "hair_id": "0",
+      "right_weapon_id": "421009",
+      "left_weapon_id": "619499",
+      "head_model_id": "114000",
+      "role_title": "chuangjue_jianjieds",
+      "role_description": "Taoists are masters of abundant magic spells. They can choose to be Fire Taoists or Water Taoists."
+    },
+    {
+      "table_key": "2",
+      "profession_id": "6",
+      "armor_id": "131230",
+      "hair_id": "0",
+      "right_weapon_id": "560439",
+      "left_weapon_id": "900439",
+      "head_model_id": "111269",
+      "role_title": "chuangjue_jianjiezs",
+      "role_description": "Warriors can equip shields for additional defense."
+    },
+    {
+      "table_key": "4",
+      "profession_id": "12",
+      "armor_id": "139000",
+      "hair_id": "0",
+      "right_weapon_id": "611239",
+      "left_weapon_id": "612439",
+      "head_model_id": "144000",
+      "role_title": "chuangjue_jianjiehd",
+      "role_description": "Pirates favor rapiers and pistols."
+    },
+    {
+      "table_key": "6",
+      "profession_id": "4",
+      "armor_id": "133080",
+      "hair_id": "3",
+      "right_weapon_id": "500239",
+      "left_weapon_id": "0",
+      "head_model_id": "113000",
+      "role_title": "chuangjue_jianjiegs",
+      "role_description": "Archers engage multiple targets at range."
+    },
+    {
+      "table_key": "8",
+      "profession_id": "14",
+      "armor_id": "138230",
+      "hair_id": "3",
+      "right_weapon_id": "617239",
+      "left_weapon_id": "0",
+      "head_model_id": "0",
+      "role_title": "chuangjue_jianjiejqs",
+      "role_description": "Dragon Warrior: martial arts, nunchaku and chained attacks."
+    },
+    {
+      "table_key": "10",
+      "profession_id": "10",
+      "armor_id": "136000",
+      "hair_id": "60",
+      "right_weapon_id": "610439",
+      "left_weapon_id": "610439",
+      "head_model_id": "0",
+      "role_title": "chuangjue_jianjiews",
+      "role_description": "Monk and Saint share martial and support abilities."
+    },
+    {
+      "table_key": "12",
+      "profession_id": "8",
+      "armor_id": "135000",
+      "hair_id": "287",
+      "right_weapon_id": "601239",
+      "left_weapon_id": "601239",
+      "head_model_id": "0",
+      "role_title": "chuangjue_jianjierz",
+      "role_description": "Ninjas wield paired katanas."
+    },
+    {
+      "table_key": "14",
+      "profession_id": "2",
+      "armor_id": "130000",
+      "hair_id": "3",
+      "right_weapon_id": "410239",
+      "left_weapon_id": "410239",
+      "head_model_id": "118000",
+      "role_title": "chuangjue_jianjieys",
+      "role_description": "Trojans wield a weapon in each hand."
+    },
+    {
+      "table_key": "16",
+      "profession_id": "16",
+      "armor_id": "101230",
+      "hair_id": "0",
+      "right_weapon_id": "626999",
+      "left_weapon_id": "626999",
+      "head_model_id": "170230",
+      "role_title": "chuangjue_jianjiets",
+      "role_description": "Windwalker has Stomper and Chaser branches."
+    },
+    {
+      "table_key": "18",
+      "profession_id": "20",
+      "armor_id": "102000",
+      "hair_id": "3",
+      "right_weapon_id": "681009",
+      "left_weapon_id": "680009",
+      "head_model_id": "146000",
+      "role_title": "chuangjue_jianjiels",
+      "role_description": "Thunderstriker source record, profession 20."
+    },
+    {
+      "table_key": "20",
+      "profession_id": "22",
+      "armor_id": "103990",
+      "hair_id": "3",
+      "right_weapon_id": "608000",
+      "left_weapon_id": "609000",
+      "head_model_id": "171000",
+      "role_title": "chuangjue_jianjiels",
+      "role_description": "Thunderstriker source record, profession 22; kept separate until role identity is reconciled."
+    }
+  ],
+  "role_selection_order": {
+    "pro_0": "Role_FemaleTaoist",
+    "pro_1": "Role_MaleTaoist",
+    "pro_2": "Role_FemaleWarrior",
+    "pro_3": "Role_MaleWarrior",
+    "pro_4": "Role_MalePirate",
+    "pro_5": "Role_FemalePirate",
+    "pro_6": "Role_FemaleArcher",
+    "pro_7": "Role_MaleArcher",
+    "pro_8": "Role_MaleDragonWarrior",
+    "pro_9": "Role_FemaleDragonWarrior",
+    "pro_10": "Role_Monk",
+    "pro_11": "Role_Saint",
+    "pro_12": "Role_MaleNinja",
+    "pro_13": "Role_FemaleNinja",
+    "pro_14": "Role_MaleTrojan",
+    "pro_15": "Role_FemaleTrojan",
+    "pro_16": "Role_View_17",
+    "pro_17": "Role_View_18"
+  },
+  "evidence": {
+    "records_found": 110,
+    "base_records_found": 21,
+    "itemtype_ini_files_found": 89,
+    "decoded_creation_records": 11,
+    "missing_source_paths": 0
+  },
+  "limitations": [
+    "Creation records provide class-specific equipment/item IDs, not verified Godot body meshes.",
+    "The two Thunderstriker profession records remain distinct pending reconciliation.",
+    "Dragon Warrior appears in role-selection UI and its creation record; body-mesh provenance and skeleton mapping remain unverified.",
+    "Armor/head/weapon translation tables and runtime GLB socket fit still require exact joins and visual validation."
+  ]
+}
