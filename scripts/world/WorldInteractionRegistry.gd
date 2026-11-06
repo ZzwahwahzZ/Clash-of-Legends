@@ -81,3 +81,27 @@ func validate_world_bindings() -> PackedStringArray:
 func is_interaction_enabled(anchor_id: String) -> bool:
 	var definition := get_anchor_definition(anchor_id)
 	return not definition.is_empty() and bool(definition.get("interaction_enabled", false))
+
+func get_navigation_path(anchor_id: String, from_world_position: Vector3, navigation_map: RID, max_projection_distance: float = 8.0) -> Dictionary:
+	if not navigation_map.is_valid():
+		return {"ok": false, "reason": "navigation_map_unavailable", "anchor_id": anchor_id}
+	var target := get_anchor_target(anchor_id)
+	if not bool(target.get("ok", false)):
+		return {"ok": false, "reason": "anchor_unresolved", "anchor_id": anchor_id}
+	var projected_start := NavigationServer3D.map_get_closest_point(navigation_map, from_world_position)
+	var projected_target := NavigationServer3D.map_get_closest_point(navigation_map, target["reference_position"])
+	if projected_start.distance_to(from_world_position) > max_projection_distance:
+		return {"ok": false, "reason": "start_outside_navigation_surface", "anchor_id": anchor_id}
+	if projected_target.distance_to(target["reference_position"]) > max_projection_distance:
+		return {"ok": false, "reason": "anchor_outside_navigation_surface", "anchor_id": anchor_id}
+	var path := NavigationServer3D.map_get_path(navigation_map, projected_start, projected_target, true, 1)
+	if path.size() < 2:
+		return {"ok": false, "reason": "no_connected_route", "anchor_id": anchor_id}
+	return {
+		"ok": true,
+		"anchor_id": anchor_id,
+		"path": path,
+		"start": projected_start,
+		"target": projected_target,
+		"waypoint_count": path.size()
+	}
