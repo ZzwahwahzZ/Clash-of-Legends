@@ -79,7 +79,7 @@ func _render_gallery(_caption: String, entries: Array, output_path: String) -> v
             push_error("Could not load production asset as PackedScene: " + String(entry["path"]))
             quit(2)
             return
-        var instance := (resource as PackedScene).instantiate()
+        var instance := (resource as PackedScene).instantiate() as Node3D
         instance.position = entry["position"]
         instance.scale = Vector3.ONE * float(entry["scale"])
         root.add_child(instance)
@@ -108,24 +108,36 @@ func _render_gallery(_caption: String, entries: Array, output_path: String) -> v
     await process_frame
 
 func _collect_bounds(node: Node) -> AABB:
-    var minimum := Vector3(INF, INF, INF)
-    var maximum := Vector3(-INF, -INF, -INF)
-    _collect_bounds_recursive(node, minimum, maximum)
-    if minimum.x == INF:
+    var accumulator := {
+        "minimum": Vector3(INF, INF, INF),
+        "maximum": Vector3(-INF, -INF, -INF),
+        "has_bounds": false
+    }
+    _collect_bounds_recursive(node, accumulator)
+    if not accumulator["has_bounds"]:
         return AABB(Vector3(-10, -1, -10), Vector3(20, 2, 20))
+    var minimum: Vector3 = accumulator["minimum"]
+    var maximum: Vector3 = accumulator["maximum"]
     return AABB(minimum, maximum - minimum)
 
-func _collect_bounds_recursive(node: Node, minimum: Vector3, maximum: Vector3) -> void:
+func _collect_bounds_recursive(node: Node, accumulator: Dictionary) -> void:
     if node is VisualInstance3D:
         var visual := node as VisualInstance3D
         var aabb := visual.get_aabb()
         for index in range(8):
             var point := visual.global_transform * aabb.get_endpoint(index)
-            minimum.x = minf(minimum.x, point.x)
-            minimum.y = minf(minimum.y, point.y)
-            minimum.z = minf(minimum.z, point.z)
-            maximum.x = maxf(maximum.x, point.x)
-            maximum.y = maxf(maximum.y, point.y)
-            maximum.z = maxf(maximum.z, point.z)
+            var minimum: Vector3 = accumulator["minimum"]
+            var maximum: Vector3 = accumulator["maximum"]
+            accumulator["minimum"] = Vector3(
+                minf(minimum.x, point.x),
+                minf(minimum.y, point.y),
+                minf(minimum.z, point.z)
+            )
+            accumulator["maximum"] = Vector3(
+                maxf(maximum.x, point.x),
+                maxf(maximum.y, point.y),
+                maxf(maximum.z, point.z)
+            )
+            accumulator["has_bounds"] = true
     for child in node.get_children():
-        _collect_bounds_recursive(child, minimum, maximum)
+        _collect_bounds_recursive(child, accumulator)
