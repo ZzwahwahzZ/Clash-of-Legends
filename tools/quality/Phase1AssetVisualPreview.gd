@@ -62,17 +62,6 @@ func _render_gallery(_caption: String, entries: Array, output_path: String) -> v
     sun.shadow_enabled = true
     root.add_child(sun)
 
-    var floor := MeshInstance3D.new()
-    var floor_mesh := PlaneMesh.new()
-    floor_mesh.size = Vector2(140, 140)
-    floor.mesh = floor_mesh
-    var floor_material := StandardMaterial3D.new()
-    floor_material.albedo_color = Color(0.24, 0.27, 0.25)
-    floor_material.roughness = 0.94
-    floor.material_override = floor_material
-    floor.position.y = -0.15
-    root.add_child(floor)
-
     for entry in entries:
         var resource := load(String(entry["path"]))
         if not (resource is PackedScene):
@@ -89,12 +78,23 @@ func _render_gallery(_caption: String, entries: Array, output_path: String) -> v
     var span := maxf(bounds.size.x, maxf(bounds.size.y, bounds.size.z))
     span = maxf(span, 12.0)
 
+    var floor := MeshInstance3D.new()
+    var floor_mesh := PlaneMesh.new()
+    floor_mesh.size = Vector2(span * 2.6, span * 2.6)
+    floor.mesh = floor_mesh
+    var floor_material := StandardMaterial3D.new()
+    floor_material.albedo_color = Color(0.24, 0.27, 0.25)
+    floor_material.roughness = 0.94
+    floor.material_override = floor_material
+    floor.position.y = bounds.position.y - 0.15
+    root.add_child(floor)
+
     var camera := Camera3D.new()
     camera.fov = 42.0
-    camera.position = center + Vector3(span * 1.25, span * 0.90, span * 1.55)
+    camera.position = center + Vector3(span * 1.05, span * 0.80, span * 1.30)
     camera.look_at(center, Vector3.UP)
-    camera.current = true
     root.add_child(camera)
+    camera.current = true
 
     await process_frame
     await process_frame
