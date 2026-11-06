@@ -90,6 +90,8 @@ jobs:
         run: python3 tools/resource_packs/build_gameplay_reference_catalog.py
       - name: Build provenance-preserving runtime resource catalog
         run: python3 tools/resource_packs/build_runtime_resource_catalog.py
+      - name: Build exact role-to-C3 candidate catalog
+        run: python3 tools/resource_packs/build_character_role_model_catalog.py
       - name: Prepare source model path lists
         run: |
           cp reports/resource-source-index.csv resource-source-index.csv
