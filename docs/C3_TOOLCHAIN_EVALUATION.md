@@ -75,3 +75,16 @@ This is a conversion and mapping coverage gap, not proof that the original sourc
 - Do not label a candidate model as a class/gender based on numeric look IDs alone.
 - Do not treat an imported Blender shape-key animation as proof of the original bone hierarchy.
 - Do not bypass the all-class content gate or the visual blockout gate to obtain a green build.
+
+
+### 7. OpenFairyGUI — FairyGUI V7 package reader (MIT)
+
+- Repository: https://github.com/OpenFairyGUI/OpenFairyGUI
+- Package: `@openfairygui/core@0.7.0`; license MIT; Node.js 22+.
+- Its `BinaryReader` reads published FairyGUI `.fui` packages and reconstructs package resources, atlas/sprite mappings, component display lists, controllers/pages/actions, transitions, gears, relations, and scroll settings.
+- The protocol documentation is explicitly V7 only. Therefore the Colab pipeline first inventories each `.fui` header and only submits files with the exact `FGUI` magic and version 7 to the reader. Unknown or older files are retained as unknown/other-version; they are not force-parsed as FairyGUI.
+- The reader is used to create a private structural inventory, not to rewrite or replace the original UI. The original atlas images and their links still need separate source-backed validation before Godot integration.
+- The package is not shipped in the APK; only accepted project-owned UI resources may enter the game.
+
+Repository: https://github.com/OpenFairyGUI/OpenFairyGUI
+Protocol: https://fairygui.dev/en/fairygui-binary-package-format
