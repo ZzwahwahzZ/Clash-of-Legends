@@ -334,6 +334,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
+      - name: Checkout repository for emulator test helpers
+        uses: actions/checkout@v4
+
       - name: Download signed Android APK
         uses: actions/download-artifact@v4
         with:
