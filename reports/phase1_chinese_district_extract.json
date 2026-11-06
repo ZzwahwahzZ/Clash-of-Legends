@@ -2500,358 +2500,6 @@
       "selected_by_name": false
     },
     {
-      "node": "OldCityShopAwning00",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "OldCityShopAwning00Mesh",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "OldCityShopAwning00FrameL",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "OldCityShopAwning00FrameLCurve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "OldCityShopAwning00FrameR",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "OldCityShopAwning00FrameRCurve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "OldCityShopAwning01",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "OldCityShopAwning01Mesh",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "OldCityShopAwning01FrameL",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "OldCityShopAwning01FrameLCurve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "OldCityShopAwning01FrameR",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "OldCityShopAwning01FrameRCurve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "OldCityShopAwning02",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "OldCityShopAwning02Mesh",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "OldCityShopAwning02FrameL",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "OldCityShopAwning02FrameLCurve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "OldCityShopAwning02FrameR",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "OldCityShopAwning02FrameRCurve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "OldCityShopAwning03",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "OldCityShopAwning03Mesh",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "OldCityShopAwning03FrameL",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "OldCityShopAwning03FrameLCurve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "OldCityShopAwning03FrameR",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "OldCityShopAwning03FrameRCurve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "OldCityShopAwning04",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "OldCityShopAwning04Mesh",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "OldCityShopAwning04FrameL",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "OldCityShopAwning04FrameLCurve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "OldCityShopAwning04FrameR",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "OldCityShopAwning04FrameRCurve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "OldCityShopAwning05",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "OldCityShopAwning05Mesh",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "OldCityShopAwning05FrameL",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "OldCityShopAwning05FrameLCurve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "OldCityShopAwning05FrameR",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "OldCityShopAwning05FrameRCurve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "UtilityCable00",
-      "parent_path": "JianghaiOldCityAuthoredScene/OverheadUtilityWires",
-      "mesh": "UtilityCable00Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "UtilityCable01",
-      "parent_path": "JianghaiOldCityAuthoredScene/OverheadUtilityWires",
-      "mesh": "UtilityCable01Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "UtilityCable02",
-      "parent_path": "JianghaiOldCityAuthoredScene/OverheadUtilityWires",
-      "mesh": "UtilityCable02Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "UtilityCable03",
-      "parent_path": "JianghaiOldCityAuthoredScene/OverheadUtilityWires",
-      "mesh": "UtilityCable03Curve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
       "node": "FactoryChimneyBand12.0",
       "parent_path": "JianghaiOldCityAuthoredScene/RedStarElectronicsFactory",
       "mesh": "FactoryChimneyBand12.0Mesh",
@@ -3192,9 +2840,9 @@
   "source_glb": "assets/models/jianghai_old_city/jianghai_old_city.glb",
   "source_license": "MIT project composition; third-party source components remain under their recorded licenses in LICENSE_EVIDENCE.md",
   "input_bytes": 63204100,
-  "output_bytes": 54957104,
-  "output_sha256": "d913fddb8a6c8d3c509a99456d30ac7d2c6e30f4dde86002a9054f50603211dd",
-  "selected_node_count": 514,
+  "output_bytes": 55039692,
+  "output_sha256": "e3d8d7c1912fe784031242869923e93b03a16f52186c55e346e54b626f5906d6",
+  "selected_node_count": 536,
   "selected_node_names": [
     "AuthoredStreetNetwork",
     "AvenueHotelBladeBacking",
@@ -3498,6 +3146,24 @@
     "NorthwestGateHouse",
     "OldCityFoundation",
     "OldCityMarketBridge",
+    "OldCityShopAwning00",
+    "OldCityShopAwning00FrameL",
+    "OldCityShopAwning00FrameR",
+    "OldCityShopAwning01",
+    "OldCityShopAwning01FrameL",
+    "OldCityShopAwning01FrameR",
+    "OldCityShopAwning02",
+    "OldCityShopAwning02FrameL",
+    "OldCityShopAwning02FrameR",
+    "OldCityShopAwning03",
+    "OldCityShopAwning03FrameL",
+    "OldCityShopAwning03FrameR",
+    "OldCityShopAwning04",
+    "OldCityShopAwning04FrameL",
+    "OldCityShopAwning04FrameR",
+    "OldCityShopAwning05",
+    "OldCityShopAwning05FrameL",
+    "OldCityShopAwning05FrameR",
     "OuterEastHarborResidence",
     "OuterEastMarketResidence",
     "OuterEastMidResidence",
@@ -3660,6 +3326,10 @@
     "TeaVerticalText",
     "TheatreVerticalBacking",
     "TheatreVerticalText",
+    "UtilityCable00",
+    "UtilityCable01",
+    "UtilityCable02",
+    "UtilityCable03",
     "WeatheredCargoCrate00",
     "WeatheredCargoCrate01",
     "WeatheredCargoCrate02",
@@ -3711,13 +3381,13 @@
     "WestTheatreHouse",
     "WestTheatreRow02"
   ],
-  "retained_node_count": 516,
-  "mesh_node_count": 501,
-  "unique_mesh_count": 213,
-  "primitive_count": 399,
-  "unique_triangles": 1076537,
-  "instanced_triangles": 2989941,
-  "material_count": 88,
+  "retained_node_count": 539,
+  "mesh_node_count": 523,
+  "unique_mesh_count": 235,
+  "primitive_count": 421,
+  "unique_triangles": 1081157,
+  "instanced_triangles": 2994561,
+  "material_count": 91,
   "texture_count": 116,
   "embedded_image_count": 116,
   "source_node_inventory": [
@@ -9975,7 +9645,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "OldCityShopAwning00FrameL",
@@ -9991,7 +9661,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "OldCityShopAwning00FrameR",
@@ -10007,7 +9677,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "OldCityShopAwning01",
@@ -10023,7 +9693,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "OldCityShopAwning01FrameL",
@@ -10039,7 +9709,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "OldCityShopAwning01FrameR",
@@ -10055,7 +9725,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "OldCityShopAwning02",
@@ -10071,7 +9741,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "OldCityShopAwning02FrameL",
@@ -10087,7 +9757,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "OldCityShopAwning02FrameR",
@@ -10103,7 +9773,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "OldCityShopAwning03",
@@ -10119,7 +9789,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "OldCityShopAwning03FrameL",
@@ -10135,7 +9805,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "OldCityShopAwning03FrameR",
@@ -10151,7 +9821,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "OldCityShopAwning04",
@@ -10167,7 +9837,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "OldCityShopAwning04FrameL",
@@ -10183,7 +9853,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "OldCityShopAwning04FrameR",
@@ -10199,7 +9869,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "OldCityShopAwning05",
@@ -10215,7 +9885,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "OldCityShopAwning05FrameL",
@@ -10231,7 +9901,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "OldCityShopAwning05FrameR",
@@ -10247,7 +9917,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "OuterEastHarborResidence",
@@ -12055,7 +11725,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "UtilityCable01",
@@ -12071,7 +11741,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "UtilityCable02",
@@ -12087,7 +11757,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "UtilityCable03",
@@ -12103,7 +11773,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "RedStarElectronicsFactory",
