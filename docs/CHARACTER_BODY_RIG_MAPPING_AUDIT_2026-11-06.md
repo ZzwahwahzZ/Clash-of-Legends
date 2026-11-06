@@ -1,0 +1,71 @@
+# Character Body / Rig Mapping Audit — 2026-11-06
+
+## Decision
+
+**No class-to-body mapping is approved for runtime use by this audit.** The converted C3 body files are source-backed candidates, not verified class assignments. Do not populate `asset_role=complete_character` with `mapping_status=verified` from filename similarity, look number, mesh count, or a motion proof-of-concept alone.
+
+## Evidence inspected
+
+- GitHub Actions artifact: `C3-Model-Conversion-Reports`
+- Artifact ID: `13463741706`
+- Workflow run: `42131464090`
+- Source conversion report: `reports/c3-conversion-report.json`
+- Detailed model report: `reports/c3-model-audit.json`
+- Motion import validation: `reports/c3-motion-poc-validation.json`
+- Original C3 source root recorded by the report: `netdragon/c31/c3/`
+
+The conversion report contains 569 converted records overall. The following 13 converted body files are present in the artifact:
+
+| C3 body model | GLB output | Mesh chunks | Animated mesh chunks in static conversion |
+|---|---|---:|---:|
+| 7000000 | characters/c3/body/7000000.glb | 1 | 1 |
+| 7101020 | characters/c3/body/7101020.glb | 18 | 17 |
+| 7102000 | characters/c3/body/7102000.glb | 18 | 0 |
+| 7103000 | characters/c3/body/7103000.glb | 18 | 17 |
+| 7130000 | characters/c3/body/7130000.glb | 18 | 0 |
+| 7131020 | characters/c3/body/7131020.glb | 18 | 17 |
+| 7132000 | characters/c3/body/7132000.glb | 18 | 0 |
+| 7133010 | characters/c3/body/7133010.glb | 18 | 17 |
+| 7134010 | characters/c3/body/7134010.glb | 18 | 17 |
+| 7135000 | characters/c3/body/7135000.glb | 18 | 17 |
+| 8133010 | characters/c3/body/8133010.glb | 18 | 0 |
+| 8134010 | characters/c3/body/8134010.glb | 18 | 17 |
+| 8135000 | characters/c3/body/8135000.glb | 18 | 0 |
+
+The 0/17 animated-chunk distinction is a conversion-report property; it is not evidence that the model is or is not a playable character. Some motion-only body sources were exported separately for the motion POC.
+
+## Motion proof-of-concept results
+
+The same artifact contains two Godot-import-validated skeletal motion samples:
+
+- `look7_model7130000_weapon500_action100.glb`: one skeleton, 66 bones, one skinned mesh, 2,542 animation keys, 128 tracks.
+- `look8_model8133010_weapon500_action100.glb`: one skeleton, 60 bones, one skinned mesh, 2,411 animation keys, 116 tracks.
+
+The report marks both as `GODOT_SKELETON_VALIDATED`. Six VAT clips were also validated. This proves that these specific motion samples can be imported and that their animation data changes over time. It does **not** prove the corresponding body model belongs to a named class, that all actions are complete, or that the sample is ready for the player controller.
+
+The broader motion-only report explicitly marks body/look pairings as `PATH_KEY_AND_BONE_SIGNATURE_CANDIDATES_ONLY_NOT_RUNTIME_PAIRED`. It reports 4,052 body/look candidate pairs and 558 motion-only documents. Those are search candidates, not 4,052 verified relationships.
+
+## Existing mobile character-creation evidence
+
+The checked-in `resource_stage/world/resource_mappings/mobile_character_creation_source.json` decodes 11 creation records from the supplied Mobile 1.1.2.3 source. Those records identify profession IDs and creation equipment IDs (armor, hair, weapons, head model), but explicitly do not provide verified Godot body meshes or skeleton mappings.
+
+The two Thunderstriker creation records (profession IDs 20 and 22) remain distinct. Do not collapse them into one identity without reconciling the original role-selection source.
+
+## Required joins before runtime approval
+
+1. Resolve each selectable class and gender to the exact role/look key in the version-matched `rolechoose.ini`, `rolechoose_js.ini`, `selectcharacter.ini`, and `3dsimplerole.ini` sources.
+2. Trace that role/look key to an exact `c3/body/<model-id>.c3` path. A numerical look resemblance alone is insufficient.
+3. Pair each body with motion files using exact source path keys and a compatible bone signature; record the exact idle, walk, run, attack, hit, and death coverage available.
+4. Verify the imported rig, skin bindings, material/texture bindings, scale, facing direction, and animation playback in Godot.
+5. Capture front, side, back, and in-game camera screenshots for each class/gender. Review clipping and body proportions before marking the mapping verified.
+6. Only then add a complete-character entry to the runtime catalog with explicit class, gender, source path, rig/motion references, evidence artifact, and reviewer status.
+
+## Runtime safety
+
+The current `CharacterModelMappingRules.gd` correctly accepts only entries with `asset_role=complete_character` and `mapping_status=verified`. Preserve that rule. The current mapping unit test uses synthetic test dictionaries; it proves the filter behavior, not that the production resource catalog contains verified class entries.
+
+The current `LegendIntro.gd` intentionally blocks world entry while any selectable class lacks a verified complete-character mapping. This is why the app may remain at character selection after resource loading. Do not bypass that gate by assigning a body candidate to every class.
+
+## Next concrete task
+
+Continue source tracing from the exact Mobile role/look records to the C3 body path and motion path. Prioritize the already import-validated look 7 / model 7130000 and look 8 / model 8133010 samples for deeper source verification, but keep both at **POC / unassigned** until the exact class/gender join and in-game visual review are complete.
