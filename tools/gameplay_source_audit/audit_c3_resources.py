@@ -64,7 +64,7 @@ def parse_wdb(data: bytes) -> dict:
                 "sha256":sha(payload),"magic_hex":payload[:16].hex(),
                 "magic_ascii":payload[:16].decode("latin1","replace"),
                 "extension":ext}
-        if Path(name.replace("\\\\","/")).name.lower() in TARGET_DBC:
+        if Path(name.replace("\\","/")).name.lower() in TARGET_DBC:
             item["dbc"] = inspect_dbc(name, payload)
         entries.append(item)
     ext_counts = collections.Counter(x["extension"] or "[none]" for x in entries)
