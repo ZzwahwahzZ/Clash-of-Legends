@@ -57,3 +57,16 @@ The existing `MainHUD.tscn` is a functional prototype only. Its rectangular text
 - [ ] Minimap, target, quest, quick slots and all visible function controls are functional.
 - [ ] Arabic RTL, phone safe areas and multiple aspect ratios pass.
 - [ ] Android runtime test on Redmi Note 11; no material FPS regression.
+
+
+## Official mobile guide evidence added during review
+
+The official Conquer Online Mobile guide page was opened and its actual linked gameplay images were inspected on 2026-11-06:
+
+- Official guide: https://comobile.99.com/guide/info/beginners/2023-02-13/start_off_-_game_operations.shtml
+- The guide explicitly describes Jump as tapping/clicking the ground destination and says all characters leap. This confirms the ground-tap leap behavior already implemented in `PlayerController.gd`.
+- Official jump/pathfinding image: https://hw.99.com/uploads/allimg/230213/82-2302131430534M.png
+- Official Auto-pathfinding panel image: https://hw.99.com/uploads/allimg/230213/82-23021314430C05.png. It shows a separate, full-height navigation panel with grouped destination rows (PK Tournaments, Pharmacist, Warehouse, Hunting Areas, Market/Twin City, Quest, Guild and Other Places). This supports keeping auto-pathfinding as a distinct panel/action rather than making every ground tap open pathfinding.
+- The guide's kill-monsters image link was not retrievable during this review, so it is not treated as a verified full-screen HUD reference. The current visual acceptance target remains pending a directly inspectable in-game gameplay screenshot set and the original FUI/atlas resources.
+
+These references verify control semantics and the separate pathfinding panel only. They do **not** establish that the current Godot HUD visually matches the original. The existing prototype remains unaccepted until the source UI package/art can be decoded and a side-by-side screen review is completed.
