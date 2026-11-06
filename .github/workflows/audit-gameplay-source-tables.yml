@@ -42,6 +42,22 @@ jobs:
           python3 tools/gameplay_source_audit/audit_source_tables.py \
             build/source/extracted-assets-001.zip \
             --output reports/gameplay-source-table-audit.json
+      - name: Inspect GLB skeleton hierarchies, skin weights and embedded animations
+        run: |
+          python3 tools/gameplay_source_audit/audit_glb_rigs.py \\
+            build/source/extracted-assets-001.zip \\
+            --output reports/glb-rig-animation-audit.json
+          python3 -m json.tool reports/glb-rig-animation-audit.json > /dev/null
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path("reports/glb-rig-animation-audit.json").read_text())
+          print("GLB files:", d["glb_file_count"])
+          print("Skinned:", d["skinned_glb_count"], "Animated:", d["animated_glb_count"])
+          print("Both skin+animation:", d["glb_with_both_skin_and_animation_count"])
+          print("Skins:", d["total_skin_count"], "Joints:", d["total_joint_count"], "Animations:", d["total_embedded_animation_count"])
+          print("Errors:", len(d["errors"]))
+          PY
       - name: Validate report JSON and print concise inventory
         run: |
           python3 -m json.tool reports/gameplay-source-table-audit.json > /dev/null
@@ -63,6 +79,6 @@ jobs:
           path: |
             reports/gameplay-source-table-audit.json
             reports/comprehensive-asset-inventory.json
-            reports/polyfile-mobile-*.json
+            reports/polyfile-mobile-*.json\n            reports/glb-rig-animation-audit.json
           if-no-files-found: error
           retention-days: 30
