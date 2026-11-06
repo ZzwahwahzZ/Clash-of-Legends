@@ -32,7 +32,7 @@ class Reader:
     def u64(self): return self.unpack("<Q")[0]
 
     def fixed_string(self, n: int) -> str:
-        return self.take(n).split(b"\\0", 1)[0].decode("cp1252", errors="replace")
+        return self.take(n).split(b"\0", 1)[0].decode("cp1252", errors="replace")
 
 
 def parse_dmap(path: Path) -> dict:
@@ -273,12 +273,12 @@ def main():
     dmap = parse_dmap(args.dmap)
     pux = parse_pux(args.pux)
     ani = [parse_ani(p) for p in args.ani]
-    embedded = Path(dmap["puzzle_path"].replace("\\\\", "/")).name.lower()
+    embedded = Path(dmap["puzzle_path"].replace("\\", "/")).name.lower()
     if embedded != args.pux.name.lower():
         raise SystemExit(f"DMAP references {embedded}, supplied PUX is {args.pux.name}")
     result = {"status": "PARSED", "dmap": dmap, "pux": pux, "ani": ani}
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+    args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({
         "status": result["status"],
         "map": f'{dmap["width"]}x{dmap["height"]}',
