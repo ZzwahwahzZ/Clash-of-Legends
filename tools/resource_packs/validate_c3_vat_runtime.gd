@@ -1,4 +1,4 @@
-extends SceneTree
+extends Node
 
 const MODELS := [
 	{"id": 7130000, "gender": "male"},
@@ -8,21 +8,22 @@ const STATES := ["idle", "walk", "run"]
 const HELPERS := ["v_zero", "v_slot", "v_l_slot01", "v_l_slot02", "v_r_slot01", "v_r_slot02"]
 const OUTPUT_DIR := "reports/c3-vat-runtime-switch"
 
-func _initialize() -> void:
+func _ready() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
-	get_root().size = Vector2i(1280, 720)
+	get_viewport().size = Vector2i(1280, 720)
 	for _frame in range(3):
-		await process_frame
+		await get_tree().process_frame
 	if not is_instance_valid(AssetCatalog) or AssetCatalog.character_vat_clips.size() != 2:
 		push_error("C3 VAT runtime validation: runtime catalog has not exposed both validated character VAT models.")
-		quit(1)
+		get_tree().quit(1)
 		return
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://reports"))
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://" + OUTPUT_DIR))
 	var stage := Node3D.new()
 	stage.name = "C3_VAT_Runtime_Switch_Validation"
-	get_root().add_child(stage)
+	get_tree().root.add_child(stage)
 	var environment_node := WorldEnvironment.new()
 	var environment := Environment.new()
 	environment.background_mode = Environment.BG_COLOR
@@ -137,7 +138,7 @@ func _run() -> void:
 			animator.set_frame(0.0)
 			for _frame in range(2):
 				await process_frame
-			var image_a := get_root().get_texture().get_image()
+			var image_a := get_viewport().get_texture().get_image()
 			var stem: String = str(model["gender"]) + "_" + state
 			var frame_a_path := OUTPUT_DIR.path_join(stem + "_frame_a.png")
 			if image_a.save_png(frame_a_path) != OK:
@@ -225,7 +226,7 @@ func _run() -> void:
 		return
 	print("C3 VAT RUNTIME VALIDATION PASSED: ", JSON.stringify(report))
 	stage.queue_free()
-	quit(0)
+	get_tree().quit(0)
 
 func _find_character_model_path(model_id: int) -> String:
 	var entries := AssetCatalog.get_asset_entries("characters", [".glb", ".gltf"])
