@@ -24,6 +24,8 @@ const keepPatterns = [
   /^JianghaiChineseArcadeShop_LOD/i,
   /^JianghaiChineseGateHouse_LOD/i,
   /^JianghaiDensity_/i,
+  /^JianghaiPerimeterGroundComposite$/i,
+  /^JianghaiMountainMassif/i,
   /^JianghaiEnterable_/i,
   /^JianghaiCleared_Market/i,
   /^JianghaiCleared_Pawnshop/i,
