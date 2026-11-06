@@ -57,6 +57,7 @@ func _run_audit() -> void:
 	var model_paths: Array[String] = []
 	_walk_directory("res://", report["extension_counts"], model_paths, report["extension_samples"])
 	_collect_character_registry_paths("res://", report["character_registry_paths"], report["c3_path_samples"])
+	_dump_dmap_format_sample(report)
 	_audit_resource_catalog(report, model_paths)
 	model_paths = model_paths.duplicate()
 	model_paths.sort()
@@ -129,6 +130,35 @@ func _run_audit() -> void:
 	quit(0)
 
 
+
+
+func _dump_dmap_format_sample(report: Dictionary) -> void:
+	var samples: Array = report.get("extension_samples", {}).get("dmap", [])
+	if samples.is_empty():
+		report["dmap_format_sample"] = {"status": "NO_DMAP_FILES_FOUND"}
+		return
+	var source_path := str(samples[0])
+	var source := FileAccess.open(source_path, FileAccess.READ)
+	if source == null:
+		report["dmap_format_sample"] = {"status": "SOURCE_OPEN_FAILED", "path": source_path}
+		return
+	var bytes := source.get_buffer(source.get_length())
+	source.close()
+	var output_path := "/tmp/clash-dmap-format-sample.bin"
+	var output := FileAccess.open(output_path, FileAccess.WRITE)
+	if output == null:
+		report["dmap_format_sample"] = {"status": "SAMPLE_WRITE_FAILED", "path": source_path, "size_bytes": bytes.size()}
+		return
+	output.store_buffer(bytes)
+	output.close()
+	report["dmap_format_sample"] = {
+		"status": "EXPORTED_FOR_BINARY_FORMAT_ANALYSIS",
+		"source_path": source_path,
+		"size_bytes": bytes.size(),
+		"header_hex_128": bytes.slice(0, mini(128, bytes.size())).hex_encode(" "),
+		"artifact_path": output_path
+	}
+	print("DMAP FORMAT SAMPLE EXPORTED: ", source_path, " | bytes=", bytes.size(), " | ", output_path)
 
 func _collect_character_registry_paths(path: String, registry_paths: Array, c3_samples: Array) -> void:
 	var directory := DirAccess.open(path)
