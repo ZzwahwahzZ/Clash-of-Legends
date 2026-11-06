@@ -32,6 +32,8 @@ var target_nav_position: Vector3 = Vector3.ZERO
 var is_moving_to_target: bool = false
 var imported_model_animation: AnimationPlayer = null
 var imported_animation_name: String = ""
+var _c3_vat_active: bool = false
+var _current_character_model_id: int = 0
 var imported_mount_item_id: String = ""
 var imported_weapon_item_id: String = ""
 var footstep_timer: float = 0.0
@@ -50,6 +52,7 @@ var footstep_timer: float = 0.0
 @onready var weapon_mount: Node3D = get_node_or_null("VisualRoot/Torso/WeaponMount")
 @onready var mount_mesh: Node3D = get_node_or_null("VisualRoot/MountMesh") if has_node("VisualRoot/MountMesh") else get_node_or_null("MountMesh")
 @onready var anim_player: AnimationPlayer = get_node_or_null("AnimationPlayer")
+@onready var c3_vat_animator: C3VatCharacterAnimator = get_node_or_null("C3VatAnimator")
 
 func _ready() -> void:
 	if GameManager:
@@ -120,6 +123,10 @@ func _apply_refinement_glow() -> void:
 func _is_renderable_mesh_instance(node: MeshInstance3D) -> bool:
 	return is_instance_valid(node) and node.mesh != null and node.mesh.get_surface_count() > 0
 
+func _extract_c3_model_id(asset_path: String) -> int:
+	var stem := asset_path.get_file().get_basename()
+	return int(stem) if stem.is_valid_int() else 0
+
 func _on_asset_catalog_loaded(_asset_count: int) -> void:
 	_apply_character_model()
 	_apply_mount_model()
@@ -136,6 +143,9 @@ func _apply_character_model() -> bool:
 	var model_index := AssetCatalog.get_verified_character_model_index(character_class, character_gender)
 	if model_index < 0:
 		return false
+	var selected_entry: Dictionary = model_entries[model_index]
+	var selected_path := str(selected_entry.get("path", ""))
+	var model_id := _extract_c3_model_id(selected_path)
 	# Build and validate the candidate while the current visible model remains intact.
 	var candidate_root := AssetCatalog.instantiate_fitted_model("characters", model_index, visual_root, 1.7, "CharacterCandidate")
 	if candidate_root == null:
@@ -143,17 +153,24 @@ func _apply_character_model() -> bool:
 		return false
 	var candidate_instance: Node = candidate_root.get_child(0) if candidate_root.get_child_count() > 0 else null
 	var candidate_animation := candidate_instance.find_child("AnimationPlayer", true, false) if candidate_instance else null
-	var validation := _validate_character_candidate(candidate_instance, candidate_animation)
+	var validation := _validate_character_candidate(candidate_instance, candidate_animation, model_id)
 	if not bool(validation.get("ok", false)):
 		push_warning("Character replacement rejected; keeping current visible model. " + str(validation.get("reason", "validation failed")))
 		candidate_root.queue_free()
 		return false
 
+	var use_c3_vat := c3_vat_animator != null and c3_vat_animator.has_vat_for_model(model_id)
+	if use_c3_vat and not c3_vat_animator.configure_character(candidate_instance as Node3D, model_id):
+		push_warning("Character replacement rejected: validated C3 VAT runtime binding failed for model %d." % model_id)
+		candidate_root.queue_free()
+		return false
 	var old_root := visual_root.get_node_or_null("ImportedModelRoot")
 	if old_root:
 		old_root.queue_free()
 	candidate_root.name = "ImportedModelRoot"
-	imported_model_animation = candidate_animation as AnimationPlayer
+	_c3_vat_active = use_c3_vat
+	_current_character_model_id = model_id
+	imported_model_animation = null if use_c3_vat else candidate_animation as AnimationPlayer
 	imported_animation_name = ""
 	_set_imported_animation_state("idle")
 	for child in visual_root.get_children():
@@ -162,7 +179,7 @@ func _apply_character_model() -> bool:
 	call_deferred("_apply_refinement_glow")
 	return true
 
-func _validate_character_candidate(candidate: Node, animation_node: Node) -> Dictionary:
+func _validate_character_candidate(candidate: Node, animation_node: Node, model_id: int = 0) -> Dictionary:
 	if candidate == null:
 		return {"ok": false, "reason": "missing instantiated model root"}
 	var mesh_count := 0
@@ -223,9 +240,10 @@ func _validate_character_candidate(candidate: Node, animation_node: Node) -> Dic
 		has_morph_move = has_morph_move or (has_morph_track and (normalized.contains("walk") or normalized.contains("run") or normalized.contains("move")))
 	var skeletal_animation_valid := skeleton_count > 0 and total_bones >= 8 and skinned_mesh_count > 0 and has_skeletal_idle and has_skeletal_move
 	var morph_animation_valid := morph_mesh_count >= 8 and has_morph_idle and has_morph_move
-	if not skeletal_animation_valid and not morph_animation_valid:
-		return {"ok": false, "reason": "requires bound skeletal idle/move clips or at least 8 morph meshes with semantic idle/move clips"}
-	var mode := "skeletal" if skeletal_animation_valid else "morph"
+	var vat_animation_valid := c3_vat_animator != null and c3_vat_animator.has_vat_for_model(model_id)
+	if not skeletal_animation_valid and not morph_animation_valid and not vat_animation_valid:
+		return {"ok": false, "reason": "requires bound skeletal idle/move clips, semantic morph idle/move clips, or a verified C3 VAT idle/walk/run set"}
+	var mode := "skeletal" if skeletal_animation_valid else ("morph" if morph_animation_valid else "C3 VAT")
 	return {"ok": true, "reason": "renderable texture-backed materials and complete %s idle/move animation path present" % mode}
 
 func _physics_process(delta: float) -> void:
@@ -291,6 +309,9 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 
 func _set_imported_animation_state(state: String) -> void:
+	if _c3_vat_active and c3_vat_animator != null:
+		c3_vat_animator.play_state(state)
+		return
 	if imported_model_animation == null or not is_instance_valid(imported_model_animation):
 		return
 	var preferred := ["idle", "stand"] if state == "idle" else ["run", "walk", "move"]
