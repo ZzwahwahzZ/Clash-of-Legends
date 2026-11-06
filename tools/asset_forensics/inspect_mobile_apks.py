@@ -5,7 +5,7 @@ The report contains metadata and matching strings only; extracted APKs and libra
 inside the caller's private working directory and are not committed or uploaded.
 """
 from __future__ import annotations
-import argparse, hashlib, json, re, shutil, struct, subprocess, zipfile
+import argparse, hashlib, json, re, struct, zipfile
 from pathlib import Path, PurePosixPath
 
 ARCHIVE_SUFFIXES = {".apk", ".apks", ".xapk", ".zip", ".obb"}
@@ -58,7 +58,7 @@ def main():
     args.out.mkdir(parents=True, exist_ok=True)
     extracted = args.out / "private_apk_extract"
     extracted.mkdir(exist_ok=True)
-    apks, libs, dexes, packages, errors = [], [], [], [], []
+    apks, libs, dexes, errors = [], [], [], []
 
     def inspect_apk(blob: bytes, label: str):
         digest = sha(blob)
@@ -68,7 +68,7 @@ def main():
         try:
             with zipfile.ZipFile(target) as z:
                 names = [n for n in z.namelist() if safe_name(n)]
-                rec["dex_files"] = [n for n in names if re.fullmatch(r"classes(?:[0-9]+)?\\.dex", PurePosixPath(n).name)]
+                rec["dex_files"] = [n for n in names if re.fullmatch(r"classes(?:[0-9]+)?\.dex", PurePosixPath(n).name)]
                 rec["native_libraries"] = [n for n in names if PurePosixPath(n).suffix.lower()==".so"]
                 rec["resource_containers"] = [n for n in names if PurePosixPath(n).suffix.lower() in {".tpi",".tpd",".wdb",".c3",".mjp",".pvr"}]
                 rec["asset_roots"] = sorted({"/".join(PurePosixPath(n).parts[:2]) for n in names if n.startswith("assets/")})[:100]
