@@ -1,5 +1,5 @@
 name: Phase 1 - Acquire and audit CC0 world assets
-# Re-run Godot preview using authored gate anchor and mobile-sized capture.
+# Re-run the Godot visual audit with the authored dusk atmosphere.
 
 on:
   push:
