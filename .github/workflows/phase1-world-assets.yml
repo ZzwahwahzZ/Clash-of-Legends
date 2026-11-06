@@ -1,5 +1,5 @@
 name: Phase 1 - Acquire and audit CC0 world assets
-# Re-run extraction after excluding the previously extracted city from the candidate-pack count.
+# Re-run Godot preview using authored gate anchor and mobile-sized capture.
 
 on:
   push:
