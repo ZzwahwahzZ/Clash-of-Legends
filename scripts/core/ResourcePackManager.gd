@@ -3,6 +3,7 @@ extends Node
 ## Multiple independent HTTPRequest nodes allow safe parallel downloads.
 
 signal manifest_loaded(package_count: int)
+signal bootstrap_completed
 signal download_progress(package_id: String, received_bytes: int, total_bytes: int)
 signal package_installed(package_id: String, path: String)
 signal package_failed(package_id: String, reason: String)
@@ -24,6 +25,7 @@ var manifest: Dictionary = {}
 var packages: Dictionary = {}
 var installed_packages: Dictionary = {}
 var busy := false
+var bootstrap_finished := false
 # package_id -> {request, temp_path, final_path, expected_size, expected_hash}
 var _active_downloads: Dictionary = {}
 
@@ -45,6 +47,13 @@ func _bootstrap_installed_resources() -> void:
 	if packages.is_empty():
 		await refresh_manifest()
 	await _load_installed_packages()
+	bootstrap_finished = true
+	bootstrap_completed.emit()
+
+func wait_for_bootstrap() -> void:
+	if bootstrap_finished:
+		return
+	await bootstrap_completed
 
 func refresh_manifest(url: String = MANIFEST_URL) -> bool:
 	if busy:
