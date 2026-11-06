@@ -240,6 +240,7 @@ jobs:
           xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --path . --rendering-method gl_compatibility --script res://tools/quality/Phase1UrbanInfillPreview.gd 2>&1 | tee reports/phase1_urban_infill_preview.log
           test -s reports/phase1_urban_infill_topdown.png
           test -s reports/phase1_urban_infill_oblique.png
+          test -s reports/phase1_urban_infill_bounds.json
           if grep -Eq 'SCRIPT ERROR:|ERROR: Node not inside tree|Parse Error:' reports/phase1_chinese_district_preview.log; then
             echo 'Godot visual preview reported a script or scene-tree error'
             exit 1
@@ -282,6 +283,7 @@ jobs:
             reports/phase1_urban_infill_preview.log
             reports/phase1_urban_infill_topdown.png
             reports/phase1_urban_infill_oblique.png
+            reports/phase1_urban_infill_bounds.json
             assets/environment/phase1/SOURCES.md
           if-no-files-found: warn
           retention-days: 30
