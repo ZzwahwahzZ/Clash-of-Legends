@@ -4,7 +4,9 @@ class_name PlayerController
 @export var character_class: String = "Trojan"
 @export_enum("male", "female") var character_gender: String = "male"
 @export var base_speed: float = 6.5
+@export_range(0.25, 1.0, 0.05) var walk_speed_multiplier: float = 0.55
 @export var mount_speed_multiplier: float = 1.6
+var is_running: bool = true
 @export var jump_velocity: float = 5.5
 
 var current_hp: int = 500
@@ -301,7 +303,8 @@ func _physics_process(delta: float) -> void:
 		velocity.y += get_gravity().y * delta
 
 	var move_vec = Vector3.ZERO
-	var current_speed = base_speed * (mount_speed_multiplier if is_mounted else 1.0)
+	var movement_mode_multiplier := 1.0 if is_running else walk_speed_multiplier
+	var current_speed = base_speed * movement_mode_multiplier * (mount_speed_multiplier if is_mounted else 1.0)
 	if input_direction != Vector2.ZERO:
 		var cam_yaw = free_camera.get_camera_yaw() if free_camera else 0.0
 		var forward = Vector3(0, 0, -1).rotated(Vector3.UP, cam_yaw)
@@ -368,6 +371,10 @@ func _set_imported_animation_state(state: String) -> void:
 
 func set_joystick_input(vec: Vector2) -> void:
 	input_direction = vec
+
+func toggle_run_mode() -> bool:
+	is_running = not is_running
+	return is_running
 
 func move_towards_target_position(pos: Vector3, _delta: float) -> void:
 	target_nav_position = pos
