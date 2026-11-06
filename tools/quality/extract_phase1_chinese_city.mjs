@@ -45,10 +45,10 @@ function keepSubtree(node) {
   for (const child of node.listChildren()) keepSubtree(child);
 }
 function keepAncestors(node) {
-  let parent = node.getParent();
+  let parent = node.getParentNode();
   while (parent instanceof Node) {
     keep.add(parent);
-    parent = parent.getParent();
+    parent = parent.getParentNode();
   }
 }
 for (const node of selected) {
@@ -57,10 +57,10 @@ for (const node of selected) {
 }
 function depth(node) {
   let value = 0;
-  let parent = node.getParent();
+  let parent = node.getParentNode();
   while (parent instanceof Node) {
     value++;
-    parent = parent.getParent();
+    parent = parent.getParentNode();
   }
   return value;
 }
