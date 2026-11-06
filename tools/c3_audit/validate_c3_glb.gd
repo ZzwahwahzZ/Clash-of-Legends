@@ -22,6 +22,12 @@ func _scan(path: String, files: Array[String]) -> void:
 func _validate() -> void:
 	var files: Array[String] = []
 	_scan("res://build/c3-glb", files)
+	var audit_path := "res://reports/c3-model-audit.json"
+	var audit_data = JSON.parse_string(FileAccess.get_file_as_string(audit_path)) if FileAccess.file_exists(audit_path) else null
+	if not (audit_data is Dictionary):
+		push_error("C3 GLB validation: source audit report is missing or invalid.")
+		quit(1)
+		return
 	if files.is_empty():
 		push_error("C3 GLB validation: no converted GLB files were generated.")
 		quit(1)
@@ -36,6 +42,8 @@ func _validate() -> void:
 	var motion_poc_failed := false
 	var skeletal_poc_results: Array[Dictionary] = []
 	var skeletal_poc_failed := false
+	var skeleton_catalog_results: Array[Dictionary] = []
+	var skeleton_catalog_failed := false
 	for path in files:
 		var packed := ResourceLoader.load(path) as PackedScene
 		if packed == null:
@@ -131,6 +139,32 @@ func _validate() -> void:
 			print("C3 SKELETAL POC: ", JSON.stringify(skeletal_result))
 			if not skeletal_ok:
 				skeletal_poc_failed = true
+		if path.contains("/skeleton-poc/"):
+			var catalog_skeletons := instance.find_children("*", "Skeleton3D", true, false)
+			var catalog_bones := 0
+			for skeleton_node in catalog_skeletons:
+				catalog_bones += (skeleton_node as Skeleton3D).get_bone_count()
+			var catalog_skinned_meshes := 0
+			for mesh_node in meshes:
+				var catalog_mesh := mesh_node as MeshInstance3D
+				if catalog_mesh.skin != null and not catalog_mesh.skeleton.is_empty():
+					catalog_skinned_meshes += 1
+			var catalog_ok := model_surfaces > 0 and catalog_skeletons.size() == 1 and catalog_bones > 1 and catalog_skinned_meshes == 1 and model_animation_tracks > 0 and model_animation_keys > 1
+			var catalog_result := {
+				"path": path,
+				"mesh_instance_count": meshes.size(),
+				"surface_count": model_surfaces,
+				"skeleton_count": catalog_skeletons.size(),
+				"skeleton_bone_count": catalog_bones,
+				"skinned_mesh_count": catalog_skinned_meshes,
+				"animation_track_count": model_animation_tracks,
+				"animation_key_count": model_animation_keys,
+				"status": "GODOT_SKELETON_CATALOG_VALIDATED" if catalog_ok else "FAILED"
+			}
+			skeleton_catalog_results.append(catalog_result)
+			print("C3 SKELETON CATALOG: ", JSON.stringify(catalog_result))
+			if not catalog_ok:
+				skeleton_catalog_failed = true
 		print("C3 GLB OK: ", path, " | MeshInstance3D: ", meshes.size(), " | surfaces: ", model_surfaces, " | morph meshes: ", model_morph_meshes, " | animation tracks: ", model_animation_tracks, " | animation keys: ", model_animation_keys)
 		instance.free()
 		valid += 1
@@ -273,8 +307,6 @@ func _validate() -> void:
 		if not expected_vat_clips.has(str(clip_key)):
 			unexpected_vat_clips.append(str(clip_key))
 	var vat_static_parts_retained := true
-	var audit_path := "res://reports/c3-model-audit.json"
-	var audit_data = JSON.parse_string(FileAccess.get_file_as_string(audit_path)) if FileAccess.file_exists(audit_path) else null
 	if not (audit_data is Dictionary):
 		vat_static_parts_retained = false
 	else:
@@ -311,6 +343,10 @@ func _validate() -> void:
 		"validated_skeletal_clip_count": skeletal_poc_results.filter(func(row): return row.get("status") == "GODOT_SKELETON_VALIDATED").size(),
 		"skeletal_status": "PASSED" if skeletal_poc_results.size() == 2 and not skeletal_poc_failed else "FAILED",
 		"skeletal_clips": skeletal_poc_results,
+		"expected_skeleton_catalog_count": int(audit_data.get("skeleton_catalog_poc_count", 0)),
+		"validated_skeleton_catalog_count": skeleton_catalog_results.filter(func(row): return row.get("status") == "GODOT_SKELETON_CATALOG_VALIDATED").size(),
+		"skeleton_catalog_status": "PASSED" if int(audit_data.get("skeleton_catalog_poc_count", 0)) > 0 and skeleton_catalog_results.size() == int(audit_data.get("skeleton_catalog_poc_count", 0)) and not skeleton_catalog_failed else "FAILED",
+		"skeleton_catalog": skeleton_catalog_results,
 		"expected_vat_clip_count": 6,
 		"validated_vat_clip_count": clips_with_moving_mesh,
 		"vat_exported_deforming_mesh_count": vat_validated_count,
@@ -332,6 +368,10 @@ func _validate() -> void:
 	print("C3 MOTION POC VALIDATION: ", poc_report["validated_clip_count"], "/", poc_report["expected_clip_count"], " clips passed Godot import and animation-track checks.")
 	if motion_poc_results.size() != 6 or motion_poc_failed:
 		push_error("C3 motion POC validation failed: expected six fully animated imported clips.")
+		quit(1)
+		return
+	if poc_report["skeleton_catalog_status"] != "PASSED":
+		push_error("C3 skeleton catalog validation failed: every exported body rig must import with its skeleton, skin binding, and animation tracks.")
 		quit(1)
 		return
 	# The full six-clip runtime path is VAT. The skeletal POC remains a
