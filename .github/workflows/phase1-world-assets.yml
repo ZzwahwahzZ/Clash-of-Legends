@@ -294,3 +294,4 @@ jobs:
           retention-days: 30
 
 # Validation workflow revision: keep phase audit runs traceable to the latest branch snapshot.
+# Quest landmark validation is part of the urban-infill visual audit.
