@@ -54,7 +54,7 @@ def decode_uncompressed_v3(data: bytes, width: int, height: int, lo: int, hi: in
 
 def decode_v2(data: bytes) -> tuple[int,int,bytes,str]:
     if len(data) < 52: raise ValueError("truncated PVR v2 header")
-    header_size,height,width,_,flags,bpp,r_mask,g_mask,b_mask,a_mask,magic=struct.unpack_from("<11I",data,0)
+    header_size,height,width,_,flags,_,bpp,r_mask,g_mask,b_mask,a_mask,magic=struct.unpack_from("<12I",data,0)
     if magic != PVR2_MAGIC: raise ValueError("invalid PVR v2 magic")
     if not (0 < width <= MAX_DIM and 0 < height <= MAX_DIM) or width*height > MAX_PIXELS:
         raise ValueError("invalid PVR v2 dimensions")
@@ -88,9 +88,12 @@ def decode_v2(data: bytes) -> tuple[int,int,bytes,str]:
 def decode_pvr(data: bytes) -> tuple[int,int,bytes,str]:
     if len(data)<52: raise ValueError("file too short for PVR header")
     magic=struct.unpack_from("<I",data,0)[0]
-    if magic == PVR2_MAGIC:
+    if magic == PVR3_MAGIC:
+        pass
+    elif struct.unpack_from("<I",data,44)[0] == PVR2_MAGIC:
         return decode_v2(data)
-    if magic != PVR3_MAGIC: raise ValueError("unknown PVR magic")
+    else:
+        raise ValueError("unknown PVR magic")
     lo,hi=struct.unpack_from("<II",data,8)
     height,width=struct.unpack_from("<II",data,24)
     meta_size=struct.unpack_from("<I",data,48)[0]
