@@ -220,7 +220,9 @@ func _write_bounds_audit(district:Node,root:Node3D)->void:
     "street_network_overlaps":street_overlaps,
     "terrain_overlap_count":terrain_overlaps.size(),
     "terrain_overlaps":terrain_overlaps,
-    "placement_status":"REJECT" if building_overlaps.size()>0 or street_overlaps.size()>0 else "REVIEW_VISUAL_AND_NAV",\n    "_audit_aabb":b,\n    "candidate_overlaps":[]
+    "placement_status":"REJECT" if building_overlaps.size()>0 or street_overlaps.size()>0 else "REVIEW_VISUAL_AND_NAV",
+    "_audit_aabb":b,
+    "candidate_overlaps":[]
    })
  for i in range(rows.size()):
   for j in range(i+1,rows.size()):
