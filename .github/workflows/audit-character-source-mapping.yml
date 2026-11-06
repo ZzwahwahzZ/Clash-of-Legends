@@ -1,4 +1,5 @@
 name: Audit Android character source mappings (source-backed body and equipment lookup)
+# Keep this workflow independently runnable to regenerate source-backed class/body joins.
 on:
   workflow_dispatch:
   push:
