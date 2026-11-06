@@ -125,6 +125,12 @@ jobs:
           python3 tools/c3_audit/merge_c3_glb_assets.py
           python3 tools/resource_packs/build_equipment_visual_candidates.py
           python3 tools/resource_packs/validate_motion_c3_conversion.py
+      - name: Import merged C3 VAT runtime resources
+        run: godot --headless --editor --path . --import --quit
+      - name: Validate runtime C3 VAT idle, walk and run switching
+        run: |
+          mkdir -p reports
+          ALSOFT_DRIVERS=null LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a godot --path . --rendering-method gl_compatibility --script tools/resource_packs/validate_c3_vat_runtime.gd
       - name: Audit original DMap terrain and map catalog
         run: cargo run --manifest-path tools/c3_audit/Cargo.toml --release --bin audit_maps -- resource_stage reports/map-audit.json
       - name: Build category PCK files
@@ -339,6 +345,8 @@ jobs:
             resource_stage/maps/**/data/itemminicon/*.pvr
             reports/c3-conversion-report.json
             reports/c3-runtime-integration.json
+            reports/c3-vat-runtime-validation.json
+            reports/c3-vat-runtime-switch/*.png
             reports/pvr-texture-audit.json
             reports/pvr-decode-report.json
             reports/mjp-decode-report.json
