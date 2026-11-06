@@ -53,7 +53,7 @@ func _run() -> void:
         push_error("Chinese district has no measurable horizontal geometry.")
         quit(3)
         return
-    var factor := 150.0 / horizontal_span
+    var factor := 480.0 / horizontal_span
     var anchor_local := Vector3.ZERO
     if anchor != null:
         anchor_local = city.to_local(anchor.global_position)
@@ -72,20 +72,9 @@ func _run() -> void:
     print("CHINESE DISTRICT BOUNDS ", final_bounds, " scale=", factor)
     print("CHINESE DISTRICT MESH NODES ", _count_mesh_nodes(city))
 
-    var floor := MeshInstance3D.new()
-    var floor_mesh := PlaneMesh.new()
-    floor_mesh.size = Vector2(220, 220)
-    floor.mesh = floor_mesh
-    var floor_material := StandardMaterial3D.new()
-    floor_material.albedo_color = Color(0.22, 0.25, 0.22)
-    floor_material.roughness = 0.95
-    floor.material_override = floor_material
-    floor.position.y = final_bounds.position.y - 0.5
-    root.add_child(floor)
-
     var overview_camera := Camera3D.new()
     overview_camera.fov = 48.0
-    overview_camera.position = final_center + Vector3(span * 1.05, span * 0.72, span * 1.25)
+    overview_camera.position = final_center + Vector3(span * 0.58, span * 0.42, span * 0.68)
     root.add_child(overview_camera)
     overview_camera.look_at(final_center, Vector3.UP)
     overview_camera.current = true
@@ -93,7 +82,7 @@ func _run() -> void:
 
     var close_camera := Camera3D.new()
     close_camera.fov = 48.0
-    close_camera.position = Vector3(38, 27, 48)
+    close_camera.position = Vector3(28, 20, 36)
     root.add_child(close_camera)
     close_camera.look_at(Vector3(0, 5, -8), Vector3.UP)
     close_camera.current = true
