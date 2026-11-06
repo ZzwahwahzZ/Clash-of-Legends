@@ -17,7 +17,7 @@ func _run() -> void:
 		await get_tree().process_frame
 	if not is_instance_valid(AssetCatalog) or AssetCatalog.character_vat_clips.size() != 2:
 		push_error("C3 VAT runtime validation: runtime catalog has not exposed both validated character VAT models.")
-		get_tree().quit(1)
+		get_tree().get_tree().quit(1)
 		return
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://reports"))
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://" + OUTPUT_DIR))
@@ -64,7 +64,7 @@ func _run() -> void:
 			continue
 		var character := packed.instantiate()
 		stage.add_child(character)
-		await process_frame
+		await get_tree().process_frame
 		var mesh_nodes := character.find_children("*", "MeshInstance3D", true, false)
 		var mesh_by_name: Dictionary = {}
 		for node in mesh_nodes:
@@ -77,7 +77,7 @@ func _run() -> void:
 			push_error("C3 VAT runtime validation: expected complete body and helper meshes, found " + str(mesh_nodes.size()))
 			all_passed = false
 			character.queue_free()
-			await process_frame
+			await get_tree().process_frame
 			continue
 		var bounds := AABB()
 		var has_bounds := false
@@ -92,7 +92,7 @@ func _run() -> void:
 			push_error("C3 VAT runtime validation: character bounds are invalid for " + str(model_id))
 			all_passed = false
 			character.queue_free()
-			await process_frame
+			await get_tree().process_frame
 			continue
 		var center := bounds.get_center()
 		var extent := maxf(bounds.size.x, maxf(bounds.size.y, bounds.size.z))
@@ -108,7 +108,7 @@ func _run() -> void:
 			all_passed = false
 			animator.queue_free()
 			character.queue_free()
-			await process_frame
+			await get_tree().process_frame
 			continue
 		for state in STATES:
 			if not animator.play_state(state):
@@ -137,8 +137,8 @@ func _run() -> void:
 			animator.pause()
 			animator.set_frame(0.0)
 			for _frame in range(2):
-				await process_frame
-			var image_a := get_viewport().get_texture().get_image()
+				await get_tree().process_frame
+			var image_a: Image = get_viewport().get_texture().get_image()
 			var stem: String = str(model["gender"]) + "_" + state
 			var frame_a_path := OUTPUT_DIR.path_join(stem + "_frame_a.png")
 			if image_a.save_png(frame_a_path) != OK:
@@ -146,14 +146,14 @@ func _run() -> void:
 				all_passed = false
 			animator.set_frame(float(maxi(1, int(frame_count / 2))))
 			for _frame in range(2):
-				await process_frame
-			var image_b := get_root().get_texture().get_image()
+				await get_tree().process_frame
+			var image_b: Image = get_viewport().get_texture().get_image()
 			var frame_b_path := OUTPUT_DIR.path_join(stem + "_frame_b.png")
 			if image_b.save_png(frame_b_path) != OK:
 				push_error("C3 VAT runtime validation: failed to save frame B for " + stem)
 				all_passed = false
-			var bytes_a := image_a.get_data()
-			var bytes_b := image_b.get_data()
+			var bytes_a: PackedByteArray = image_a.get_data()
+			var bytes_b: PackedByteArray = image_b.get_data()
 			var changed_pixels := 0
 			var sampled_pixels := 0
 			if bytes_a.size() == bytes_b.size():
@@ -202,7 +202,7 @@ func _run() -> void:
 			})
 		animator.queue_free()
 		character.queue_free()
-		await process_frame
+		await get_tree().process_frame
 
 	var report := {
 		"expected_states": 6,
@@ -216,13 +216,13 @@ func _run() -> void:
 	var report_file := FileAccess.open(report_path, FileAccess.WRITE)
 	if report_file == null:
 		push_error("C3 VAT runtime validation: could not write report.")
-		quit(1)
+		get_tree().quit(1)
 		return
 	report_file.store_string(JSON.stringify(report, "\t") + "\n")
 	report_file.close()
 	if not all_passed or clip_results.size() != 6:
 		push_error("C3 VAT runtime state-switching validation failed.")
-		quit(1)
+		get_tree().quit(1)
 		return
 	print("C3 VAT RUNTIME VALIDATION PASSED: ", JSON.stringify(report))
 	stage.queue_free()
