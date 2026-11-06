@@ -35,7 +35,7 @@ jobs:
             "https://kenney.nl/media/pages/assets/nature-kit/37ac38a37b-1677698939/kenney_nature-kit.zip" \
             -o /tmp/phase1-packs/kenney_nature-kit.zip
           echo "fa7974a0d342bfe63c38664ba9f8ec1a4aab8ea25f099bdc56870e33588c4d9d  /tmp/phase1-packs/kenney_nature-kit.zip" | sha256sum -c -
-          unzip -t /tmp/phase1-packs/kenney-fantasy-town-kit_2.0.zip
+          unzip -t /tmp/phase1-packs/kenney_fantasy-town-kit_2.0.zip
           unzip -t /tmp/phase1-packs/kenney_nature-kit.zip
           mkdir -p assets/environment/phase1/kenney-fantasy-town-kit
           mkdir -p assets/environment/phase1/kenney-nature-kit
