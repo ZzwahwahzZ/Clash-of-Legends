@@ -33,7 +33,7 @@
     },
     {
       "id": "jianghai.pawnshop_courtyard",
-      "node_path": "JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopCourtyardStone",
+      "node_path": "JianghaiOldCityAuthoredScene/GuangchangPawnshop",
       "kind": "service_landmark",
       "task_tags": [
         "visit",
