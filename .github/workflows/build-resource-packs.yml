@@ -172,6 +172,54 @@ jobs:
               echo "Missing or empty PCK for $category"; exit 1
             fi
           done
+      - name: Generate internal resource PCK manifest before character-coverage gate
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          root = Path("build/pcks")
+          labels = {
+              "world": ("العالم والأصول العامة", "World and Core Data"),
+              "maps": ("الخرائط والمناطق", "Maps and Regions"),
+              "characters": ("الشخصيات والفئات", "Characters and Classes"),
+              "monsters": ("الوحوش والأعداء", "Monsters and Enemies"),
+              "equipment": ("الأسلحة والمعدات", "Weapons and Equipment"),
+              "mounts": ("المطايا والمرافقون", "Mounts and Companions"),
+              "effects": ("المهارات والمؤثرات", "Skills and Effects"),
+              "animations": ("الحركات والأنيميشن", "Animations"),
+              "interface": ("موارد الواجهة", "Interface Resources"),
+              "audio": ("الأصوات والموسيقى", "Audio and Music"),
+              "models": ("نماذج C3 الأصلية", "Original C3 Models"),
+          }
+          packages = []
+          for path in sorted(root.glob("*.pck")):
+              data = path.read_bytes()
+              if len(data) < 64:
+                  raise SystemExit(f"PCK suspiciously small: {path}")
+              ar, en = labels[path.stem]
+              packages.append({
+                  "package_id": path.stem, "file_name": path.name,
+                  "display_name_ar": ar, "display_name_en": en,
+                  "size_bytes": len(data), "sha256": hashlib.sha256(data).hexdigest(),
+                  "download_url": "", "godot_version": "4.3", "platform": "all",
+              })
+          if not packages:
+              raise SystemExit("No category PCK files were generated.")
+          manifest = {
+              "manifest_version": "1.0.0",
+              "release_tag": "resource-packs-v4",
+              "app_version": "1.0.3",
+              "package_id": "com.zwahwahzz.clashoflegends",
+              "status": "BUILT_NOT_PUBLISHED_REVIEW_REQUIRED",
+              "distribution_allowed": False,
+              "distribution_policy": "Internal CI evidence only. Extracted Conquer source assets and converted derivatives are not publicly distributed.",
+              "resource_packages": packages,
+              "source_release": "https://github.com/ZzwahwahzZ/Conquer-Mobile-Assets./releases/tag/mobile-extracted-assets",
+              "build_note": "Sizes and SHA-256 values are computed from the exact Godot 4.3 PCK bytes."
+          }
+          Path("RESOURCE_MANIFEST_INTERNAL").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+          print(json.dumps({"packages": len(packages), "total_bytes": sum(p["size_bytes"] for p in packages)}, ensure_ascii=False))
+          PY
       - name: Audit generated runtime PCK content and verified character coverage
         env:
           RESOURCE_PACK_DIR: res://build/pcks
@@ -367,6 +415,7 @@ jobs:
           name: C3-Skeleton-Stage-PCKs
           path: |
             build/pcks/*.pck
+            RESOURCE_MANIFEST_INTERNAL
             resource_stage/world/resource_catalog.json
             reports/c3-model-audit.json
             reports/c3-import-subset.json
