@@ -108,18 +108,24 @@ def main() -> None:
         slot = key.removeprefix("pro_")
         index_key = "index_" + slot
         profession_index = indices.get(index_key, "").strip()
-        joined_role = simple_by_section.get(profession_index)
+        # rolechoose.ini stores a numeric profession index, while
+        # 3dsimplerole.ini names the matching sections Role0..Role7.
+        # Resolve only this exact source-key relation; do not infer any
+        # additional class/gender identities from ordering or model IDs.
+        role_section_key = f"Role{profession_index}" if profession_index.isdigit() else ""
+        joined_role = simple_by_section.get(role_section_key)
         if joined_role is not None:
             direct_section_joins += 1
         selection_rows.append({
             "slot": int(slot) if slot.isdigit() else slot,
             "animation_role": animation_role,
             "profession_index": profession_index,
+            "role_section_key_candidate": role_section_key or None,
             "simple_role_join": {
                 "source_section": joined_role["source_section"],
                 "simple_object_id": joined_role["simple_object_id"],
             } if joined_role is not None else None,
-            "mapping_status": "DIRECT_SOURCE_SECTION_KEY_JOIN_CANDIDATE_NOT_CLASS_GENDER_APPROVED" if joined_role is not None else "UI_ROLE_TO_SIMPLE_ROLE_JOIN_NOT_ESTABLISHED",
+            "mapping_status": "DIRECT_SOURCE_ROLE_INDEX_JOIN_CANDIDATE_NOT_CLASS_GENDER_APPROVED" if joined_role is not None else "UI_ROLE_TO_SIMPLE_ROLE_JOIN_NOT_ESTABLISHED",
         })
 
     output = {
