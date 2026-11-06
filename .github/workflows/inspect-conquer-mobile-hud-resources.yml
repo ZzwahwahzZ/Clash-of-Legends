@@ -1,0 +1,53 @@
+name: Inspect Conquer Mobile HUD source resources
+on:
+  push:
+    paths:
+      - .github/workflows/inspect-conquer-mobile-hud-resources.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inventory-mobile-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and verify original source archive
+        run: |
+          set -euo pipefail
+          mkdir -p build/source extracted reports
+          curl --fail --location --retry 5 --retry-all-errors 'https://github.com/ZzwahwahzZ/Conquer-Mobile-Assets./releases/download/mobile-extracted-assets/extracted-assets-001.zip' -o build/source/extracted-assets-001.zip
+          echo '0d21a110c09b762ed5f1a5f4da022857b0534e489eb85052d15da460cb229d2a  build/source/extracted-assets-001.zip' | sha256sum -c -
+      - name: Extract official mobile package files
+        run: |
+          set -euo pipefail
+          unzip -p build/source/extracted-assets-001.zip 'ConquerOnline/install_time_1001.apk' > extracted/install_time_1001.apk
+          unzip -p build/source/extracted-assets-001.zip 'ConquerOnline/ConquerOnline-1.1.2.3.apk' > extracted/ConquerOnline-1.1.2.3.apk
+          unzip -p extracted/install_time_1001.apk 'assets/ConquerRes/c31.tpi' > extracted/c31.tpi
+          unzip -p extracted/install_time_1001.apk 'assets/ConquerRes/c31.tpd' > extracted/c31.tpd
+          unzip -p extracted/install_time_1001.apk 'assets/ConquerRes/data1.tpi' > extracted/data1.tpi
+          unzip -p extracted/install_time_1001.apk 'assets/ConquerRes/data1.tpd' > extracted/data1.tpd
+          unzip -p extracted/ConquerOnline-1.1.2.3.apk 'assets/ConquerRes/data.tpi' > extracted/data.tpi
+          unzip -p extracted/ConquerOnline-1.1.2.3.apk 'assets/ConquerRes/data.tpd' > extracted/data.tpd
+          unzip -p extracted/ConquerOnline-1.1.2.3.apk 'assets/ConquerRes/ini/c3.wdb' > extracted/c3.wdb
+          sha256sum extracted/*.tpi extracted/*.tpd extracted/c3.wdb > reports/resource-package-sha256.txt
+      - name: Inventory every UI and interaction resource path
+        run: |
+          set -euo pipefail
+          for apk in extracted/*.apk; do
+            unzip -Z1 "$apk"
+          done | sort -u > reports/all-mobile-apk-resource-paths.txt
+          grep -Ei '(^|/)(ui|interface|hud|icon|button|skill|action|touch|joystick|control|map|quest|status|player|hp|mp)(/|_|\.|$)|\.png$|\.jpg$|\.webp$|\.mjp$|\.pvr$|\.c3$' reports/all-mobile-apk-resource-paths.txt > reports/ui-and-gameplay-resource-paths.txt || true
+          wc -l reports/all-mobile-apk-resource-paths.txt reports/ui-and-gameplay-resource-paths.txt
+          sed -n '1,500p' reports/ui-and-gameplay-resource-paths.txt
+          du -h extracted/*.tpi extracted/*.tpd extracted/c3.wdb > reports/resource-package-sizes.txt
+      - name: Upload source UI inventory and package fingerprints
+        uses: actions/upload-artifact@v4
+        with:
+          name: Conquer-Mobile-HUD-Source-Inventory
+          path: |
+            reports/all-mobile-apk-resource-paths.txt
+            reports/ui-and-gameplay-resource-paths.txt
+            reports/resource-package-sizes.txt
+            reports/resource-package-sha256.txt
+          retention-days: 30
