@@ -1,107 +1,13 @@
-[gd_scene load_steps=24 format=3 uid="uid://player001"]
+[gd_scene load_steps=8 format=3 uid="uid://player001"]
 
 [ext_resource type="Script" path="res://scripts/player/PlayerController.gd" id="1_player"]
 [ext_resource type="Script" path="res://scripts/player/FreeCamera3D.gd" id="2_camera"]
 [ext_resource type="Script" path="res://scripts/player/PlayerInventory.gd" id="3_inventory"]
-[ext_resource type="Shader" path="res://assets/shaders/weapon_glow.gdshader" id="4_shader"]
 [ext_resource type="Script" path="res://scripts/animation/C3VatCharacterAnimator.gd" id="5_vat"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
 radius = 0.5
 height = 1.8
-
-[sub_resource type="StandardMaterial3D" id="Mat_Armor"]
-albedo_color = Color(0.18, 0.38, 0.72, 1)
-metallic = 0.55
-roughness = 0.35
-
-[sub_resource type="StandardMaterial3D" id="Mat_GoldTrim"]
-albedo_color = Color(0.92, 0.75, 0.22, 1)
-metallic = 0.8
-roughness = 0.25
-
-[sub_resource type="StandardMaterial3D" id="Mat_Skin"]
-albedo_color = Color(0.92, 0.78, 0.65, 1)
-roughness = 0.6
-
-[sub_resource type="StandardMaterial3D" id="Mat_Steel"]
-albedo_color = Color(0.75, 0.78, 0.82, 1)
-metallic = 0.85
-roughness = 0.2
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_glow"]
-render_priority = 0
-shader = ExtResource("4_shader")
-shader_parameter/glow_color = Color(0.2, 0.6, 1, 1)
-shader_parameter/glow_intensity = 2.5
-shader_parameter/pulse_speed = 2.2
-shader_parameter/refine_tier = 1
-
-[sub_resource type="StandardMaterial3D" id="Mat_Steed"]
-albedo_color = Color(0.35, 0.22, 0.14, 1)
-roughness = 0.7
-
-[sub_resource type="StandardMaterial3D" id="Mat_Saddle"]
-albedo_color = Color(0.65, 0.15, 0.12, 1)
-metallic = 0.3
-roughness = 0.5
-
-[sub_resource type="BoxMesh" id="Mesh_Torso"]
-material = SubResource("Mat_Armor")
-size = Vector3(0.65, 0.7, 0.35)
-
-[sub_resource type="SphereMesh" id="Mesh_Head"]
-material = SubResource("Mat_Skin")
-radius = 0.2
-height = 0.4
-
-[sub_resource type="CylinderMesh" id="Mesh_Helmet"]
-material = SubResource("Mat_GoldTrim")
-top_radius = 0.22
-bottom_radius = 0.24
-height = 0.2
-
-[sub_resource type="BoxMesh" id="Mesh_Pauldron"]
-material = SubResource("Mat_GoldTrim")
-size = Vector3(0.22, 0.15, 0.25)
-
-[sub_resource type="BoxMesh" id="Mesh_Limb"]
-material = SubResource("Mat_Armor")
-size = Vector3(0.16, 0.45, 0.16)
-
-[sub_resource type="BoxMesh" id="Mesh_SwordBlade"]
-material = SubResource("ShaderMaterial_glow")
-size = Vector3(0.08, 1.1, 0.18)
-
-[sub_resource type="BoxMesh" id="Mesh_Shield"]
-material = SubResource("Mat_GoldTrim")
-size = Vector3(0.08, 0.75, 0.5)
-
-[sub_resource type="BoxMesh" id="Mesh_HorseBody"]
-material = SubResource("Mat_Steed")
-size = Vector3(0.9, 0.9, 1.8)
-
-[sub_resource type="Animation" id="Anim_Idle"]
-resource_name = "idle"
-length = 2.0
-loop_mode = 1
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("VisualRoot/Torso:position")
-tracks/0/interp = 2
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 1, 2),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [Vector3(0, 0.9, 0), Vector3(0, 0.93, 0), Vector3(0, 0.9, 0)]
-}
-
-[sub_resource type="AnimationLibrary" id="AnimationLibrary_player"]
-_data = {
-"idle": SubResource("Anim_Idle")
-}
 
 [node name="Player" type="CharacterBody3D"]
 collision_layer = 2
@@ -113,75 +19,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 shape = SubResource("CapsuleShape3D_player")
 
 [node name="VisualRoot" type="Node3D" parent="."]
-
-[node name="Torso" type="MeshInstance3D" parent="VisualRoot"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-mesh = SubResource("Mesh_Torso")
-
-[node name="HeadNode" type="Node3D" parent="VisualRoot/Torso"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
-
-[node name="HeadMesh" type="MeshInstance3D" parent="VisualRoot/Torso/HeadNode"]
-mesh = SubResource("Mesh_Head")
-
-[node name="HelmetMesh" type="MeshInstance3D" parent="VisualRoot/Torso/HeadNode"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.12, 0)
-mesh = SubResource("Mesh_Helmet")
-
-[node name="LeftPauldron" type="MeshInstance3D" parent="VisualRoot/Torso"]
-transform = Transform3D(0.965926, -0.258819, 0, 0.258819, 0.965926, 0, 0, 0, 1, 0.4, 0.3, 0)
-mesh = SubResource("Mesh_Pauldron")
-
-[node name="RightPauldron" type="MeshInstance3D" parent="VisualRoot/Torso"]
-transform = Transform3D(0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 0, 0, 1, -0.4, 0.3, 0)
-mesh = SubResource("Mesh_Pauldron")
-
-[node name="LeftArm" type="MeshInstance3D" parent="VisualRoot/Torso"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.42, -0.05, 0)
-mesh = SubResource("Mesh_Limb")
-
-[node name="RightArm" type="MeshInstance3D" parent="VisualRoot/Torso"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.42, -0.05, 0)
-mesh = SubResource("Mesh_Limb")
-
-[node name="LeftLeg" type="MeshInstance3D" parent="VisualRoot"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.18, 0.25, 0)
-mesh = SubResource("Mesh_Limb")
-
-[node name="RightLeg" type="MeshInstance3D" parent="VisualRoot"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.18, 0.25, 0)
-mesh = SubResource("Mesh_Limb")
-
-[node name="WeaponMount" type="Node3D" parent="VisualRoot/Torso"]
-transform = Transform3D(0.866025, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866025, 0.52, 0.1, 0.2)
-
-[node name="MainWeapon" type="MeshInstance3D" parent="VisualRoot/Torso/WeaponMount"]
-transform = Transform3D(1, 0, 0, 0, 0.707107, -0.707107, 0, 0.707107, 0.707107, 0, 0.3, -0.2)
-mesh = SubResource("Mesh_SwordBlade")
-
-[node name="OffhandShield" type="MeshInstance3D" parent="VisualRoot/Torso"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.48, 0.05, 0.15)
-mesh = SubResource("Mesh_Shield")
-
-[node name="MountMesh" type="Node3D" parent="VisualRoot"]
-visible = false
-
-[node name="HorseBody" type="MeshInstance3D" parent="VisualRoot/MountMesh"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.65, 0)
-mesh = SubResource("Mesh_HorseBody")
-
-[node name="Saddle" type="MeshInstance3D" parent="VisualRoot/MountMesh"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.15, -0.1)
-mesh = SubResource("Mesh_Shield")
-
-[node name="HorseHead" type="MeshInstance3D" parent="VisualRoot/MountMesh"]
-transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 0, 1.25, 0.9)
-mesh = SubResource("Mesh_Head")
-
-[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-libraries = {
-"": SubResource("AnimationLibrary_player")
-}
 
 [node name="CameraPivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
