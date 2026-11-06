@@ -360,6 +360,24 @@ jobs:
             resource_stage/world/gameplay_reference/*.json
           if-no-files-found: error
           retention-days: 30
+      - name: Preserve validated C3 skeleton-stage PCKs and runtime evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: C3-Skeleton-Stage-PCKs
+          path: |
+            build/pcks/*.pck
+            resource_stage/world/resource_catalog.json
+            reports/c3-model-audit.json
+            reports/c3-import-subset.json
+            reports/c3-motion-poc-validation.json
+            reports/c3-runtime-integration.json
+            reports/c3-vat-runtime-validation.json
+            reports/c3-vat-runtime-switch/*.png
+            resource-pack-audit.json
+            reports/resource-pack-runtime-audit.log
+          if-no-files-found: warn
+          retention-days: 30
       - name: Publish allowlisted project-owned resource release
         if: ${{ success() }}
         uses: softprops/action-gh-release@v2
