@@ -260,7 +260,7 @@ jobs:
           # The asset/report commit is already complete, so reset only the CI worktree before rebasing.
           git reset --hard HEAD
           git fetch origin stage/phase1-world-assets
-          git rebase origin/stage/phase1-world-assets
+          git rebase -X ours origin/stage/phase1-world-assets
           git push origin HEAD:stage/phase1-world-assets
 
       - name: Upload acquisition and visual evidence
@@ -297,3 +297,5 @@ jobs:
 # Quest landmark validation is part of the urban-infill visual audit.
 
 # Navigation route resolver added to the task landmark contract.
+
+# Preserve already committed phase evidence when CI jobs race on binary preview files.
