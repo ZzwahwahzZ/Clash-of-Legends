@@ -26,7 +26,10 @@ jobs:
           echo "0d21a110c09b762ed5f1a5f4da022857b0534e489eb85052d15da460cb229d2a  build/source/extracted-assets-001.zip" | sha256sum -c -
       - name: Install professional content-based format analyzer
         run: |
-          python3 -m pip install --disable-pip-version-check polyfile
+          python3 -m venv .venv
+          .venv/bin/pip install --disable-pip-version-check polyfile
+          echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
+          python3 -m py_compile tools/gameplay_source_audit/comprehensive_asset_inventory.py tools/gameplay_source_audit/audit_source_tables.py
       - name: Recursively inventory every archive member by content
         run: |
           python3 tools/gameplay_source_audit/comprehensive_asset_inventory.py \
