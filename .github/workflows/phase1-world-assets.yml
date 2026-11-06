@@ -148,6 +148,28 @@ jobs:
           npm install --prefix /tmp/phase1-gltf-tools --no-save @gltf-transform/core @gltf-transform/extensions @gltf-transform/functions
           cp tools/quality/extract_phase1_chinese_city.mjs /tmp/phase1-gltf-tools/extract.mjs
           node /tmp/phase1-gltf-tools/extract.mjs /tmp/phase1-city-source/jianghai_old_city.glb assets/environment/phase1/jianghai/chinese_district.glb reports/phase1_chinese_district_extract.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("reports/phase1_chinese_district_extract.json").read_text(encoding="utf-8"))
+          names = set(report["selected_node_names"])
+          required = {
+              "FactoryEntryFacade_DoorFrame",
+              "JianghaiArtPass_EastAircon00",
+              "JianghaiExpansion_StreetLife",
+              "JianghaiExpansion_UrbanFacades",
+              "JianghaiInteriorShell_EastGateRow00",
+              "WestClockRow01",
+              "WestMedicineRow02",
+              "WestTheatreRow02",
+          }
+          missing = sorted(required - names)
+          if missing:
+              raise SystemExit("Required authored city content was omitted: " + ", ".join(missing))
+          if report["selected_node_count"] < 320:
+              raise SystemExit(f"Extracted authored city is incomplete: {report['selected_node_count']} selected nodes")
+          print(f"PHASE1 CITY CONTENT GATE: {report['selected_node_count']} selected authored nodes; required facade, street-life, interior-shell and west-side rows retained")
+          PY
           cp /tmp/phase1-city-source/jianghai_old_city.glb assets/environment/phase1/jianghai/full_city_preview.glb
 
       - name: Import project with Godot 4.3
