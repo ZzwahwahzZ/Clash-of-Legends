@@ -164,13 +164,22 @@ jobs:
               "WestClockRow01",
               "WestMedicineRow02",
               "WestTheatreRow02",
+              "CentralAvenue",
+              "RiverWardStreet",
+              "NorthCrossStreet",
+              "SouthCrossStreet",
+              "ExtractionInnerRing",
+              "ExtractionOuterRing",
           }
           missing = sorted(required - names)
           if missing:
               raise SystemExit("Required authored city content was omitted: " + ", ".join(missing))
-          if report["selected_node_count"] < 320:
+          if report["selected_node_count"] < 400:
               raise SystemExit(f"Extracted authored city is incomplete: {report['selected_node_count']} selected nodes")
-          print(f"PHASE1 CITY CONTENT GATE: {report['selected_node_count']} selected authored nodes; required facade, street-life, interior-shell and west-side rows retained")
+          omitted_roads = [row["node"] for row in report["road_ground_candidates"] if row["node"] in required and not row["selected_by_name"]]
+          if omitted_roads:
+              raise SystemExit("Required road network nodes were omitted: " + ", ".join(omitted_roads))
+          print(f"PHASE1 CITY CONTENT GATE: {report['selected_node_count']} selected authored nodes; streets, facades, street-life, interior-shell and west-side rows retained")
           PY
           cp /tmp/phase1-city-source/jianghai_old_city.glb assets/environment/phase1/jianghai/full_city_preview.glb
 
