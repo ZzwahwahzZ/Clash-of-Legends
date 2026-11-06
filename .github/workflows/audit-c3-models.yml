@@ -104,7 +104,7 @@ jobs:
             tools/c3_audit/THIRD_PARTY_NOTICES.md
             build/c3-glb/motion-poc/*.glb
             build/c3-glb/motion-poc-skinned/*.glb
-          build/c3-glb/skeleton-poc/**/*.glb
+            build/c3-glb/skeleton-poc/**/*.glb
             build/c3-glb/motion-poc-vat/*.json
             build/c3-glb/motion-poc-vat/*.rgba32f
             build/c3-glb/motion-poc-vat/*.normalrgba8
