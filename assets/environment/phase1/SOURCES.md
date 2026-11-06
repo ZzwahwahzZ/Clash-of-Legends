@@ -3,7 +3,7 @@
 ## Sapphire environment models
 - Source repository: https://github.com/nameless525/sapphire
 - Pinned source commit: 3b1bdd7a3aa935126cbc39a1109f86661a789a5b
-- courtyard.glb and arcade.glb are source-project environment models; the repository MIT license is retained as LICENSE-MIT.txt.
+- courtyard.glb, arcade.glb, and ground.png are source-project environment assets; the repository MIT license is retained as LICENSE-MIT.txt.
 - pavilion.glb is a deterministic glTF conversion of VVayToyek's Chinese Four-corner Pavilion, originally CC0 1.0. The original source and license evidence are retained in PAVILION-SOURCE.md and PAVILION-LICENSE.md.
 
 ## Nature models

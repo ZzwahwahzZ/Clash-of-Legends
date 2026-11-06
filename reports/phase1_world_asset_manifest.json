@@ -7,9 +7,14 @@
   "nature_source": "https://github.com/Hidencod/tge-assets",
   "nature_commit": "ea2f2aa1ca8da0898330c97df8a5489976b051d0",
   "nature_license": "CC0-1.0; retained in kenney-nature/LICENSE-CC0.txt",
-  "asset_count": 12,
+  "asset_count": 21,
   "model_count": 7,
   "files": [
+    {
+      "path": "assets/environment/phase1/SOURCES.md",
+      "bytes": 1077,
+      "sha256": "1e3b207d29757a46d76cd9566875d9fc827809e725d7f786edcac4f67667c1d0"
+    },
     {
       "path": "assets/environment/phase1/kenney-nature/LICENSE-CC0.txt",
       "bytes": 510,
@@ -26,6 +31,11 @@
       "scenes": 1
     },
     {
+      "path": "assets/environment/phase1/kenney-nature/plant-bushdetailed.glb.import",
+      "bytes": 941,
+      "sha256": "7aaf3cc9832ad0747217ad9ea504ffc58c3b7d325d1cddf7616304dea83cf504"
+    },
+    {
       "path": "assets/environment/phase1/kenney-nature/rock-largea.glb",
       "bytes": 7552,
       "sha256": "6dd15390fd96501dcd1454765a17ba61dbbd8d47705dfe5149c8dd92b353ce25",
@@ -34,6 +44,11 @@
       "materials": 2,
       "images": 0,
       "scenes": 1
+    },
+    {
+      "path": "assets/environment/phase1/kenney-nature/rock-largea.glb.import",
+      "bytes": 920,
+      "sha256": "2bb3eac372dfb6f3cc622689949c52f9bdebc1d1d1860f5f5b2a388548fdc2b2"
     },
     {
       "path": "assets/environment/phase1/kenney-nature/tree-oak.glb",
@@ -46,6 +61,11 @@
       "scenes": 1
     },
     {
+      "path": "assets/environment/phase1/kenney-nature/tree-oak.glb.import",
+      "bytes": 911,
+      "sha256": "8730d8f0e3a966b676be8676a4b443fe122d1d93ea35f5f223be689d3e3fe61e"
+    },
+    {
       "path": "assets/environment/phase1/kenney-nature/tree-pinedefaulta.glb",
       "bytes": 17220,
       "sha256": "60d8f352fa3659ed275e06cbddfecf8f92c8effe2977c2f2d7b29b6c9b582e46",
@@ -54,6 +74,11 @@
       "materials": 2,
       "images": 0,
       "scenes": 1
+    },
+    {
+      "path": "assets/environment/phase1/kenney-nature/tree-pinedefaulta.glb.import",
+      "bytes": 938,
+      "sha256": "966c74f424110c796acf6ec6587b146338b12e1ad79ea2b0a749ac6eb9c38c88"
     },
     {
       "path": "assets/environment/phase1/sapphire/LICENSE-MIT.txt",
@@ -86,6 +111,11 @@
       "scenes": 1
     },
     {
+      "path": "assets/environment/phase1/sapphire/arcade.glb.import",
+      "bytes": 900,
+      "sha256": "f132690c4d0a826609ce4aab97c24d1ec58bf11aad42ac1343ad6b66bfca35dc"
+    },
+    {
       "path": "assets/environment/phase1/sapphire/courtyard.glb",
       "bytes": 778888,
       "sha256": "c51a090082ec3f7748f16544ad5b8b2f589570ab87f057ba4a831cdee4b79a63",
@@ -96,6 +126,16 @@
       "scenes": 1
     },
     {
+      "path": "assets/environment/phase1/sapphire/courtyard.glb.import",
+      "bytes": 909,
+      "sha256": "57a8d0dc349f14d20f2e377c03880dffbfe3aa0c6c29b59fcadb6a19c894d7ed"
+    },
+    {
+      "path": "assets/environment/phase1/sapphire/ground.png",
+      "bytes": 130911,
+      "sha256": "4de1f4281953b468ad641646dab2e103188321d4175b90f3e22e6420d851db5b"
+    },
+    {
       "path": "assets/environment/phase1/sapphire/pavilion.glb",
       "bytes": 1098824,
       "sha256": "1d1adb97a062ede237d63625efed57c4da2408a42884b539018aa081df5e1a25",
@@ -104,6 +144,11 @@
       "materials": 6,
       "images": 0,
       "scenes": 1
+    },
+    {
+      "path": "assets/environment/phase1/sapphire/pavilion.glb.import",
+      "bytes": 906,
+      "sha256": "5e2464556d084c6c9787da77bc2d9608dd8844ebe4288021c75e275c685101d6"
     }
   ]
 }
