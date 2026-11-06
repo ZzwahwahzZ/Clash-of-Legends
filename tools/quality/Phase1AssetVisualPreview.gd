@@ -92,8 +92,8 @@ func _render_gallery(_caption: String, entries: Array, output_path: String) -> v
     var camera := Camera3D.new()
     camera.fov = 42.0
     camera.position = center + Vector3(span * 1.05, span * 0.80, span * 1.30)
-    camera.look_at(center, Vector3.UP)
     root.add_child(camera)
+    camera.look_at(center, Vector3.UP)
     camera.current = true
 
     await process_frame
