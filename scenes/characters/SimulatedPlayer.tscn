@@ -1,41 +1,11 @@
-[gd_scene load_steps=10 format=3 uid="uid://simplayer001"]
+[gd_scene load_steps=5 format=3 uid="uid://simplayer001"]
 
 [ext_resource type="Script" path="res://scripts/ai/SimulatedPlayer.gd" id="1_sim"]
+[ext_resource type="Script" path="res://scripts/animation/C3VatCharacterAnimator.gd" id="2_vat"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_sim"]
 radius = 0.5
 height = 1.8
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_armor"]
-albedo_color = Color(0.78, 0.42, 0.18, 1)
-metallic = 0.4
-roughness = 0.5
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_skin"]
-albedo_color = Color(0.9, 0.75, 0.6, 1)
-roughness = 0.6
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_weapon"]
-albedo_color = Color(0.85, 0.85, 0.9, 1)
-metallic = 0.9
-roughness = 0.2
-
-[sub_resource type="BoxMesh" id="BoxMesh_torso"]
-material = SubResource("StandardMaterial3D_armor")
-size = Vector3(0.65, 0.7, 0.35)
-
-[sub_resource type="SphereMesh" id="SphereMesh_head"]
-material = SubResource("StandardMaterial3D_skin")
-radius = 0.2
-height = 0.4
-
-[sub_resource type="BoxMesh" id="BoxMesh_limb"]
-material = SubResource("StandardMaterial3D_armor")
-size = Vector3(0.16, 0.45, 0.16)
-
-[sub_resource type="BoxMesh" id="BoxMesh_weapon"]
-material = SubResource("StandardMaterial3D_weapon")
-size = Vector3(0.08, 1.1, 0.16)
 
 [node name="SimulatedPlayer" type="CharacterBody3D"]
 collision_layer = 2
@@ -48,33 +18,8 @@ shape = SubResource("CapsuleShape3D_sim")
 
 [node name="VisualRoot" type="Node3D" parent="."]
 
-[node name="Torso" type="MeshInstance3D" parent="VisualRoot"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-mesh = SubResource("BoxMesh_torso")
-
-[node name="Head" type="MeshInstance3D" parent="VisualRoot/Torso"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
-mesh = SubResource("SphereMesh_head")
-
-[node name="LeftArm" type="MeshInstance3D" parent="VisualRoot/Torso"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.42, -0.05, 0)
-mesh = SubResource("BoxMesh_limb")
-
-[node name="RightArm" type="MeshInstance3D" parent="VisualRoot/Torso"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.42, -0.05, 0)
-mesh = SubResource("BoxMesh_limb")
-
-[node name="Weapon" type="MeshInstance3D" parent="VisualRoot/Torso"]
-transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 0.52, 0.25, -0.1)
-mesh = SubResource("BoxMesh_weapon")
-
-[node name="LeftLeg" type="MeshInstance3D" parent="VisualRoot"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.18, 0.25, 0)
-mesh = SubResource("BoxMesh_limb")
-
-[node name="RightLeg" type="MeshInstance3D" parent="VisualRoot"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.18, 0.25, 0)
-mesh = SubResource("BoxMesh_limb")
+[node name="C3VatAnimator" type="Node" parent="."]
+script = ExtResource("2_vat")
 
 [node name="Label3D" type="Label3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, 0)
