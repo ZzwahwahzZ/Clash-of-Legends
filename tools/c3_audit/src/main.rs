@@ -202,7 +202,25 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 let rel_path = Path::new(&relative);
                 let inner = c3_inner_path(rel_path);
                 if let Some(category) = category_for(&inner) {
-                    let texture_path = pvr_root.join(rel_path.with_extension("png"));
+                    let same_stem_texture = pvr_root.join(rel_path.with_extension("png"));
+                    // Mobile C3 animation files often carry the full skinned mesh
+                    // and motion chunks but intentionally omit the texture name.
+                    // Their sibling model 1.c3 owns the shared 1.pvr atlas. Use
+                    // that atlas only when every mesh has an empty texture name,
+                    // the sibling base C3 exists, and its decoded 1.png is present.
+                    let has_unassigned_textures = document.meshes.iter().all(|mesh| mesh.texture_name.trim().is_empty());
+                    let sibling_base_c3 = rel_path.parent().unwrap_or(Path::new("")).join("1.c3");
+                    let sibling_base_png = pvr_root.join(rel_path.parent().unwrap_or(Path::new("")).join("1.png"));
+                    let (texture_path, texture_assignment) = if same_stem_texture.is_file() {
+                        (same_stem_texture, "same_stem")
+                    } else if has_unassigned_textures
+                        && root.join(&sibling_base_c3).is_file()
+                        && sibling_base_png.is_file()
+                    {
+                        (sibling_base_png, "verified_sibling_base_atlas")
+                    } else {
+                        (same_stem_texture, "unresolved")
+                    };
                     let renderable_meshes: Vec<_> = document.meshes.iter()
                         .filter(|mesh| !mesh.vertices.is_empty() && (!mesh.opaque_indices.is_empty() || !mesh.alpha_indices.is_empty()))
                         .collect();
@@ -224,6 +242,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             "source":relative,
                             "reason":"matching same-stem decoded PVR texture is missing",
                             "texture_expected":texture_path.to_string_lossy(),
+                            "texture_assignment":texture_assignment,
                             "source_texture_names":document.meshes.iter().map(|mesh| mesh.texture_name.clone())
                                 .filter(|name| !name.is_empty()).collect::<std::collections::BTreeSet<_>>()
                         }));
@@ -238,6 +257,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                     "source":relative,
                                     "output":output_relative.to_string_lossy().replace('\\',"/"),
                                     "texture":texture_path.to_string_lossy(),
+                                    "texture_assignment":texture_assignment,
                                     "glb_bytes":glb_bytes,
                                     "mesh_count":mesh_count,
                                     "motion_chunk_count":document.motions.len(),
