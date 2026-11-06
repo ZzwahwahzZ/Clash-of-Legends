@@ -140,9 +140,15 @@ func _dump_dmap_format_sample(report: Dictionary) -> void:
 	var source_path := ""
 	for candidate in samples:
 		var candidate_path := str(candidate)
-		if candidate_path.contains("/maps/"):
+		if candidate_path.to_lower().contains("/maps/") and candidate_path.to_lower().contains("citys01_new"):
 			source_path = candidate_path
 			break
+	if source_path.is_empty():
+		for candidate in samples:
+			var candidate_path := str(candidate)
+			if candidate_path.contains("/maps/"):
+				source_path = candidate_path
+				break
 	if source_path.is_empty():
 		source_path = str(samples[0])
 	var source := FileAccess.open(source_path, FileAccess.READ)
@@ -165,6 +171,32 @@ func _dump_dmap_format_sample(report: Dictionary) -> void:
 		"header_hex_128": bytes.slice(0, mini(128, bytes.size())).hex_encode(),
 		"artifact_path": output_path
 	}
+	var embedded_end := bytes.find(0, 8)
+	if embedded_end > 8:
+		var embedded_resource := bytes.slice(8, embedded_end).get_string_from_ascii()
+		var embedded_name := embedded_resource.get_file().to_lower()
+		var pux_samples: Array = report.get("extension_samples", {}).get("pux", [])
+		var pux_source_path := ""
+		for candidate in pux_samples:
+			var candidate_path := str(candidate)
+			if candidate_path.get_file().to_lower() == embedded_name:
+				pux_source_path = candidate_path
+				break
+		if not pux_source_path.is_empty():
+			var pux_source := FileAccess.open(pux_source_path, FileAccess.READ)
+			if pux_source != null:
+				var pux_bytes := pux_source.get_buffer(pux_source.get_length())
+				pux_source.close()
+				var pux_output_path := "/tmp/clash-map-pux-format-sample.bin"
+				var pux_output := FileAccess.open(pux_output_path, FileAccess.WRITE)
+				if pux_output != null:
+					pux_output.store_buffer(pux_bytes)
+					pux_output.close()
+					report["dmap_format_sample"]["embedded_resource"] = embedded_resource
+					report["dmap_format_sample"]["pux_source_path"] = pux_source_path
+					report["dmap_format_sample"]["pux_size_bytes"] = pux_bytes.size()
+					report["dmap_format_sample"]["pux_header_hex_128"] = pux_bytes.slice(0, mini(128, pux_bytes.size())).hex_encode()
+					report["dmap_format_sample"]["pux_artifact_path"] = pux_output_path
 	print("DMAP FORMAT SAMPLE EXPORTED: ", source_path, " | bytes=", bytes.size(), " | ", output_path)
 
 func _collect_character_registry_paths(path: String, registry_paths: Array, c3_samples: Array) -> void:
@@ -267,7 +299,7 @@ func _walk_directory(path: String, counts: Dictionary, model_paths: Array[String
 			counts[extension] = int(counts.get(extension, 0)) + 1
 			if not samples.has(extension):
 				samples[extension] = []
-			var sample_limit := 500 if extension == "dmap" else 15
+			var sample_limit := 500 if extension in ["dmap", "pux"] else 15
 			if samples[extension].size() < sample_limit:
 				samples[extension].append(full_path)
 			if extension in MODEL_EXTENSIONS:
