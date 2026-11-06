@@ -20,9 +20,12 @@ func _ready() -> void:
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
 		if event.pressed:
-			is_pressed = true
-			touch_index = event.index
-			_update_joystick(event.position)
+			# Lock the joystick to the first finger until that finger releases.
+			# Additional fingers must not steal movement control.
+			if touch_index == -1:
+				is_pressed = true
+				touch_index = event.index
+				_update_joystick(event.position)
 		elif event.index == touch_index:
 			_reset_joystick()
 		elif event.canceled and event.index == touch_index:
