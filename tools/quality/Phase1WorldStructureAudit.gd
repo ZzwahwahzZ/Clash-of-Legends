@@ -6,7 +6,6 @@ const REPORT_PATH := "reports/phase1_world_structure_audit.json"
 var counts := {
 	"mesh_instances": 0,
 	"navigation_regions": 0,
-	"navigation_mesh_instances": 0,
 	"collision_objects": 0,
 	"static_bodies": 0,
 	"collision_shapes": 0
@@ -71,8 +70,6 @@ func _walk(node: Node, relative_path: String) -> void:
 	if node is NavigationRegion3D:
 		counts["navigation_regions"] += 1
 		navigation_nodes.append({"path": path, "navigation_mesh_assigned": node.navigation_mesh != null})
-	if node is NavigationMeshInstance3D:
-		counts["navigation_mesh_instances"] += 1
 	if node is CollisionObject3D:
 		counts["collision_objects"] += 1
 	if node is StaticBody3D:
