@@ -84,3 +84,14 @@ The extracted source report contains structural metadata and decoded INI section
 **Important gap:** the role-animation names, simple-object IDs, look values 1–4, and C3 body filenames such as 7101020 / 7130000 / 8133010 are separate identifier families in the evidence collected so far. No direct key in this extraction report joins them. Treating the shared word “look” or a similar number as a body assignment would be guesswork.
 
 The next source-tracing step is therefore to locate the original model/animation registry or binary resource index that maps the role-animation/simple-object IDs to concrete C3 body and motion paths. Until that registry is extracted and reconciled, the two skeletal POCs remain unassigned.
+
+
+## Motion coverage correction from the raw validation JSON
+
+A deeper read of `reports/c3-motion-poc-validation.json` confirms that the two skeletal imports are **standby/action 100 only**. The corresponding skeletal exports for walk/action 110 and run/action 120 were rejected by the exporter because their source bone matrices contain non-TRS shear (examples: look 7 bone 16 at frame 1; look 8 bone 21 at frame 11). Therefore the current skeletal POC does not provide a complete locomotion set.
+
+The report also validates 72 VAT mesh-data entries across six clips (actions 100, 110, 120 for looks 7 and 8). These checks prove finite VAT data, changing frame positions, source vertex-order correspondence, and preservation of affine shear. They do **not** yet prove a Godot VAT shader/material is rendering the full character correctly at runtime, nor that the clip is performant on the target Redmi Note 11. The two paths must remain separate in the asset ledger:
+- Skeletal: action 100 import validated; actions 110/120 rejected by current TRS exporter.
+- VAT: data validated for 100/110/120; Godot runtime renderer and mobile performance not yet validated.
+
+Do not describe either path as a complete playable animation set. The next technical work is to build a Godot VAT playback test scene using the exact exported metadata and textures, validate all body parts (including armet, weapons, limbs and pelvis) in sync, and profile it on Android hardware/emulator. In parallel, improve skeletal export to preserve affine/shear transforms or use a mathematically safe decomposition/bake route, then revalidate walk/run before adopting the skeletal path.
