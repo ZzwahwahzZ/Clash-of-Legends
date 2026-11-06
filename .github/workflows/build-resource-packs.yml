@@ -370,3 +370,5 @@ jobs:
             RESOURCE_MANIFEST
           overwrite_files: true
           fail_on_unmatched_files: true
+
+# VAT runtime binding excludes non-deforming C3 socket markers.
