@@ -191,39 +191,43 @@ func _write_bounds_audit(district:Node,root:Node3D)->void:
  for child in district.get_children():
   if str(child.name).begins_with("AUDIT_ONLY_"):
    var b:=_subtree_bounds(child)
-   var structural_overlaps:Array=[]
-   var road_overlaps:Array=[]
+   var building_overlaps:Array=[]
+   var street_overlaps:Array=[]
+   var terrain_overlaps:Array=[]
    for source in authored_meshes:
     var sb:AABB=source["bounds"]
     var overlap_x:=minf(b.end.x,sb.end.x)-maxf(b.position.x,sb.position.x)
     var overlap_z:=minf(b.end.z,sb.end.z)-maxf(b.position.z,sb.position.z)
     if overlap_x<=0.35 or overlap_z<=0.35:
      continue
-    var source_path:String=source["path"]
-    if bool(source["road"]):
-     road_overlaps.append({"path":source_path,"name":source["name"],"overlap_xz_area":snappedf(overlap_x*overlap_z,0.01),"bounds":_aabb_dict(sb)})
-    else:
-     var overlap_y:=minf(b.end.y,sb.end.y)-maxf(b.position.y,sb.position.y)
-     var volume=maxf(0.0,overlap_x)*maxf(0.0,overlap_y)*maxf(0.0,overlap_z)
-     if overlap_y>0.35 and volume>0.5:
-      structural_overlaps.append({"path":source_path,"name":source["name"],"overlap_volume":snappedf(volume,0.01),"bounds":_aabb_dict(sb)})
+    var overlap_y:=minf(b.end.y,sb.end.y)-maxf(b.position.y,sb.position.y)
+    var volume:=maxf(0.0,overlap_x)*maxf(0.0,overlap_y)*maxf(0.0,overlap_z)
+    if bool(source["terrain"]):
+     terrain_overlaps.append({"path":source["path"],"name":source["name"],"overlap_xz_area":snappedf(overlap_x*overlap_z,0.01)})
+    elif bool(source["road"]):
+     street_overlaps.append({"path":source["path"],"name":source["name"],"overlap_xz_area":snappedf(overlap_x*overlap_z,0.01)})
+    elif overlap_y>0.35 and volume>0.5:
+     building_overlaps.append({"path":source["path"],"name":source["name"],"overlap_volume":snappedf(volume,0.01)})
    rows.append({
     "candidate":str(child.name),
     "center":[b.get_center().x,b.get_center().y,b.get_center().z],
     "size":[b.size.x,b.size.y,b.size.z],
     "min":[b.position.x,b.position.y,b.position.z],
     "max":[b.end.x,b.end.y,b.end.z],
-    "authored_structure_overlap_count":structural_overlaps.size(),
-    "authored_structure_overlaps":structural_overlaps,
-    "street_network_overlap_count":road_overlaps.size(),
-    "street_network_overlaps":road_overlaps
+    "authored_building_overlap_count":building_overlaps.size(),
+    "authored_building_overlaps":building_overlaps,
+    "street_network_overlap_count":street_overlaps.size(),
+    "street_network_overlaps":street_overlaps,
+    "terrain_overlap_count":terrain_overlaps.size(),
+    "terrain_overlaps":terrain_overlaps,
+    "placement_status":"REJECT" if building_overlaps.size()>0 or street_overlaps.size()>0 else "REVIEW"
    })
  var report={
   "district_bounds":_aabb_dict(_subtree_bounds(district)),
   "candidate_bounds":rows,
   "authored_mesh_count":authored_meshes.size(),
-  "audit_method":"World-space mesh AABBs; XZ overlap >0.35 units; structural overlap requires Y overlap >0.35 and volume >0.5; street overlap is separately reported as XZ area. Audit-only clones are excluded from authored geometry.",
-  "note":"Bounds are world-space; clones are audit-only and are not written to the source GLB."
+  "audit_method":"World-space transformed mesh AABBs; building overlap requires XZ overlap >0.35, Y overlap >0.35 and volume >0.5. Road and terrain overlaps are classified separately. Any building or road overlap rejects the candidate pending visual review.",
+  "note":"All candidate clones are audit-only and are not written to the source GLB."
  }
  var file:=FileAccess.open("reports/phase1_urban_infill_bounds.json",FileAccess.WRITE)
  if file==null:
@@ -237,9 +241,10 @@ func _collect_authored_mesh_bounds(node:Node,rows:Array)->void:
  if node is MeshInstance3D and not _has_audit_ancestor(node):
   var instance:=node as MeshInstance3D
   if instance.mesh!=null:
-   var label: String=(str(instance.name)+" "+str(instance.get_path())).to_lower()
-   var road:=label.contains("authoredstreetnetwork") or label.contains("street") or label.contains("road") or label.contains("avenue") or label.contains("curb") or label.contains("cross") or label.contains("lane") or label.contains("bridge") or label.contains("ramp")
-   rows.append({"name":str(instance.name),"path":str(instance.get_path()),"road":road,"bounds":instance.global_transform*instance.get_aabb()})
+   var label: String=(str(instance.name)+" "+str(instance.get_path())+" "+instance.mesh.resource_name).to_lower()
+   var terrain:=label.contains("terrain") or label.contains("groundcomposite") or label.contains("foundation")
+   var road:=label.contains("authoredstreetnetwork") or label.contains("street") or label.contains("road") or label.contains("avenue") or label.contains("curb") or label.contains("cross") or label.contains("lane") or label.contains("bridge") or label.contains("ramp") or label.contains("pawnshopapproach")
+   rows.append({"name":str(instance.name),"path":str(instance.get_path()),"road":road and not terrain,"terrain":terrain,"bounds":instance.global_transform*instance.get_aabb()})
  for child in node.get_children():
   _collect_authored_mesh_bounds(child,rows)
 
