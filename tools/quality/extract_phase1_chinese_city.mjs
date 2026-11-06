@@ -15,9 +15,26 @@ const root = document.getRoot();
 const allNodes = root.listNodes();
 
 const inventory = allNodes
-  .map((node) => ({ node: node.getName(), mesh: node.getMesh()?.getName() ?? '' }))
-  .filter((item) => /(Chinese|Jianghai|Pawnshop|Lantern|Lion|Stall|Cart|ClanHall)/i.test(item.node + ' ' + item.mesh))
-  .sort((a, b) => (a.node + a.mesh).localeCompare(b.node + b.mesh));
+  .map((node) => {
+    const parentPath = [];
+    let parent = node.getParentNode();
+    while (parent instanceof Node) {
+      parentPath.unshift(parent.getName());
+      parent = parent.getParentNode();
+    }
+    const translation = node.getTranslation();
+    const scale = node.getScale();
+    const mesh = node.getMesh();
+    return {
+      node: node.getName(),
+      parent_path: parentPath.join('/'),
+      mesh: mesh?.getName() ?? '',
+      translation: [translation[0], translation[1], translation[2]],
+      scale: [scale[0], scale[1], scale[2]],
+      selected_by_name: false
+    };
+  })
+  .sort((a, b) => (a.parent_path + '/' + a.node).localeCompare(b.parent_path + '/' + b.node));
 
 const keepPatterns = [
   /^AuthoredStreetNetwork$/i,
@@ -121,8 +138,28 @@ for (const node of meshNodes) {
 }
 const output = await fs.readFile(outputPath);
 const input = await fs.readFile(inputPath);
+const selectedSet = new Set(selected);
+for (const entry of inventory) {
+  const match = allNodes.find((node) => node.getName() === entry.node
+    && (() => {
+      const parts = [];
+      let parent = node.getParentNode();
+      while (parent instanceof Node) {
+        parts.unshift(parent.getName());
+        parent = parent.getParentNode();
+      }
+      return parts.join('/') === entry.parent_path;
+    })());
+  entry.selected_by_name = Boolean(match && selectedSet.has(match));
+}
+const roadGroundCandidates = inventory.filter((entry) =>
+  /(road|street|path|ground|terrain|foundation|sidewalk|pavement|plaza|bridge|asphalt|floor|lot|curb|crosswalk|drain|gutter)/i
+    .test(entry.node + ' ' + entry.mesh + ' ' + entry.parent_path));
+const omittedMeshNodes = inventory.filter((entry) => entry.mesh && !entry.selected_by_name);
 const report = {
   source_repository: 'https://github.com/AetherRadar/operation-steel-tide',
+  road_ground_candidates: roadGroundCandidates,
+  omitted_mesh_nodes: omittedMeshNodes,
   source_commit: 'd6a33b932e00fb9016dea407eca3f909aeaf2dcb',
   source_glb: 'assets/models/jianghai_old_city/jianghai_old_city.glb',
   source_license: 'MIT project composition; third-party source components remain under their recorded licenses in LICENSE_EVIDENCE.md',
