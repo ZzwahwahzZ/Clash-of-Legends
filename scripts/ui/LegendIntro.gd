@@ -338,7 +338,7 @@ func _start_splash_resource_download(manager: Node) -> void:
 	if is_instance_valid(splash_progress_bar):
 		splash_progress_bar = null
 	if class_status:
-		class_status.text = "تعذّر اكتمال تحميل الموارد؛ اضغط «ابدأ رحلتك» لإعادة المحاولة"
+		class_status.text = "تعذّر تجهيز بعض الموارد المضمّنة؛ أعد فحص ملفات التطبيق"
 
 
 func _on_package_download_failed(package_id: String, reason: String) -> void:
