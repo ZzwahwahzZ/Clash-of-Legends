@@ -22,7 +22,7 @@ def glb_json(data: bytes) -> dict:
         if end > total:
             raise ValueError("chunk exceeds declared GLB length")
         if kind == JSON_CHUNK:
-            return json.loads(data[offset:end].decode("utf-8").rstrip(" \\t\\r\\n\\0"))
+            return json.loads(data[offset:end].decode("utf-8").rstrip(" \t\r\n\0"))
         offset = end
     raise ValueError("GLB JSON chunk missing")
 
@@ -147,7 +147,7 @@ def main():
         "files": results
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+    args.output.write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({k:v for k,v in summary.items() if k not in ("files",)}, ensure_ascii=False))
 if __name__ == "__main__":
     main()
