@@ -4,7 +4,11 @@ import hashlib, json, shutil
 from pathlib import Path
 
 root = Path.cwd()
-source_root = root / "build/c3-glb"
+# The proof-subset preparation step moves the complete conversion to
+# /tmp/c3-glb-full and leaves only reviewed animation/skeleton POCs under
+# build/c3-glb for the editor importer. Merge runtime models from the preserved
+# full conversion tree, never from the intentionally reduced proof subset.
+source_root = Path("/tmp/c3-glb-full")
 stage_root = root / "resource_stage"
 catalog_path = stage_root / "world/resource_catalog.json"
 if not source_root.is_dir():
