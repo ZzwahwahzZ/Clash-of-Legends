@@ -6,6 +6,7 @@ on:
     paths:
       - tools/asset_forensics/**
       - tests/test_asset_forensics.py
+      - tests/test_native_library_inventory.py
       - notebooks/Run_External_Asset_Forensics.ipynb
       - .github/workflows/test-asset-forensics.yml
   workflow_dispatch:
@@ -20,7 +21,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Compile scanner
-        run: python -m py_compile tools/asset_forensics/run_forensics.py tools/asset_forensics/process_standard_assets.py tools/asset_forensics/build_godot_catalog.py tests/test_asset_forensics.py
+        run: python -m py_compile tools/asset_forensics/run_forensics.py tools/asset_forensics/process_standard_assets.py tools/asset_forensics/build_godot_catalog.py tests/test_asset_forensics.py tests/test_native_library_inventory.py tools/asset_forensics/inspect_native_libraries.py
       - name: Validate Colab notebook JSON and single-cell contract
         run: |
           python - <<'PY'

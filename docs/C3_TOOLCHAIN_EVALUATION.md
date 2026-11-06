@@ -64,7 +64,7 @@ This is a conversion and mapping coverage gap, not proof that the original sourc
 1. Keep the Apache-2.0 parser as the baseline and preserve source hashes/provenance.
 2. Add an isolated Blender compatibility pass over representative samples from every discovered PHY subtype and keyframe family. Compare mesh counts, vertex/index counts, UVs, texture references, frame counts, and animation deformation against the Rust parser. Do not accept shape-key output as a skeletal rig.
 3. Expand exact source joins from `3dsimplerole.ini`, `rolechoose.ini`, `3DObj.dbc`, `3DSimpleObj.dbc`, `RolePart.dbc`, and motion tables. Keep unresolved class/gender links explicitly unresolved.
-4. Obtain and inspect the matching Mobile ARM64 native library (if it exists in the supplied APK/source archive) with Ghidra. Recover bone names, parent IDs, reference pose, pivots, and sockets from source-backed records.
+4. Run the new nested-APK native-library inventory from the Colab notebook. If the matching Mobile ARM64 native library is present in the supplied archive, inspect it with Ghidra; if not, record that absence and do not infer the native hierarchy. Recover bone names, parent IDs, reference pose, pivots, and sockets from source-backed records.
 5. Only then generate named parented skeletons and bind motion clips. Reject non-TRS/sheared transforms rather than silently flattening them.
 6. Import the result into Godot and require Skeleton3D presence, valid skin weights, all expected mesh parts, correct sockets, animation playback, and visual review before approving a character.
 7. Keep all third-party tools outside the shipped APK. Only accepted project-owned converted assets enter runtime PCKs.
