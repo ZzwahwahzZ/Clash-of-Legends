@@ -19,8 +19,8 @@ class RsdbLayoutProbeTests(unittest.TestCase):
     def test_unknown_rsdb_autodetects_u32_id_and_string_offset(self):
         header = b"RSDB" + struct.pack("<I", 2)
         table_end = 8 + 2 * 8
-        paths = b"c3/body/7130000.c3\\0c3/body/8133010.c3\\0"
-        data = header + struct.pack("<II", 7130000, table_end) + struct.pack("<II", 8133010, table_end + len(b"c3/body/7130000.c3\\0")) + paths
+        paths = b"c3/body/7130000.c3\0c3/body/8133010.c3\0"
+        data = header + struct.pack("<II", 7130000, table_end) + struct.pack("<II", 8133010, table_end + len(b"c3/body/7130000.c3\0")) + paths
         result = parse_rsdb(data, "3dskeleton")
         self.assertEqual(result["parse_status"], "PARSED")
         self.assertEqual(result["layout"], "u32_id_u32_path")
@@ -29,8 +29,8 @@ class RsdbLayoutProbeTests(unittest.TestCase):
     def test_unknown_rsdb_autodetects_u64_id_and_string_offset(self):
         header = b"RSDB" + struct.pack("<I", 2)
         table_end = 8 + 2 * 12
-        first = b"c3/body/7130000.c3\\0"
-        second = b"c3/body/8133010.c3\\0"
+        first = b"c3/body/7130000.c3\0"
+        second = b"c3/body/8133010.c3\0"
         data = header + struct.pack("<QI", 7130000, table_end) + struct.pack("<QI", 8133010, table_end + len(first)) + first + second
         result = parse_rsdb(data, "3dobjprop")
         self.assertEqual(result["parse_status"], "PARSED")
