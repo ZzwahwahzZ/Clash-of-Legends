@@ -1,9 +1,28 @@
 extends SceneTree
 
 const MODEL_PATH := "res://build/c3-glb/motion-poc-skinned/look7_model7130000_weapon500_action100.glb"
+const REPORT_PATH := "res://reports/c3-skeletal-poc-validation.json"
+const FRAME_A_PATH := "res://reports/c3-skeletal-poc-frame-a.png"
+const FRAME_B_PATH := "res://reports/c3-skeletal-poc-frame-b.png"
 
 func _initialize() -> void:
 	call_deferred("_render")
+
+func _fail(reason: String, details: Dictionary = {}) -> void:
+	var report := {
+		"schema_version": 1,
+		"status": "FAILED",
+		"model": MODEL_PATH,
+		"reason": reason,
+		"details": details
+	}
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://reports"))
+	var file := FileAccess.open(REPORT_PATH, FileAccess.WRITE)
+	if file != null:
+		file.store_string(JSON.stringify(report, "\t") + "\n")
+		file.close()
+	push_error("C3 skeletal proof FAILED: " + reason)
+	quit(1)
 
 func _render() -> void:
 	get_root().size = Vector2i(1280, 720)
@@ -11,8 +30,7 @@ func _render() -> void:
 
 	var packed := ResourceLoader.load(MODEL_PATH) as PackedScene
 	if packed == null:
-		push_error("C3 visual proof: skinned GLB could not be loaded: " + MODEL_PATH)
-		quit(1)
+		_fail("SKINNED_GLB_LOAD_FAILED")
 		return
 
 	var stage := Node3D.new()
@@ -37,8 +55,7 @@ func _render() -> void:
 
 	var mesh_nodes := character.find_children("*", "MeshInstance3D", true, false)
 	if mesh_nodes.is_empty():
-		push_error("C3 visual proof: imported character contains no MeshInstance3D.")
-		quit(1)
+		_fail("NO_IMPORTED_MESHES")
 		return
 
 	var bounds := AABB()
@@ -54,13 +71,16 @@ func _render() -> void:
 		else:
 			bounds = bounds.merge(world_bounds)
 	if first_bounds or bounds.size.length() < 0.01:
-		push_error("C3 visual proof: character bounds are empty or degenerate.")
-		quit(1)
+		_fail("EMPTY_OR_DEGENERATE_CHARACTER_BOUNDS", {"mesh_nodes": mesh_nodes.size()})
+		return
+
+	var skeleton_nodes := character.find_children("*", "Skeleton3D", true, false)
+	var bone_count := _count_bones(character)
+	if skeleton_nodes.is_empty() or bone_count <= 0:
+		_fail("SKELETON_OR_BONES_MISSING", {"skeleton_nodes": skeleton_nodes.size(), "bone_count": bone_count})
 		return
 
 	var center := bounds.get_center()
-	# The skeletal exporter bakes the C3 centimetre/Z-up basis into vertex data,
-	# so imported bounds are already in metres and Godot's Y-up convention.
 	var extent := maxf(bounds.size.x, maxf(bounds.size.y, bounds.size.z))
 	var camera := Camera3D.new()
 	camera.name = "Proof_Camera"
@@ -87,8 +107,7 @@ func _render() -> void:
 
 	var players := character.find_children("*", "AnimationPlayer", true, false)
 	if players.is_empty():
-		push_error("C3 visual proof: no AnimationPlayer was imported.")
-		quit(1)
+		_fail("ANIMATION_PLAYER_MISSING", {"bone_count": bone_count})
 		return
 	var animation_player := players[0] as AnimationPlayer
 	var animation_name := ""
@@ -97,50 +116,119 @@ func _render() -> void:
 			animation_name = candidate
 			break
 	if animation_name.is_empty():
-		push_error("C3 visual proof: no playable skeletal animation was imported.")
-		quit(1)
+		_fail("NO_NON_RESET_ANIMATION_IMPORTED", {"bone_count": bone_count})
+		return
+
+	var animation := animation_player.get_animation(animation_name)
+	if animation == null or animation.get_track_count() <= 0:
+		_fail("ANIMATION_HAS_NO_TRACKS", {"animation": animation_name})
+		return
+
+	var skeleton_track_count := 0
+	for track_index in range(animation.get_track_count()):
+		var track_path := str(animation.track_get_path(track_index)).to_lower()
+		if "skeleton" in track_path or "bone" in track_path:
+			skeleton_track_count += 1
+	if skeleton_track_count <= 0:
+		_fail("NO_SKELETAL_ANIMATION_TRACKS", {
+			"animation": animation_name,
+			"track_count": animation.get_track_count(),
+			"track_paths": _track_paths(animation)
+		})
 		return
 
 	animation_player.play(animation_name)
 	await process_frame
 	await create_timer(0.35).timeout
 	await process_frame
+	if not animation_player.is_playing():
+		_fail("ANIMATION_DID_NOT_START", {"animation": animation_name})
+		return
 	var first_image := get_root().get_texture().get_image()
-	var first_error := first_image.save_png("reports/c3-skeletal-poc-frame-a.png")
+	if first_image == null or first_image.is_empty():
+		_fail("FIRST_FRAME_CAPTURE_FAILED")
+		return
+	var first_error := first_image.save_png(FRAME_A_PATH)
 	if first_error != OK:
-		push_error("C3 visual proof: could not save first frame.")
-		quit(1)
+		_fail("FIRST_FRAME_SAVE_FAILED", {"error_code": first_error})
 		return
 
 	await create_timer(0.45).timeout
 	await process_frame
 	var second_image := get_root().get_texture().get_image()
-	var second_error := second_image.save_png("reports/c3-skeletal-poc-frame-b.png")
+	if second_image == null or second_image.is_empty():
+		_fail("SECOND_FRAME_CAPTURE_FAILED")
+		return
+	var second_error := second_image.save_png(FRAME_B_PATH)
 	if second_error != OK:
-		push_error("C3 visual proof: could not save second frame.")
-		quit(1)
+		_fail("SECOND_FRAME_SAVE_FAILED", {"error_code": second_error})
 		return
 
-	print("C3 VISUAL PROOF: model=", MODEL_PATH,
-		" meshes=", mesh_nodes.size(),
-		" animation=", animation_name,
-		" bones=", _count_bones(character),
-		" screenshots=reports/c3-skeletal-poc-frame-a.png,reports/c3-skeletal-poc-frame-b.png")
+	var changed_pixels := _count_changed_pixels(first_image, second_image)
+	var total_pixels := first_image.get_width() * first_image.get_height()
+	var changed_ratio := float(changed_pixels) / float(maxi(1, total_pixels))
+	if changed_pixels <= 0 or changed_ratio < 0.0005:
+		_fail("ANIMATION_VISUAL_CHANGE_NOT_PROVEN", {
+			"changed_pixels": changed_pixels,
+			"changed_ratio": changed_ratio,
+			"animation": animation_name,
+			"bone_count": bone_count
+		})
+		return
 
+	var report := {
+		"schema_version": 1,
+		"status": "PASSED",
+		"model": MODEL_PATH,
+		"mesh_nodes": mesh_nodes.size(),
+		"skeleton_nodes": skeleton_nodes.size(),
+		"bone_count": bone_count,
+		"animation": animation_name,
+		"animation_track_count": animation.get_track_count(),
+		"skeleton_track_count": skeleton_track_count,
+		"changed_pixels": changed_pixels,
+		"changed_pixel_ratio": changed_ratio,
+		"screenshots": [FRAME_A_PATH, FRAME_B_PATH]
+	}
+	var report_file := FileAccess.open(REPORT_PATH, FileAccess.WRITE)
+	if report_file == null:
+		_fail("REPORT_WRITE_FAILED")
+		return
+	report_file.store_string(JSON.stringify(report, "\t") + "\n")
+	report_file.close()
+
+	print("C3 SKELETAL VISUAL PROOF PASSED: ", JSON.stringify(report))
 	animation_player.stop()
 	character.queue_free()
 	await process_frame
-
-	# The dedicated six-clip renderer runs after this representative skeletal POC.
 	stage.queue_free()
 	quit(0)
-	return
 
 func _count_bones(root: Node) -> int:
 	var total := 0
 	for node in root.find_children("*", "Skeleton3D", true, false):
 		total += (node as Skeleton3D).get_bone_count()
 	return total
+
+func _track_paths(animation: Animation) -> Array[String]:
+	var paths: Array[String] = []
+	for index in range(animation.get_track_count()):
+		paths.append(str(animation.track_get_path(index)))
+	return paths
+
+func _count_changed_pixels(first: Image, second: Image) -> int:
+	if first.get_width() != second.get_width() or first.get_height() != second.get_height():
+		return first.get_width() * first.get_height()
+	var a := first.get_data()
+	var b := second.get_data()
+	var changed := 0
+	for offset in range(0, mini(a.size(), b.size()), 4):
+		var difference := absi(int(a[offset]) - int(b[offset]))
+		difference += absi(int(a[offset + 1]) - int(b[offset + 1]))
+		difference += absi(int(a[offset + 2]) - int(b[offset + 2]))
+		if difference > 24:
+			changed += 1
+	return changed
 
 func _transform_aabb(bounds: AABB, transform: Transform3D) -> AABB:
 	var corners := [
