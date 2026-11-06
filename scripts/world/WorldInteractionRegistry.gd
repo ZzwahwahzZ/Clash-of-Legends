@@ -111,7 +111,7 @@ func get_npc_spawn_candidate(anchor_id: String) -> Dictionary:
 	var node := resolve_anchor_node(anchor_id)
 	if definition.is_empty() or node == null or not definition.has("npc_id"):
 		return {"ok": false, "reason": "npc_anchor_unavailable", "anchor_id": anchor_id}
-	var offset_data: Array = definition.get("spawn_offset_local", [0.0, 0.0, 0.0])
+	var offset_data: Array = definition.get("spawn_offset_local", definition.get("offset", [0.0, 0.0, 0.0]))
 	if offset_data.size() != 3:
 		return {"ok": false, "reason": "invalid_spawn_offset", "anchor_id": anchor_id}
 	var local_offset := Vector3(float(offset_data[0]), float(offset_data[1]), float(offset_data[2]))
