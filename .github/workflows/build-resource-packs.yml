@@ -121,6 +121,7 @@ jobs:
           godot --headless --editor --path . --import --quit
           godot --headless --path . --script tools/c3_audit/validate_c3_glb.gd
           python3 tools/c3_audit/merge_c3_glb_assets.py
+          python3 tools/resource_packs/build_equipment_visual_candidates.py
           python3 tools/resource_packs/validate_motion_c3_conversion.py
       - name: Audit original DMap terrain and map catalog
         run: cargo run --manifest-path tools/c3_audit/Cargo.toml --release --bin audit_maps -- resource_stage reports/map-audit.json

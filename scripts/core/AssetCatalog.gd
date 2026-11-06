@@ -141,3 +141,56 @@ func get_verified_character_model_index(requested_class: String, requested_gende
 func get_verified_mount_model_index(requested_item_id: String) -> int:
 	var entries := get_asset_entries("mounts", [".glb", ".gltf"])
 	return MountModelMappingRules.find_verified_mount_model_index(entries, requested_item_id)
+
+func get_verified_weapon_model_index(item_id: String) -> int:
+	if item_id.is_empty():
+		return -1
+	var entries := get_asset_entries("equipment", [".glb", ".gltf"])
+	for index in range(entries.size()):
+		var entry: Dictionary = entries[index]
+		if str(entry.get("asset_role", "")) != "weapon_visual_candidate":
+			continue
+		if str(entry.get("mapping_status", "")) != "source_join_verified":
+			continue
+		var item_ids: Variant = entry.get("source_item_ids", [])
+		if item_ids is Array and item_ids.has(item_id):
+			return index
+	return -1
+
+func instantiate_fitted_weapon_model(item_id: String, parent: Node3D, target_height: float = 1.0) -> Node3D:
+	if parent == null or target_height <= 0.0:
+		return null
+	var index := get_verified_weapon_model_index(item_id)
+	if index < 0:
+		return null
+	var packed_model := load_model_scene("equipment", index)
+	if packed_model == null:
+		return null
+	var root := Node3D.new()
+	root.name = "WeaponCandidate"
+	# Converted C3 weapon meshes use Z as their long axis; rotate Z-up into Godot Y-up.
+	root.rotation.x = PI * 0.5
+	parent.add_child(root)
+	var instance := packed_model.instantiate()
+	root.add_child(instance)
+	var combined_bounds := AABB()
+	var has_bounds := false
+	for mesh_node in instance.find_children("*", "MeshInstance3D", true, false):
+		var mesh_instance := mesh_node as MeshInstance3D
+		if mesh_instance == null or mesh_instance.mesh == null:
+			continue
+		var relative_transform := root.global_transform.affine_inverse() * mesh_instance.global_transform
+		var mesh_bounds := _transform_aabb(mesh_instance.get_aabb(), relative_transform)
+		combined_bounds = mesh_bounds if not has_bounds else combined_bounds.merge(mesh_bounds)
+		has_bounds = true
+	if not has_bounds or combined_bounds.size.y <= 0.001:
+		root.queue_free()
+		return null
+	var fit_scale := target_height / combined_bounds.size.y
+	root.scale = Vector3.ONE * fit_scale
+	root.position = Vector3(
+		-(combined_bounds.position.x + combined_bounds.size.x * 0.5) * fit_scale,
+		-combined_bounds.position.y * fit_scale,
+		-(combined_bounds.position.z + combined_bounds.size.z * 0.5) * fit_scale
+	)
+	return root

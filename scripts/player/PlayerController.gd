@@ -33,6 +33,7 @@ var is_moving_to_target: bool = false
 var imported_model_animation: AnimationPlayer = null
 var imported_animation_name: String = ""
 var imported_mount_item_id: String = ""
+var imported_weapon_item_id: String = ""
 var footstep_timer: float = 0.0
 
 @onready var camera_pivot: Node3D = $CameraPivot
@@ -64,11 +65,13 @@ func _ready() -> void:
 		anim_player.play("idle")
 	call_deferred("_apply_character_model")
 	call_deferred("_apply_mount_model")
+	call_deferred("_apply_weapon_model")
 	call_deferred("_apply_refinement_glow")
 
 func _on_equipment_updated() -> void:
 	_apply_refinement_glow()
 	_apply_mount_model()
+	_apply_weapon_model()
 
 func _apply_refinement_glow() -> void:
 	if not inventory:
@@ -578,3 +581,40 @@ func sync_stats_to_hud() -> void:
 	if GameManager:
 		var gold = GameManager.current_gold
 		GameManager.emit_signal("player_stats_changed", current_hp, max_hp, current_mp, max_mp, current_xp, max_xp, current_level, gold)
+
+func _apply_weapon_model() -> void:
+	if not weapon_mount or not inventory or not AssetCatalog:
+		return
+	var equipped_weapon: Variant = inventory.equipment.get("weapon", null)
+	var item_id := str(equipped_weapon.get("id", "")) if equipped_weapon is Dictionary else ""
+	var existing_root := weapon_mount.get_node_or_null("ImportedWeaponRoot")
+	if item_id != imported_weapon_item_id:
+		if existing_root:
+			existing_root.queue_free()
+		imported_weapon_item_id = ""
+	if item_id.is_empty():
+		_set_placeholder_weapon_visible(true)
+		return
+	var verified_index := AssetCatalog.get_verified_weapon_model_index(item_id)
+	if verified_index < 0:
+		_set_placeholder_weapon_visible(true)
+		return
+	if weapon_mount.get_node_or_null("ImportedWeaponRoot") != null:
+		_set_placeholder_weapon_visible(false)
+		return
+	var candidate_root := AssetCatalog.instantiate_fitted_weapon_model(item_id, weapon_mount, 0.95)
+	if candidate_root == null:
+		push_warning("Weapon visual candidate could not be instantiated; retaining placeholder.")
+		_set_placeholder_weapon_visible(true)
+		return
+	candidate_root.name = "ImportedWeaponRoot"
+	imported_weapon_item_id = item_id
+	_set_placeholder_weapon_visible(false)
+	call_deferred("_apply_refinement_glow")
+
+func _set_placeholder_weapon_visible(visible_state: bool) -> void:
+	if not weapon_mount:
+		return
+	var placeholder := weapon_mount.get_node_or_null("MainWeapon")
+	if placeholder is Node3D:
+		placeholder.visible = visible_state
