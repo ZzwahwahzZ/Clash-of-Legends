@@ -66,19 +66,31 @@ func _run() -> void:
   placed+=1
  print("AUDIT ONLY INFILL CLONES: ",placed)
  print("Candidate placements use the original JianghaiTenementDistrict parent coordinate system.")
+ var district:=city.find_child("JianghaiTenementDistrict",true,false)
+ if district==null:
+  push_error("JianghaiTenementDistrict not found for bounds audit.")
+  quit(5)
+  return
+ var district_bounds:=_subtree_bounds(district)
+ if district_bounds.size==Vector3.ZERO:
+  push_error("Could not calculate district bounds.")
+  quit(5)
+  return
+ _write_bounds_audit(district,root)
+ var focus:=district_bounds.get_center()
  var top:=Camera3D.new()
  top.projection=Camera3D.PROJECTION_ORTHOGONAL
- top.size=360.0
- top.position=Vector3(0,360,-55)
+ top.size=maxf(district_bounds.size.x,district_bounds.size.z)*1.18
+ top.position=Vector3(focus.x,focus.y+360.0,focus.z)
  root.add_child(top)
- top.look_at(Vector3(0,0,-55),Vector3.FORWARD)
+ top.look_at(focus,Vector3.FORWARD)
  top.current=true
  await _capture("reports/phase1_urban_infill_topdown.png")
  var oblique:=Camera3D.new()
  oblique.fov=50.0
- oblique.position=Vector3(90,65,110)
+ oblique.position=focus+Vector3(95,75,115)
  root.add_child(oblique)
- oblique.look_at(Vector3(0,5,-10),Vector3.UP)
+ oblique.look_at(focus+Vector3(0,5,0),Vector3.UP)
  oblique.current=true
  await _capture("reports/phase1_urban_infill_oblique.png")
  quit(0)
@@ -156,3 +168,36 @@ func _capture(path:String)->void:
  if image.save_png(path)!=OK:
   push_error("Could not save preview: "+path)
   quit(4)
+
+func _subtree_bounds(node:Node)->AABB:
+ var found:=false
+ var result:=AABB()
+ if node is MeshInstance3D:
+  var mesh_node:=node as MeshInstance3D
+  if mesh_node.mesh!=null:
+   result=mesh_node.global_transform*mesh_node.get_aabb()
+   found=true
+ for child in node.get_children():
+  var child_bounds:=_subtree_bounds(child)
+  if child_bounds.size!=Vector3.ZERO:
+   result=result.merge(child_bounds) if found else child_bounds
+   found=true
+ return result if found else AABB()
+
+func _write_bounds_audit(district:Node,root:Node3D)->void:
+ var rows:Array=[]
+ for child in district.get_children():
+  if str(child.name).begins_with("AUDIT_ONLY_"):
+   var b:=_subtree_bounds(child)
+   rows.append({"candidate":str(child.name),"center":[b.get_center().x,b.get_center().y,b.get_center().z],"size":[b.size.x,b.size.y,b.size.z],"min":[b.position.x,b.position.y,b.position.z],"max":[b.end.x,b.end.y,b.end.z]})
+ var report={"district_bounds":_aabb_dict(_subtree_bounds(district)),"candidate_bounds":rows,"note":"Bounds are world-space; clones are audit-only and are not written to the source GLB."}
+ var file:=FileAccess.open("reports/phase1_urban_infill_bounds.json",FileAccess.WRITE)
+ if file==null:
+  push_error("Could not write bounds audit JSON.")
+  return
+ file.store_string(JSON.stringify(report,"  "))
+ file.close()
+ print("URBAN INFILL BOUNDS AUDIT: ",JSON.stringify(report))
+
+func _aabb_dict(b:AABB)->Dictionary:
+ return {"min":[b.position.x,b.position.y,b.position.z],"max":[b.end.x,b.end.y,b.end.z],"size":[b.size.x,b.size.y,b.size.z],"center":[b.get_center().x,b.get_center().y,b.get_center().z]}
