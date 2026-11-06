@@ -79,6 +79,7 @@ jobs:
           path: |
             reports/gameplay-source-table-audit.json
             reports/comprehensive-asset-inventory.json
-            reports/polyfile-mobile-*.json\n            reports/glb-rig-animation-audit.json
+            reports/polyfile-mobile-*.json
+            reports/glb-rig-animation-audit.json
           if-no-files-found: error
           retention-days: 30
