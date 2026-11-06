@@ -150,9 +150,22 @@ func play_state(state: String) -> bool:
 	_current_state = normalized
 	return true
 
-func stop() -> void:
+func pause() -> void:
 	for player_value in _players_by_mesh.values():
 		(player_value as C3VatPlayer).pause()
+
+func resume() -> void:
+	for mesh_name in _active_mesh_names.keys():
+		if _players_by_mesh.has(mesh_name):
+			(_players_by_mesh[mesh_name] as C3VatPlayer).play()
+
+func set_frame(frame: float) -> void:
+	for mesh_name in _active_mesh_names.keys():
+		if _players_by_mesh.has(mesh_name):
+			(_players_by_mesh[mesh_name] as C3VatPlayer).set_frame(frame)
+
+func stop() -> void:
+	pause()
 
 func get_current_state() -> String:
 	return _current_state
