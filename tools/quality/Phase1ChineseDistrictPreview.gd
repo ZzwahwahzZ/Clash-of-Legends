@@ -2,6 +2,7 @@ extends SceneTree
 
 const CITY_PATH := "res://assets/environment/phase1/jianghai/chinese_district.glb"
 const SOURCE_GATE_ANCHOR := Vector3(-86.001892, 1.2787764, -122.576271)
+var audit_root: Node3D
 
 func _initialize() -> void:
     call_deferred("_run")
@@ -10,6 +11,7 @@ func _run() -> void:
     get_root().get_viewport().size = Vector2i(960, 540)
     var root := Node3D.new()
     root.name = "ChineseDistrictVisualAudit"
+    audit_root = root
     get_root().add_child(root)
 
     var world := WorldEnvironment.new()
@@ -158,8 +160,8 @@ func _run() -> void:
 
 func _run_main_game_integration() -> void:
     # Audit-only composition: do not modify or delete the source MainGame nodes.
-    root.visible = false
-    for camera_node in root.find_children("*", "Camera3D", true, false):
+    audit_root.visible = false
+    for camera_node in audit_root.find_children("*", "Camera3D", true, false):
         (camera_node as Camera3D).current = false
     var main_packed := load("res://scenes/core/MainGame.tscn") as PackedScene
     var city_packed := load(CITY_PATH) as PackedScene
