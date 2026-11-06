@@ -214,7 +214,7 @@ func _dump_ani_format_samples(report: Dictionary) -> void:
 				continue
 			var bytes := source.get_buffer(source.get_length())
 			source.close()
-			var output_path := "/tmp/clash-" + wanted.replace(".ani", "") + "-ani-sample.txt"
+			var output_path: String = "/tmp/clash-" + str(wanted).replace(".ani", "") + "-ani-sample.txt"
 			var output := FileAccess.open(output_path, FileAccess.WRITE)
 			if output == null:
 				continue
