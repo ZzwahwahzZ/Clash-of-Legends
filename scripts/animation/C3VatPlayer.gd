@@ -2,6 +2,8 @@ extends Node
 class_name C3VatPlayer
 
 var _materials: Array[ShaderMaterial] = []
+var _target_mesh: MeshInstance3D = null
+var _source_materials: Array[Material] = []
 var _frame_count: int = 0
 var _fps: float = 30.0
 var _frame: float = 0.0
@@ -74,6 +76,17 @@ func configure(mesh_instance: MeshInstance3D, metadata_path: String, binary_path
 		push_error("C3 VAT: could not create animated RGBA8 normal texture.")
 		return false
 	var normal_texture := ImageTexture.create_from_image(normal_image)
+	if _target_mesh != mesh_instance:
+		reset()
+		_target_mesh = mesh_instance
+		_source_materials.clear()
+		for surface in range(mesh_instance.mesh.get_surface_count()):
+			_source_materials.append(mesh_instance.get_active_material(surface))
+	elif _source_materials.size() != mesh_instance.mesh.get_surface_count():
+		reset()
+		_source_materials.clear()
+		for surface in range(mesh_instance.mesh.get_surface_count()):
+			_source_materials.append(mesh_instance.get_active_material(surface))
 	_materials.clear()
 	var shader_opaque_path := "res://shaders/C3Vat.gdshader"
 	var shader_alpha_path := "res://shaders/C3VatAlpha.gdshader"
@@ -91,7 +104,7 @@ func configure(mesh_instance: MeshInstance3D, metadata_path: String, binary_path
 	mesh_instance.skeleton = NodePath()
 	_hide_c3_attachment_socket_markers(mesh_instance)
 	for surface in range(mesh_instance.mesh.get_surface_count()):
-		var source_material := mesh_instance.get_active_material(surface) as BaseMaterial3D
+		var source_material := _source_materials[surface] as BaseMaterial3D
 		var source_texture: Texture2D = albedo
 		var alpha_enabled := false
 		if source_material != null:
@@ -112,6 +125,15 @@ func configure(mesh_instance: MeshInstance3D, metadata_path: String, binary_path
 	_frame = 0.0
 	_running = true
 	return true
+
+func reset() -> void:
+	_running = false
+	if _target_mesh != null and is_instance_valid(_target_mesh) and _target_mesh.mesh != null:
+		for surface in range(_target_mesh.mesh.get_surface_count()):
+			_target_mesh.set_surface_override_material(surface, null)
+	_materials.clear()
+	_frame_count = 0
+	_frame = 0.0
 
 func set_frame(frame: float) -> void:
 	if _materials.is_empty() or _frame_count <= 0:
