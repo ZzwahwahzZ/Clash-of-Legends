@@ -372,6 +372,7 @@ jobs:
           echo "Unable to push manifest after 3 synchronized attempts."
           exit 1
       - name: Upload compact source audit reports
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ClashOfLegends-Source-Audit-Reports
@@ -404,6 +405,10 @@ jobs:
             reports/map-audit.json
             reports/tpi-extraction-audit.json
             reports/gameplay-data-source-probe.json
+            reports/gameplay-readable-catalog-report.json
+            resource_stage/world/gameplay_reference/*.json
+            resource_stage/world/resource_mappings/role_model_candidate_catalog.json
+            resource_stage/world/resource_catalog.json
             reports/gameplay-readable-catalog-report.json
             resource_stage/world/gameplay_reference/*.json
           if-no-files-found: error
