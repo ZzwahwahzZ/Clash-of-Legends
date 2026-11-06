@@ -61,3 +61,39 @@ The following accessor behavior is now confirmed at instruction level:
 3. Preserve all 64 reference-pose bytes, the three pivot floats, flags, parent sentinel, socket records and separate-root-bone ID.
 4. Validate parent references and ancestry chains before exporting a Godot `Skeleton3D`; reject cycles and out-of-range links.
 5. Do not build or retarget animation tracks until the source skeleton resource and its name-pointer resolution have been recovered.
+
+
+## Rig-to-motion catalog cross-check (2026-11-06)
+
+A parsed catalog is now available as `C3-Rig-Motion-Catalog.csv` in the project research workspace. It contains 994 indexed C3 resources and separates body tracks from attachment/effect tracks. Representative verified rows:
+
+- `c3/0007/000/100.c3`: 18 MOTI sections, 66-bone body track, 17 additional one-bone tracks, 18 named attachment points including `v_body`, `v_armet`, weapon/forearm/shoulder sockets, feet, pelvis and slot points.
+- `c3/0007/423/100.c3`: same 66-bone body-track pattern, with 18 MOTI sections.
+- `c3/0008/000/100.c3`: 18 MOTI sections and a 60-bone body track, with attachment tracks kept separate.
+- The catalog also records body model families such as `c3/body/7101020.c3` (66-bone body track) and `c3/body/8133010.c3` (60-bone body track).
+
+This is a reliable first-stage association between motion resources and body-track families, but **it is not yet the recovered named skeleton hierarchy**. Bone count alone is not enough to declare two rigs interchangeable. The original skeleton identity, ordered bone names, parent graph, rest matrices and sockets still need to be resolved from the mobile client resources.
+
+## External tool assessment (free/open-source first)
+
+### UI package investigation
+
+- **Official FairyGUI Editor 6.1.4** is a free desktop editor distributed for Windows and macOS. Its documented authoring workflow opens `.fairy` project descriptions or source project folders; its import/export feature handles `.fairypackage` resource bundles. This is useful if the Conquer package proves to be a compatible FairyGUI package, but it is not proof that the editor can reconstruct a third-party published `.fui` binary as an editable source project.
+- **OpenFairyGUI Editor / restore tooling** is MIT-licensed and can help inspect compatible FairyGUI published packages. Its own restore limitations explicitly state that source-project semantics and XML are not guaranteed to be recoverable from published output. The package header/version must be identified before selecting a parser. Do not feed unknown binary files to a restore command blindly.
+- Decision: inspect the original `interface.fui` and `ui_main.fui` headers and companion atlas metadata first; only then choose the exact reader/editor path. No reconstructed UI asset is to be called original unless its pixels, component tree and identifiers match the extracted package.
+
+### C3 and archive tooling investigation
+
+- **C3 View Studio v1.0** is a community Windows viewer for legacy Conquer C3 assets (character, monster, NPC, item, effect and mount viewing). It is an old, closed-source viewer and does not document named skeleton hierarchy export or mobile-client compatibility. It may be used only as a visual cross-check if it accepts the resource generation; it is not the hierarchy-recovery tool.
+- **C3Studio** is a separate WPF/MonoGame Windows viewer/parser for C3 assets and INI data. It is useful for visual comparison and checking C3 model/motion decoding, but its public description does not establish complete mobile skeleton parent/name recovery.
+- **Dragon UnPACKer 5.7** is a free/open-source Windows archive explorer with plugin-based extraction and HyperRipper. Its documented formats/features do not establish support for the Conquer mobile TQ/WDB/TPI package variants. Treat it as a generic archive/asset scanner, not a confirmed Conquer extractor.
+- **Blender + Godot 4.3 glTF importer/retargeting** are the downstream rig inspection and conversion stage, not the source decoder. Godot requires matching both bone names and rest poses for shared animations; same bone names alone are insufficient.
+
+### Input availability and next executable gate
+
+The prior audit notebook records the original `extracted-assets-001.zip` as a 842,723,106-byte file in the user's Google Drive and explicitly says it was not uploaded to the repository. The current working session has the audit/catalog derivatives but not the original ZIP bytes. Therefore the original `.fui`, `.ani`, `.ini`, C3 and APK assets cannot be honestly claimed as extracted in this pass.
+
+Next gate: obtain the exact original archive bytes in the active analysis workspace, verify its size and SHA-256, inventory the APK/resource package versions, then extract and inspect:
+`interface.fui`, `ui_main.fui`, their atlas pages, `interface_ar.ani`, `control_ar.ani`, `3dskeleton.ini`, `3dobjprop.ini`, `bodymotiontrans.ini`, `3DMotion.dbc`, and representative C3 body/motion pairs.
+
+No guessed UI icons, skeleton names, parent links, transformation skill IDs or animation mappings are to be committed as original data.
