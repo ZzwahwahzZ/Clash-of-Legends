@@ -328,7 +328,7 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-  # Full device smoke and source-resource audits are enabled for manual dispatches and [audit-packs] pushes (including paired Twin City DMAP/PUX sampling).
+  # Full device smoke and source-resource audits are enabled for manual dispatches and [audit-packs] pushes (including paired Twin City DMAP/PUX payloads).
   android-emulator-smoke:
     name: Android 13 Emulator - Player Experience Smoke Test
     needs: android-apk
