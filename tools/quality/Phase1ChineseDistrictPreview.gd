@@ -17,22 +17,52 @@ func _run() -> void:
     environment.background_mode = Environment.BG_SKY
     var sky := Sky.new()
     var sky_material := ProceduralSkyMaterial.new()
-    sky_material.sky_top_color = Color(0.12, 0.19, 0.29)
-    sky_material.sky_horizon_color = Color(0.63, 0.52, 0.40)
+    sky_material.sky_top_color = Color(0.015, 0.050, 0.115)
+    sky_material.sky_horizon_color = Color(0.085, 0.170, 0.225)
+    sky_material.sky_curve = 0.22
+    sky_material.sky_energy_multiplier = 0.62
+    sky_material.ground_bottom_color = Color(0.018, 0.035, 0.060)
+    sky_material.ground_horizon_color = Color(0.075, 0.125, 0.160)
+    sky_material.ground_curve = 0.18
+    sky_material.ground_energy_multiplier = 0.34
+    sky_material.sun_angle_max = 5.5
+    sky_material.sun_curve = 0.10
+    sky_material.use_debanding = true
     sky.sky_material = sky_material
+    sky.radiance_size = Sky.RADIANCE_SIZE_128
+    sky.process_mode = Sky.PROCESS_MODE_INCREMENTAL
     environment.sky = sky
-    environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-    environment.ambient_light_color = Color(0.66, 0.67, 0.69)
-    environment.ambient_light_energy = 0.48
+    environment.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
+    environment.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
+    environment.background_energy_multiplier = 1.0
+    environment.ambient_light_energy = 0.78
+    environment.fog_enabled = true
+    environment.fog_light_color = Color(0.075, 0.110, 0.145)
+    environment.fog_light_energy = 0.15
+    environment.fog_density = 0.0012
+    environment.fog_sky_affect = 0.18
     environment.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+    environment.tonemap_exposure = 0.95
+    environment.adjustment_enabled = true
+    environment.adjustment_brightness = 0.99
+    environment.adjustment_contrast = 1.10
+    environment.adjustment_saturation = 1.10
     world.environment = environment
     root.add_child(world)
 
     var sun := DirectionalLight3D.new()
     sun.rotation_degrees = Vector3(-42, 28, 0)
-    sun.light_energy = 0.92
+    sun.light_color = Color(1.0, 0.56, 0.32)
+    sun.light_energy = 0.62
     sun.shadow_enabled = true
     root.add_child(sun)
+
+    var fill := DirectionalLight3D.new()
+    fill.rotation_degrees = Vector3(-18, -148, 0)
+    fill.light_color = Color(0.12, 0.25, 0.42)
+    fill.light_energy = 0.32
+    fill.shadow_enabled = false
+    root.add_child(fill)
 
     var packed := load(CITY_PATH) as PackedScene
     if packed == null:
