@@ -52,6 +52,11 @@ const keepPatterns = [
   /^JianghaiChineseArcadeShop_LOD/i,
   /^JianghaiChineseGateHouse_LOD/i,
   /^JianghaiDensity_/i,
+  /^(Avenue(Hotel|Medicine|Pawn|Tea)Blade(Backing|Text)|ClockVertical(Backing|Text)|HardwareVertical(Backing|Text)|MedicineVertical(Backing|Text)|PhotoVertical(Backing|Text)|TeaVertical(Backing|Text)|TheatreVertical(Backing|Text))$/i,
+  /^OldCityShopAwning\\d{2}(Frame[LR])?$/i,
+  /^UtilityCable\\d{2}$/i,
+  /^FactoryChimney(Band\\d+\\.0)?$/i,
+  /^FactoryGatePortal_(PierCap[LR]|Pier[LR]|Roof)$/i,
   /^JianghaiPerimeterGroundComposite$/i,
   /^JianghaiMountainMassif/i,
   /^JianghaiEnterable_/i,
@@ -69,7 +74,8 @@ const keepPatterns = [
 const selected = allNodes.filter((node) => {
   const names = [node.getName(), node.getMesh()?.getName() ?? ''];
   const combined = names.join(' ');
-  if (/FactoryGatePortal|PowerDrop|SecurityCamera/i.test(combined)) return false;
+  // Retain the authored factory entry portal; only gameplay/security-only props stay excluded.
+  if (/PowerDrop|SecurityCamera/i.test(combined)) return false;
   if (keepPatterns.some((pattern) => names.some((name) => pattern.test(name)))) return true;
   let ancestor = node.getParentNode();
   while (ancestor instanceof Node) {
