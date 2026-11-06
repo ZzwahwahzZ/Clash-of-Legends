@@ -20,6 +20,12 @@ const inventory = allNodes
   .sort((a, b) => (a.node + a.mesh).localeCompare(b.node + b.mesh));
 
 const keepPatterns = [
+  /^AuthoredStreetNetwork$/i,
+  /^JianghaiValleyEnvironment$/i,
+  /^JianghaiTenementDistrict$/i,
+  /^RedStarElectronicsFactory$/i,
+  /^GuangchangPawnshop$/i,
+  /^OldCityMarketBridge$/i,
   /^JianghaiChineseTempleHall_LOD/i,
   /^JianghaiChineseArcadeShop_LOD/i,
   /^JianghaiChineseGateHouse_LOD/i,
@@ -41,7 +47,7 @@ const keepPatterns = [
 const selected = allNodes.filter((node) => {
   const names = [node.getName(), node.getMesh()?.getName() ?? ''];
   const combined = names.join(' ');
-  if (/Factory|FactoryGatePortal|PowerDrop|SecurityCamera/i.test(combined)) return false;
+  if (/FactoryGatePortal|PowerDrop|SecurityCamera/i.test(combined)) return false;
   return keepPatterns.some((pattern) => names.some((name) => pattern.test(name)));
 });
 if (selected.length === 0) {
