@@ -36,7 +36,7 @@ for row in report.get("converted", []):
     destination.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(source, destination)
     selected.append(output)
-for name in ("motion-poc", "motion-poc-skinned", "motion-poc-vat"):
+for name in ("motion-poc", "motion-poc-skinned", "motion-poc-vat", "skeleton-poc"):
     source = full / name
     if source.is_dir():
         shutil.copytree(source, root / name)
@@ -52,9 +52,9 @@ summary = {
     "geometry_rejected_candidate_count": len(rejected_outputs),
     "geometry_rejected_candidates": rejected_outputs,
     "equipment_candidates": selected,
-    "poc_directories": [name for name in ("motion-poc", "motion-poc-skinned", "motion-poc-vat") if (root / name).exists()],
+    "poc_directories": [name for name in ("motion-poc", "motion-poc-skinned", "motion-poc-vat", "skeleton-poc") if (root / name).exists()],
     "status": "FILTERED_IMPORT_SUBSET_READY",
-    "note": "All converted GLBs remain preserved outside the Godot import scan at /tmp/c3-glb-full for this job. Only the 42 equipment candidates and animation POCs are imported to isolate importer instability."
+    "note": "All converted GLBs remain preserved outside the Godot import scan at /tmp/c3-glb-full for this job. Only the reviewed equipment candidates, animation POCs, and matched body skeleton catalog are imported to isolate importer instability."
 }
 out = Path("reports/equipment/c3-validation-subset.json")
 out.parent.mkdir(parents=True, exist_ok=True)
