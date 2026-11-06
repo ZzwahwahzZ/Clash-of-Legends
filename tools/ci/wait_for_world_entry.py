@@ -15,6 +15,17 @@ current = output_dir / "world-entry.png"
 
 for attempt in range(1, 19):
     time.sleep(10)
+    logcat = subprocess.run(
+        ["adb", "logcat", "-d", "-t", "3000"],
+        check=True,
+        capture_output=True,
+        text=True,
+        errors="replace",
+    )
+    blocked = next((line for line in logcat.stdout.splitlines() if "WORLD_ENTRY_BLOCKED:" in line), None)
+    if blocked:
+        print("ANDROID WORLD ENTRY BLOCKED BY CONTENT GATE: " + blocked, flush=True)
+        raise SystemExit(3)
     subprocess.run(
         ["adb", "shell", "screencap", "-p", "/sdcard/clash-world-entry.png"],
         check=True,
