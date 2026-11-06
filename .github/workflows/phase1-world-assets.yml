@@ -170,11 +170,14 @@ jobs:
               "SouthCrossStreet",
               "ExtractionInnerRing",
               "ExtractionOuterRing",
+              "MarketBridgeDeck",
+              "MarketEastRamp",
+              "MarketWestRamp",
           }
           missing = sorted(required - names)
           if missing:
               raise SystemExit("Required authored city content was omitted: " + ", ".join(missing))
-          if report["selected_node_count"] < 400:
+          if report["selected_node_count"] < 480:
               raise SystemExit(f"Extracted authored city is incomplete: {report['selected_node_count']} selected nodes")
           omitted_roads = [row["node"] for row in report["road_ground_candidates"] if row["node"] in required and not row["selected_by_name"]]
           if omitted_roads:
