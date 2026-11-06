@@ -155,7 +155,7 @@ func _dump_dmap_format_sample(report: Dictionary) -> void:
 		"status": "EXPORTED_FOR_BINARY_FORMAT_ANALYSIS",
 		"source_path": source_path,
 		"size_bytes": bytes.size(),
-		"header_hex_128": bytes.slice(0, mini(128, bytes.size())).hex_encode(" "),
+		"header_hex_128": bytes.slice(0, mini(128, bytes.size())).hex_encode(),
 		"artifact_path": output_path
 	}
 	print("DMAP FORMAT SAMPLE EXPORTED: ", source_path, " | bytes=", bytes.size(), " | ", output_path)
