@@ -267,6 +267,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dmap", required=True, type=Path)
     ap.add_argument("--pux", required=True, type=Path)
+    ap.add_argument("--pux-name", default="", help="Logical source filename when the exported artifact has a generic name")
     ap.add_argument("--ani", action="append", default=[], type=Path)
     ap.add_argument("--output", type=Path, required=True)
     args = ap.parse_args()
@@ -274,8 +275,9 @@ def main():
     pux = parse_pux(args.pux)
     ani = [parse_ani(p) for p in args.ani]
     embedded = Path(dmap["puzzle_path"].replace("\\", "/")).name.lower()
-    if embedded != args.pux.name.lower():
-        raise SystemExit(f"DMAP references {embedded}, supplied PUX is {args.pux.name}")
+    supplied_name = (args.pux_name or args.pux.name).lower()
+    if embedded != supplied_name:
+        raise SystemExit(f"DMAP references {embedded}, supplied PUX source is {supplied_name}")
     result = {"status": "PARSED", "dmap": dmap, "pux": pux, "ani": ani}
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
