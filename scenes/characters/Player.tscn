@@ -1,9 +1,10 @@
-[gd_scene load_steps=23 format=3 uid="uid://player001"]
+[gd_scene load_steps=24 format=3 uid="uid://player001"]
 
 [ext_resource type="Script" path="res://scripts/player/PlayerController.gd" id="1_player"]
 [ext_resource type="Script" path="res://scripts/player/FreeCamera3D.gd" id="2_camera"]
 [ext_resource type="Script" path="res://scripts/player/PlayerInventory.gd" id="3_inventory"]
 [ext_resource type="Shader" path="res://assets/shaders/weapon_glow.gdshader" id="4_shader"]
+[ext_resource type="Script" path="res://scripts/animation/C3VatCharacterAnimator.gd" id="5_vat"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
 radius = 0.5
@@ -195,3 +196,6 @@ current = true
 
 [node name="PlayerInventory" type="Node" parent="."]
 script = ExtResource("3_inventory")
+
+[node name="C3VatAnimator" type="Node" parent="."]
+script = ExtResource("5_vat")
