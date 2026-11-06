@@ -168,7 +168,7 @@ jobs:
           mkdir -p reports
           xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --path . --rendering-method gl_compatibility --script res://tools/quality/Phase1ChineseDistrictPreview.gd 2>&1 | tee reports/phase1_chinese_district_preview.log
           test -s reports/phase1_chinese_district_preview.png
-          if grep -Eq 'SCRIPT ERROR:|ERROR: Node not inside tree|Parse Error:' reports/phase1_visual_preview.log; then
+          if grep -Eq 'SCRIPT ERROR:|ERROR: Node not inside tree|Parse Error:' reports/phase1_chinese_district_preview.log; then
             echo 'Godot visual preview reported a script or scene-tree error'
             exit 1
           fi
