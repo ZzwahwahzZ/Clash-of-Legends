@@ -388,13 +388,13 @@ jobs:
             # The game is landscape (2400x1080 after orientation), so tap the
             # actual "Got it" button. adb input uses the emulator's natural 1080x2400
             # coordinate space while the captured landscape framebuffer is 2400x1080.
-            adb shell input tap 700 1500
+            adb shell input tap 1500 500
             sleep 3
             adb shell screencap -p /sdcard/clash-character-select.png
             adb pull /sdcard/clash-character-select.png emulator-evidence/character-select.png
             python3 tools/ci/compare_emulator_screens.py emulator-evidence/launch-screen.png emulator-evidence/character-select.png 700,0,1700,600
             # Enter the journey using the center of the actual start button.
-            adb shell input tap 105 1200
+            adb shell input tap 1200 980
             sleep 15
             adb shell screencap -p /sdcard/clash-world-entry.png
             adb pull /sdcard/clash-world-entry.png emulator-evidence/world-entry.png
