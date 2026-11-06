@@ -5,6 +5,7 @@ from __future__ import annotations
 import configparser
 import hashlib
 import json
+import re
 from pathlib import Path
 
 ROOT = Path.cwd()
