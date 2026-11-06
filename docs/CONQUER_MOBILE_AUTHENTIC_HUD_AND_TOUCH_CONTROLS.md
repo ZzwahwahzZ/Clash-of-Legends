@@ -70,3 +70,25 @@ The official Conquer Online Mobile guide page was opened and its actual linked g
 - The guide's kill-monsters image link was not retrievable during this review, so it is not treated as a verified full-screen HUD reference. The current visual acceptance target remains pending a directly inspectable in-game gameplay screenshot set and the original FUI/atlas resources.
 
 These references verify control semantics and the separate pathfinding panel only. They do **not** establish that the current Godot HUD visually matches the original. The existing prototype remains unaccepted until the source UI package/art can be decoded and a side-by-side screen review is completed.
+
+
+## Current Godot prototype code audit (2026-11-06)
+
+A source review of `MainHUD.tscn`, `MainHUDController.gd`, `VirtualJoystickController.gd`, and `PlayerController.gd` confirms the following gaps; these are implementation findings, not visual guesses:
+
+- The current HUD has HP/MP/XP bars, gold, a quest banner, auto-hunt/auto-loot, inventory/blacksmith/settings/travel buttons, two text-labelled skill buttons, attack/jump/mount buttons and a virtual joystick.
+- It does not yet contain a minimap node, target/target-health presentation, quick potion/item slots, a real icon-based skill hotbar, or a dedicated walk/run mode control.
+- The current skill buttons receive translated skill **names** from the skill database, not reviewed source icon textures; they remain generic text controls.
+- The current joystick sets `touch_index` on every new screen-touch press. A second finger pressing inside the joystick control can therefore take ownership from the first finger. The current release/focus reset logic does not by itself solve that ownership race.
+- The controller's movement speed currently has a base value and a mount multiplier, but no separate walk/run mode state or mode-change signal is present in the inspected script.
+- The jump button and world-tap leap are separate triggers; retain the dedicated button only as an additional accessibility action, not as the sole way to jump.
+
+## Required implementation order from this audit
+
+1. Decode and legally source the original interface layout/art and icon atlases before skinning the scene. Do not invent a visual match from the current placeholder rectangles.
+2. Add a single-owner touch capture rule to the joystick: only the first active finger may own it; ignore other finger presses until release/cancel; release only on the owning pointer; always reset on focus loss.
+3. Add a real walk/run mode state and a visible mode control, then verify joystick speed and movement animation state in both modes.
+4. Add reviewed minimap, target feedback, quick slots and icon-backed skill buttons with functional signals and cooldown/resource states.
+5. Test simultaneous joystick + skill touches, cancellation, focus loss, screen rotation, safe areas and the Redmi Note 11 aspect ratio.
+
+No code changes were made for these new audit findings in this commit. The prototype remains a prototype; these gaps must be fixed and device-tested before visual or control acceptance.
