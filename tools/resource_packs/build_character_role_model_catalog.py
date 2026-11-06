@@ -104,6 +104,8 @@ def main() -> None:
     indices = choose_sections.get("proIndex", {})
     selection_rows = []
     direct_section_joins = 0
+    source_identity_candidates = 0
+    joined_source_role_identities = 0
     for key, animation_role in sorted(choose.items()):
         slot = key.removeprefix("pro_")
         index_key = "index_" + slot
@@ -116,11 +118,34 @@ def main() -> None:
         joined_role = simple_by_section.get(role_section_key)
         if joined_role is not None:
             direct_section_joins += 1
+        # Preserve explicit class/gender tokens from the UI source separately
+        # from model resolution. A role-index join does not prove that its model
+        # parts or final profession appearance have been resolved.
+        identity_match = re.fullmatch(r"Role_(Male|Female)([A-Za-z]+)", animation_role)
+        source_identity = None
+        if identity_match:
+            source_identity_candidates += 1
+            source_identity = {
+                "gender": identity_match.group(1).lower(),
+                "class_token": identity_match.group(2),
+                "identity_source": "rolechoose.ini proAni key",
+                "identity_status": "SOURCE_LABEL_AND_ROLE_INDEX_JOINED_MODEL_ASSET_UNRESOLVED" if joined_role is not None else "SOURCE_LABEL_ONLY_ROLE_INDEX_JOIN_UNRESOLVED",
+            }
+            if joined_role is not None:
+                joined_source_role_identities += 1
+        elif animation_role.startswith("Role_"):
+            source_identity = {
+                "gender": None,
+                "class_token": animation_role.removeprefix("Role_"),
+                "identity_source": "rolechoose.ini proAni key",
+                "identity_status": "SOURCE_ROLE_LABEL_ONLY_GENDER_OR_PROFESSION_NORMALIZATION_PENDING",
+            }
         selection_rows.append({
             "slot": int(slot) if slot.isdigit() else slot,
             "animation_role": animation_role,
             "profession_index": profession_index,
             "role_section_key_candidate": role_section_key or None,
+            "source_role_identity": source_identity,
             "simple_role_join": {
                 "source_section": joined_role["source_section"],
                 "simple_object_id": joined_role["simple_object_id"],
@@ -149,6 +174,9 @@ def main() -> None:
             "blaze_motion_ids_found": sum(1 for row in role_rows if row["blaze_motion_paths"]),
             "selection_ui_slots": len(selection_rows),
             "selection_ui_direct_section_join_candidates": direct_section_joins,
+            "source_role_identity_candidates": source_identity_candidates,
+            "joined_source_role_identities": joined_source_role_identities,
+            "class_gender_mappings_approved": 0,
             "standby_motion_id_fields_found": sum(1 for row in role_rows if row["standby_motion_id"] > 0),
             "blaze_motion_id_fields_found": sum(1 for row in role_rows if row["blaze_motion_id"] > 0),
             "class_gender_mappings_approved": 0,
