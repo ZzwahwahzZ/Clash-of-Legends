@@ -87,7 +87,7 @@ func _run() -> void:
     var factor := 1.0
     city.scale = Vector3.ONE * factor
     city.position = -SOURCE_GATE_ANCHOR * factor
-    _tint_landscape(city)
+    # Keep source-authored gravel, rocky terrain and mountain materials unchanged.
     await process_frame
 
     var final_bounds := _collect_bounds(city)
