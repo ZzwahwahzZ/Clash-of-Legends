@@ -59,7 +59,11 @@ def scan_zip(zf,container,depth,rows,errors,nested_files):
             with zf.open(info) as stream:
                 rows.append(inspect_stream(stream,info.file_size,info.filename,container,depth))
             if depth < 4 and info.filename.lower().endswith((".apk",".zip",".jar")):
-                nested_files.append((info.filename,info))
+                # Keep ZipInfo references only for members owned by the outer archive.
+                # Nested ZipInfo objects belong to a different ZipFile and cannot be
+                # passed to outer.open() in the later PolyFile reporting pass.
+                if depth == 0:
+                    nested_files.append((info.filename, info))
                 try:
                     with zf.open(info) as stream, tempfile.NamedTemporaryFile(prefix="nested-archive-",suffix=Path(info.filename).suffix,delete=True) as tmp:
                         while True:
