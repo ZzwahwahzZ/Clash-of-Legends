@@ -114,6 +114,36 @@ jobs:
           All downloaded models are pinned to immutable commits. SHA-256 hashes and GLB structural inventories are in reports/phase1_world_asset_manifest.json. These remain candidate assets until Godot import, visual review, scene integration, collision review, and Android runtime checks pass.
           EOF
 
+      - name: Download and extract the licensed Chinese district
+        shell: bash
+        run: |
+          set -euo pipefail
+          CITY_COMMIT=d6a33b932e00fb9016dea407eca3f909aeaf2dcb
+          CITY_RAW="https://raw.githubusercontent.com/AetherRadar/operation-steel-tide/${CITY_COMMIT}"
+          mkdir -p /tmp/phase1-city-source assets/environment/phase1/jianghai reports
+          curl --fail --location --retry 3 "${CITY_RAW}/assets/models/jianghai_old_city/jianghai_old_city.glb" -o /tmp/phase1-city-source/jianghai_old_city.glb
+          echo "33e2176e52d538123d45abeea61464ea8e7002854a2b1d47e5c5d560ad32d17e  /tmp/phase1-city-source/jianghai_old_city.glb" | sha256sum -c -
+          curl --fail --location --retry 3 "${CITY_RAW}/LICENSE" -o assets/environment/phase1/jianghai/LICENSE-MIT.txt
+          curl --fail --location --retry 3 "${CITY_RAW}/source_art/world/jianghai_old_city/LICENSE_EVIDENCE.md" -o assets/environment/phase1/jianghai/LICENSE_EVIDENCE.md
+          curl --fail --location --retry 3 "${CITY_RAW}/source_art/world/jianghai_old_city/README.md" -o assets/environment/phase1/jianghai/README.md
+          curl --fail --location --retry 3 "${CITY_RAW}/assets/models/LICENSE.md" -o assets/environment/phase1/jianghai/THIRD_PARTY_LICENSES.md
+          cat > assets/environment/phase1/jianghai/SOURCES.md <<'EOF'
+          # Chinese district asset provenance
+
+          - Source project: https://github.com/AetherRadar/operation-steel-tide
+          - Pinned commit: d6a33b932e00fb9016dea407eca3f909aeaf2dcb
+          - Source runtime GLB: assets/models/jianghai_old_city/jianghai_old_city.glb
+          - Project composition license: MIT; retained as LICENSE-MIT.txt.
+          - The selected Chinese temple, arcade-shop, and gate-house profiles are documented as adaptations of CC0 Chinese Temple 2, CC0 Chinese Four-corner Pavilion, and the recorded CC0 Quaternius Buildings Pack. Third-party rights remain their original licenses, not relicensed as MIT.
+          - Exact source records and the retired/omitted asset list are retained in LICENSE_EVIDENCE.md and THIRD_PARTY_LICENSES.md.
+          - The extractor keeps only named Chinese district nodes and their transform ancestors; it does not redistribute the full source city.
+          - reports/phase1_chinese_district_extract.json records the exact selected nodes, geometry counts, output size, and SHA-256.
+          EOF
+          mkdir -p /tmp/phase1-gltf-tools
+          npm install --prefix /tmp/phase1-gltf-tools --no-save @gltf-transform/core @gltf-transform/extensions @gltf-transform/functions
+          cp tools/quality/extract_phase1_chinese_city.mjs /tmp/phase1-gltf-tools/extract.mjs
+          node /tmp/phase1-gltf-tools/extract.mjs /tmp/phase1-city-source/jianghai_old_city.glb assets/environment/phase1/jianghai/chinese_district.glb reports/phase1_chinese_district_extract.json
+
       - name: Import project with Godot 4.3
         uses: chickensoft-games/setup-godot@v2
         with:
@@ -136,9 +166,8 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p reports
-          xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --path . --rendering-method gl_compatibility --script res://tools/quality/Phase1AssetVisualPreview.gd 2>&1 | tee reports/phase1_visual_preview.log
-          test -s reports/phase1_world_preview.png
-          test -s reports/phase1_nature_preview.png
+          xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --path . --rendering-method gl_compatibility --script res://tools/quality/Phase1ChineseDistrictPreview.gd 2>&1 | tee reports/phase1_chinese_district_preview.log
+          test -s reports/phase1_chinese_district_preview.png
           if grep -Eq 'SCRIPT ERROR:|ERROR: Node not inside tree|Parse Error:' reports/phase1_visual_preview.log; then
             echo 'Godot visual preview reported a script or scene-tree error'
             exit 1
@@ -149,7 +178,7 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add assets/environment/phase1 reports/phase1_world_asset_manifest.json reports/phase1_world_preview.png reports/phase1_nature_preview.png
+          git add assets/environment/phase1 reports/phase1_world_asset_manifest.json reports/phase1_chinese_district_extract.json reports/phase1_chinese_district_preview.png
           git diff --cached --quiet && { echo "No asset changes to commit"; exit 0; }
           git commit -m "Acquire and audit phase 1 production world assets"
           git push origin HEAD:stage/phase1-world-assets
@@ -163,8 +192,9 @@ jobs:
             reports/phase1_world_asset_manifest.json
             reports/phase1_godot_import.log
             reports/phase1_visual_preview.log
-            reports/phase1_world_preview.png
-            reports/phase1_nature_preview.png
+            reports/phase1_chinese_district_extract.json
+            reports/phase1_chinese_district_preview.log
+            reports/phase1_chinese_district_preview.png
             assets/environment/phase1/SOURCES.md
           if-no-files-found: warn
           retention-days: 30
