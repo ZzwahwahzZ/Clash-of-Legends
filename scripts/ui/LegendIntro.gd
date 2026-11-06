@@ -285,8 +285,19 @@ func _request_world_entry() -> void:
 	if manager == null:
 		_enter_world()
 		return
+	if manager.has_method("wait_for_bootstrap"):
+		await manager.wait_for_bootstrap()
 	if manager.packages.is_empty():
 		await manager.refresh_manifest()
+	# Validate the production character catalog before downloading optional packs.
+	# The current catalog is expected in the bundled world/model baseline; if it
+	# cannot provide verified class models, a large first-run download cannot fix it.
+	var missing_classes := _missing_verified_character_classes()
+	if not missing_classes.is_empty():
+		var detail := "، ".join(PackedStringArray(missing_classes))
+		print("WORLD_ENTRY_PREFLIGHT_BLOCKED_BEFORE_DOWNLOAD: " + detail)
+		_show_production_content_block(missing_classes)
+		return
 	if manager.get_missing_package_count() <= 0:
 		_enter_world()
 		return
@@ -354,7 +365,7 @@ func _on_aggregate_download_progress(received: int, total: int, _completed: int,
 
 func _missing_verified_character_classes() -> Array[String]:
 	var missing: Array[String] = []
-	if not GameContentDatabase or not AssetCatalog:
+	if not GameContentDatabase or not AssetCatalog or AssetCatalog.catalog_version <= 0 or AssetCatalog.assets_by_category.is_empty():
 		return ["resource catalog unavailable"]
 	for class_id in GameContentDatabase.get_selectable_class_ids():
 		if AssetCatalog.get_verified_character_model_index(class_id) < 0:
