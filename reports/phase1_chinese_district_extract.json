@@ -2500,230 +2500,6 @@
       "selected_by_name": false
     },
     {
-      "node": "AvenueHotelBladeBacking",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "AvenueHotelBladeBackingMesh",
-      "translation": [
-        -11.600000381469727,
-        4.199999809265137,
-        -31.5
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "AvenueHotelBladeText",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "AvenueHotelBladeTextCurve",
-      "translation": [
-        -11.600000381469727,
-        4.199999809265137,
-        -31.40999984741211
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "AvenueMedicineBladeBacking",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "AvenueMedicineBladeBackingMesh",
-      "translation": [
-        11.600000381469727,
-        4.300000190734863,
-        -45
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "AvenueMedicineBladeText",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "AvenueMedicineBladeTextCurve",
-      "translation": [
-        11.600000381469727,
-        4.300000190734863,
-        -44.90999984741211
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "AvenuePawnBladeBacking",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "AvenuePawnBladeBackingMesh",
-      "translation": [
-        -11.600000381469727,
-        4.150000095367432,
-        9.5
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "AvenuePawnBladeText",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "AvenuePawnBladeTextCurve",
-      "translation": [
-        -11.600000381469727,
-        4.150000095367432,
-        9.59000015258789
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "AvenueTeaBladeBacking",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "AvenueTeaBladeBackingMesh",
-      "translation": [
-        11.600000381469727,
-        4.349999904632568,
-        -5
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "AvenueTeaBladeText",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "AvenueTeaBladeTextCurve",
-      "translation": [
-        11.600000381469727,
-        4.349999904632568,
-        -4.909999847412109
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "ClockVerticalBacking",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "ClockVerticalBackingMesh",
-      "translation": [
-        -13.199999809265137,
-        4.599999904632568,
-        39
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "ClockVerticalText",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "ClockVerticalTextCurve",
-      "translation": [
-        -13.289999961853027,
-        4.599999904632568,
-        39
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "HardwareVerticalBacking",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "HardwareVerticalBackingMesh",
-      "translation": [
-        13.800000190734863,
-        4.800000190734863,
-        -43
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "HardwareVerticalText",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "HardwareVerticalTextCurve",
-      "translation": [
-        13.890000343322754,
-        4.800000190734863,
-        -43
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MedicineVerticalBacking",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "MedicineVerticalBackingMesh",
-      "translation": [
-        -13,
-        4.800000190734863,
-        8
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "MedicineVerticalText",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "MedicineVerticalTextCurve",
-      "translation": [
-        -13.09000015258789,
-        4.800000190734863,
-        8
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
       "node": "OldCityShopAwning00",
       "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
       "mesh": "OldCityShopAwning00Mesh",
@@ -3012,102 +2788,6 @@
       "selected_by_name": false
     },
     {
-      "node": "PhotoVerticalBacking",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "PhotoVerticalBackingMesh",
-      "translation": [
-        13,
-        4.599999904632568,
-        1
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "PhotoVerticalText",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "PhotoVerticalTextCurve",
-      "translation": [
-        13.09000015258789,
-        4.599999904632568,
-        1
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "TeaVerticalBacking",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "TeaVerticalBackingMesh",
-      "translation": [
-        13.199999809265137,
-        4.699999809265137,
-        34
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "TeaVerticalText",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "TeaVerticalTextCurve",
-      "translation": [
-        13.289999961853027,
-        4.699999809265137,
-        34
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "TheatreVerticalBacking",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "TheatreVerticalBackingMesh",
-      "translation": [
-        -13.800000190734863,
-        5,
-        -37
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "TheatreVerticalText",
-      "parent_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict",
-      "mesh": "TheatreVerticalTextCurve",
-      "translation": [
-        -13.890000343322754,
-        5,
-        -37
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
       "node": "UtilityCable00",
       "parent_path": "JianghaiOldCityAuthoredScene/OverheadUtilityWires",
       "mesh": "UtilityCable00Curve",
@@ -3163,22 +2843,6 @@
         0,
         0,
         0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "FactoryChimney",
-      "parent_path": "JianghaiOldCityAuthoredScene/RedStarElectronicsFactory",
-      "mesh": "FactoryChimneyMesh",
-      "translation": [
-        108,
-        0,
-        16
       ],
       "scale": [
         1,
@@ -3278,86 +2942,6 @@
       ],
       "scale": [
         1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "FactoryGatePortal_PierCapL",
-      "parent_path": "JianghaiOldCityAuthoredScene/RedStarElectronicsFactory",
-      "mesh": "Cube.290",
-      "translation": [
-        81.82720184326172,
-        4.349999904632568,
-        -7.924499988555908
-      ],
-      "scale": [
-        0.3499999940395355,
-        1.399999976158142,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "FactoryGatePortal_PierCapR",
-      "parent_path": "JianghaiOldCityAuthoredScene/RedStarElectronicsFactory",
-      "mesh": "Cube.291",
-      "translation": [
-        90.17279815673828,
-        4.349999904632568,
-        -7.924499988555908
-      ],
-      "scale": [
-        0.3499999940395355,
-        1.399999976158142,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "FactoryGatePortal_PierL",
-      "parent_path": "JianghaiOldCityAuthoredScene/RedStarElectronicsFactory",
-      "mesh": "PawnshopGatePierLMesh",
-      "translation": [
-        81.82720184326172,
-        2.200000047683716,
-        -7.924499988555908
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "FactoryGatePortal_PierR",
-      "parent_path": "JianghaiOldCityAuthoredScene/RedStarElectronicsFactory",
-      "mesh": "PawnshopGatePierRMesh",
-      "translation": [
-        90.17279815673828,
-        2.200000047683716,
-        -7.924499988555908
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "FactoryGatePortal_Roof",
-      "parent_path": "JianghaiOldCityAuthoredScene/RedStarElectronicsFactory",
-      "mesh": "PawnshopGateRoofMesh.001",
-      "translation": [
-        86,
-        0,
-        -7.924499988555908
-      ],
-      "scale": [
-        1.1405318975448608,
         1,
         1
       ],
@@ -3608,14 +3192,24 @@
   "source_glb": "assets/models/jianghai_old_city/jianghai_old_city.glb",
   "source_license": "MIT project composition; third-party source components remain under their recorded licenses in LICENSE_EVIDENCE.md",
   "input_bytes": 63204100,
-  "output_bytes": 52432344,
-  "output_sha256": "67c93103d8b9272473db194c448d2fc879fa937b69b4608f632a088d813a9303",
-  "selected_node_count": 488,
+  "output_bytes": 54957104,
+  "output_sha256": "d913fddb8a6c8d3c509a99456d30ac7d2c6e30f4dde86002a9054f50603211dd",
+  "selected_node_count": 514,
   "selected_node_names": [
     "AuthoredStreetNetwork",
+    "AvenueHotelBladeBacking",
+    "AvenueHotelBladeText",
+    "AvenueMedicineBladeBacking",
+    "AvenueMedicineBladeText",
+    "AvenuePawnBladeBacking",
+    "AvenuePawnBladeText",
+    "AvenueTeaBladeBacking",
+    "AvenueTeaBladeText",
     "CentralAvenue",
     "CentralAvenueCurbE",
     "CentralAvenueCurbW",
+    "ClockVerticalBacking",
+    "ClockVerticalText",
     "CrossStreetCurb-106.3",
     "CrossStreetCurb-13.8",
     "CrossStreetCurb-29.4",
@@ -3639,6 +3233,7 @@
     "ExtractionOuterRing",
     "ExtractionSquare",
     "FactoryApproach",
+    "FactoryChimney",
     "FactoryEntryFacade_DoorFrame",
     "FactoryEntryFacade_Wall_East_00",
     "FactoryEntryFacade_Wall_East_01",
@@ -3649,6 +3244,11 @@
     "FactoryEntryFacade_Wall_West_01",
     "FactoryEntryFacade_Wall_West_02",
     "FactoryEntryFacade_Wall_West_03",
+    "FactoryGatePortal_PierCapL",
+    "FactoryGatePortal_PierCapR",
+    "FactoryGatePortal_PierL",
+    "FactoryGatePortal_PierR",
+    "FactoryGatePortal_Roof",
     "FarEastResidence",
     "FarEastSouthResidence",
     "FarWestNorthResidence",
@@ -3657,6 +3257,8 @@
     "GuangchangPawnshop",
     "GuangchangPawnshopDangPlaqueText",
     "GuangchangPawnshopSignText",
+    "HardwareVerticalBacking",
+    "HardwareVerticalText",
     "JianghaiArtPass_EastAircon00",
     "JianghaiArtPass_EastAircon01",
     "JianghaiArtPass_EastAircon02",
@@ -3889,6 +3491,8 @@
     "MarketRail_-128.05_4.85",
     "MarketRail_-128.05_5.45",
     "MarketWestRamp",
+    "MedicineVerticalBacking",
+    "MedicineVerticalText",
     "NorthCrossStreet",
     "NortheastGateHouse",
     "NorthwestGateHouse",
@@ -4007,6 +3611,8 @@
     "PawnshopWestWall_05",
     "PawnshopWestWall_06",
     "PawnshopWestWall_07",
+    "PhotoVerticalBacking",
+    "PhotoVerticalText",
     "RainPuddle00",
     "RainPuddle01",
     "RainPuddle02",
@@ -4050,6 +3656,10 @@
     "StreetLamp10Lens",
     "StreetLamp10Post",
     "StreetLamp10Shade",
+    "TeaVerticalBacking",
+    "TeaVerticalText",
+    "TheatreVerticalBacking",
+    "TheatreVerticalText",
     "WeatheredCargoCrate00",
     "WeatheredCargoCrate01",
     "WeatheredCargoCrate02",
@@ -4101,15 +3711,15 @@
     "WestTheatreHouse",
     "WestTheatreRow02"
   ],
-  "retained_node_count": 490,
-  "mesh_node_count": 475,
-  "unique_mesh_count": 187,
-  "primitive_count": 373,
-  "unique_triangles": 988851,
-  "instanced_triangles": 2902255,
-  "material_count": 82,
-  "texture_count": 112,
-  "embedded_image_count": 112,
+  "retained_node_count": 516,
+  "mesh_node_count": 501,
+  "unique_mesh_count": 213,
+  "primitive_count": 399,
+  "unique_triangles": 1076537,
+  "instanced_triangles": 2989941,
+  "material_count": 88,
+  "texture_count": 116,
+  "embedded_image_count": 116,
   "source_node_inventory": [
     {
       "node": "GrandHotelSecurityTerminalVisual",
@@ -8701,7 +8311,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "AvenueHotelBladeText",
@@ -8717,7 +8327,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "AvenueMedicineBladeBacking",
@@ -8733,7 +8343,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "AvenueMedicineBladeText",
@@ -8749,7 +8359,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "AvenuePawnBladeBacking",
@@ -8765,7 +8375,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "AvenuePawnBladeText",
@@ -8781,7 +8391,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "AvenueTeaBladeBacking",
@@ -8797,7 +8407,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "AvenueTeaBladeText",
@@ -8813,7 +8423,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "ClockVerticalBacking",
@@ -8829,7 +8439,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "ClockVerticalText",
@@ -8845,7 +8455,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "EastGateRow00",
@@ -9165,7 +8775,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "HardwareVerticalText",
@@ -9181,7 +8791,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "JianghaiCleared_MarketRearHouseEast",
@@ -10301,7 +9911,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "MedicineVerticalText",
@@ -10317,7 +9927,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "NortheastGateHouse",
@@ -10861,7 +10471,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "PhotoVerticalText",
@@ -10877,7 +10487,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "TeaVerticalBacking",
@@ -10893,7 +10503,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "TeaVerticalText",
@@ -10909,7 +10519,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "TheatreVerticalBacking",
@@ -10925,7 +10535,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "TheatreVerticalText",
@@ -10941,7 +10551,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "WeatheredRollerShop00",
@@ -12525,7 +12135,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "FactoryChimneyBand12.0",
@@ -12797,7 +12407,7 @@
         1.399999976158142,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "FactoryGatePortal_PierCapR",
@@ -12813,7 +12423,7 @@
         1.399999976158142,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "FactoryGatePortal_PierL",
@@ -12829,7 +12439,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "FactoryGatePortal_PierR",
@@ -12845,7 +12455,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "FactoryGatePortal_Roof",
@@ -12861,7 +12471,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "FactoryLoadingGuide00",
