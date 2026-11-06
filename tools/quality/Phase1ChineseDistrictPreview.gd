@@ -152,7 +152,86 @@ func _run() -> void:
         " deck=", bridge_deck.name, " east_ramp=", east_ramp.name, " west_ramp=", west_ramp.name)
     await _capture("reports/phase1_market_bridge_detail.png")
     print("CHINESE DISTRICT PREVIEWS SAVED full-world, authored-district, gate-detail, and market-bridge-detail; full_span=", span, " authored_span=", authored_span)
+    await _run_main_game_integration()
     quit(0)
+
+
+func _run_main_game_integration() -> void:
+    # Audit-only composition: do not modify or delete the source MainGame nodes.
+    root.visible = false
+    for camera_node in root.find_children("*", "Camera3D", true, false):
+        (camera_node as Camera3D).current = false
+    var main_packed := load("res://scenes/core/MainGame.tscn") as PackedScene
+    var city_packed := load(CITY_PATH) as PackedScene
+    if main_packed == null or city_packed == null:
+        push_error("MainGame or Phase 1 city failed to load for integration audit.")
+        quit(6)
+        return
+    var game := main_packed.instantiate() as Node3D
+    if game == null:
+        push_error("MainGame root is not Node3D.")
+        quit(6)
+        return
+    get_root().add_child(game)
+    await process_frame
+    var old_ground := game.get_node_or_null("Ground")
+    var old_city := game.get_node_or_null("TwinCity")
+    if old_ground:
+        old_ground.visible = false
+    if old_city:
+        old_city.visible = false
+    var canvas := game.get_node_or_null("CanvasLayer")
+    if canvas:
+        canvas.visible = false
+    for camera_node in game.find_children("*", "Camera3D", true, false):
+        (camera_node as Camera3D).current = false
+    var city := city_packed.instantiate() as Node3D
+    if city == null:
+        push_error("Phase 1 city root is not Node3D.")
+        quit(6)
+        return
+    city.name = "Phase1ChineseDistrict_AuditOnly"
+    city.position = -SOURCE_GATE_ANCHOR
+    game.add_child(city)
+    await process_frame
+    var player := game.get_node_or_null("Player")
+    var travel := game.get_node_or_null("WorldTravelManager")
+    var bridge := city.find_child("MarketBridgeDeck", true, false) as MeshInstance3D
+    var east_ramp := city.find_child("MarketEastRamp", true, false)
+    var west_ramp := city.find_child("MarketWestRamp", true, false)
+    var street := city.find_child("CentralAvenue", true, false)
+    if player == null or travel == null or bridge == null or east_ramp == null or west_ramp == null or street == null:
+        push_error("Integration audit missing Player, WorldTravelManager, street, bridge deck, or bridge ramps.")
+        quit(7)
+        return
+    print("PHASE1 MAIN GAME AUDIT: player=", player.name,
+        " npc_count=", game.find_children("*", "NPCBase", true, false).size(),
+        " bridge_world_position=", bridge.global_position,
+        " street=", street.name, " travel_manager=", travel.name)
+    var gate_camera := Camera3D.new()
+    gate_camera.fov = 62.0
+    gate_camera.position = Vector3(18.0, 12.0, 28.0)
+    game.add_child(gate_camera)
+    gate_camera.look_at(Vector3(0.0, 3.0, 0.0), Vector3.UP)
+    gate_camera.current = true
+    await _capture("reports/phase1_maingame_gate_integration.png")
+    var bridge_camera := Camera3D.new()
+    bridge_camera.fov = 62.0
+    var bridge_center := bridge.global_position
+    bridge_camera.position = bridge_center + Vector3(30.0, 22.0, 30.0)
+    game.add_child(bridge_camera)
+    bridge_camera.look_at(bridge_center, Vector3.UP)
+    bridge_camera.current = true
+    await _capture("reports/phase1_maingame_bridge_integration.png")
+    var avenue_target := Vector3(86.0, 3.0, 45.0)
+    var avenue_camera := Camera3D.new()
+    avenue_camera.fov = 68.0
+    avenue_camera.position = avenue_target + Vector3(26.0, 18.0, 30.0)
+    game.add_child(avenue_camera)
+    avenue_camera.look_at(avenue_target, Vector3.UP)
+    avenue_camera.current = true
+    await _capture("reports/phase1_maingame_street_integration.png")
+    print("PHASE1 MAIN GAME VISUAL AUDIT SAVED: gate, bridge, and avenue. Legacy blockout nodes were hidden only in this disposable audit instance.")
 
 func _collect_authored_city_bounds(node: Node) -> AABB:
     var accumulator := {
