@@ -21,6 +21,11 @@ const inventory = allNodes
 
 const keepPatterns = [
   /^AuthoredStreetNetwork$/i,
+  /^FactoryEntryFacade_/i,
+  /^JianghaiArtPass_(?!.*Camera)/i,
+  /^JianghaiExpansion_(Bicycle|FactoryHandTruck|StreetLife|UrbanFacades)/i,
+  /^JianghaiInteriorShell_/i,
+  /^West(ClockRow01|MedicineRow02|TheatreRow02)$/i,
   /^JianghaiValleyEnvironment$/i,
   /^JianghaiTenementDistrict$/i,
   /^RedStarElectronicsFactory$/i,
