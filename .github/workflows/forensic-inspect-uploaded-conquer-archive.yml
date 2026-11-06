@@ -1,0 +1,192 @@
+name: Forensic inspect uploaded original Conquer archive
+
+on:
+  push:
+    branches:
+      - tools/colab-drive-asset-transfer
+    paths:
+      - .github/workflows/forensic-inspect-uploaded-conquer-archive.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: original-conquer-archive-forensics
+  cancel-in-progress: false
+
+jobs:
+  inspect-original-archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Download repository sources
+        uses: actions/checkout@v4
+
+      - name: Download and verify the exact uploaded archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/original-conquer reports/original-conquer
+          curl --fail --location --retry 5 --retry-all-errors \
+            'https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/untagged-4406b3bcf98aaafd485f/ConquerOnline.zip' \
+            -o build/original-conquer/ConquerOnline.zip
+          echo 'b1c6958109a07c237631943fc0442d3161563d89e1020b143d95437ba9a6fdb0  build/original-conquer/ConquerOnline.zip' | sha256sum -c -
+          stat -c 'archive_bytes=%s' build/original-conquer/ConquerOnline.zip
+          unzip -tq build/original-conquer/ConquerOnline.zip
+
+      - name: Inventory archive and inspect nested APK resource indexes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import collections, hashlib, json, os, re, zipfile, tempfile
+          from pathlib import Path
+
+          archive = Path("build/original-conquer/ConquerOnline.zip")
+          out = Path("reports/original-conquer")
+          out.mkdir(parents=True, exist_ok=True)
+          needles = re.compile(
+              r"(skeleton|bone|3dskeleton|3dobjprop|rolepart|3dobj|3dmotion|"
+              r"bodymotion|motion|\.ani$|\.c3$|\.fui$|\.tpi$|\.tpd$|"
+              r"\.wdb$|\.dbc$|texture|atlas|interface|ui[_/.-]|sound|audio|"
+              r"effect|weapon|mount|monster|npc|\.pvr$)",
+              re.I
+          )
+          text_ext = {".ini",".xml",".json",".txt",".cfg",".lua",".dat",".csv",".manifest"}
+          report = {
+              "archive": archive.name,
+              "archive_bytes": archive.stat().st_size,
+              "archive_sha256": hashlib.sha256(archive.read_bytes()).hexdigest(),
+              "zip_test": "passed",
+              "outer_entries": [],
+              "outer_extension_counts": {},
+              "nested_archives": [],
+              "resource_candidates": [],
+              "text_config_samples": [],
+              "apk_entry_summaries": [],
+          }
+          ext_counts = collections.Counter()
+          candidate_count = 0
+
+          def add_entry(scope, name, size, crc=None):
+              global candidate_count
+              ext = Path(name).suffix.lower() or "[no extension]"
+              ext_counts[ext] += 1
+              row = {"scope": scope, "path": name, "size_bytes": size}
+              if crc is not None:
+                  row["crc32"] = f"{crc:08x}"
+              report["outer_entries"].append(row)
+              if needles.search(name):
+                  report["resource_candidates"].append(row)
+              return ext
+
+          with zipfile.ZipFile(archive) as z:
+              bad = z.testzip()
+              if bad:
+                  raise RuntimeError(f"CRC failure: {bad}")
+              infos = z.infolist()
+              for info in infos:
+                  add_entry("archive", info.filename, info.file_size, info.CRC)
+              report["outer_extension_counts"] = dict(sorted(ext_counts.items()))
+              report["outer_entry_count"] = len(infos)
+              report["outer_uncompressed_bytes"] = sum(i.file_size for i in infos)
+
+              nested = [i for i in infos if Path(i.filename).suffix.lower() in {".apk",".zip",".obb",".pak"}]
+              for ni in nested:
+                  item = {"path": ni.filename, "size_bytes": ni.file_size}
+                  report["nested_archives"].append(item)
+                  if Path(ni.filename).suffix.lower() != ".apk":
+                      continue
+                  with tempfile.NamedTemporaryFile(suffix=".apk") as tmp:
+                      with z.open(ni) as src, open(tmp.name, "wb") as dst:
+                          while True:
+                              b = src.read(1024*1024)
+                              if not b: break
+                              dst.write(b)
+                      try:
+                          with zipfile.ZipFile(tmp.name) as apk:
+                              bad_apk = apk.testzip()
+                              names = apk.infolist()
+                              hits = []
+                              local_ext = collections.Counter()
+                              config_samples = []
+                              for ai in names:
+                                  ext = Path(ai.filename).suffix.lower() or "[no extension]"
+                                  local_ext[ext] += 1
+                                  if needles.search(ai.filename):
+                                      hits.append({"path": ai.filename, "size_bytes": ai.file_size, "crc32": f"{ai.CRC:08x}"})
+                                  if ext in text_ext and ai.file_size <= 2*1024*1024 and len(config_samples) < 120:
+                                      try:
+                                          raw = apk.read(ai)
+                                          sample = raw[:200000].decode("utf-8-sig", errors="replace")
+                                          if sum(ch.isprintable() or ch in "\r\n\t" for ch in sample[:5000]) / max(1,len(sample[:5000])) > .72:
+                                              lines = sample.splitlines()
+                                              sections = sum(1 for x in lines if re.match(r"\s*\[[^]]+\]",x))
+                                              keys = sum(1 for x in lines if re.match(r"\s*[\w.-]+\s*=",x))
+                                              config_samples.append({
+                                                  "path": ai.filename, "bytes": ai.file_size,
+                                                  "encoding_preview": "utf-8-replacement",
+                                                  "line_count": len(lines), "section_count": sections,
+                                                  "key_value_line_count": keys,
+                                                  "sample": "\n".join(lines[:18])[:3500]
+                                              })
+                                      except Exception:
+                                          pass
+                              report["apk_entry_summaries"].append({
+                                  "apk_path": ni.filename, "apk_bytes": ni.file_size,
+                                  "zip_test": "passed" if not bad_apk else f"failed:{bad_apk}",
+                                  "entry_count": len(names),
+                                  "extension_counts": dict(sorted(local_ext.items())),
+                                  "resource_candidates": hits[:3000],
+                                  "resource_candidate_count": len(hits),
+                                  "config_samples": config_samples
+                              })
+                      except zipfile.BadZipFile as e:
+                          report["apk_entry_summaries"].append({"apk_path": ni.filename, "error": str(e)})
+
+          report["resource_candidate_count"] = len(report["resource_candidates"])
+          report["text_config_sample_count"] = sum(len(x.get("config_samples",[])) for x in report["apk_entry_summaries"])
+          (out/"archive-forensic-inventory.json").write_text(json.dumps(report, ensure_ascii=False, indent=2)+"\n", encoding="utf-8")
+          with (out/"archive-file-index.csv").open("w", encoding="utf-8") as f:
+              f.write("scope,path,size_bytes,crc32\n")
+              for x in report["outer_entries"]:
+                  f.write(",".join('"'+str(x.get(k,"")).replace('"','""')+'"' for k in ("scope","path","size_bytes","crc32"))+"\n")
+          with (out/"resource-candidate-index.txt").open("w", encoding="utf-8") as f:
+              for x in report["resource_candidates"]:
+                  f.write(f'{x["size_bytes"]:>12}  {x["path"]}\n')
+              for apk in report["apk_entry_summaries"]:
+                  f.write(f'\n### APK: {apk["apk_path"]}\n')
+                  for x in apk.get("resource_candidates",[]):
+                      f.write(f'{x["size_bytes"]:>12}  {x["path"]}\n')
+          summary = {
+              "archive_bytes": report["archive_bytes"],
+              "archive_sha256": report["archive_sha256"],
+              "outer_entry_count": report["outer_entry_count"],
+              "outer_uncompressed_bytes": report["outer_uncompressed_bytes"],
+              "outer_extension_counts": report["outer_extension_counts"],
+              "nested_archives": report["nested_archives"],
+              "resource_candidate_count": report["resource_candidate_count"],
+              "apk_summaries": [{
+                  "apk_path": a["apk_path"], "apk_bytes": a.get("apk_bytes"),
+                  "entry_count": a.get("entry_count"),
+                  "resource_candidate_count": a.get("resource_candidate_count"),
+                  "extension_counts": a.get("extension_counts"),
+                  "config_sample_count": len(a.get("config_samples",[])),
+                  "zip_test": a.get("zip_test"), "error": a.get("error")
+              } for a in report["apk_entry_summaries"]]
+          }
+          (out/"SUMMARY.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2)+"\n", encoding="utf-8")
+          print(json.dumps(summary, ensure_ascii=False, indent=2))
+          if report["outer_entry_count"] == 0:
+              raise SystemExit("Archive is empty.")
+          PY
+
+      - name: Upload forensic inventory for follow-on skeleton, motion, UI and asset parsing
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Original-Conquer-Archive-Forensic-Inventory
+          path: reports/original-conquer/
+          if-no-files-found: error
+          retention-days: 30
