@@ -1,87 +1,16 @@
 {
-  "audit_method": "World-space mesh AABBs; XZ overlap >0.35 units; structural overlap requires Y overlap >0.35 and volume >0.5; street overlap is separately reported as XZ area. Audit-only clones are excluded from authored geometry.",
+  "audit_method": "World-space transformed mesh AABBs; building overlap requires XZ overlap >0.35, Y overlap >0.35 and volume >0.5. Road and terrain overlaps are classified separately. Any building or road overlap rejects the candidate pending visual review.",
   "authored_mesh_count": 553,
   "candidate_bounds": [
     {
-      "authored_structure_overlap_count": 3,
-      "authored_structure_overlaps": [
+      "authored_building_overlap_count": 2,
+      "authored_building_overlaps": [
         {
-          "bounds": {
-            "center": [
-              31.0134391784668,
-              3.38947248458862,
-              166.576263427734
-            ],
-            "max": [
-              40.4441070556641,
-              8.0277214050293,
-              171.79443359375
-            ],
-            "min": [
-              21.5827713012695,
-              -1.24877643585205,
-              161.35807800293
-            ],
-            "size": [
-              18.8613357543945,
-              9.27649784088135,
-              10.4363555908203
-            ]
-          },
           "name": "OuterWestClockResidence",
           "overlap_volume": 1165.09,
           "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiTenementDistrict/OuterWestClockResidence"
         },
         {
-          "bounds": {
-            "center": [
-              85.9894409179688,
-              -5.15753936767578,
-              62.71826171875
-            ],
-            "max": [
-              686.855346679688,
-              3.76018524169922,
-              662.915893554688
-            ],
-            "min": [
-              -514.87646484375,
-              -14.0752639770508,
-              -537.479370117188
-            ],
-            "size": [
-              1201.73181152344,
-              17.83544921875,
-              1200.39526367188
-            ]
-          },
-          "name": "JianghaiPerimeterGroundComposite",
-          "overlap_volume": 1102.98,
-          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/JianghaiPerimeterGroundComposite"
-        },
-        {
-          "bounds": {
-            "center": [
-              84.5016479492188,
-              9.81086158752441,
-              178.076171875
-            ],
-            "max": [
-              129.013916015625,
-              11.7490158081055,
-              194.601318359375
-            ],
-            "min": [
-              39.9893684387207,
-              7.87270736694336,
-              161.551010131836
-            ],
-            "size": [
-              89.0245513916016,
-              3.87630844116211,
-              33.0503082275391
-            ]
-          },
           "name": "UtilityCable00",
           "overlap_volume": 32.94,
           "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/OverheadUtilityWires/UtilityCable00"
@@ -103,70 +32,35 @@
         -1.24877643585205,
         162.081298828125
       ],
+      "placement_status": "REJECT",
       "size": [
         12.976583480835,
         13.8969593048096,
         16.9691467285156
       ],
       "street_network_overlap_count": 0,
-      "street_network_overlaps": []
+      "street_network_overlaps": [],
+      "terrain_overlap_count": 2,
+      "terrain_overlaps": [
+        {
+          "name": "JianghaiPerimeterGroundComposite",
+          "overlap_xz_area": 220.2,
+          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/JianghaiPerimeterGroundComposite"
+        },
+        {
+          "name": "OldCityFoundation",
+          "overlap_xz_area": 220.2,
+          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/OldCityFoundation"
+        }
+      ]
     },
     {
-      "authored_structure_overlap_count": 2,
-      "authored_structure_overlaps": [
+      "authored_building_overlap_count": 1,
+      "authored_building_overlaps": [
         {
-          "bounds": {
-            "center": [
-              31.0134391784668,
-              3.38947248458862,
-              166.576263427734
-            ],
-            "max": [
-              40.4441070556641,
-              8.0277214050293,
-              171.79443359375
-            ],
-            "min": [
-              21.5827713012695,
-              -1.24877643585205,
-              161.35807800293
-            ],
-            "size": [
-              18.8613357543945,
-              9.27649784088135,
-              10.4363555908203
-            ]
-          },
           "name": "OuterWestClockResidence",
           "overlap_volume": 79.63,
           "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiTenementDistrict/OuterWestClockResidence"
-        },
-        {
-          "bounds": {
-            "center": [
-              85.9894409179688,
-              -5.15753936767578,
-              62.71826171875
-            ],
-            "max": [
-              686.855346679688,
-              3.76018524169922,
-              662.915893554688
-            ],
-            "min": [
-              -514.87646484375,
-              -14.0752639770508,
-              -537.479370117188
-            ],
-            "size": [
-              1201.73181152344,
-              17.83544921875,
-              1200.39526367188
-            ]
-          },
-          "name": "JianghaiPerimeterGroundComposite",
-          "overlap_volume": 532.23,
-          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/JianghaiPerimeterGroundComposite"
         }
       ],
       "candidate": "AUDIT_ONLY_WestNorthHall",
@@ -185,70 +79,35 @@
         1.32941555976868,
         163.121322631836
       ],
+      "placement_status": "REJECT",
       "size": [
         14.6851444244385,
         13.7703056335449,
         14.9098663330078
       ],
       "street_network_overlap_count": 0,
-      "street_network_overlaps": []
+      "street_network_overlaps": [],
+      "terrain_overlap_count": 2,
+      "terrain_overlaps": [
+        {
+          "name": "JianghaiPerimeterGroundComposite",
+          "overlap_xz_area": 218.95,
+          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/JianghaiPerimeterGroundComposite"
+        },
+        {
+          "name": "OldCityFoundation",
+          "overlap_xz_area": 218.95,
+          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/OldCityFoundation"
+        }
+      ]
     },
     {
-      "authored_structure_overlap_count": 2,
-      "authored_structure_overlaps": [
+      "authored_building_overlap_count": 1,
+      "authored_building_overlaps": [
         {
-          "bounds": {
-            "center": [
-              140.989471435547,
-              3.74626111984253,
-              166.576263427734
-            ],
-            "max": [
-              151.145568847656,
-              8.74129867553711,
-              172.195846557617
-            ],
-            "min": [
-              130.833358764648,
-              -1.24877643585205,
-              160.956695556641
-            ],
-            "size": [
-              20.3122100830078,
-              9.99007511138916,
-              11.2391510009766
-            ]
-          },
           "name": "OuterEastTeaResidence",
           "overlap_volume": 1265.89,
           "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiTenementDistrict/OuterEastTeaResidence"
-        },
-        {
-          "bounds": {
-            "center": [
-              85.9894409179688,
-              -5.15753936767578,
-              62.71826171875
-            ],
-            "max": [
-              686.855346679688,
-              3.76018524169922,
-              662.915893554688
-            ],
-            "min": [
-              -514.87646484375,
-              -14.0752639770508,
-              -537.479370117188
-            ],
-            "size": [
-              1201.73181152344,
-              17.83544921875,
-              1200.39526367188
-            ]
-          },
-          "name": "JianghaiPerimeterGroundComposite",
-          "overlap_volume": 1063.94,
-          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/JianghaiPerimeterGroundComposite"
         }
       ],
       "candidate": "AUDIT_ONLY_EastNorthArcade",
@@ -267,70 +126,35 @@
         -1.24877643585205,
         162.253402709961
       ],
+      "placement_status": "REJECT",
       "size": [
         12.7448577880859,
         13.6488008499146,
         16.6661224365234
       ],
       "street_network_overlap_count": 0,
-      "street_network_overlaps": []
+      "street_network_overlaps": [],
+      "terrain_overlap_count": 2,
+      "terrain_overlaps": [
+        {
+          "name": "JianghaiPerimeterGroundComposite",
+          "overlap_xz_area": 212.41,
+          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/JianghaiPerimeterGroundComposite"
+        },
+        {
+          "name": "OldCityFoundation",
+          "overlap_xz_area": 212.41,
+          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/OldCityFoundation"
+        }
+      ]
     },
     {
-      "authored_structure_overlap_count": 2,
-      "authored_structure_overlaps": [
+      "authored_building_overlap_count": 1,
+      "authored_building_overlaps": [
         {
-          "bounds": {
-            "center": [
-              140.989471435547,
-              3.74626111984253,
-              166.576263427734
-            ],
-            "max": [
-              151.145568847656,
-              8.74129867553711,
-              172.195846557617
-            ],
-            "min": [
-              130.833358764648,
-              -1.24877643585205,
-              160.956695556641
-            ],
-            "size": [
-              20.3122100830078,
-              9.99007511138916,
-              11.2391510009766
-            ]
-          },
           "name": "OuterEastTeaResidence",
           "overlap_volume": 151.27,
           "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiTenementDistrict/OuterEastTeaResidence"
-        },
-        {
-          "bounds": {
-            "center": [
-              85.9894409179688,
-              -5.15753936767578,
-              62.71826171875
-            ],
-            "max": [
-              686.855346679688,
-              3.76018524169922,
-              662.915893554688
-            ],
-            "min": [
-              -514.87646484375,
-              -14.0752639770508,
-              -537.479370117188
-            ],
-            "size": [
-              1201.73181152344,
-              17.83544921875,
-              1200.39526367188
-            ]
-          },
-          "name": "JianghaiPerimeterGroundComposite",
-          "overlap_volume": 541.62,
-          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/JianghaiPerimeterGroundComposite"
         }
       ],
       "candidate": "AUDIT_ONLY_EastNorthHall",
@@ -349,70 +173,35 @@
         1.3789963722229,
         162.977966308594
       ],
+      "placement_status": "REJECT",
       "size": [
         14.9675445556641,
         14.0351181030273,
         15.1966094970703
       ],
       "street_network_overlap_count": 0,
-      "street_network_overlaps": []
+      "street_network_overlaps": [],
+      "terrain_overlap_count": 2,
+      "terrain_overlaps": [
+        {
+          "name": "JianghaiPerimeterGroundComposite",
+          "overlap_xz_area": 227.46,
+          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/JianghaiPerimeterGroundComposite"
+        },
+        {
+          "name": "OldCityFoundation",
+          "overlap_xz_area": 227.46,
+          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/OldCityFoundation"
+        }
+      ]
     },
     {
-      "authored_structure_overlap_count": 2,
-      "authored_structure_overlaps": [
+      "authored_building_overlap_count": 1,
+      "authored_building_overlaps": [
         {
-          "bounds": {
-            "center": [
-              31.0143260955811,
-              3.74626111984253,
-              50.5762634277344
-            ],
-            "max": [
-              41.1704292297363,
-              8.74129867553711,
-              56.1958389282227
-            ],
-            "min": [
-              20.8582229614258,
-              -1.24877643585205,
-              44.9566917419434
-            ],
-            "size": [
-              20.3122062683105,
-              9.99007511138916,
-              11.2391471862793
-            ]
-          },
           "name": "OuterWestMarketResidence",
           "overlap_volume": 504.04,
           "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiTenementDistrict/OuterWestMarketResidence"
-        },
-        {
-          "bounds": {
-            "center": [
-              85.9894409179688,
-              -5.15753936767578,
-              62.71826171875
-            ],
-            "max": [
-              686.855346679688,
-              3.76018524169922,
-              662.915893554688
-            ],
-            "min": [
-              -514.87646484375,
-              -14.0752639770508,
-              -537.479370117188
-            ],
-            "size": [
-              1201.73181152344,
-              17.83544921875,
-              1200.39526367188
-            ]
-          },
-          "name": "JianghaiPerimeterGroundComposite",
-          "overlap_volume": 1063.24,
-          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/JianghaiPerimeterGroundComposite"
         }
       ],
       "candidate": "AUDIT_ONLY_WestMidArcade",
@@ -431,45 +220,31 @@
         -1.24877643585205,
         52.2357635498047
       ],
+      "placement_status": "REJECT",
       "size": [
         12.7406482696533,
         13.6442880630493,
         16.6606216430664
       ],
       "street_network_overlap_count": 0,
-      "street_network_overlaps": []
+      "street_network_overlaps": [],
+      "terrain_overlap_count": 2,
+      "terrain_overlaps": [
+        {
+          "name": "JianghaiPerimeterGroundComposite",
+          "overlap_xz_area": 212.27,
+          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/JianghaiPerimeterGroundComposite"
+        },
+        {
+          "name": "OldCityFoundation",
+          "overlap_xz_area": 212.27,
+          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/OldCityFoundation"
+        }
+      ]
     },
     {
-      "authored_structure_overlap_count": 1,
-      "authored_structure_overlaps": [
-        {
-          "bounds": {
-            "center": [
-              85.9894409179688,
-              -5.15753936767578,
-              62.71826171875
-            ],
-            "max": [
-              686.855346679688,
-              3.76018524169922,
-              662.915893554688
-            ],
-            "min": [
-              -514.87646484375,
-              -14.0752639770508,
-              -537.479370117188
-            ],
-            "size": [
-              1201.73181152344,
-              17.83544921875,
-              1200.39526367188
-            ]
-          },
-          "name": "JianghaiPerimeterGroundComposite",
-          "overlap_volume": 219.77,
-          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/JianghaiPerimeterGroundComposite"
-        }
-      ],
+      "authored_building_overlap_count": 0,
+      "authored_building_overlaps": [],
       "candidate": "AUDIT_ONLY_WestMidShop",
       "center": [
         16.0018920898438,
@@ -486,70 +261,35 @@
         -1.26824772357941,
         57.154369354248
       ],
+      "placement_status": "REVIEW",
       "size": [
         6.38623905181885,
         8.25784683227539,
         6.84380340576172
       ],
       "street_network_overlap_count": 0,
-      "street_network_overlaps": []
+      "street_network_overlaps": [],
+      "terrain_overlap_count": 2,
+      "terrain_overlaps": [
+        {
+          "name": "JianghaiPerimeterGroundComposite",
+          "overlap_xz_area": 43.71,
+          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/JianghaiPerimeterGroundComposite"
+        },
+        {
+          "name": "OldCityFoundation",
+          "overlap_xz_area": 43.71,
+          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/OldCityFoundation"
+        }
+      ]
     },
     {
-      "authored_structure_overlap_count": 2,
-      "authored_structure_overlaps": [
+      "authored_building_overlap_count": 1,
+      "authored_building_overlaps": [
         {
-          "bounds": {
-            "center": [
-              140.989227294922,
-              3.83545827865601,
-              50.5762748718262
-            ],
-            "max": [
-              151.326690673828,
-              8.91969299316406,
-              56.2961959838867
-            ],
-            "min": [
-              130.651779174805,
-              -1.24877643585205,
-              44.8563537597656
-            ],
-            "size": [
-              20.6749114990234,
-              10.1684694290161,
-              11.4398422241211
-            ]
-          },
           "name": "OuterEastMarketResidence",
           "overlap_volume": 495.15,
           "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiTenementDistrict/OuterEastMarketResidence"
-        },
-        {
-          "bounds": {
-            "center": [
-              85.9894409179688,
-              -5.15753936767578,
-              62.71826171875
-            ],
-            "max": [
-              686.855346679688,
-              3.76018524169922,
-              662.915893554688
-            ],
-            "min": [
-              -514.87646484375,
-              -14.0752639770508,
-              -537.479370117188
-            ],
-            "size": [
-              1201.73181152344,
-              17.83544921875,
-              1200.39526367188
-            ]
-          },
-          "name": "JianghaiPerimeterGroundComposite",
-          "overlap_volume": 1025.6,
-          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/JianghaiPerimeterGroundComposite"
         }
       ],
       "candidate": "AUDIT_ONLY_EastMidArcade",
@@ -568,45 +308,31 @@
         -1.24877643585205,
         52.4047317504883
       ],
+      "placement_status": "REJECT",
       "size": [
         12.5131378173828,
         13.4006414413452,
         16.3631134033203
       ],
       "street_network_overlap_count": 0,
-      "street_network_overlaps": []
+      "street_network_overlaps": [],
+      "terrain_overlap_count": 2,
+      "terrain_overlaps": [
+        {
+          "name": "JianghaiPerimeterGroundComposite",
+          "overlap_xz_area": 204.75,
+          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/JianghaiPerimeterGroundComposite"
+        },
+        {
+          "name": "OldCityFoundation",
+          "overlap_xz_area": 204.75,
+          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/OldCityFoundation"
+        }
+      ]
     },
     {
-      "authored_structure_overlap_count": 1,
-      "authored_structure_overlaps": [
-        {
-          "bounds": {
-            "center": [
-              85.9894409179688,
-              -5.15753936767578,
-              62.71826171875
-            ],
-            "max": [
-              686.855346679688,
-              3.76018524169922,
-              662.915893554688
-            ],
-            "min": [
-              -514.87646484375,
-              -14.0752639770508,
-              -537.479370117188
-            ],
-            "size": [
-              1201.73181152344,
-              17.83544921875,
-              1200.39526367188
-            ]
-          },
-          "name": "JianghaiPerimeterGroundComposite",
-          "overlap_volume": 211.22,
-          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/JianghaiPerimeterGroundComposite"
-        }
-      ],
+      "authored_building_overlap_count": 0,
+      "authored_building_overlaps": [],
       "candidate": "AUDIT_ONLY_EastMidShop",
       "center": [
         156.001892089844,
@@ -623,70 +349,35 @@
         -1.26786589622498,
         57.2214660644531
       ],
+      "placement_status": "REVIEW",
       "size": [
         6.26101684570312,
         8.09592819213867,
         6.70960998535156
       ],
       "street_network_overlap_count": 0,
-      "street_network_overlaps": []
+      "street_network_overlaps": [],
+      "terrain_overlap_count": 2,
+      "terrain_overlaps": [
+        {
+          "name": "JianghaiPerimeterGroundComposite",
+          "overlap_xz_area": 42.01,
+          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/JianghaiPerimeterGroundComposite"
+        },
+        {
+          "name": "OldCityFoundation",
+          "overlap_xz_area": 42.01,
+          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/OldCityFoundation"
+        }
+      ]
     },
     {
-      "authored_structure_overlap_count": 2,
-      "authored_structure_overlaps": [
+      "authored_building_overlap_count": 1,
+      "authored_building_overlaps": [
         {
-          "bounds": {
-            "center": [
-              21.5037040710449,
-              3.56786727905273,
-              -22.4137744903564
-            ],
-            "max": [
-              32.2120513916016,
-              8.38451099395752,
-              -15.3067741394043
-            ],
-            "min": [
-              10.7953538894653,
-              -1.24877643585205,
-              -29.5207748413086
-            ],
-            "size": [
-              21.4166984558105,
-              9.63328742980957,
-              14.2140007019043
-            ]
-          },
           "name": "JianghaiExpansion_PawnshopBackdrop",
           "overlap_volume": 587.82,
           "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiTenementDistrict/JianghaiExpansion_PawnshopBackdrop"
-        },
-        {
-          "bounds": {
-            "center": [
-              85.9894409179688,
-              -5.15753936767578,
-              62.71826171875
-            ],
-            "max": [
-              686.855346679688,
-              3.76018524169922,
-              662.915893554688
-            ],
-            "min": [
-              -514.87646484375,
-              -14.0752639770508,
-              -537.479370117188
-            ],
-            "size": [
-              1201.73181152344,
-              17.83544921875,
-              1200.39526367188
-            ]
-          },
-          "name": "JianghaiPerimeterGroundComposite",
-          "overlap_volume": 969.42,
-          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/JianghaiPerimeterGroundComposite"
         }
       ],
       "candidate": "AUDIT_ONLY_WestSouthArcade",
@@ -705,70 +396,35 @@
         -1.24877643585205,
         -30.3877563476562
       ],
+      "placement_status": "REJECT",
       "size": [
         12.1655464172363,
         13.0283994674683,
         15.9085779190063
       ],
       "street_network_overlap_count": 0,
-      "street_network_overlaps": []
+      "street_network_overlaps": [],
+      "terrain_overlap_count": 2,
+      "terrain_overlaps": [
+        {
+          "name": "JianghaiPerimeterGroundComposite",
+          "overlap_xz_area": 193.54,
+          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/JianghaiPerimeterGroundComposite"
+        },
+        {
+          "name": "OldCityFoundation",
+          "overlap_xz_area": 193.54,
+          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/OldCityFoundation"
+        }
+      ]
     },
     {
-      "authored_structure_overlap_count": 2,
-      "authored_structure_overlaps": [
+      "authored_building_overlap_count": 1,
+      "authored_building_overlaps": [
         {
-          "bounds": {
-            "center": [
-              21.5037040710449,
-              3.56786727905273,
-              -22.4137744903564
-            ],
-            "max": [
-              32.2120513916016,
-              8.38451099395752,
-              -15.3067741394043
-            ],
-            "min": [
-              10.7953538894653,
-              -1.24877643585205,
-              -29.5207748413086
-            ],
-            "size": [
-              21.4166984558105,
-              9.63328742980957,
-              14.2140007019043
-            ]
-          },
           "name": "JianghaiExpansion_PawnshopBackdrop",
           "overlap_volume": 307.63,
           "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiTenementDistrict/JianghaiExpansion_PawnshopBackdrop"
-        },
-        {
-          "bounds": {
-            "center": [
-              85.9894409179688,
-              -5.15753936767578,
-              62.71826171875
-            ],
-            "max": [
-              686.855346679688,
-              3.76018524169922,
-              662.915893554688
-            ],
-            "min": [
-              -514.87646484375,
-              -14.0752639770508,
-              -537.479370117188
-            ],
-            "size": [
-              1201.73181152344,
-              17.83544921875,
-              1200.39526367188
-            ]
-          },
-          "name": "JianghaiPerimeterGroundComposite",
-          "overlap_volume": 193.13,
-          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/JianghaiPerimeterGroundComposite"
         }
       ],
       "candidate": "AUDIT_ONLY_WestSouthHall",
@@ -787,45 +443,31 @@
         -1.27013409137726,
         -25.8237285614014
       ],
+      "placement_status": "REJECT",
       "size": [
         5.64611339569092,
         8.03401851654053,
         6.79999923706055
       ],
       "street_network_overlap_count": 0,
-      "street_network_overlaps": []
+      "street_network_overlaps": [],
+      "terrain_overlap_count": 2,
+      "terrain_overlaps": [
+        {
+          "name": "JianghaiPerimeterGroundComposite",
+          "overlap_xz_area": 38.39,
+          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/JianghaiPerimeterGroundComposite"
+        },
+        {
+          "name": "OldCityFoundation",
+          "overlap_xz_area": 38.39,
+          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/OldCityFoundation"
+        }
+      ]
     },
     {
-      "authored_structure_overlap_count": 1,
-      "authored_structure_overlaps": [
-        {
-          "bounds": {
-            "center": [
-              85.9894409179688,
-              -5.15753936767578,
-              62.71826171875
-            ],
-            "max": [
-              686.855346679688,
-              3.76018524169922,
-              662.915893554688
-            ],
-            "min": [
-              -514.87646484375,
-              -14.0752639770508,
-              -537.479370117188
-            ],
-            "size": [
-              1201.73181152344,
-              17.83544921875,
-              1200.39526367188
-            ]
-          },
-          "name": "JianghaiPerimeterGroundComposite",
-          "overlap_volume": 1041.2,
-          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/JianghaiPerimeterGroundComposite"
-        }
-      ],
+      "authored_building_overlap_count": 0,
+      "authored_building_overlaps": [],
       "candidate": "AUDIT_ONLY_EastSouthArcade",
       "center": [
         138.001892089844,
@@ -842,45 +484,31 @@
         -1.24877643585205,
         -30.6571731567383
       ],
+      "placement_status": "REVIEW",
       "size": [
         12.6079254150391,
         13.5021591186523,
         16.4870719909668
       ],
       "street_network_overlap_count": 0,
-      "street_network_overlaps": []
+      "street_network_overlaps": [],
+      "terrain_overlap_count": 2,
+      "terrain_overlaps": [
+        {
+          "name": "JianghaiPerimeterGroundComposite",
+          "overlap_xz_area": 207.87,
+          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/JianghaiPerimeterGroundComposite"
+        },
+        {
+          "name": "OldCityFoundation",
+          "overlap_xz_area": 207.87,
+          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/OldCityFoundation"
+        }
+      ]
     },
     {
-      "authored_structure_overlap_count": 1,
-      "authored_structure_overlaps": [
-        {
-          "bounds": {
-            "center": [
-              85.9894409179688,
-              -5.15753936767578,
-              62.71826171875
-            ],
-            "max": [
-              686.855346679688,
-              3.76018524169922,
-              662.915893554688
-            ],
-            "min": [
-              -514.87646484375,
-              -14.0752639770508,
-              -537.479370117188
-            ],
-            "size": [
-              1201.73181152344,
-              17.83544921875,
-              1200.39526367188
-            ]
-          },
-          "name": "JianghaiPerimeterGroundComposite",
-          "overlap_volume": 200.65,
-          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/JianghaiPerimeterGroundComposite"
-        }
-      ],
+      "authored_building_overlap_count": 0,
+      "authored_building_overlaps": [],
       "candidate": "AUDIT_ONLY_EastSouthHall",
       "center": [
         156.001892089844,
@@ -897,13 +525,27 @@
         -1.27054488658905,
         -25.8891124725342
       ],
+      "placement_status": "REVIEW",
       "size": [
         5.75469970703125,
         8.18851852416992,
         6.93076705932617
       ],
       "street_network_overlap_count": 0,
-      "street_network_overlaps": []
+      "street_network_overlaps": [],
+      "terrain_overlap_count": 2,
+      "terrain_overlaps": [
+        {
+          "name": "JianghaiPerimeterGroundComposite",
+          "overlap_xz_area": 39.88,
+          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/JianghaiPerimeterGroundComposite"
+        },
+        {
+          "name": "OldCityFoundation",
+          "overlap_xz_area": 39.88,
+          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/OldCityFoundation"
+        }
+      ]
     }
   ],
   "district_bounds": {
@@ -928,5 +570,5 @@
       302.959167480469
     ]
   },
-  "note": "Bounds are world-space; clones are audit-only and are not written to the source GLB."
+  "note": "All candidate clones are audit-only and are not written to the source GLB."
 }
