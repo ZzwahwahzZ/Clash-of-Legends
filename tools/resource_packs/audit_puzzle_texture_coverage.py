@@ -56,7 +56,7 @@ def parse_pul(path, ani_index, mjp):
     roll = None
     if header != "PUZZLE" and pos + 8 <= len(data):
         roll = struct.unpack_from("<ii", data, pos); pos += 8
-    unique = sorted(set(tiles) - {0})
+    unique = sorted(set(tiles))
     resolved = missing_ani = missing_mjp = frame_count = decoded_frames = 0
     for tile in unique:
         status, found, missing = resolve_frames(ani_path, f"Puzzle{tile}", ani_index, mjp)
