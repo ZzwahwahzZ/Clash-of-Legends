@@ -62,17 +62,25 @@ def main() -> None:
 
     simple_sections = parse_ini(simple_role_path)
     role_rows = []
+    simple_by_section: dict[str, dict] = {}
+    def normalized_fields(fields: dict[str, str]) -> dict[str, str]:
+        return {re.sub(r"[^a-z0-9]", "", key.lower()): value for key, value in fields.items()}
+    def numeric_field(fields: dict[str, str], aliases: tuple[str, ...]) -> int:
+        normalized = normalized_fields(fields)
+        for alias in aliases:
+            value = normalized.get(alias, "").strip()
+            if value.isdigit():
+                return int(value)
+        return 0
     for section_name, fields in simple_sections.items():
-        if "3DSimpleObjID" not in fields:
+        normalized = normalized_fields(fields)
+        simple_id = numeric_field(fields, ("3dsimpleobjid", "simpleobjid"))
+        if simple_id <= 0:
             continue
-        try:
-            simple_id = int(fields["3DSimpleObjID"])
-            standby_id = int(fields.get("3DStandByMotion", "0"))
-            blaze_id = int(fields.get("3DBlazeMotion", "0"))
-        except ValueError:
-            continue
+        standby_id = numeric_field(fields, ("3dstandbymotion", "3dstandbymotionid", "standbymotion"))
+        blaze_id = numeric_field(fields, ("3dblazemotion", "3dblazemotionid", "blazemotion"))
         simple = simple_by_id.get(simple_id)
-        role_rows.append({
+        row = {
             "source_section": section_name,
             "simple_object_id": simple_id,
             "simple_object_found": simple is not None,
@@ -84,22 +92,33 @@ def main() -> None:
             "blaze_sound": fields.get("BlazeSound", ""),
             "selection_effect_front": fields.get("F3DEffect", ""),
             "selection_effect_back": fields.get("B3DEffect", ""),
+            "source_field_keys": sorted(fields.keys()),
             "mapping_status": "SOURCE_JOIN_CANDIDATE_ONLY_NOT_CLASS_OR_GENDER_APPROVED",
-        })
+        }
+        role_rows.append(row)
+        simple_by_section[section_name] = row
 
     choose_sections = parse_ini(role_choose_path)
     choose = choose_sections.get("proAni", {})
     indices = choose_sections.get("proIndex", {})
     selection_rows = []
+    direct_section_joins = 0
     for key, animation_role in sorted(choose.items()):
         slot = key.removeprefix("pro_")
         index_key = "index_" + slot
+        profession_index = indices.get(index_key, "").strip()
+        joined_role = simple_by_section.get(profession_index)
+        if joined_role is not None:
+            direct_section_joins += 1
         selection_rows.append({
             "slot": int(slot) if slot.isdigit() else slot,
             "animation_role": animation_role,
-            "profession_index": indices.get(index_key, ""),
-            "simple_role_join": None,
-            "mapping_status": "UI_ROLE_TO_SIMPLE_ROLE_JOIN_NOT_ESTABLISHED",
+            "profession_index": profession_index,
+            "simple_role_join": {
+                "source_section": joined_role["source_section"],
+                "simple_object_id": joined_role["simple_object_id"],
+            } if joined_role is not None else None,
+            "mapping_status": "DIRECT_SOURCE_SECTION_KEY_JOIN_CANDIDATE_NOT_CLASS_GENDER_APPROVED" if joined_role is not None else "UI_ROLE_TO_SIMPLE_ROLE_JOIN_NOT_ESTABLISHED",
         })
 
     output = {
@@ -122,6 +141,9 @@ def main() -> None:
             "standby_motion_ids_found": sum(1 for row in role_rows if row["standby_motion_paths"]),
             "blaze_motion_ids_found": sum(1 for row in role_rows if row["blaze_motion_paths"]),
             "selection_ui_slots": len(selection_rows),
+            "selection_ui_direct_section_join_candidates": direct_section_joins,
+            "standby_motion_id_fields_found": sum(1 for row in role_rows if row["standby_motion_id"] > 0),
+            "blaze_motion_id_fields_found": sum(1 for row in role_rows if row["blaze_motion_id"] > 0),
             "class_gender_mappings_approved": 0,
         },
         "policy": "All rows are source-backed joins or explicit unresolved UI slots. No class/gender mapping is approved without a direct source key and visual/rig validation.",
