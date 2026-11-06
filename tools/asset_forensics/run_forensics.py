@@ -87,7 +87,12 @@ def external_list(p):
   if not tool: return {"tool":None,"returncode":None,"listing":"","stderr":"Install p7zip-full or libarchive-tools."}
   cmd=[tool,"-tvf",str(p)]
  q=subprocess.run(cmd,capture_output=True,text=True,timeout=180)
- return {"tool":tool,"returncode":q.returncode,"listing":q.stdout[-80000:],"stderr":q.stderr[-8000:]}
+ result={"tool":tool,"returncode":q.returncode,"listing":q.stdout[-80000:],"stderr":q.stderr[-8000:]}
+ binwalk=shutil.which("binwalk")
+ if binwalk:
+  scan=subprocess.run([binwalk,"--signature",str(p)],capture_output=True,text=True,timeout=180)
+  result["binwalk_signature_scan"]={"returncode":scan.returncode,"matches":scan.stdout[-30000:],"stderr":scan.stderr[-4000:]}
+ return result
 
 def main():
  a=argparse.ArgumentParser()
