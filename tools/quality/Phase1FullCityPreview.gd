@@ -7,7 +7,7 @@ func _initialize() -> void:
     call_deferred("_run")
 
 func _run() -> void:
-    get_root().get_viewport().size = Vector2i(1280, 720)
+    get_root().get_viewport().size = Vector2i(960, 540)
     var root := Node3D.new()
     root.name = "ChineseDistrictVisualAudit"
     get_root().add_child(root)
@@ -98,18 +98,18 @@ func _run() -> void:
     print("CHINESE DISTRICT MESH NODES ", _count_mesh_nodes(city))
 
     var overview_camera := Camera3D.new()
-    overview_camera.fov = 48.0
-    overview_camera.position = Vector3(180, 135, 220)
+    overview_camera.fov = 50.0
+    overview_camera.position = Vector3(90, 65, 110)
     root.add_child(overview_camera)
     overview_camera.look_at(Vector3(0, 5, -10), Vector3.UP)
     overview_camera.current = true
     await _capture("reports/phase1_full_city_preview.png")
 
     var close_camera := Camera3D.new()
-    close_camera.fov = 48.0
-    close_camera.position = Vector3(28, 20, 36)
+    close_camera.fov = 55.0
+    close_camera.position = Vector3(10, 8, 14)
     root.add_child(close_camera)
-    close_camera.look_at(Vector3(0, 5, -8), Vector3.UP)
+    close_camera.look_at(Vector3(0, 2, -3), Vector3.UP)
     close_camera.current = true
     await _capture("reports/phase1_full_city_closeup.png")
     print("CHINESE DISTRICT PREVIEWS SAVED overview and gate close-up; span=", span)
