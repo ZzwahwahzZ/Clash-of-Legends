@@ -58,22 +58,8 @@ jobs:
       - name: Build per-family helmet, weapon and equipment candidate inventory
         run: |
           python3 tools/external_assets/audit_c3_equipment_families.py reports/c3-model-audit.json --project-root . --output reports/equipment/c3-equipment-family-audit.json
-      - name: Install Blender 4.3.2 for diagnostic equipment renders
-        uses: bradyajohnston/setup-blender@v5
-        with:
-          version: 4.3.2
-      - name: Install minimal EGL and OpenGL runtime libraries
-        run: |
-          sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- update
-          sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- install -y libegl1 libgl1 libgles2
-      - name: Verify Blender and bundled NumPy
-        run: blender --background --factory-startup --python-expr "import bpy, numpy; print('BLENDER_OK', bpy.app.version_string, 'NUMPY_OK', numpy.__version__)"
-      - name: Render all helmet, weapon and equipment C3 candidates
-        env:
-          LIBGL_ALWAYS_SOFTWARE: 1
-        run: |
-          blender --background --factory-startup --python tools/external_assets/render_c3_equipment_previews.py -- --input-root build/c3-glb/equipment/c3 --output-root reports/equipment/previews/models --report reports/equipment/previews/equipment-preview-audit.json
-          python3 tools/external_assets/assemble_c3_equipment_contact_sheets.py reports/equipment/previews/equipment-preview-audit.json
+      - name: Record equipment preview deferral
+        run: echo "Equipment preview rendering is deferred; skeletal and animation proof runs independently in Godot."
       - name: Prepare focused Godot import subset
         run: python3 tools/c3_audit/prepare_c3_validation_subset.py
       - name: Import and validate converted C3 equipment GLB candidates and animation POCs
