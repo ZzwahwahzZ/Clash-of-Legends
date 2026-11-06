@@ -592,6 +592,10 @@ func _apply_weapon_model() -> void:
 	if item_id != imported_weapon_item_id:
 		if existing_root:
 			existing_root.queue_free()
+			imported_weapon_item_id = ""
+			_set_placeholder_weapon_visible(true)
+			call_deferred("_apply_weapon_model")
+			return
 		imported_weapon_item_id = ""
 	if item_id.is_empty():
 		_set_placeholder_weapon_visible(true)
