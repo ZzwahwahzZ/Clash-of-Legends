@@ -20,7 +20,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Compile scanner
-        run: python -m py_compile tools/asset_forensics/run_forensics.py tests/test_asset_forensics.py
+        run: python -m py_compile tools/asset_forensics/run_forensics.py tools/asset_forensics/process_standard_assets.py tests/test_asset_forensics.py
       - name: Validate Colab notebook JSON and single-cell contract
         run: |
           python - <<'PY'
