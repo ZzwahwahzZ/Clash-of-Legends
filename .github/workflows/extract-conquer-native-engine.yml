@@ -1,0 +1,47 @@
+name: Extract Conquer Android native engine libraries
+on:
+  push:
+    paths:
+      - .github/workflows/extract-conquer-native-engine.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  extract-native-engine:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and verify source archive
+        run: |
+          set -euo pipefail
+          mkdir -p build/source extracted reports
+          curl --fail --location --retry 5 --retry-all-errors 'https://github.com/ZzwahwahzZ/Conquer-Mobile-Assets./releases/download/mobile-extracted-assets/extracted-assets-001.zip' -o build/source/extracted-assets-001.zip
+          echo '0d21a110c09b762ed5f1a5f4da022857b0534e489eb85052d15da460cb229d2a  build/source/extracted-assets-001.zip' | sha256sum -c -
+      - name: Extract ARM64 client engine libraries
+        run: |
+          set -euo pipefail
+          unzip -p build/source/extracted-assets-001.zip 'ConquerOnline/config.arm64_v8a.apk' > extracted/config.arm64_v8a.apk
+          unzip -p extracted/config.arm64_v8a.apk 'lib/arm64-v8a/libCQ2ClientEn.so' > extracted/libCQ2ClientEn.so
+          unzip -p extracted/config.arm64_v8a.apk 'lib/arm64-v8a/libTq.so' > extracted/libTq.so
+          test -s extracted/libCQ2ClientEn.so
+          test -s extracted/libTq.so
+          file extracted/libCQ2ClientEn.so extracted/libTq.so | tee reports/native-library-types.txt
+          sha256sum extracted/libCQ2ClientEn.so extracted/libTq.so | tee reports/native-library-sha256.txt
+      - name: Inspect native engine strings for animation and skeleton symbols
+        run: |
+          set -euo pipefail
+          strings -a extracted/libCQ2ClientEn.so extracted/libTq.so | grep -Ei 'skeleton|bone|motion|3DSkeleton|3DMotion|RolePart|BindPartToBodyBone|C3DMotion|C3DObj' | sort -u > reports/skeleton-engine-strings.txt || true
+          wc -l reports/skeleton-engine-strings.txt
+          sed -n '1,240p' reports/skeleton-engine-strings.txt
+      - name: Upload native engine libraries and analysis
+        uses: actions/upload-artifact@v4
+        with:
+          name: Conquer-ARM64-Native-Engine-Forensics
+          path: |
+            extracted/libCQ2ClientEn.so
+            extracted/libTq.so
+            reports/native-library-types.txt
+            reports/native-library-sha256.txt
+            reports/skeleton-engine-strings.txt
+          retention-days: 30
