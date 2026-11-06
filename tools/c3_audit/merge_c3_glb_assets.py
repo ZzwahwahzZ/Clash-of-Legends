@@ -23,13 +23,31 @@ existing_hashes = {
 }
 added = []
 converted_category_counts = {}
-for source in sorted(source_root.rglob("*.glb")):
-    relative = source.relative_to(source_root)
-    if len(relative.parts) < 2:
-        continue
-    category = relative.parts[0]
+conversion_report_path = root / "reports/c3-model-audit.json"
+if not conversion_report_path.is_file():
+    raise SystemExit("C3 conversion report is missing; refusing to silently omit converted models.")
+conversion_report = json.loads(conversion_report_path.read_text(encoding="utf-8"))
+conversion_rows = conversion_report.get("converted", [])
+if not isinstance(conversion_rows, list) or not conversion_rows:
+    raise SystemExit("C3 conversion report contains no converted GLB entries.")
+
+converted_sources = []
+for row in conversion_rows:
+    output_name = str(row.get("output", "")).replace("\\\\", "/").strip()
+    relative = Path(output_name)
+    if relative.is_absolute() or any(part in ("", ".", "..") for part in relative.parts):
+        raise SystemExit(f"Unsafe converted GLB path in audit report: {output_name}")
+    category = relative.parts[0] if relative.parts else ""
     if category not in {"characters", "monsters", "equipment", "mounts", "effects", "world"}:
         continue
+    source = source_root / relative
+    if not source.is_file():
+        raise SystemExit(f"Converted GLB is missing despite successful conversion report: {source}")
+    converted_sources.append((category, relative, source))
+
+if not converted_sources:
+    raise SystemExit("No category GLBs found in the C3 conversion report.")
+for category, relative, source in converted_sources:
     digest = hashlib.sha256(source.read_bytes()).hexdigest()
     if (category, digest) in existing_hashes:
         continue
@@ -42,7 +60,6 @@ for source in sorted(source_root.rglob("*.glb")):
         "extension": ".glb",
         "size_bytes": destination.stat().st_size,
         "sha256": digest,
-        # Conversion and import do not prove character/mount identity or visual approval.
         "asset_role": "unclassified",
         "mapping_status": "unreviewed",
     }
