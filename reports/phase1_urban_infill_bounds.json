@@ -3,20 +3,16 @@
   "authored_mesh_count": 553,
   "candidate_bounds": [
     {
-      "authored_building_overlap_count": 2,
+      "authored_building_overlap_count": 1,
       "authored_building_overlaps": [
         {
           "name": "OuterWestClockResidence",
           "overlap_volume": 1165.09,
           "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiTenementDistrict/OuterWestClockResidence"
-        },
-        {
-          "name": "UtilityCable00",
-          "overlap_volume": 32.94,
-          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/OverheadUtilityWires/UtilityCable00"
         }
       ],
       "candidate": "AUDIT_ONLY_WestNorthArcade",
+      "candidate_overlaps": [],
       "center": [
         34.0018844604492,
         5.69970321655273,
@@ -40,7 +36,7 @@
       ],
       "street_network_overlap_count": 0,
       "street_network_overlaps": [],
-      "terrain_overlap_count": 2,
+      "terrain_overlap_count": 3,
       "terrain_overlaps": [
         {
           "name": "JianghaiPerimeterGroundComposite",
@@ -51,6 +47,11 @@
           "name": "OldCityFoundation",
           "overlap_xz_area": 220.2,
           "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiValleyEnvironment/OldCityFoundation"
+        },
+        {
+          "name": "UtilityCable00",
+          "overlap_xz_area": 8.5,
+          "path": "/root/UrbanInfillAuditOnly/full_city_preview/JianghaiOldCityAuthoredScene/OverheadUtilityWires/UtilityCable00"
         }
       ]
     },
@@ -64,6 +65,7 @@
         }
       ],
       "candidate": "AUDIT_ONLY_WestNorthHall",
+      "candidate_overlaps": [],
       "center": [
         15.6109018325806,
         8.21456813812256,
@@ -111,6 +113,7 @@
         }
       ],
       "candidate": "AUDIT_ONLY_EastNorthArcade",
+      "candidate_overlaps": [],
       "center": [
         138.001892089844,
         5.57562398910522,
@@ -158,6 +161,7 @@
         }
       ],
       "candidate": "AUDIT_ONLY_EastNorthHall",
+      "candidate_overlaps": [],
       "center": [
         156.400390625,
         8.39655494689941,
@@ -205,6 +209,7 @@
         }
       ],
       "candidate": "AUDIT_ONLY_WestMidArcade",
+      "candidate_overlaps": [],
       "center": [
         34.0018882751465,
         5.57336759567261,
@@ -246,6 +251,7 @@
       "authored_building_overlap_count": 0,
       "authored_building_overlaps": [],
       "candidate": "AUDIT_ONLY_WestMidShop",
+      "candidate_overlaps": [],
       "center": [
         16.0018920898438,
         2.86067581176758,
@@ -261,7 +267,7 @@
         -1.26824772357941,
         57.154369354248
       ],
-      "placement_status": "REVIEW",
+      "placement_status": "REVIEW_VISUAL_AND_NAV",
       "size": [
         6.38623905181885,
         8.25784683227539,
@@ -293,6 +299,7 @@
         }
       ],
       "candidate": "AUDIT_ONLY_EastMidArcade",
+      "candidate_overlaps": [],
       "center": [
         138.001892089844,
         5.45154428482056,
@@ -334,6 +341,7 @@
       "authored_building_overlap_count": 0,
       "authored_building_overlaps": [],
       "candidate": "AUDIT_ONLY_EastMidShop",
+      "candidate_overlaps": [],
       "center": [
         156.001892089844,
         2.78009819984436,
@@ -349,7 +357,7 @@
         -1.26786589622498,
         57.2214660644531
       ],
-      "placement_status": "REVIEW",
+      "placement_status": "REVIEW_VISUAL_AND_NAV",
       "size": [
         6.26101684570312,
         8.09592819213867,
@@ -381,6 +389,7 @@
         }
       ],
       "candidate": "AUDIT_ONLY_WestSouthArcade",
+      "candidate_overlaps": [],
       "center": [
         34.0018844604492,
         5.26542329788208,
@@ -428,6 +437,7 @@
         }
       ],
       "candidate": "AUDIT_ONLY_WestSouthHall",
+      "candidate_overlaps": [],
       "center": [
         16.0018920898438,
         2.74687528610229,
@@ -469,6 +479,7 @@
       "authored_building_overlap_count": 0,
       "authored_building_overlaps": [],
       "candidate": "AUDIT_ONLY_EastSouthArcade",
+      "candidate_overlaps": [],
       "center": [
         138.001892089844,
         5.50230312347412,
@@ -484,7 +495,7 @@
         -1.24877643585205,
         -30.6571731567383
       ],
-      "placement_status": "REVIEW",
+      "placement_status": "REVIEW_VISUAL_AND_NAV",
       "size": [
         12.6079254150391,
         13.5021591186523,
@@ -510,6 +521,7 @@
       "authored_building_overlap_count": 0,
       "authored_building_overlaps": [],
       "candidate": "AUDIT_ONLY_EastSouthHall",
+      "candidate_overlaps": [],
       "center": [
         156.001892089844,
         2.82371425628662,
@@ -525,7 +537,7 @@
         -1.27054488658905,
         -25.8891124725342
       ],
-      "placement_status": "REVIEW",
+      "placement_status": "REVIEW_VISUAL_AND_NAV",
       "size": [
         5.75469970703125,
         8.18851852416992,
