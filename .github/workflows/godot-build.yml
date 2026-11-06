@@ -349,8 +349,11 @@ jobs:
           test -s builds/android/ClashOfLegends-emulator-x86_64.apk
           mkdir -p emulator-evidence
 
-      - name: Install Pillow for screenshot transition assertions
-        run: python3 -m pip install --user Pillow
+      - name: Install Pillow and validate screenshot-aware emulator helpers
+        run: |
+          python3 -m pip install --user Pillow
+          python3 -m py_compile tools/ci/tap_start_button.py tools/ci/assert_world_transition.py tools/ci/wait_for_world_entry.py
+          python3 tools/ci/test_android_emulator_helpers.py
 
       - name: Enable KVM acceleration for Android emulator
         run: |
@@ -383,33 +386,44 @@ jobs:
             adb install -r builds/android/ClashOfLegends-emulator-x86_64.apk
             adb logcat -c
             adb shell monkey -p com.zwahwahzz.clashoflegends 1
-            sleep 45
-            adb shell pidof com.zwahwahzz.clashoflegends > emulator-evidence/game-pid.txt || { adb logcat -d -t 12000 > emulator-evidence/logcat-failure.txt; echo "Game process exited after launch."; grep -Ei "FATAL EXCEPTION|SIGSEGV|Godot Engine|ERROR:" emulator-evidence/logcat-failure.txt | tail -n 120 || true; exit 1; }
+            # Capture the actual opening state immediately; the cinematic intro fades after about 3 seconds.
+            sleep 1
+            adb shell pidof com.zwahwahzz.clashoflegends > emulator-evidence/game-pid.txt || { adb logcat -d -t 12000 > emulator-evidence/logcat-failure.txt; echo "Game process exited after launch."; exit 1; }
             adb shell screencap -p /sdcard/clash-launch.png
             adb pull /sdcard/clash-launch.png emulator-evidence/launch-screen.png
-            # Dismiss Android's one-time immersive-mode education overlay.
-            # The game is landscape (2400x1080 after orientation), so tap the
-            # actual "Got it" button. adb input uses the emulator's natural 1080x2400
-            # coordinate space while the captured landscape framebuffer is 2400x1080.
+            # The observed Android 13 immersive-mode "Got it" button is at 62.5% x / 46.3% y
+            # on this 2400x1080 landscape framebuffer (the adb input coordinate space matches it).
             adb shell input tap 1500 500
-            sleep 3
+            sleep 0.2
+            adb shell screencap -p /sdcard/clash-intro.png
+            adb pull /sdcard/clash-intro.png emulator-evidence/intro-screen.png
+            # LegendIntro.gd centers its skip button inside a VBox anchored to y=0.25..0.75.
+            # On the captured 2400x1080 layout, the source-derived button center is x=1200, y≈627.
+            adb shell input tap 1200 627
+            sleep 0.5
             adb shell screencap -p /sdcard/clash-character-select.png
             adb pull /sdcard/clash-character-select.png emulator-evidence/character-select.png
-            python3 tools/ci/compare_emulator_screens.py emulator-evidence/launch-screen.png emulator-evidence/character-select.png 700,0,1700,600
-            # Enter the journey and wait for the actual game world, not merely a changed loading bar.
-            adb shell input tap 1200 980
-            python3 tools/ci/wait_for_world_entry.py emulator-evidence/character-select.png emulator-evidence
-            # Exercise the landscape movement area only after world entry is verified.
-            adb shell input swipe 180 280 180 420 700
-            sleep 3
-            adb shell screencap -p /sdcard/clash-interaction.png
-            adb pull /sdcard/clash-interaction.png emulator-evidence/interaction-screen.png
+            python3 tools/ci/compare_emulator_screens.py emulator-evidence/intro-screen.png emulator-evidence/character-select.png 600,250,1800,800 --minimum-ratio 0.02
+            # Detect the gold button and Arabic label in the screenshot, then tap its measured center.
+            python3 tools/ci/tap_start_button.py emulator-evidence/character-select.png
+            # First-run resource packs total about 1.13 GB; wait for verified downloads rather than
+            # misclassifying the still-visible start label behind the RTL progress overlay as a stuck screen.
+            python3 tools/ci/wait_for_world_entry.py emulator-evidence/character-select.png emulator-evidence --timeout-seconds 1200 --poll-seconds 10
+            # Preserve a short in-world visual recording before attempting any control coordinates.
+            adb shell screenrecord --time-limit 12 /sdcard/clash-world-idle.mp4 >/dev/null 2>&1 &
+            SCREENRECORD_PID=$!
+            sleep 12
+            wait "$SCREENRECORD_PID" || true
+            adb pull /sdcard/clash-world-idle.mp4 emulator-evidence/world-idle.mp4 || echo "SCREENRECORD_UNAVAILABLE" > emulator-evidence/screenrecord-status.txt
+            adb shell screencap -p /sdcard/clash-world-idle.png
+            adb pull /sdcard/clash-world-idle.png emulator-evidence/world-idle.png
+            adb shell uiautomator dump /sdcard/clash-window.xml >/dev/null 2>&1 || true
+            adb pull /sdcard/clash-window.xml emulator-evidence/window-hierarchy.xml || true
             adb shell dumpsys meminfo com.zwahwahzz.clashoflegends > emulator-evidence/memory.txt
             adb shell dumpsys gfxinfo com.zwahwahzz.clashoflegends > emulator-evidence/graphics.txt
             adb logcat -d -t 16000 > emulator-evidence/logcat.txt
             grep -E "FATAL EXCEPTION|Fatal signal|SIGSEGV" emulator-evidence/logcat.txt && { echo "Fatal Android runtime error detected."; exit 1; } || true
-            echo "ANDROID EMULATOR SMOKE TEST PASSED: installed, launched, survived touch/navigation inputs, and collected screen/performance evidence."
-
+            echo "ANDROID EMULATOR SMOKE TEST PASSED: intro dismissal, screenshot-verified Arabic start-button tap, world entry, and idle video/performance evidence collected."
       - name: Upload Android emulator evidence
         if: always()
         uses: actions/upload-artifact@v4
