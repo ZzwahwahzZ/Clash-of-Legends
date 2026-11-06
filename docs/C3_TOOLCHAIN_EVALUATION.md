@@ -148,3 +148,17 @@ These counts describe the inspected archive and parser output only. They do not 
 - No unexplained skipped records, TPI malformed entries, parser exceptions or silent chunk skips remain.
 - Extracted assets have stable source paths, source hashes, decoded hashes, format metadata and provenance.
 - Model, motion, texture, UI, map, audio and gameplay-data references reconcile to the source catalog and are verified in the Godot runtime.
+
+
+### 8.6 Newly confirmed specialist lead: TQ Package Manager and full-format TPI/TPD gap
+
+The Conquer-specific TQ Package Manager thread documents WDF, DNP, WDB and TPI/TPD extraction, plus a WDF/DNP brute-force filename-list generator. More importantly, the format author states that the old public extractor does **not** support the full TPI/TPD format (including some CO3 packages), while he later wrote newer private Rust CLI tools after fully reversing the formats. The author explicitly says TPI names are already encoded in the paired TPI index, so brute-force is unnecessary for TPI/TPD; brute-force is relevant to hash-addressed WDF/DNP entries and has false positives due to hash collisions.
+
+Action:
+1. Treat the old public package manager as a legacy comparison tool, not the completeness solution.
+2. Prioritise reproducing the newer full TPI/TPD format behavior from our exact mobile samples, using the private-tool description as a lead and our 355 + 156 malformed-entry cases as test fixtures.
+3. Check whether the format author or maintainers can provide a compatible public tool, a documented format update, or permission to use a sample-based specification. Do not wait on private tooling; continue independent reverse engineering.
+4. For WDF/DNP only, add controlled candidate-name/hash enumeration using known INI/ANI/DBC references and a bounded dictionary. Record collisions and validate file signatures; never count brute-force hits as confirmed assets without validation.
+5. Keep two separate metrics: (a) named TPI/TPD index recovery completeness, and (b) hash-only WDF/DNP discovery coverage.
+
+This lead changes the priority order: full TPI/TPD parsing and malformed-record recovery come before expanding generic extension-based scanning.
