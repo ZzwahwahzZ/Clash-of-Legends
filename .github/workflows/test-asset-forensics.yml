@@ -22,7 +22,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Compile scanner
-        run: python -m py_compile tools/asset_forensics/run_forensics.py tools/asset_forensics/process_standard_assets.py tools/asset_forensics/build_godot_catalog.py tests/test_asset_forensics.py tests/test_native_library_inventory.py tests/test_fui_headers.py tools/asset_forensics/inspect_native_libraries.py tools/asset_forensics/inspect_fui_headers.py
+        run: python -m py_compile tools/asset_forensics/run_forensics.py tools/asset_forensics/process_standard_assets.py tools/asset_forensics/build_godot_catalog.py tests/test_asset_forensics.py tests/test_native_library_inventory.py tests/test_fui_headers.py tests/test_mobile_apk_inventory.py tools/asset_forensics/inspect_mobile_apks.py tools/asset_forensics/inspect_native_libraries.py tools/asset_forensics/inspect_fui_headers.py
       - name: Validate JavaScript parser syntax
         run: node --check tools/asset_forensics/parse_fui_packages.mjs
       - name: Validate Colab notebook JSON and single-cell contract
@@ -72,7 +72,7 @@ jobs:
           mkdir -p /tmp/jadx-main /tmp/jadx-install
           find mobile-apk-analysis/private_apk_extract -maxdepth 1 -name 'ConquerOnline-*.apk' -print -quit | grep . | while read APK; do "$JADX" --no-res -d /tmp/jadx-main "$APK" || true; done
           find mobile-apk-analysis/private_apk_extract -maxdepth 1 -name 'install_time_*.apk' -print -quit | grep . | while read APK; do "$JADX" --no-res -d /tmp/jadx-install "$APK" || true; done
-          grep -RInE -m 300 'Cipher|getInstance|SecretKey|IvParameter|MessageDigest|Inflater|ZipInputStream|AssetManager|System\\.loadLibrary|native |decrypt|encrypt|TPI|TPD|C3|MJP|PVR|loadResource|openAsset' /tmp/jadx-main /tmp/jadx-install > mobile-apk-analysis/jadx-resource-loader-hits.txt || true
+          grep -RInE -m 300 'Cipher|getInstance|SecretKey|IvParameter|MessageDigest|Inflater|ZipInputStream|AssetManager|System\.loadLibrary|native |decrypt|encrypt|TPI|TPD|C3|MJP|PVR|loadResource|openAsset' /tmp/jadx-main /tmp/jadx-install > mobile-apk-analysis/jadx-resource-loader-hits.txt || true
           test -s mobile-apk-analysis/jadx-resource-loader-hits.txt || echo "No matching Java-side loader strings; native path still requires ELF analysis." > mobile-apk-analysis/jadx-resource-loader-hits.txt
       - name: Upload metadata-only reverse-engineering report
         uses: actions/upload-artifact@v4
