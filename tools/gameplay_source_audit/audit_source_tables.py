@@ -253,6 +253,32 @@ def main() -> None:
                                           "sha256": hashlib.sha256(data).hexdigest(), **parse_itemtype(data, include_column_59_candidate=rel.lower().endswith("itemtype13.ini"))}
                                 entries.append(record)
                 results[category] = entries
+            # Inventory the complete mobile skill-icon/UI directory, not only the named INI/DAT files.
+            # This captures the actual skill button assets and any per-skill metadata stored beside them.
+            skill_assets = []
+            for rel, candidates in sources.items():
+                normalized = rel.lower().replace("\\", "/")
+                if not any(normalized.startswith(prefix) for prefix in TARGET_PREFIXES["skills"]):
+                    continue
+                for source_zip, member, display in candidates:
+                    data = source_zip.read(member)
+                    ext = Path(rel).suffix.lower()
+                    entry = {
+                        "relative_path": rel, "source_member": display,
+                        "size_bytes": len(data), "sha256": hashlib.sha256(data).hexdigest(),
+                        "extension": ext, "asset_role": "SKILL_UI_OR_ICON_ASSET",
+                        "parse_status": "BINARY_ASSET_METADATA_ONLY"
+                    }
+                    if ext in (".ini", ".txt", ".lua", ".json", ".xml"):
+                        parsed = parse_ini_opaque(data) if ext == ".ini" else {
+                            "parse_status": "TEXT_PRESENT_RAW_CONTENT_NOT_INTERPRETED",
+                            "line_count": len(decode_text(data).splitlines())
+                        }
+                        entry.update(parsed)
+                    elif ext == ".dat":
+                        entry["cipher_probe"] = probe_tq_candidates(data)
+                    skill_assets.append(entry)
+
             itemtypes = [e for e in results["equipment"] if e["relative_path"].lower().startswith("ini/itemtype/")]
             # Discover exact version-matched C3 and equipment-mapping paths without
             # guessing the Mobile client's folder layout or decoding opaque fields.
@@ -318,6 +344,7 @@ def main() -> None:
                 "archive_sha256": sha256_file(args.archive),
                 "version_matched_member_count": sum(len(v) for v in sources.values()),
                 "categories": {k: {"file_count": len(v), "files": v} for k, v in results.items()},
+                "skill_ui_asset_inventory": {"file_count": len(skill_assets), "extension_counts": {ext: sum(1 for item in skill_assets if item["extension"] == ext) for ext in sorted({item["extension"] for item in skill_assets})}, "files": skill_assets, "policy": "Icon/UI assets are inventoried by exact source path and hash; no icon-to-skill or icon-to-animation association is inferred."},
                 "asset_path_inventory": {
                     "c3_model_path_count": len(c3_model_paths),
                     "c3_model_paths": c3_model_paths,
