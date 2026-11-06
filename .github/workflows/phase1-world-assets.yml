@@ -138,13 +138,17 @@ jobs:
           xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --path . --rendering-method gl_compatibility --script res://tools/quality/Phase1AssetVisualPreview.gd 2>&1 | tee reports/phase1_visual_preview.log
           test -s reports/phase1_world_preview.png
           test -s reports/phase1_nature_preview.png
+          if grep -Eq 'SCRIPT ERROR:|ERROR: Node not inside tree|Parse Error:' reports/phase1_visual_preview.log; then
+            echo 'Godot visual preview reported a script or scene-tree error'
+            exit 1
+          fi
 
       - name: Commit acquired assets and audit evidence to phase branch
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add assets/environment/phase1 reports/phase1_world_asset_manifest.json reports/phase1_godot_import.log reports/phase1_visual_preview.log reports/phase1_world_preview.png reports/phase1_nature_preview.png
+          git add assets/environment/phase1 reports/phase1_world_asset_manifest.json reports/phase1_world_preview.png reports/phase1_nature_preview.png
           git diff --cached --quiet && { echo "No asset changes to commit"; exit 0; }
           git commit -m "Acquire and audit phase 1 production world assets"
           git push origin HEAD:stage/phase1-world-assets
