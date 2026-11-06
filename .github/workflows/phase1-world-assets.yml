@@ -301,3 +301,5 @@ jobs:
 # Preserve already committed phase evidence when CI jobs race on binary preview files.
 
 # Audit deferred NPC service spawn anchors against the imported city.
+
+# Recheck the corrected pawnshop anchor transform and NPC local offsets.
