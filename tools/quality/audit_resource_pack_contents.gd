@@ -29,6 +29,8 @@ func _run_audit() -> void:
 		"catalog_categories": {},
 		"catalog_model_entries": 0,
 		"catalog_missing_paths": [],
+		"character_registry_paths": [],
+		"c3_path_samples": [],
 		"verified_character_mappings": [],
 		"missing_character_classes": [],
 		"visual_geometry": {
@@ -54,6 +56,7 @@ func _run_audit() -> void:
 
 	var model_paths: Array[String] = []
 	_walk_directory("res://", report["extension_counts"], model_paths, report["extension_samples"])
+	_collect_character_registry_paths("res://", report["character_registry_paths"], report["c3_path_samples"])
 	_audit_resource_catalog(report, model_paths)
 	model_paths = model_paths.duplicate()
 	model_paths.sort()
@@ -98,6 +101,8 @@ func _run_audit() -> void:
 		"models_with_skeletons": report["models_with_skeletons"],
 		"models_with_animations": report["models_with_animations"],
 		"extension_counts": report["extension_counts"],
+		"character_registry_paths": report["character_registry_paths"],
+		"c3_path_sample_count": report["c3_path_samples"].size(),
 		"geometry": report["visual_geometry"]
 	}))
 	if not report["catalog_found"]:
@@ -120,6 +125,29 @@ func _run_audit() -> void:
 		print("RESOURCE MODEL WARNINGS: ", report["models_failed"].size())
 	quit(0)
 
+
+
+func _collect_character_registry_paths(path: String, registry_paths: Array, c3_samples: Array) -> void:
+	var directory := DirAccess.open(path)
+	if directory == null:
+		return
+	directory.list_dir_begin()
+	var entry := directory.get_next()
+	while not entry.is_empty():
+		if entry.begins_with(".") or entry == "ci-resource-packs":
+			entry = directory.get_next()
+			continue
+		var full_path := path.path_join(entry)
+		if directory.current_is_dir():
+			_collect_character_registry_paths(full_path, registry_paths, c3_samples)
+		else:
+			var lower_name := entry.to_lower()
+			if lower_name in ["3dobj.ini", "3dtexture.ini", "3dmotion.ini", "3dsimplerole.ini", "rolechoose.ini", "rolechoose_js.ini", "selectcharacter.ini"]:
+				registry_paths.append(full_path)
+			if lower_name.ends_with(".c3") and c3_samples.size() < 100:
+				c3_samples.append(full_path)
+		entry = directory.get_next()
+	directory.list_dir_end()
 
 func _audit_resource_catalog(report: Dictionary, model_paths: Array[String]) -> void:
 	var catalog_path := "res://resource_stage/world/resource_catalog.json"
