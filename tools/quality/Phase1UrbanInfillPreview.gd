@@ -237,9 +237,9 @@ func _collect_authored_mesh_bounds(node:Node,rows:Array)->void:
  if node is MeshInstance3D and not _has_audit_ancestor(node):
   var instance:=node as MeshInstance3D
   if instance.mesh!=null:
-   var label: String=(str(instance.name)+" "+instance.get_path().to_string()).to_lower()
+   var label: String=(str(instance.name)+" "+str(instance.get_path())).to_lower()
    var road:=label.contains("authoredstreetnetwork") or label.contains("street") or label.contains("road") or label.contains("avenue") or label.contains("curb") or label.contains("cross") or label.contains("lane") or label.contains("bridge") or label.contains("ramp")
-   rows.append({"name":str(instance.name),"path":instance.get_path().to_string(),"road":road,"bounds":instance.global_transform*instance.get_aabb()})
+   rows.append({"name":str(instance.name),"path":str(instance.get_path()),"road":road,"bounds":instance.global_transform*instance.get_aabb()})
  for child in node.get_children():
   _collect_authored_mesh_bounds(child,rows)
 
