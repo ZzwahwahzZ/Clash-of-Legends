@@ -36,6 +36,17 @@ var imported_mount_item_id: String = ""
 var imported_weapon_item_id: String = ""
 var footstep_timer: float = 0.0
 
+# World-touch navigation is separate from the virtual joystick. UI controls
+# consume their own touches before they reach _unhandled_input.
+@export var world_tap_max_drag: float = 18.0
+@export var world_double_tap_window_ms: int = 300
+@export var world_double_tap_jump: bool = true
+var _world_touch_starts: Dictionary = {}
+var _last_world_tap_ms: int = -1000
+var _last_world_tap_position: Vector2 = Vector2.ZERO
+var _mouse_world_press_position: Vector2 = Vector2.ZERO
+var _mouse_world_pressed: bool = false
+
 @onready var camera_pivot: Node3D = $CameraPivot
 @onready var free_camera: FreeCamera3D = $CameraPivot/FreeCamera3D
 @onready var inventory: PlayerInventory = $PlayerInventory
@@ -227,6 +238,60 @@ func _validate_character_candidate(candidate: Node, animation_node: Node) -> Dic
 		return {"ok": false, "reason": "requires bound skeletal idle/move clips or at least 8 morph meshes with semantic idle/move clips"}
 	var mode := "skeletal" if skeletal_animation_valid else "morph"
 	return {"ok": true, "reason": "renderable texture-backed materials and complete %s idle/move animation path present" % mode}
+
+func _unhandled_input(event: InputEvent) -> void:
+	# Short world taps move toward the ground point. UI touches are consumed
+	# by Controls; camera drags are rejected by the movement threshold.
+	if event is InputEventScreenTouch:
+		if event.pressed:
+			_world_touch_starts[event.index] = event.position
+		elif _world_touch_starts.has(event.index):
+			var start_position: Vector2 = _world_touch_starts[event.index]
+			_world_touch_starts.erase(event.index)
+			if start_position.distance_to(event.position) <= world_tap_max_drag:
+				_handle_world_tap(event.position)
+	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			_mouse_world_pressed = true
+			_mouse_world_press_position = event.position
+		elif _mouse_world_pressed:
+			_mouse_world_pressed = false
+			if _mouse_world_press_position.distance_to(event.position) <= world_tap_max_drag:
+				_handle_world_tap(event.position)
+
+func _handle_world_tap(screen_position: Vector2) -> void:
+	if is_dead:
+		return
+	var camera := get_viewport().get_camera_3d()
+	if camera == null:
+		return
+	var ray_origin := camera.project_ray_origin(screen_position)
+	var ray_end := ray_origin + camera.project_ray_normal(screen_position) * 300.0
+	var query := PhysicsRayQueryParameters3D.create(ray_origin, ray_end)
+	# Ground-only picking prevents taps on actors from becoming move commands.
+	query.collision_mask = 1
+	query.exclude = [get_rid()]
+	var hit := get_world_3d().direct_space_state.intersect_ray(query)
+	if hit.is_empty():
+		return
+	var now_ms := Time.get_ticks_msec()
+	var is_double_tap := (
+		world_double_tap_jump
+		and now_ms - _last_world_tap_ms <= world_double_tap_window_ms
+		and _last_world_tap_position.distance_to(screen_position) <= 56.0
+	)
+	_last_world_tap_ms = -1000 if is_double_tap else now_ms
+	_last_world_tap_position = screen_position
+	if is_double_tap:
+		perform_jump()
+		return
+	move_towards_target_position(hit.position, 0.0)
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:
+		_world_touch_starts.clear()
+		_mouse_world_pressed = false
+		input_direction = Vector2.ZERO
 
 func _physics_process(delta: float) -> void:
 	if is_dead:
