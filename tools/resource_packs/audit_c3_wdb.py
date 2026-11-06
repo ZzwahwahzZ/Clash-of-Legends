@@ -232,6 +232,65 @@ def parse_simo(data: bytes) -> dict:
             "sample_records": records[:20], "_records": records}
 
 
+
+def parse_ropt(data: bytes) -> dict:
+    """Parse the fixed-layout ROPT RolePart table with strict size validation.
+
+    Layout is independently documented by conquer-online/co2_core_dll
+    (src/IO/DBC/ROPT.cs): 12-byte header, 544-byte Part records and
+    36-byte Dummy records. Keep the source strings and IDs verbatim.
+    """
+    if len(data) < 12 or data[:4] != b"ROPT":
+        raise ValueError("RolePart table is missing the ROPT header")
+    part_count, dummy_count = struct.unpack_from("<II", data, 4)
+    part_size = 32 + 256 + 256
+    dummy_size = 4 + 32
+    expected_size = 12 + part_count * part_size + dummy_count * dummy_size
+    if expected_size != len(data):
+        raise ValueError(
+            f"ROPT size mismatch: expected {expected_size} from "
+            f"{part_count} parts and {dummy_count} dummy records, got {len(data)}"
+        )
+
+    def fixed_string(raw: bytes) -> str:
+        return raw.split(b"\\0", 1)[0].decode("latin-1", errors="replace").strip()
+
+    parts = []
+    offset = 12
+    for index in range(part_count):
+        name = fixed_string(data[offset:offset + 32])
+        mesh_ini = fixed_string(data[offset + 32:offset + 288])
+        motion_ini = fixed_string(data[offset + 288:offset + 544])
+        if not name:
+            raise ValueError(f"ROPT Part {index} has an empty name")
+        parts.append({
+            "index": index,
+            "name": name,
+            "mesh_ini": mesh_ini,
+            "motion_ini": motion_ini,
+        })
+        offset += part_size
+
+    dummy_parts = []
+    for index in range(dummy_count):
+        unique_id = struct.unpack_from("<I", data, offset)[0]
+        name = fixed_string(data[offset + 4:offset + 36])
+        dummy_parts.append({"id": unique_id, "name": name})
+        offset += dummy_size
+
+    return {
+        "format": "ROPT",
+        "record_count": part_count,
+        "dummy_record_count": dummy_count,
+        "parse_status": "PARSED",
+        "part_record_size": part_size,
+        "dummy_record_size": dummy_size,
+        "parts": parts,
+        "dummy_parts": dummy_parts,
+        "schema_reference": "conquer-online/co2_core_dll src/IO/DBC/ROPT.cs",
+    }
+
+
 def parse_wdb(data: bytes) -> dict:
     if len(data) < 16 or data[:4] != b"BDMG":
         raise ValueError("c3.wdb is missing the BDMG header")
@@ -265,21 +324,7 @@ def parse_wdb(data: bytes) -> dict:
         elif magic in (b"MESH", b"MESZ"):
             parsed = parse_mesh(blob)
         elif magic == b"ROPT":
-            # Preserve a bounded raw probe until the Mobile RolePart record layout
-            # is validated against independent samples; never guess field names.
-            payload = blob[8:]
-            u32_count = min(len(payload) // 4, 128)
-            u16_count = min(len(payload) // 2, 128)
-            parsed = {
-                "format": "ROPT",
-                "record_count": struct.unpack_from("<I", blob, 4)[0] if len(blob) >= 8 else None,
-                "parse_status": "RAW_LAYOUT_PROBE_ONLY",
-                "raw_size_bytes": len(blob),
-                "payload_size_bytes": len(payload),
-                "u32_probe": list(struct.unpack_from("<" + "I" * u32_count, payload, 0)) if u32_count else [],
-                "u16_probe": list(struct.unpack_from("<" + "H" * u16_count, payload, 0)) if u16_count else [],
-                "payload_hex": payload.hex(),
-            }
+            parsed = parse_ropt(blob)
         elif magic == b"SIM5":
             parsed = {
                 "format": "SIM5", "record_count": struct.unpack_from("<I", blob, 4)[0] if len(blob) >= 8 else None,
