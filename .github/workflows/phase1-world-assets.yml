@@ -299,3 +299,5 @@ jobs:
 # Navigation route resolver added to the task landmark contract.
 
 # Preserve already committed phase evidence when CI jobs race on binary preview files.
+
+# Audit deferred NPC service spawn anchors against the imported city.
