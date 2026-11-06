@@ -256,6 +256,7 @@ jobs:
           rm -f assets/environment/phase1/jianghai/full_city_preview.glb assets/environment/phase1/jianghai/full_city_preview.glb.import
           git diff --cached --quiet && { echo "No asset changes to commit"; exit 0; }
           git commit -m "Acquire and audit phase 1 production world assets"
+          git stash push -m "Godot-generated tracked changes before phase-branch rebase" || true
           git fetch origin stage/phase1-world-assets
           git rebase origin/stage/phase1-world-assets
           git push origin HEAD:stage/phase1-world-assets
