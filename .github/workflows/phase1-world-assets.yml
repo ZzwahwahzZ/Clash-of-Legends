@@ -1,4 +1,5 @@
 name: Phase 1 - Acquire and audit CC0 world assets
+# Re-run extraction after updating glTF Transform hierarchy traversal.
 
 on:
   push:
