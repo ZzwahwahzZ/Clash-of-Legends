@@ -1,6 +1,11 @@
 extends SceneTree
 
-const MODEL_CATEGORIES := ["characters", "monsters", "mounts", "equipment"]
+# Only categories with converted source geometry are hard-gated here.
+# Mount metadata and animation resources exist, but this source release currently
+# has no native C3 mount/horse/pet model directory; keep that gap explicit rather
+# than treating an empty GLB list as a successful visual model.
+const MODEL_CATEGORIES := ["characters", "monsters", "equipment"]
+const PENDING_MODEL_CATEGORIES := ["mounts"]
 
 func _initialize() -> void:
 	call_deferred("_validate_packages")
@@ -42,6 +47,18 @@ func _validate_packages() -> void:
 			_fail("Category is empty: " + required_category)
 			return
 		print("PCK category OK: ", required_category, " (", entries.size(), " entries)")
+
+	# Keep categories with source metadata but no converted model visible as pending.
+	for pending_category in PENDING_MODEL_CATEGORIES:
+		var pending_glbs := 0
+		for entry in assets.get(pending_category, []):
+			var ext := str(entry.get("extension", "")).to_lower()
+			if ext == ".glb" or ext == ".gltf":
+				pending_glbs += 1
+		if pending_glbs == 0:
+			print("MODEL CATEGORY PENDING: ", pending_category, " | source metadata exists, but no native converted GLB/glTF is available yet.")
+		else:
+			print("MODEL CATEGORY AVAILABLE: ", pending_category, " | ", pending_glbs, " GLB/glTF entries.")
 
 	# Inspect every supported model scene, not just the first entry in each category.
 	var total_models := 0
