@@ -441,6 +441,101 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
+    // Export a skeleton catalog for every body model whose external action-100
+    // clip matches the full per-mesh bone signature. The path key supplies look,
+    // while exact bone-count signatures and vertex bone-index bounds gate the join.
+    let mut skeleton_catalog_poc: Vec<Value> = Vec::new();
+    let mut body_paths: Vec<PathBuf> = files.iter()
+        .filter(|path| path.to_string_lossy().replace('\\', "/").contains("/c3/body/"))
+        .cloned().collect();
+    body_paths.sort();
+    for body_path in body_paths {
+        let body_relative = body_path.strip_prefix(&root).unwrap_or(&body_path).to_string_lossy().replace('\\', "/");
+        let Some(look) = parse_body_model_look(&body_relative) else { continue; };
+        if look != 7 && look != 8 { continue; }
+        let Some(model_id) = Path::new(&body_relative).file_stem().and_then(|s| s.to_str()).and_then(|s| s.parse::<u32>().ok()) else { continue; };
+        let body_bytes = fs::read(&body_path)?;
+        let body_document = match C3Document::parse(&body_bytes) {
+            Ok(document) => document,
+            Err(error) => {
+                skeleton_catalog_poc.push(json!({"model_id":model_id,"look":look,"source":body_relative,"status":"REJECTED_BODY_PARSE","reason":error.to_string()}));
+                continue;
+            }
+        };
+        let Some(body_mesh_index) = body_document.meshes.iter().position(|mesh| mesh.name.eq_ignore_ascii_case("v_body")) else {
+            skeleton_catalog_poc.push(json!({"model_id":model_id,"look":look,"source":body_relative,"status":"SKIPPED_NO_V_BODY_MESH"}));
+            continue;
+        };
+        let motion_suffix = format!("/c3/{look:04}/500/100.c3");
+        let Some(motion_path) = files.iter().find(|path| path.to_string_lossy().replace('\\', "/").ends_with(&motion_suffix)) else {
+            skeleton_catalog_poc.push(json!({"model_id":model_id,"look":look,"source":body_relative,"status":"SKIPPED_ACTION_100_NOT_FOUND"}));
+            continue;
+        };
+        let motion_relative = motion_path.strip_prefix(&root).unwrap_or(motion_path).to_string_lossy().replace('\\', "/");
+        let motion_bytes = fs::read(motion_path)?;
+        let motion_document = match C3Document::parse(&motion_bytes) {
+            Ok(document) => document,
+            Err(error) => {
+                skeleton_catalog_poc.push(json!({"model_id":model_id,"look":look,"source":body_relative,"motion_source":motion_relative,"status":"REJECTED_MOTION_PARSE","reason":error.to_string()}));
+                continue;
+            }
+        };
+        let body_signature: Vec<u32> = body_document.motions.iter().map(|motion| motion.bone_count).collect();
+        let motion_signature: Vec<u32> = motion_document.motions.iter().map(|motion| motion.bone_count).collect();
+        if parse_motion_path_key(&motion_relative) != Some((look, 500, 100))
+            || !motion_signature_matches(&body_signature, &motion_signature)
+            || motion_document.motions.len() != body_document.meshes.len()
+        {
+            skeleton_catalog_poc.push(json!({
+                "model_id":model_id,"look":look,"source":body_relative,"motion_source":motion_relative,
+                "status":"SKIPPED_RIG_SIGNATURE_MISMATCH",
+                "body_bone_signature":body_signature,"motion_bone_signature":motion_signature
+            }));
+            continue;
+        }
+        let source_mesh = &body_document.meshes[body_mesh_index];
+        let source_motion = &motion_document.motions[body_mesh_index];
+        if source_motion.bone_count <= 1 || source_mesh.vertices.iter().all(|vertex| vertex.bone_weights[0] <= 0.0 && vertex.bone_weights[1] <= 0.0) {
+            skeleton_catalog_poc.push(json!({"model_id":model_id,"look":look,"source":body_relative,"motion_source":motion_relative,"status":"SKIPPED_NO_DEFORMING_SKIN"}));
+            continue;
+        }
+        let texture_path = pvr_root.join(Path::new(&body_relative).with_extension("png"));
+        let (texture_bytes, texture_source) = if texture_path.is_file() {
+            (fs::read(&texture_path)?, texture_path.to_string_lossy().to_string())
+        } else {
+            let fallback_name = if look == 7 { "7130000.png" } else { "8133010.png" };
+            let fallback_path = pvr_root.join("netdragon/c31/c3/body").join(fallback_name);
+            if !fallback_path.is_file() {
+                skeleton_catalog_poc.push(json!({"model_id":model_id,"look":look,"source":body_relative,"motion_source":motion_relative,"status":"SKIPPED_NO_DIAGNOSTIC_TEXTURE"}));
+                continue;
+            }
+            (fs::read(&fallback_path)?, format!("DIAGNOSTIC_TEXTURE_FALLBACK:{}", fallback_path.to_string_lossy()))
+        };
+        let skinned_document = C3Document {
+            version: body_document.version.clone(),
+            meshes: vec![source_mesh.clone()],
+            motions: vec![source_motion.clone()],
+            unknown_chunks: Vec::new(),
+        };
+        let output_relative = Path::new("skeleton-poc").join(format!("look{look}_model{model_id}_weapon500_action100.glb"));
+        let output_path = glb_root.join(&output_relative);
+        let source_pair = format!("{body_relative} + {motion_relative} [v_body only]");
+        match skinned_glb::export_document(&skinned_document, &texture_bytes, &source_pair, &output_path) {
+            Ok((glb_bytes, mesh_count, animated_mesh_count)) => skeleton_catalog_poc.push(json!({
+                "model_id":model_id,"look":look,"source":body_relative,"motion_source":motion_relative,
+                "texture_source":texture_source,"output":output_relative.to_string_lossy().replace('\\', "/"),
+                "glb_bytes":glb_bytes,"mesh_count":mesh_count,"animated_mesh_count":animated_mesh_count,
+                "bone_count":source_motion.bone_count,"skinned_vertex_count":source_mesh.vertices.iter().filter(|v| v.bone_weights[0] > 0.0 || v.bone_weights[1] > 0.0).count(),
+                "status":"EXPORTED_PENDING_GODOT_CATALOG_VALIDATION"
+            })),
+            Err(error) => skeleton_catalog_poc.push(json!({
+                "model_id":model_id,"look":look,"source":body_relative,"motion_source":motion_relative,
+                "status":"REJECTED_SKELETON_EXPORT","reason":error.to_string()
+            }))
+        }
+    }
+    println!("C3 SKELETON CATALOG RESULTS: {}", serde_json::to_string(&skeleton_catalog_poc)?);
+
     println!("C3 SKELETAL EXPORT RESULTS: {}", serde_json::to_string(&skeletal_motion_poc)?);
     println!("C3 VAT EXPORT RESULTS: {}", serde_json::to_string(&vat_motion_poc)?);
 
@@ -510,6 +605,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "external_motion_poc_count": external_motion_poc.iter().filter(|row| row["status"] == "EXPORTED_PENDING_GODOT_IMPORT_VALIDATION").count(),
         "external_motion_poc": external_motion_poc,
         "skeletal_motion_poc": skeletal_motion_poc,
+        "skeleton_catalog_poc_count": skeleton_catalog_poc.iter().filter(|row| row["status"] == "EXPORTED_PENDING_GODOT_CATALOG_VALIDATION").count(),
+        "skeleton_catalog_poc": skeleton_catalog_poc,
         "vat_motion_poc": vat_motion_poc,
         "motion_only_pairing_status": "PATH_KEY_AND_BONE_SIGNATURE_CANDIDATES_ONLY_NOT_RUNTIME_PAIRED",
         "motion_only_pairing": motion_pairing_report,

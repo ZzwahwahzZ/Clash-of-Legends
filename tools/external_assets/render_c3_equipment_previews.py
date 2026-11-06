@@ -67,11 +67,18 @@ def render_one(src: Path, root: Path, out_root: Path):
     world.use_nodes = True
     world.node_tree.nodes["Background"].inputs["Color"].default_value = (0.035, 0.045, 0.065, 1.0)
     world.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.65
-    engine_items = bpy.types.RenderSettings.bl_rna.properties["engine"].enum_items
-    engine_ids = {item.identifier for item in engine_items}
-    scene.render.engine = "BLENDER_EEVEE_NEXT" if "BLENDER_EEVEE_NEXT" in engine_ids else "BLENDER_EEVEE"
-    scene.render.resolution_x = 512
-    scene.render.resolution_y = 512
+    # Workbench gives deterministic, fast geometry previews in headless CI.
+    # These previews are for shape inspection only, never material approval.
+    scene.render.engine = "BLENDER_WORKBENCH"
+    scene.display.shading.light = "STUDIO"
+    scene.display.shading.studio_light = "paint.sl"
+    scene.display.shading.color_type = "MATERIAL"
+    scene.display.shading.show_shadows = True
+    scene.display.shading.show_cavity = True
+    scene.display.shading.cavity_type = "BOTH"
+    scene.display.shading.background_type = "WORLD"
+    scene.render.resolution_x = 384
+    scene.render.resolution_y = 384
     scene.render.resolution_percentage = 100
     scene.render.image_settings.file_format = "PNG"
     scene.render.film_transparent = False
