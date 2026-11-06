@@ -69,3 +69,18 @@ The current `LegendIntro.gd` intentionally blocks world entry while any selectab
 ## Next concrete task
 
 Continue source tracing from the exact Mobile role/look records to the C3 body path and motion path. Prioritize the already import-validated look 7 / model 7130000 and look 8 / model 8133010 samples for deeper source verification, but keep both at **POC / unassigned** until the exact class/gender join and in-game visual review are complete.
+
+
+## Additional role-source trace (extraction artifact 13466315369)
+
+The extracted source report contains structural metadata and decoded INI sections for the original Mobile 1.1.2.3 role files. It confirms:
+
+- `rolechoose.ini` maps 18 UI slots to named role animation identifiers (for example `Role_FemaleTaoist`, `Role_MaleWarrior`, `Role_MaleDragonWarrior`, `Role_View_17`, and `Role_View_18`) and to profession/info indices.
+- `selectcharacter.ini` labels slots 14–15 as Dragon-Warrior and slots 16–17 as Windwalker; its class descriptions establish the class identity but not the C3 body model path.
+- `3dsimplerole.ini` contains `Role0`–`Role7` simple-object IDs 20001–20008 with standby/blaze motion IDs 9998800–9998871. It separately contains `Role100`–`Role115` entries with `Look` values 1–4 and armor/hair item IDs.
+- The decoded creation table supplies profession IDs and equipment IDs, but its `sex_code` is -1 for these entries and does not give a body model ID.
+- The report's `known_role_model_ids` list consists of the role-creation armor IDs and the `3dsimplerole.ini` armor IDs. It does not establish a body-model join.
+
+**Important gap:** the role-animation names, simple-object IDs, look values 1–4, and C3 body filenames such as 7101020 / 7130000 / 8133010 are separate identifier families in the evidence collected so far. No direct key in this extraction report joins them. Treating the shared word “look” or a similar number as a body assignment would be guesswork.
+
+The next source-tracing step is therefore to locate the original model/animation registry or binary resource index that maps the role-animation/simple-object IDs to concrete C3 body and motion paths. Until that registry is extracted and reconciled, the two skeletal POCs remain unassigned.
