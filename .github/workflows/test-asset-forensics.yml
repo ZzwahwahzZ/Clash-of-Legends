@@ -1,0 +1,34 @@
+name: Test external asset forensics
+on:
+  push:
+    branches:
+      - tools/colab-drive-asset-transfer
+    paths:
+      - tools/asset_forensics/**
+      - tests/test_asset_forensics.py
+      - notebooks/Run_External_Asset_Forensics.ipynb
+      - .github/workflows/test-asset-forensics.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile scanner
+        run: python -m py_compile tools/asset_forensics/run_forensics.py tests/test_asset_forensics.py
+      - name: Validate Colab notebook JSON and single-cell contract
+        run: |
+          python - <<'PY'
+          import json
+          p=json.load(open("notebooks/Run_External_Asset_Forensics.ipynb",encoding="utf-8"))
+          assert p["nbformat"] == 4
+          assert len(p["cells"]) == 1 and p["cells"][0]["cell_type"] == "code"
+          print("Notebook JSON valid; exactly one executable cell.")
+          PY
+      - name: Run archive fixtures
+        run: python -m unittest discover -s tests -v
