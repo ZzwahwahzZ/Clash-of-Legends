@@ -4,8 +4,8 @@ extends SceneTree
 # Mount metadata and animation resources exist, but this source release currently
 # has no native C3 mount/horse/pet model directory; keep that gap explicit rather
 # than treating an empty GLB list as a successful visual model.
-const MODEL_CATEGORIES := ["characters", "monsters", "equipment"]
-const PENDING_MODEL_CATEGORIES := ["mounts"]
+const MODEL_CATEGORIES := ["characters", "equipment"]
+const PENDING_MODEL_CATEGORIES := ["monsters", "mounts"]
 
 func _initialize() -> void:
 	call_deferred("_validate_packages")
@@ -56,9 +56,9 @@ func _validate_packages() -> void:
 			if ext == ".glb" or ext == ".gltf":
 				pending_glbs += 1
 		if pending_glbs == 0:
-			print("MODEL CATEGORY PENDING: ", pending_category, " | source metadata exists, but no native converted GLB/glTF is available yet.")
+			print("MODEL CATEGORY PENDING: ", pending_category, " | source assets are retained, but no native converted GLB/glTF is available yet.")
 		else:
-			print("MODEL CATEGORY AVAILABLE: ", pending_category, " | ", pending_glbs, " GLB/glTF entries.")
+			print("MODEL CATEGORY PARTIAL: ", pending_category, " | ", pending_glbs, " GLB/glTF entries.")
 
 	# Inspect every supported model scene, not just the first entry in each category.
 	var total_models := 0
