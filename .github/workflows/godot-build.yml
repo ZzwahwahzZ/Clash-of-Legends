@@ -403,8 +403,10 @@ jobs:
             sleep 0.5
             adb shell screencap -p /sdcard/clash-intro.png
             adb pull /sdcard/clash-intro.png emulator-evidence/intro-screen.png
-            # LegendIntro.gd fades its cinematic overlay automatically after about 3.85 seconds.
+            # Allow the automatic intro fade, then tap the centered in-game skip control as a deterministic fallback.
             sleep 4
+            adb shell input tap 1200 500
+            sleep 0.6
             adb shell screencap -p /sdcard/clash-character-select.png
             adb pull /sdcard/clash-character-select.png emulator-evidence/character-select.png
             python3 tools/ci/compare_emulator_screens.py emulator-evidence/intro-screen.png emulator-evidence/character-select.png 600,250,1800,800 --minimum-ratio 0.02
