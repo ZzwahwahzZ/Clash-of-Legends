@@ -186,6 +186,9 @@ func _run_main_game_integration() -> void:
     var old_trees := game.get_node_or_null("TwinPlainsTrees")
     if old_trees:
         old_trees.visible = false
+    var old_volcano := game.get_node_or_null("MountainSummitVolcano")
+    if old_volcano:
+        old_volcano.visible = false
     var canvas := game.get_node_or_null("CanvasLayer")
     if canvas:
         canvas.visible = false
@@ -238,6 +241,9 @@ func _run_main_game_integration() -> void:
     avenue_camera.current = true
     await _capture("reports/phase1_maingame_street_integration.png")
     print("PHASE1 MAIN GAME VISUAL AUDIT SAVED: gate, bridge, and avenue. Legacy blockout nodes were hidden only in this disposable audit instance.")
+    # Let importer/navigation/audio worker threads finish before SceneTree teardown.
+    await get_tree().create_timer(2.0).timeout
+    await process_frame
 
 func _collect_authored_city_bounds(node: Node) -> AABB:
     var accumulator := {
