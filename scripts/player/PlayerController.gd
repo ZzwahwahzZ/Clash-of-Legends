@@ -39,11 +39,7 @@ var footstep_timer: float = 0.0
 # World-touch navigation is separate from the virtual joystick. UI controls
 # consume their own touches before they reach _unhandled_input.
 @export var world_tap_max_drag: float = 18.0
-@export var world_double_tap_window_ms: int = 300
-@export var world_double_tap_jump: bool = true
 var _world_touch_starts: Dictionary = {}
-var _last_world_tap_ms: int = -1000
-var _last_world_tap_position: Vector2 = Vector2.ZERO
 var _mouse_world_press_position: Vector2 = Vector2.ZERO
 var _mouse_world_pressed: bool = false
 
@@ -274,18 +270,10 @@ func _handle_world_tap(screen_position: Vector2) -> void:
 	var hit := get_world_3d().direct_space_state.intersect_ray(query)
 	if hit.is_empty():
 		return
-	var now_ms := Time.get_ticks_msec()
-	var is_double_tap := (
-		world_double_tap_jump
-		and now_ms - _last_world_tap_ms <= world_double_tap_window_ms
-		and _last_world_tap_position.distance_to(screen_position) <= 56.0
-	)
-	_last_world_tap_ms = -1000 if is_double_tap else now_ms
-	_last_world_tap_position = screen_position
-	if is_double_tap:
-		perform_jump()
-		return
+	# Conquer Mobile: one deliberate ground tap makes the hero leap toward
+	# the selected point. Continuous walking/running remains on the joystick.
 	move_towards_target_position(hit.position, 0.0)
+	perform_jump()
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:
