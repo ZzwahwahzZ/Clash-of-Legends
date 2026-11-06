@@ -1,0 +1,59 @@
+# Conquer Mobile-faithful gameplay HUD and touch control specification
+
+**Owner-approved requirement:** 2026-11-06  
+**Target:** Android portrait/landscape phone gameplay; Redmi Note 11 baseline  
+**Reference:** The actual in-game HUD of Conquer Online Mobile (Android package `com.Tq.CQ2ClientAndroid`), not a generic MMORPG HUD and not the old PC-only layout.
+
+## Visual acceptance target
+
+The gameplay screen must read immediately as the Conquer Mobile play screen. Use current official mobile gameplay screenshots and, where available, the legally usable UI reference material in the project's source inventory as the visual reference set. Do not substitute the PC 4:3 HUD or an unrelated fan redesign.
+
+Match the reference's visual language, relative placement, hierarchy, proportions, icon treatment, frame shapes, colors, gradients, borders, and density:
+- upper gameplay overlay and status indicators;
+- character portrait/status/level and HP/MP/resource presentation;
+- minimap and its expand/collapse affordance, location/coordinate and nearby marker roles;
+- quest/objective and event/navigation access;
+- bottom action/skill/quick-item area with class-appropriate skill icons;
+- attack and special-action cluster, target feedback, cooldown/disabled states;
+- inventory, character/status, equipment, skills, quests, map, settings and other function shortcuts;
+- message/system feedback area, while respecting this project's explicit no-chat requirement;
+- contextual NPC/interact, mount and movement controls.
+
+The existing `MainHUD.tscn` is a functional prototype only. Its rectangular text buttons, arbitrary corner layout and missing mobile reference art are not an accepted final visual match. Replace/refine it incrementally; do not discard working signal wiring or gameplay systems.
+
+## Control behavior (owner's explicit adaptation)
+
+1. A visible virtual joystick is the primary continuous movement control. It must support analog direction and magnitude, smooth dead-zone handling, safe multi-touch, and release-to-stop. Walking/running is selectable through a dedicated mode control; sprint/run may also use a press/hold affordance only if it does not conflict with the reference layout.
+2. Touching a valid point on the 3D world issues a pathfinding destination, using the existing navigation system and obstacle avoidance. Touching UI must never issue a world command.
+3. A dedicated jump action and the reference-style tap/hold gesture for jump/hop must be supported without turning every world tap into an accidental jump. Gesture recognition must distinguish tap, drag, long-press, joystick contact, and UI interaction. A short tap on the world selects/interacts or path-moves according to target/context; a configured jump gesture performs a hop. Do not infer the jump gesture from a PC keyboard shortcut.
+4. Attack and each skill are separate touch targets. Skill buttons show the actual class skill icon, cooldown overlay, mana/cost state, and disabled state; no text-only generic skill buttons in the final HUD.
+5. Mount, auto-hunt, auto-loot, potion/quick slots and contextual interaction must be reachable by thumb and must not overlap the joystick or attack/skill cluster.
+6. All touch actions must work concurrently where expected (e.g. movement joystick plus skill press), with correct pointer/touch IDs and no stuck movement state when the app loses focus or a finger leaves the screen.
+7. UI must scale and reposition safely across phone aspect ratios and safe areas; target the Redmi Note 11 screen first. Preserve camera visibility and avoid covering the character/action area.
+
+## Offline and project constraints
+
+- Arabic-first RTL labels; iconography remains recognizable and aligned to the reference.
+- No chat feed or live social channels; do not add chat merely because the reference includes it.
+- Gold only; do not add VIP, premium-currency, real-money shop or payment affordances.
+- Keep existing Godot scene/signal connections, save data and gameplay functions. Every visible button must perform a real action.
+- Prefer original or properly licensed UI artwork and icons. Use screenshots as visual layout/behavior references; do not extract and redistribute proprietary game art without authorization.
+- Do not claim visual completion until compared side-by-side against actual Conquer Mobile gameplay screenshots and verified on an Android device.
+
+## Source references reviewed
+
+- Official Google Play listing for Conquer Online Android, package `com.Tq.CQ2ClientAndroid`, updated 2026-07-21: https://play.google.com/store/apps/details?id=com.Tq.CQ2ClientAndroid
+- Official classic interface guide (PC reference only; useful for functional roles, not the mobile layout): https://conqueronline.com/guide/guides/basicint.shtml
+- AppFollow screenshot index for the Android package: https://apps.appfollow.io/android/conquer-online-mmorpg-game/com.Tq.CQ2ClientAndroid?country=by
+
+## Acceptance checklist
+
+- [ ] Side-by-side mobile screenshot review completed against the current Conquer Mobile gameplay screen.
+- [ ] Correct mobile layout, visual skin, icons and spacing; not the current generic prototype.
+- [ ] Joystick analog movement and walk/run mode work.
+- [ ] World tap pathfinding and obstacle avoidance work.
+- [ ] Jump/hop gesture and dedicated button work without false triggers.
+- [ ] Movement + attack/skill multi-touch works; no stuck inputs after touch cancellation/focus loss.
+- [ ] Minimap, target, quest, quick slots and all visible function controls are functional.
+- [ ] Arabic RTL, phone safe areas and multiple aspect ratios pass.
+- [ ] Android runtime test on Redmi Note 11; no material FPS regression.
