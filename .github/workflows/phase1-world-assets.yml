@@ -173,6 +173,22 @@ jobs:
               "MarketBridgeDeck",
               "MarketEastRamp",
               "MarketWestRamp",
+              "FactoryCourtyard",
+              "FactorySteamPipe",
+              "RedStarFactoryMarqueeBacking",
+              "RedStarFactoryMarqueeText",
+              "RedStarSafetyPlaqueBacking",
+              "RedStarSafetyPlaqueText",
+              "FactoryLoadingGuide00",
+              "FactoryLoadingGuide01",
+              "FactoryLoadingGuide02",
+              "FactoryLoadingGuide03",
+              "FactoryLoadingGuide04",
+              "FactoryChimneyBand2.0",
+              "FactoryChimneyBand7.0",
+              "FactoryChimneyBand12.0",
+              "FactoryChimneyBand17.0",
+              "FactoryChimneyBand22.0",
           }
           missing = sorted(required - names)
           if missing:
