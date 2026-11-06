@@ -181,7 +181,8 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add assets/environment/phase1 reports/phase1_world_asset_manifest.json reports/phase1_chinese_district_extract.json reports/phase1_chinese_district_preview.png reports/phase1_chinese_district_closeup.png
+          git add assets/environment/phase1 reports/phase1_world_asset_manifest.json reports/phase1_chinese_district_extract.json reports/phase1_chinese_district_preview.png
+          git add -f reports/phase1_chinese_district_closeup.png
           git diff --cached --quiet && { echo "No asset changes to commit"; exit 0; }
           git commit -m "Acquire and audit phase 1 production world assets"
           git push origin HEAD:stage/phase1-world-assets
