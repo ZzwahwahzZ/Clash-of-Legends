@@ -395,9 +395,10 @@ jobs:
             adb shell screencap -p /sdcard/clash-launch.png
             adb pull /sdcard/clash-launch.png emulator-evidence/launch-screen.png
             # Dismiss Android 13's first-run immersive-mode notice after the splash has rendered.
-            # The "Got it" target is centered near (1500, 383) on the 2400x1080 emulator.
+            # The "Got it" target is centered near (1500, 500) on the 2400x1080 emulator.
+            # (The captured image is rendered scaled in reports; use native framebuffer coordinates.)
             sleep 2
-            adb shell input tap 1500 383
+            adb shell input tap 1500 500
             sleep 0.5
             adb shell screencap -p /sdcard/clash-intro.png
             adb pull /sdcard/clash-intro.png emulator-evidence/intro-screen.png
