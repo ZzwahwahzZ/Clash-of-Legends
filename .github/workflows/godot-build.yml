@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - tools/colab-drive-asset-transfer
   pull_request:
     branches:
       - main
@@ -156,33 +157,7 @@ jobs:
           set -euo pipefail
           mkdir -p bundled
           gh release download resource-packs-v4 --repo ZzwahwahzZ/Clash-of-Legends --pattern "*.pck" --dir bundled --clobber
-          python3 - <<'PY'
-          import hashlib, json, pathlib
-          manifest = json.loads(pathlib.Path("RESOURCE_MANIFEST").read_text(encoding="utf-8"))
-          entries = manifest.get("resource_packages", [])
-          if len(entries) != 11:
-              raise SystemExit(f"Expected exactly 11 PCK entries, found {len(entries)}")
-          expected_names = set()
-          total = 0
-          for entry in entries:
-              name = entry["file_name"]
-              if name in expected_names:
-                  raise SystemExit(f"Duplicate PCK filename: {name}")
-              expected_names.add(name)
-              path = pathlib.Path("bundled") / name
-              if not path.is_file():
-                  raise SystemExit(f"Missing embedded resource pack: {name}")
-              size = path.stat().st_size
-              digest = hashlib.sha256(path.read_bytes()).hexdigest()
-              if size != int(entry["size_bytes"]) or digest != entry["sha256"]:
-                  raise SystemExit(f"Embedded pack integrity failure: {name}")
-              total += size
-              print(f"VERIFIED EMBEDDED PCK: {name} {size} bytes SHA-256 OK")
-          actual_names = {p.name for p in pathlib.Path("bundled").glob("*.pck")}
-          if actual_names != expected_names:
-              raise SystemExit(f"Unexpected bundled PCK set: {sorted(actual_names ^ expected_names)}")
-          print(f"ALL 11 PCK FILES STAGED FOR APK: {total} bytes")
-          PY
+          python3 tools/resource_packs/validate_offline_bundle.py bundled --manifest RESOURCE_MANIFEST --report reports/offline-pck-bundle-report.json
 
       - name: Import Godot project
         run: godot --headless --editor --path . --quit
@@ -383,10 +358,15 @@ jobs:
             # Enter the journey and wait for the actual game world, not merely a changed loading bar.
             adb shell input tap 1200 980
             python3 tools/ci/wait_for_world_entry.py emulator-evidence/character-select.png emulator-evidence
-            # Exercise the landscape movement area only after world entry is verified.
+            # Record real in-world interaction evidence after the world-entry gate passes.
+            adb shell 'screenrecord --time-limit 20 /sdcard/clash-gameplay.mp4 >/dev/null 2>&1 &' 
+            sleep 2
             adb shell input swipe 180 280 180 420 700
-            sleep 3
+            adb shell input tap 2100 930
+            sleep 4
             adb shell screencap -p /sdcard/clash-interaction.png
+            sleep 15
+            adb pull /sdcard/clash-gameplay.mp4 emulator-evidence/gameplay-session.mp4 || true
             adb pull /sdcard/clash-interaction.png emulator-evidence/interaction-screen.png
             adb shell dumpsys meminfo com.zwahwahzz.clashoflegends > emulator-evidence/memory.txt
             adb shell dumpsys gfxinfo com.zwahwahzz.clashoflegends > emulator-evidence/graphics.txt
