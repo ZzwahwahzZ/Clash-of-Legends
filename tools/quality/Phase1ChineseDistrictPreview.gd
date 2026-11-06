@@ -101,22 +101,21 @@ func _run() -> void:
     print("CHINESE DISTRICT AUTHORED-BUILDINGS BOUNDS ", authored_bounds)
     print("CHINESE DISTRICT MESH NODES ", _count_mesh_nodes(city))
 
-    # Full-world framing: the source perimeter is over 2 km across, so a fixed
-    # 90 m camera made a valid world look like a tiny cluster in empty terrain.
+    # Keep the overview camera identical to the full-source comparison render.
+    # This makes omitted structures obvious instead of hiding them through auto-fit.
     var overview_camera := Camera3D.new()
     overview_camera.fov = 50.0
-    var overview_distance := maxf(span * 1.55, 180.0)
-    overview_camera.position = final_center + Vector3(0.72, 0.58, 1.0) * overview_distance
+    overview_camera.position = Vector3(90, 65, 110)
     root.add_child(overview_camera)
-    overview_camera.look_at(final_center, Vector3.UP)
+    overview_camera.look_at(Vector3(0, 5, -10), Vector3.UP)
     overview_camera.current = true
     await _capture("reports/phase1_chinese_district_preview.png")
 
-    # City-focused framing excludes only the outer mountain/perimeter meshes;
-    # authored building, street, market, bridge, and workshop transforms remain untouched.
+    # A wider city framing complements the source-matched camera while retaining
+    # all authored transforms and excluding only outer landscape meshes from bounds.
     var district_camera := Camera3D.new()
     district_camera.fov = 52.0
-    var district_distance := maxf(authored_span * 1.45, 120.0)
+    var district_distance := maxf(authored_span * 0.78, 100.0)
     district_camera.position = authored_center + Vector3(0.78, 0.62, 1.0) * district_distance
     root.add_child(district_camera)
     district_camera.look_at(authored_center, Vector3.UP)
