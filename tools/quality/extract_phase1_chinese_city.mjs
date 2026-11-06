@@ -15,9 +15,9 @@ const root = document.getRoot();
 const allNodes = root.listNodes();
 
 const inventory = allNodes
-  .map((node) => node.getName())
-  .filter((name) => /(Chinese|Jianghai|Pawnshop|Lantern|Lion|Stall|Cart|ClanHall)/i.test(name))
-  .sort();
+  .map((node) => ({ node: node.getName(), mesh: node.getMesh()?.getName() ?? '' }))
+  .filter((item) => /(Chinese|Jianghai|Pawnshop|Lantern|Lion|Stall|Cart|ClanHall)/i.test(item.node + ' ' + item.mesh))
+  .sort((a, b) => (a.node + a.mesh).localeCompare(b.node + b.mesh));
 
 const keepPatterns = [
   /^JianghaiChineseTempleHall_LOD/i,
@@ -29,7 +29,10 @@ const keepPatterns = [
   /^JianghaiClanHallDoubleGateAnchor$/i
 ];
 
-const selected = allNodes.filter((node) => keepPatterns.some((pattern) => pattern.test(node.getName())));
+const selected = allNodes.filter((node) => {
+  const names = [node.getName(), node.getMesh()?.getName() ?? ''];
+  return keepPatterns.some((pattern) => names.some((name) => pattern.test(name)));
+});
 if (selected.length === 0) {
   await fs.writeFile(reportPath, JSON.stringify({ inventory, error: 'No approved Chinese district nodes matched.' }, null, 2));
   throw new Error('No approved Chinese district nodes matched; inspect the node inventory before changing the filter.');
