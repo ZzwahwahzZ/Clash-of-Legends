@@ -538,6 +538,18 @@ jobs:
           test -s resource-pack-audit.json
           grep -q "RESOURCE PACK CONTENT AUDIT:" resource-pack-audit.log
 
+      - name: Parse Twin City DMAP, PUX and referenced ANI files
+        if: always()
+        run: |
+          set -euo pipefail
+          test -s /tmp/clash-dmap-format-sample.bin
+          test -s /tmp/clash-map-pux-format-sample.bin
+          args=(--dmap /tmp/clash-dmap-format-sample.bin --pux /tmp/clash-map-pux-format-sample.bin --output reports/twin-city-map-format-audit.json)
+          for ani in /tmp/clash-zf-ani-sample.txt /tmp/clash-mapscene-new-ani-sample.txt; do
+            if test -s "$ani"; then args+=(--ani "$ani"); fi
+          done
+          python3 tools/resource_packs/audit_dmap_pux_formats.py "${args[@]}"
+
       - name: Upload resource audit evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -550,5 +562,6 @@ jobs:
             /tmp/clash-map-pux-format-sample.bin
             /tmp/clash-zf-ani-sample.txt
             /tmp/clash-mapscene-new-ani-sample.txt
+            reports/twin-city-map-format-audit.json
           if-no-files-found: warn
           retention-days: 30
