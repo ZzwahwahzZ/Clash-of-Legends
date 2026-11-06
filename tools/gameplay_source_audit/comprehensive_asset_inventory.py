@@ -14,7 +14,7 @@ except Exception as exc:
     MATCHER_ERROR=f"{type(exc).__name__}: {exc}"
 
 CHUNK=1024*1024
-MATCH_LIMIT=16*1024*1024
+MATCH_LIMIT=256*1024
 SAMPLE_LIMIT=256*1024
 INTEREST=re.compile(r"(skill|magic|motion|action|anim|walk|run|stand|idle|attack|defen|role|weapon|mount|effect|3d|c3|ani|dbc|wdb)",re.I)
 
@@ -50,12 +50,15 @@ def inspect_stream(stream,size,name,container,depth):
       "review_priority":"HIGH" if relevant else ("UNKNOWN_BINARY" if ratio<0.35 and size else "GENERAL")}
 
 def scan_zip(zf,container,depth,rows,errors,nested_files):
+    if depth > 4:
+        errors.append({"container":container,"path":"[nested archive]","error":"MAX_NESTED_ARCHIVE_DEPTH_EXCEEDED"})
+        return
     for info in zf.infolist():
         if info.is_dir(): continue
         try:
             with zf.open(info) as stream:
                 rows.append(inspect_stream(stream,info.file_size,info.filename,container,depth))
-            if depth==0 and info.filename.lower().endswith((".apk",".zip",".jar")):
+            if depth < 4 and info.filename.lower().endswith((".apk",".zip",".jar")):
                 nested_files.append((info.filename,info))
                 try:
                     with zf.open(info) as stream, tempfile.NamedTemporaryFile(prefix="nested-archive-",suffix=Path(info.filename).suffix,delete=True) as tmp:
@@ -66,7 +69,7 @@ def scan_zip(zf,container,depth,rows,errors,nested_files):
                         tmp.flush()
                         try:
                             with zipfile.ZipFile(tmp.name) as inner:
-                                scan_zip(inner,info.filename,depth+1,rows,errors,[])
+                                scan_zip(inner,container+"!"+info.filename,depth+1,rows,errors,nested_files)
                         except zipfile.BadZipFile:
                             pass
                 except Exception as exc:
@@ -99,7 +102,7 @@ def main():
                         dst.write(block)
                 try:
                     proc=subprocess.run(["polyfile","--format","sbud","--no-contents",str(target)],
-                        capture_output=True,text=True,timeout=900,check=False)
+                        capture_output=True,text=True,timeout=240,check=False)
                     outpath=args.polyfile_report.with_name(args.polyfile_report.stem+f"-{i}.json")
                     outpath.write_text(proc.stdout or "",encoding="utf-8")
                     reports.append({"source_member":member,"exit_code":proc.returncode,
@@ -107,7 +110,7 @@ def main():
                 except Exception as exc:
                     reports.append({"source_member":member,"error":f"{type(exc).__name__}: {exc}"})
     counts=Counter(r["extension"] or "[no extension]" for r in rows)
-    payload={"schema_version":"2.1.0","scanner":"Trail of Bits PolyFile magic matcher + recursive archive inventory",
+    payload={"schema_version":"2.2.0","scanner":"Trail of Bits PolyFile magic matcher + recursive archive inventory",
       "source_archive":args.archive.name,"outer_member_count":outer_count,
       "nested_archive_count":len(nested),"total_inventory_records":len(rows),
       "extension_counts":dict(sorted(counts.items())),
@@ -115,7 +118,7 @@ def main():
       "unknown_binary_count":sum(r["review_priority"]=="UNKNOWN_BINARY" for r in rows),
       "polyfile_available":MATCHER is not None,"polyfile_import_error":MATCHER_ERROR,
       "polyfile_recursive_reports":reports,"read_errors":errors,
-      "coverage_policy":"Every regular outer ZIP member and every regular member of nested ZIP/APK/JAR archives is recorded. Unknown binaries are retained. Supported nested containers are traversed recursively; proprietary embedded formats still require dedicated parsers.",
+      "coverage_policy":"Every regular outer ZIP member and every regular member of nested ZIP/APK/JAR archives is recorded recursively to depth 4. Full SHA-256 is streamed for every file; PolyFile content matching is bounded to the first 256 KiB to avoid excessive scan cost. Unknown binaries are retained; proprietary embedded formats still require dedicated parsers.",
       "files":rows}
     args.output.parent.mkdir(parents=True,exist_ok=True)
     args.output.write_text(json.dumps(payload,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
