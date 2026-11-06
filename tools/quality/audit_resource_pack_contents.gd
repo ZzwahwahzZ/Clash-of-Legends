@@ -58,6 +58,7 @@ func _run_audit() -> void:
 	_walk_directory("res://", report["extension_counts"], model_paths, report["extension_samples"])
 	_collect_character_registry_paths("res://", report["character_registry_paths"], report["c3_path_samples"])
 	_dump_dmap_format_sample(report)
+	_dump_ani_format_samples(report)
 	_audit_resource_catalog(report, model_paths)
 	model_paths = model_paths.duplicate()
 	model_paths.sort()
@@ -199,6 +200,36 @@ func _dump_dmap_format_sample(report: Dictionary) -> void:
 					report["dmap_format_sample"]["pux_artifact_path"] = pux_output_path
 	print("DMAP FORMAT SAMPLE EXPORTED: ", source_path, " | bytes=", bytes.size(), " | ", output_path)
 
+
+func _dump_ani_format_samples(report: Dictionary) -> void:
+	var samples: Array = report.get("extension_samples", {}).get("ani", [])
+	var exported: Array = []
+	for wanted in ["zf.ani", "mapscene-new.ani"]:
+		for candidate in samples:
+			var source_path := str(candidate)
+			if source_path.get_file().to_lower() != wanted:
+				continue
+			var source := FileAccess.open(source_path, FileAccess.READ)
+			if source == null:
+				continue
+			var bytes := source.get_buffer(source.get_length())
+			source.close()
+			var output_path := "/tmp/clash-" + wanted.replace(".ani", "") + "-ani-sample.txt"
+			var output := FileAccess.open(output_path, FileAccess.WRITE)
+			if output == null:
+				continue
+			output.store_buffer(bytes)
+			output.close()
+			exported.append({
+				"source_path": source_path,
+				"size_bytes": bytes.size(),
+				"artifact_path": output_path
+			})
+			break
+	report["ani_format_samples"] = exported
+	for entry in exported:
+		print("ANI FORMAT SAMPLE EXPORTED: ", entry["source_path"], " | bytes=", entry["size_bytes"])
+
 func _collect_character_registry_paths(path: String, registry_paths: Array, c3_samples: Array) -> void:
 	var directory := DirAccess.open(path)
 	if directory == null:
@@ -299,7 +330,7 @@ func _walk_directory(path: String, counts: Dictionary, model_paths: Array[String
 			counts[extension] = int(counts.get(extension, 0)) + 1
 			if not samples.has(extension):
 				samples[extension] = []
-			var sample_limit := 500 if extension in ["dmap", "pux"] else 15
+			var sample_limit := 500 if extension in ["dmap", "pux", "ani"] else 15
 			if samples[extension].size() < sample_limit:
 				samples[extension].append(full_path)
 			if extension in MODEL_EXTENSIONS:
