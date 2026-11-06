@@ -23,7 +23,13 @@ func _ready() -> void:
 	add_to_group("simulated_players")
 	_update_label()
 	move_target = global_position
+	if AssetCatalog and not AssetCatalog.catalog_loaded.is_connected(_on_asset_catalog_loaded):
+		AssetCatalog.catalog_loaded.connect(_on_asset_catalog_loaded)
 	call_deferred("_apply_gender_base_model")
+
+func _on_asset_catalog_loaded(_asset_count: int) -> void:
+	if _c3_model_id == 0:
+		_apply_gender_base_model()
 	velocity = Vector3.ZERO
 
 func _apply_gender_base_model() -> bool:
