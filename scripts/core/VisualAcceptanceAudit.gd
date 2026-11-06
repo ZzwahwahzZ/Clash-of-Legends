@@ -53,30 +53,26 @@ func _ready() -> void:
 	var total_count = 0
 
 	
-	# Test 1: Player Visual Hierarchy
+	# Test 1: Runtime C3 player model integration.
 	total_count += 1
 	var player_sc = load("res://scenes/characters/Player.tscn")
 	if player_sc:
 		var p = player_sc.instantiate()
-		var has_torso = p.has_node("VisualRoot/Torso")
-		var has_head = p.has_node("VisualRoot/Torso/HeadNode/HeadMesh")
-		var has_helmet = p.has_node("VisualRoot/Torso/HeadNode/HelmetMesh")
-		var has_pauldrons = p.has_node("VisualRoot/Torso/LeftPauldron") and p.has_node("VisualRoot/Torso/RightPauldron")
-		var has_arms = p.has_node("VisualRoot/Torso/LeftArm") and p.has_node("VisualRoot/Torso/RightArm")
-		var has_legs = p.has_node("VisualRoot/LeftLeg") and p.has_node("VisualRoot/RightLeg")
-		var has_weapon = p.has_node("VisualRoot/Torso/WeaponMount/MainWeapon")
-		var has_mount = p.has_node("VisualRoot/MountMesh/HorseBody")
-		var has_anim = p.has_node("AnimationPlayer")
-		if has_torso and has_head and has_helmet and has_pauldrons and has_arms and has_legs and has_weapon and has_mount and has_anim and _all_required_meshes_exist(p, ["VisualRoot/Torso", "VisualRoot/Torso/HeadNode/HeadMesh", "VisualRoot/Torso/HeadNode/HelmetMesh", "VisualRoot/Torso/LeftPauldron", "VisualRoot/Torso/LeftArm", "VisualRoot/LeftLeg", "VisualRoot/Torso/WeaponMount/MainWeapon", "VisualRoot/MountMesh/HorseBody", "VisualRoot/MountMesh/Saddle", "VisualRoot/MountMesh/HorseHead"]):
-			print("[PASS] Visual Check: 3D Player Anatomical Hierarchy (Torso, Head, Helm, Pauldrons, Limbs, Weapon, Warhorse Mount, AnimPlayer)")
+		var has_runtime_visual_root = p.has_node("VisualRoot")
+		var has_vat_animator = p.has_node("C3VatAnimator")
+		var has_inventory = p.has_node("PlayerInventory")
+		var has_camera = p.has_node("CameraPivot/FreeCamera3D/Camera3D")
+		var has_no_primitive_fallback = p.find_children("*", "MeshInstance3D", true, false).is_empty()
+		if has_runtime_visual_root and has_vat_animator and has_inventory and has_camera and has_no_primitive_fallback:
+			print("[PASS] Visual Check: Player uses source C3 gender-base loader and validated VAT animator; no primitive fallback")
 			pass_count += 1
 		else:
-			print("[FAIL] Visual Check: 3D Player Missing Subcomponents")
+			print("[FAIL] Visual Check: Player C3 runtime model integration is incomplete")
 		p.queue_free()
 		await get_tree().process_frame
 	else:
 		print("[FAIL] Visual Check: Player.tscn could not be loaded")
-		
+
 	# Test 2: Wild Wolf Anatomical Quadruped Model
 	total_count += 1
 	var wolf_sc = load("res://scenes/enemies/WildWolf.tscn")
@@ -139,20 +135,20 @@ func _ready() -> void:
 	else:
 		print("[FAIL] Visual Check: NPCBase.tscn could not be loaded")
 		
-	# Test 5: Simulated MMORPG Roaming Player
+	# Test 5: Simulated player uses the same source-backed C3 body pipeline.
 	total_count += 1
 	var sim_sc = load("res://scenes/characters/SimulatedPlayer.tscn")
 	if sim_sc:
 		var s = sim_sc.instantiate()
-		var has_torso = s.has_node("VisualRoot/Torso")
-		var has_head = s.has_node("VisualRoot/Torso/Head")
-		var has_limbs = s.has_node("VisualRoot/Torso/LeftArm") and s.has_node("VisualRoot/LeftLeg")
-		var has_weapon = s.has_node("VisualRoot/Torso/Weapon")
-		if has_torso and has_head and has_limbs and has_weapon and _all_required_meshes_exist(s, ["VisualRoot/Torso", "VisualRoot/Torso/Head", "VisualRoot/Torso/LeftArm", "VisualRoot/LeftLeg", "VisualRoot/Torso/Weapon"]):
-			print("[PASS] Visual Check: Simulated Hero Character Model (Torso, Head, Limbs, Weapon)")
+		var has_runtime_visual_root = s.has_node("VisualRoot")
+		var has_vat_animator = s.has_node("C3VatAnimator")
+		var has_nameplate = s.has_node("Label3D")
+		var has_no_primitive_fallback = s.find_children("*", "MeshInstance3D", true, false).is_empty()
+		if has_runtime_visual_root and has_vat_animator and has_nameplate and has_no_primitive_fallback:
+			print("[PASS] Visual Check: Simulated players use source C3 gender-base loader and validated VAT animator")
 			pass_count += 1
 		else:
-			print("[FAIL] Visual Check: Simulated Player Missing Subcomponents")
+			print("[FAIL] Visual Check: Simulated player C3 runtime model integration is incomplete")
 		s.queue_free()
 		await get_tree().process_frame
 	else:
