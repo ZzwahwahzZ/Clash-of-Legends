@@ -2500,262 +2500,6 @@
       "selected_by_name": false
     },
     {
-      "node": "FactoryChimneyBand12.0",
-      "parent_path": "JianghaiOldCityAuthoredScene/RedStarElectronicsFactory",
-      "mesh": "FactoryChimneyBand12.0Mesh",
-      "translation": [
-        108,
-        12,
-        16
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "FactoryChimneyBand17.0",
-      "parent_path": "JianghaiOldCityAuthoredScene/RedStarElectronicsFactory",
-      "mesh": "FactoryChimneyBand17.0Mesh",
-      "translation": [
-        108,
-        17,
-        16
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "FactoryChimneyBand2.0",
-      "parent_path": "JianghaiOldCityAuthoredScene/RedStarElectronicsFactory",
-      "mesh": "FactoryChimneyBand2.0Mesh",
-      "translation": [
-        108,
-        2,
-        16
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "FactoryChimneyBand22.0",
-      "parent_path": "JianghaiOldCityAuthoredScene/RedStarElectronicsFactory",
-      "mesh": "FactoryChimneyBand22.0Mesh",
-      "translation": [
-        108,
-        22,
-        16
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "FactoryChimneyBand7.0",
-      "parent_path": "JianghaiOldCityAuthoredScene/RedStarElectronicsFactory",
-      "mesh": "FactoryChimneyBand7.0Mesh",
-      "translation": [
-        108,
-        7,
-        16
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "FactoryCourtyard",
-      "parent_path": "JianghaiOldCityAuthoredScene/RedStarElectronicsFactory",
-      "mesh": "FactoryCourtyardMesh",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "FactoryLoadingGuide00",
-      "parent_path": "JianghaiOldCityAuthoredScene/RedStarElectronicsFactory",
-      "mesh": "FactoryLoadingGuide00Mesh",
-      "translation": [
-        74,
-        0.06199999898672104,
-        -3.200000047683716
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "FactoryLoadingGuide01",
-      "parent_path": "JianghaiOldCityAuthoredScene/RedStarElectronicsFactory",
-      "mesh": "FactoryLoadingGuide01Mesh",
-      "translation": [
-        80,
-        0.06199999898672104,
-        -3.200000047683716
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "FactoryLoadingGuide02",
-      "parent_path": "JianghaiOldCityAuthoredScene/RedStarElectronicsFactory",
-      "mesh": "FactoryLoadingGuide02Mesh",
-      "translation": [
-        86,
-        0.06199999898672104,
-        -3.200000047683716
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "FactoryLoadingGuide03",
-      "parent_path": "JianghaiOldCityAuthoredScene/RedStarElectronicsFactory",
-      "mesh": "FactoryLoadingGuide03Mesh",
-      "translation": [
-        92,
-        0.06199999898672104,
-        -3.200000047683716
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "FactoryLoadingGuide04",
-      "parent_path": "JianghaiOldCityAuthoredScene/RedStarElectronicsFactory",
-      "mesh": "FactoryLoadingGuide04Mesh",
-      "translation": [
-        98,
-        0.06199999898672104,
-        -3.200000047683716
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "FactorySteamPipe",
-      "parent_path": "JianghaiOldCityAuthoredScene/RedStarElectronicsFactory",
-      "mesh": "FactorySteamPipeCurve",
-      "translation": [
-        0,
-        0,
-        0
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "RedStarFactoryMarqueeBacking",
-      "parent_path": "JianghaiOldCityAuthoredScene/RedStarElectronicsFactory",
-      "mesh": "RedStarFactoryMarqueeBackingMesh",
-      "translation": [
-        85.5,
-        7.349999904632568,
-        3.9000000953674316
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "RedStarFactoryMarqueeText",
-      "parent_path": "JianghaiOldCityAuthoredScene/RedStarElectronicsFactory",
-      "mesh": "RedStarFactoryMarqueeTextCurve",
-      "translation": [
-        85.5,
-        7.349999904632568,
-        3.809999942779541
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "RedStarSafetyPlaqueBacking",
-      "parent_path": "JianghaiOldCityAuthoredScene/RedStarElectronicsFactory",
-      "mesh": "RedStarSafetyPlaqueBackingMesh",
-      "translation": [
-        96.5,
-        4.699999809265137,
-        3.6700000762939453
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
-      "node": "RedStarSafetyPlaqueText",
-      "parent_path": "JianghaiOldCityAuthoredScene/RedStarElectronicsFactory",
-      "mesh": "RedStarSafetyPlaqueTextCurve",
-      "translation": [
-        96.5,
-        4.699999809265137,
-        3.580000162124634
-      ],
-      "scale": [
-        1,
-        1,
-        1
-      ],
-      "selected_by_name": false
-    },
-    {
       "node": "MunicipalTreasuryManifestTerminalVisual_AuthoredScreenBezel",
       "parent_path": "MunicipalTreasuryManifestTerminalVisual",
       "mesh": "Cube.167",
@@ -2840,9 +2584,9 @@
   "source_glb": "assets/models/jianghai_old_city/jianghai_old_city.glb",
   "source_license": "MIT project composition; third-party source components remain under their recorded licenses in LICENSE_EVIDENCE.md",
   "input_bytes": 63204100,
-  "output_bytes": 55039692,
-  "output_sha256": "e3d8d7c1912fe784031242869923e93b03a16f52186c55e346e54b626f5906d6",
-  "selected_node_count": 536,
+  "output_bytes": 55542088,
+  "output_sha256": "98ba5cf5af8bd41f9a7f757af2012d37d4affa79c5e4b084415342e39a6b1a63",
+  "selected_node_count": 552,
   "selected_node_names": [
     "AuthoredStreetNetwork",
     "AvenueHotelBladeBacking",
@@ -2882,6 +2626,12 @@
     "ExtractionSquare",
     "FactoryApproach",
     "FactoryChimney",
+    "FactoryChimneyBand12.0",
+    "FactoryChimneyBand17.0",
+    "FactoryChimneyBand2.0",
+    "FactoryChimneyBand22.0",
+    "FactoryChimneyBand7.0",
+    "FactoryCourtyard",
     "FactoryEntryFacade_DoorFrame",
     "FactoryEntryFacade_Wall_East_00",
     "FactoryEntryFacade_Wall_East_01",
@@ -2897,6 +2647,12 @@
     "FactoryGatePortal_PierL",
     "FactoryGatePortal_PierR",
     "FactoryGatePortal_Roof",
+    "FactoryLoadingGuide00",
+    "FactoryLoadingGuide01",
+    "FactoryLoadingGuide02",
+    "FactoryLoadingGuide03",
+    "FactoryLoadingGuide04",
+    "FactorySteamPipe",
     "FarEastResidence",
     "FarEastSouthResidence",
     "FarWestNorthResidence",
@@ -3287,6 +3043,10 @@
     "RainPuddle05",
     "RainPuddle06",
     "RedStarElectronicsFactory",
+    "RedStarFactoryMarqueeBacking",
+    "RedStarFactoryMarqueeText",
+    "RedStarSafetyPlaqueBacking",
+    "RedStarSafetyPlaqueText",
     "RiverWardStreet",
     "SouthCrossStreet",
     "StreetLamp00Lens",
@@ -3381,12 +3141,12 @@
     "WestTheatreHouse",
     "WestTheatreRow02"
   ],
-  "retained_node_count": 539,
-  "mesh_node_count": 523,
-  "unique_mesh_count": 235,
-  "primitive_count": 421,
-  "unique_triangles": 1081157,
-  "instanced_triangles": 2994561,
+  "retained_node_count": 555,
+  "mesh_node_count": 539,
+  "unique_mesh_count": 251,
+  "primitive_count": 437,
+  "unique_triangles": 1099809,
+  "instanced_triangles": 3013213,
   "material_count": 91,
   "texture_count": 116,
   "embedded_image_count": 116,
@@ -11821,7 +11581,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "FactoryChimneyBand17.0",
@@ -11837,7 +11597,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "FactoryChimneyBand2.0",
@@ -11853,7 +11613,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "FactoryChimneyBand22.0",
@@ -11869,7 +11629,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "FactoryChimneyBand7.0",
@@ -11885,7 +11645,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "FactoryCourtyard",
@@ -11901,7 +11661,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "FactoryEntryFacade_DoorFrame",
@@ -12157,7 +11917,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "FactoryLoadingGuide01",
@@ -12173,7 +11933,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "FactoryLoadingGuide02",
@@ -12189,7 +11949,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "FactoryLoadingGuide03",
@@ -12205,7 +11965,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "FactoryLoadingGuide04",
@@ -12221,7 +11981,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "FactorySteamPipe",
@@ -12237,7 +11997,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "JianghaiCleared_FactoryAdmin",
@@ -12365,7 +12125,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "RedStarFactoryMarqueeText",
@@ -12381,7 +12141,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "RedStarSafetyPlaqueBacking",
@@ -12397,7 +12157,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "RedStarSafetyPlaqueText",
@@ -12413,7 +12173,7 @@
         1,
         1
       ],
-      "selected_by_name": false
+      "selected_by_name": true
     },
     {
       "node": "JianghaiArtPass_MunicipalTreasuryManifestTerminalVisual_CRT",
