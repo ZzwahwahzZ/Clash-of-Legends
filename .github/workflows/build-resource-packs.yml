@@ -134,6 +134,8 @@ jobs:
           ALSOFT_DRIVERS=null LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a godot --path . --rendering-method gl_compatibility res://tools/resource_packs/C3VatRuntimeValidation.tscn
       - name: Audit original DMap terrain and map catalog
         run: cargo run --manifest-path tools/c3_audit/Cargo.toml --release --bin audit_maps -- resource_stage reports/map-audit.json
+      - name: Audit PUL and PUX puzzle texture coverage against decoded MJP files
+        run: python3 tools/resource_packs/audit_puzzle_texture_coverage.py --root resource_stage --mjp-map resource_stage/world/resource_mappings/mjp_texture_map.json --map-audit reports/map-audit.json --output reports/puzzle-texture-coverage-audit.json
       - name: Build category PCK files
         run: |
           set -euo pipefail
@@ -403,6 +405,7 @@ jobs:
             reports/mjp-decode-report.json
             resource_stage/world/resource_mappings/mjp_texture_map.json
             reports/map-audit.json
+            reports/puzzle-texture-coverage-audit.json
             reports/tpi-extraction-audit.json
             reports/gameplay-data-source-probe.json
             reports/gameplay-readable-catalog-report.json
