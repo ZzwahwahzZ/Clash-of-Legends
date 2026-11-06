@@ -63,8 +63,8 @@ for table_name, table in catalog.get("tables", {}).items():
             if texture_path:
                 referenced_texture_paths.add(texture_path)
                 matched_rows = source_by_inner.get(texture_path, [])
-                staged_files = [row.get("staged_path", "") for row in rows if row.get("staged_path")]
-                present = next((path for path in staged_files if staged_path_available(path)), None)
+                staged_files = [row.get("staged_path", "") for row in matched_rows if row.get("staged_path")]
+                present = next((path for path in staged_files if path.startswith("resource_stage/models/") and staged_path_available(path)), None)
                 if present:
                     pvr_paths.add(present)
                     texture_found += 1
@@ -75,8 +75,8 @@ for table_name, table in catalog.get("tables", {}).items():
             if mix_texture_path:
                 referenced_texture_paths.add(mix_texture_path)
                 matched_rows = source_by_inner.get(mix_texture_path, [])
-                staged_files = [row.get("staged_path", "") for row in rows if row.get("staged_path")]
-                present = next((path for path in staged_files if Path(path).is_file()), None)
+                staged_files = [row.get("staged_path", "") for row in matched_rows if row.get("staged_path")]
+                present = next((path for path in staged_files if path.startswith("resource_stage/models/") and staged_path_available(path)), None)
                 if present:
                     pvr_paths.add(present)
                     mix_texture_found += 1
@@ -101,13 +101,13 @@ if motion_catalog_path.is_file():
     motion_catalog = json.loads(motion_catalog_path.read_text(encoding="utf-8"))
     for motion_path in motion_catalog.get("unique_motion_paths", []):
         normalized = str(motion_path).replace("\\", "/").lower()
-        rows = source_by_inner.get(normalized, [])
-        staged_files = [row.get("staged_path", "") for row in rows if row.get("staged_path")]
-        present = next((path for path in staged_files if staged_path_available(path)), None)
+        motion_rows = source_by_inner.get(normalized, [])
+        staged_files = [row.get("staged_path", "") for row in motion_rows if row.get("staged_path")]
+        present = next((path for path in staged_files if path.startswith("resource_stage/models/") and path.lower().endswith(".c3") and staged_path_available(path)), None)
         if present:
             c3_paths.add(present)
             motion_paths_added += 1
-        else:
+        elif normalized.endswith(".c3"):
             motion_paths_missing += 1
             if len(missing_samples) < 250:
                 missing_samples.append({"family": "motion_tables", "kind": "motion", "path": normalized})

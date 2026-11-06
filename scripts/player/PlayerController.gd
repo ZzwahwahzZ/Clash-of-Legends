@@ -123,6 +123,7 @@ func _is_renderable_mesh_instance(node: MeshInstance3D) -> bool:
 func _on_asset_catalog_loaded(_asset_count: int) -> void:
 	_apply_character_model()
 	_apply_mount_model()
+	_apply_weapon_model()
 
 func _apply_character_model() -> bool:
 	if not visual_root or not AssetCatalog:
