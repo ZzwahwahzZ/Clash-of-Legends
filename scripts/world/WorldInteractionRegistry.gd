@@ -105,3 +105,24 @@ func get_navigation_path(anchor_id: String, from_world_position: Vector3, naviga
 		"target": projected_target,
 		"waypoint_count": path.size()
 	}
+
+func get_npc_spawn_candidate(anchor_id: String) -> Dictionary:
+	var definition := get_anchor_definition(anchor_id)
+	var node := resolve_anchor_node(anchor_id)
+	if definition.is_empty() or node == null or not definition.has("npc_id"):
+		return {"ok": false, "reason": "npc_anchor_unavailable", "anchor_id": anchor_id}
+	var offset_data: Array = definition.get("spawn_offset_local", [0.0, 0.0, 0.0])
+	if offset_data.size() != 3:
+		return {"ok": false, "reason": "invalid_spawn_offset", "anchor_id": anchor_id}
+	var local_offset := Vector3(float(offset_data[0]), float(offset_data[1]), float(offset_data[2]))
+	var candidate_position := node.global_transform * local_offset
+	return {
+		"ok": true,
+		"npc_id": str(definition.get("npc_id", "")),
+		"role": str(definition.get("role", "")),
+		"anchor_id": anchor_id,
+		"candidate_position": candidate_position,
+		"spawn_enabled": bool(definition.get("spawn_enabled", false)),
+		"requires_navmesh_projection": bool(definition.get("requires_navmesh_projection", true)),
+		"requires_clearance_validation": bool(definition.get("requires_clearance_validation", true))
+	}
