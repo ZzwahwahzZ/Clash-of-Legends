@@ -396,13 +396,30 @@ jobs:
             adb shell screencap -p /sdcard/clash-character-select.png
             adb pull /sdcard/clash-character-select.png emulator-evidence/character-select.png
             python3 tools/ci/compare_emulator_screens.py emulator-evidence/launch-screen.png emulator-evidence/character-select.png 700,0,1700,600
-            # Enter the journey using the center of the actual start button.
+            # Enter the journey and wait for the actual game world, not merely a changed loading bar.
             adb shell input tap 1200 980
-            sleep 15
-            adb shell screencap -p /sdcard/clash-world-entry.png
-            adb pull /sdcard/clash-world-entry.png emulator-evidence/world-entry.png
-            python3 tools/ci/compare_emulator_screens.py emulator-evidence/character-select.png emulator-evidence/world-entry.png
-            # Exercise the landscape movement area and capture the resulting scene.
+            WORLD_READY=0
+            for attempt in $(seq 1 18); do
+              sleep 10
+              adb shell screencap -p /sdcard/clash-world-entry.png
+              adb pull /sdcard/clash-world-entry.png emulator-evidence/world-entry.png
+              set +e
+              python3 tools/ci/assert_world_transition.py emulator-evidence/character-select.png emulator-evidence/world-entry.png
+              transition_status=$?
+              set -e
+              if [ "$transition_status" -eq 0 ]; then
+                WORLD_READY=1
+                break
+              elif [ "$transition_status" -ne 2 ]; then
+                echo "World transition assertion encountered an invalid screenshot or reference."
+                exit "$transition_status"
+              fi
+            done
+            if [ "$WORLD_READY" -ne 1 ]; then
+              echo "World entry did not complete within 180 seconds; refusing to count a loading screen as successful gameplay."
+              exit 1
+            fi
+            # Exercise the landscape movement area only after world entry is verified.
             adb shell input swipe 180 280 180 420 700
             sleep 3
             adb shell screencap -p /sdcard/clash-interaction.png
