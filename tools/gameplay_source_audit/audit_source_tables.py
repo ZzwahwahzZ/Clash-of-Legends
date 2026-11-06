@@ -22,7 +22,7 @@ TARGET_PREFIXES = {
     "skills": ["data/interface/style01/skill/"],
     "motion_ui": ["data/interface/style01/"],
 }
-MOTION_PATH_PATTERN = re.compile(r"(3dmotion|miscmotion|mountmotion|armetmotion|weaponmotion|headmotion|3dsimplerole|motion|\\.ani$|/\\d{3,4}\\.c3$|/body/\\d+\\.c3$)", re.I)
+MOTION_PATH_PATTERN = re.compile(r"(3dmotion|miscmotion|mountmotion|armetmotion|weaponmotion|headmotion|3dsimplerole|motion|\.ani$|/\d{3,4}\.c3$|/body/\d+\.c3$)", re.I)
 TARGETS = {
     "mounts": ["ini/mountinfo.ini", "ini/mounttype.dat", "ani/dragon.ani", "ani/sdragon.ani"],
     "skills": [
@@ -307,6 +307,20 @@ def main() -> None:
                         entry["cipher_probe"] = probe_tq_candidates(data)
                     skill_assets.append(entry)
 
+            # Keep a complete UI path inventory so icon discovery is not tied to an assumed skill folder.
+            ui_assets = []
+            for rel, candidates in sources.items():
+                normalized = rel.lower().replace("\\", "/")
+                if "/interface/" not in "/" + normalized and not normalized.startswith("interface/"):
+                    continue
+                for source_zip, member, display in candidates:
+                    info = source_zip.getinfo(member)
+                    ui_assets.append({
+                        "relative_path": rel, "source_member": display,
+                        "size_bytes": info.file_size, "extension": Path(rel).suffix.lower(),
+                        "skill_or_action_name_hint": bool(re.search(r"(skill|magic|spell|action|walk|run|stand|move)", normalized, re.I))
+                    })
+
             itemtypes = [e for e in results["equipment"] if e["relative_path"].lower().startswith("ini/itemtype/")]
             # Discover exact version-matched C3 and equipment-mapping paths without
             # guessing the Mobile client's folder layout or decoding opaque fields.
@@ -377,6 +391,12 @@ def main() -> None:
                     "extension_counts": {ext: sum(1 for item in motion_assets if item["extension"] == ext) for ext in sorted({item["extension"] for item in motion_assets})},
                     "files": motion_assets,
                     "policy": "Mobile-version-matched motion/action candidates; schemas and joins remain unconfirmed until validated."
+                },
+                "interface_asset_inventory": {
+                    "file_count": len(ui_assets),
+                    "extension_counts": {ext: sum(1 for item in ui_assets if item["extension"] == ext) for ext in sorted({item["extension"] for item in ui_assets})},
+                    "files": ui_assets,
+                    "policy": "Complete interface path inventory; semantic hints are discovery clues only."
                 },
                 "skill_ui_asset_inventory": {"file_count": len(skill_assets), "extension_counts": {ext: sum(1 for item in skill_assets if item["extension"] == ext) for ext in sorted({item["extension"] for item in skill_assets})}, "files": skill_assets, "policy": "Icon/UI assets are inventoried by exact source path and hash; no icon-to-skill or icon-to-animation association is inferred."},
                 "asset_path_inventory": {
