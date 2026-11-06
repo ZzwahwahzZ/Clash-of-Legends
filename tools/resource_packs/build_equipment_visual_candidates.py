@@ -55,7 +55,20 @@ for staged_path, item_ids in sorted(grouped.items()):
     })
 
 if not records:
-    raise SystemExit("No exact source-joined converted weapon candidates were found.")
+    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "schema_version": "1.0.0",
+        "policy": "No weapon candidates are promoted until the corresponding converted C3 weapon assets are staged and source-joined.",
+        "candidate_model_count": 0,
+        "mapped_item_id_count": 0,
+        "records": [],
+        "status": "DEFERRED_NO_STAGED_C3_WEAPON_ASSETS"
+    }
+    OUTPUT.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+    REPORT.parent.mkdir(parents=True, exist_ok=True)
+    REPORT.write_text(json.dumps({"candidate_model_count": 0, "mapped_item_id_count": 0, "models": [], "runtime_role": "weapon_visual_candidate", "attachment_gate": "PENDING_STAGED_C3_WEAPON_ASSETS"}, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+    print("EQUIPMENT_VISUAL_CANDIDATES deferred: no C3 weapon GLBs in the current skeletal proof subset.")
+    raise SystemExit(0)
 
 OUTPUT.parent.mkdir(parents=True, exist_ok=True)
 payload = {
