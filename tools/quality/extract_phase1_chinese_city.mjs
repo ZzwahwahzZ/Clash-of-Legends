@@ -23,14 +23,23 @@ const keepPatterns = [
   /^JianghaiChineseTempleHall_LOD/i,
   /^JianghaiChineseArcadeShop_LOD/i,
   /^JianghaiChineseGateHouse_LOD/i,
+  /^JianghaiDensity_/i,
+  /^JianghaiEnterable_/i,
+  /^JianghaiCleared_Market/i,
+  /^JianghaiCleared_Pawnshop/i,
+  /^JianghaiExpansion_(Market|Pawnshop)/i,
+  /^Pawnshop/i,
+  /^Guangchang(ClanHall|Pawnshop)/i,
+  /^OldCityFoundation$/i,
+  /^JianghaiClanHallDoubleGateAnchor$/i,
   /Chinese.*(Lamp|Lantern|Lion|LatticeDoor)/i,
-  /Jianghai.*(Lamp|Lantern|Lion|LatticeDoor)/i,
-  /^PawnshopAuthoredWing_/i,
-  /^JianghaiClanHallDoubleGateAnchor$/i
+  /Jianghai.*(Lamp|Lantern|Lion|LatticeDoor)/i
 ];
 
 const selected = allNodes.filter((node) => {
   const names = [node.getName(), node.getMesh()?.getName() ?? ''];
+  const combined = names.join(' ');
+  if (/Factory|FactoryGatePortal|PowerDrop|SecurityCamera/i.test(combined)) return false;
   return keepPatterns.some((pattern) => names.some((name) => pattern.test(name)));
 });
 if (selected.length === 0) {
