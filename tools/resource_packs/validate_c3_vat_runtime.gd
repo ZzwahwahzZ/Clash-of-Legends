@@ -229,6 +229,9 @@ func _run() -> void:
 	get_tree().quit(0)
 
 func _find_character_model_path(model_id: int) -> String:
+	var vat_base_path := AssetCatalog.get_character_vat_base_model_path(model_id)
+	if not vat_base_path.is_empty() and FileAccess.file_exists(vat_base_path):
+		return vat_base_path
 	var entries := AssetCatalog.get_asset_entries("characters", [".glb", ".gltf"])
 	for entry in entries:
 		var path := str(entry.get("path", ""))
