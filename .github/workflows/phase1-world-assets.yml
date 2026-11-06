@@ -1,5 +1,5 @@
 name: Phase 1 - Acquire and audit CC0 world assets
-# Re-run extraction after updating glTF Transform hierarchy traversal.
+# Re-run extraction with complete Chinese market, pawnshop and density layout.
 
 on:
   push:
@@ -137,7 +137,8 @@ jobs:
           - Project composition license: MIT; retained as LICENSE-MIT.txt.
           - The selected Chinese temple, arcade-shop, and gate-house profiles are documented as adaptations of CC0 Chinese Temple 2, CC0 Chinese Four-corner Pavilion, and the recorded CC0 Quaternius Buildings Pack. Third-party rights remain their original licenses, not relicensed as MIT.
           - Exact source records and the retired/omitted asset list are retained in LICENSE_EVIDENCE.md and THIRD_PARTY_LICENSES.md.
-          - The extractor keeps only named Chinese district nodes and their transform ancestors; it does not redistribute the full source city.
+          - The extractor keeps the Chinese district, all 50 density placements, enterable residences, market props, pawnshop courtyard/entrance, and OldCityFoundation.
+          - The extractor intentionally excludes the industrial factory block, the 1.2-km perimeter terrain, the 12 CC BY Hero Mountain instances, and interior shells; those are not part of this compact playable-hub candidate.
           - reports/phase1_chinese_district_extract.json records the exact selected nodes, geometry counts, output size, and SHA-256.
           EOF
           mkdir -p /tmp/phase1-gltf-tools
@@ -169,6 +170,7 @@ jobs:
           mkdir -p reports
           xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --path . --rendering-method gl_compatibility --script res://tools/quality/Phase1ChineseDistrictPreview.gd 2>&1 | tee reports/phase1_chinese_district_preview.log
           test -s reports/phase1_chinese_district_preview.png
+          test -s reports/phase1_chinese_district_closeup.png
           if grep -Eq 'SCRIPT ERROR:|ERROR: Node not inside tree|Parse Error:' reports/phase1_chinese_district_preview.log; then
             echo 'Godot visual preview reported a script or scene-tree error'
             exit 1
@@ -179,7 +181,7 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add assets/environment/phase1 reports/phase1_world_asset_manifest.json reports/phase1_chinese_district_extract.json reports/phase1_chinese_district_preview.png
+          git add assets/environment/phase1 reports/phase1_world_asset_manifest.json reports/phase1_chinese_district_extract.json reports/phase1_chinese_district_preview.png reports/phase1_chinese_district_closeup.png
           git diff --cached --quiet && { echo "No asset changes to commit"; exit 0; }
           git commit -m "Acquire and audit phase 1 production world assets"
           git push origin HEAD:stage/phase1-world-assets
@@ -196,6 +198,7 @@ jobs:
             reports/phase1_chinese_district_extract.json
             reports/phase1_chinese_district_preview.log
             reports/phase1_chinese_district_preview.png
+            reports/phase1_chinese_district_closeup.png
             assets/environment/phase1/SOURCES.md
           if-no-files-found: warn
           retention-days: 30
