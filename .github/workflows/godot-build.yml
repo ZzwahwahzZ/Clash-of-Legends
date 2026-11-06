@@ -385,22 +385,21 @@ jobs:
             test "$(adb shell getprop ro.build.version.sdk | tr -d '\r')" = "33"
             adb install -r builds/android/ClashOfLegends-emulator-x86_64.apk
             adb logcat -c
+            # Preserve device diagnostics even when an early visual assertion fails.
+            trap 'adb logcat -d -t 16000 > emulator-evidence/logcat.txt || true' EXIT
             adb shell monkey -p com.zwahwahzz.clashoflegends 1
-            # Capture the actual opening state immediately; the cinematic intro fades after about 3 seconds.
+            # Godot's Android splash can outlive the first second on software-rendered CI.
+            # Capture it, then allow the actual CanvasItem-based intro and its timed fade to finish.
             sleep 1
-            adb shell pidof com.zwahwahzz.clashoflegends > emulator-evidence/game-pid.txt || { adb logcat -d -t 12000 > emulator-evidence/logcat-failure.txt; echo "Game process exited after launch."; exit 1; }
+            adb shell pidof com.zwahwahzz.clashoflegends > emulator-evidence/game-pid.txt || { adb logcat -d -t 16000 > emulator-evidence/logcat-failure.txt; echo "Game process exited after launch."; exit 1; }
             adb shell screencap -p /sdcard/clash-launch.png
             adb pull /sdcard/clash-launch.png emulator-evidence/launch-screen.png
-            # The observed Android 13 immersive-mode "Got it" button is at 62.5% x / 46.3% y
-            # on this 2400x1080 landscape framebuffer (the adb input coordinate space matches it).
-            adb shell input tap 1500 500
-            sleep 0.2
+            sleep 2
             adb shell screencap -p /sdcard/clash-intro.png
             adb pull /sdcard/clash-intro.png emulator-evidence/intro-screen.png
-            # LegendIntro.gd centers its skip button inside a VBox anchored to y=0.25..0.75.
-            # On the captured 2400x1080 layout, the source-derived button center is x=1200, y≈627.
-            adb shell input tap 1200 627
-            sleep 0.5
+            # LegendIntro.gd fades its cinematic overlay automatically after about 3.85 seconds.
+            # Wait for that transition instead of tapping stale coordinates while the splash is loading.
+            sleep 3
             adb shell screencap -p /sdcard/clash-character-select.png
             adb pull /sdcard/clash-character-select.png emulator-evidence/character-select.png
             python3 tools/ci/compare_emulator_screens.py emulator-evidence/intro-screen.png emulator-evidence/character-select.png 600,250,1800,800 --minimum-ratio 0.02
