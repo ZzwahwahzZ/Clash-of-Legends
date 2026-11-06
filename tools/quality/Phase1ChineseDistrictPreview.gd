@@ -115,8 +115,10 @@ func _run() -> void:
     # all authored transforms and excluding only outer landscape meshes from bounds.
     var district_camera := Camera3D.new()
     district_camera.fov = 52.0
-    var district_distance := maxf(authored_span * 0.78, 100.0)
-    district_camera.position = authored_center + Vector3(0.78, 0.62, 1.0) * district_distance
+    var district_horizontal_span := maxf(authored_bounds.size.x, authored_bounds.size.z)
+    var district_distance := maxf(district_horizontal_span * 0.48, 85.0)
+    var district_view_direction := Vector3(0.78, 0.62, 1.0).normalized()
+    district_camera.position = authored_center + district_view_direction * district_distance
     root.add_child(district_camera)
     district_camera.look_at(authored_center, Vector3.UP)
     district_camera.current = true
