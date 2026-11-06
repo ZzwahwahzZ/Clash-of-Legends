@@ -284,6 +284,20 @@ func _on_joystick_moved(direction: Vector2) -> void:
 	if player and player.has_method("set_joystick_input"):
 		player.set_joystick_input(direction)
 
+func _on_run_toggle_pressed() -> void:
+	var player = GameManager.player_reference if GameManager else null
+	if player and player.has_method("toggle_run_mode"):
+		player.toggle_run_mode()
+		_refresh_run_toggle_label()
+
+func _refresh_run_toggle_label() -> void:
+	if not run_toggle_btn:
+		return
+	var player = GameManager.player_reference if GameManager else null
+	var running := bool(player.get("is_running")) if player else true
+	var is_ar := GameManager != null and GameManager.current_language == "ar"
+	run_toggle_btn.text = ("جري" if running else "مشي") if is_ar else ("Run" if running else "Walk")
+
 func _on_quest_updated(_quest_id: String, objective_title: String, progress: int, goal: int, is_done: bool) -> void:
 	if quest_title:
 		quest_title.text = objective_title
