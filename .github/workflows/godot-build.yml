@@ -328,6 +328,7 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+  # Full device smoke runs are enabled for manual dispatches and [audit-packs] pushes.
   android-emulator-smoke:
     name: Android 13 Emulator - Player Experience Smoke Test
     needs: android-apk
