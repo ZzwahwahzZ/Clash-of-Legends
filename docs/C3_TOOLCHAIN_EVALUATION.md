@@ -162,3 +162,21 @@ Action:
 5. Keep two separate metrics: (a) named TPI/TPD index recovery completeness, and (b) hash-only WDF/DNP discovery coverage.
 
 This lead changes the priority order: full TPI/TPD parsing and malformed-record recovery come before expanding generic extension-based scanning.
+
+
+### 8.7 Additional Conquer-specific extractors found during follow-up research
+
+- **TQ Package Manager (CptSky)** — forum release covers WDF, DNP, WDB and TPI/TPD extraction, with a WDF/DNP brute-force list generator. The author warns that older public builds are incomplete for some TPI/TPD packages and that newer complete Rust CLI tools are private. Use the public build only as a differential test after verifying the exact attachment/version; do not assume its extraction is complete. The thread explicitly says TPI filenames are already present in the paired TPI index, so brute force is not the solution for TPI/TPD.
+  - https://www.elitepvpers.com/forum/co2-weapon-armor-effects-interface-edits/1779148-release-tq-package-manager-wdf-dnp-wdb-tpi-tpd.html
+- **co-stuff/web-wdf-viewer** — browser-based Conquer viewer with WDF/DNP readers, TPI/TPD support, C3 chunk identification, and dedicated MJP/PVR decoders. This is a particularly useful comparison implementation for mobile resource payloads. Its GitHub repository currently has no confirmed license file, so inspect/test it as a reference only; do not copy or redistribute its code until licensing is clarified.
+  - https://github.com/co-stuff/web-wdf-viewer
+  - https://co-stuff.github.io/web-wdf-viewer/
+- **co-stuff/conquer-rsa-patcher** — public scripts for extracting the embedded RSA public key and decrypting RSA-protected Conquer DAT files. The repository currently has no confirmed license file. Treat it as an algorithm/reference lead; use the documented public-key method only when the exact source file is identified as RSA-protected and the matching client is verified.
+  - https://github.com/co-stuff/conquer-rsa-patcher
+- **TQ cipher / RSA documentation** — Conquer-specific documentation distinguishes symmetric TQ File Cipher from RSA-wrapped gzip files. They are separate algorithms; neither is a universal decryptor. The documented seed tables are patch-specific and must not be transplanted blindly to Android 1.1.2.3.
+  - https://conquer-online.github.io/wiki/security/tqfile.html
+  - https://conquer-online.github.io/wiki/security/rsa.html
+- **Mobile map and resource evidence** — community research identifies mobile TPI/TPD payloads containing C3/MJP/PVR, OGG sounds, and 7z-contained DMap variants; reports also mention 20–30 mobile-specific maps with PUX/parallax layers. Add MJP/PVR alpha-channel validation, OGG inventory, 7z/DMap/PUX detection to the source-specific test matrix.
+  - https://cooldown.dev/topic/797-co-mobile-resources/
+
+Implementation note: the web viewer's current TPI reader checks the same size-pair equality condition and silently skips mismatches; its decompression failure path may return the original compressed bytes. It therefore cannot by itself resolve our 511 malformed index records. We will use it as a visual/differential reference for known-good records, while building a lossless parser that retains every malformed raw index entry and tests alternative version/layout hypotheses against the exact Android client.
