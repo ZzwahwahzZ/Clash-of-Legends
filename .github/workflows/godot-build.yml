@@ -21,31 +21,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Verify published PCK host supports safe HTTP range resume
-        run: |
-          python3 - <<'PY'
-          import json
-          import pathlib
-          import urllib.request
-
-          manifest = json.loads(pathlib.Path("RESOURCE_MANIFEST").read_text(encoding="utf-8"))
-          packages = manifest.get("resource_packages", [])
-          target = next((item for item in packages if item.get("package_id") == "models"), None)
-          if not target or not target.get("download_url"):
-              raise SystemExit("Published models PCK URL is missing; range-resume capability cannot be verified.")
-          request = urllib.request.Request(
-              target["download_url"],
-              headers={"Range": "bytes=0-1023", "Accept-Encoding": "identity", "User-Agent": "ClashOfLegends-RangeProbe/1.0"},
-          )
-          with urllib.request.urlopen(request, timeout=45) as response:
-              content_range = response.headers.get("Content-Range", "")
-              body = response.read(2048)
-              print(f"RANGE PROBE: HTTP {response.status}; Content-Range={content_range}; bytes={len(body)}")
-              if response.status != 206 or not content_range.startswith("bytes 0-1023/") or len(body) != 1024:
-                  raise SystemExit("Published PCK host does not provide a valid 206 byte-range response.")
-          print("PCK RANGE SUPPORT VERIFIED: safe chunked resume is available.")
-          PY
-
       - name: Enforce original-reference acceptance ledger
         run: python3 tools/quality/validate_acceptance_ledger.py
 
@@ -58,9 +33,6 @@ jobs:
 
       - name: Verify Godot
         run: godot --version
-
-      - name: Test Godot HTTPRequest byte-range downloads against the actual PCK host
-        run: godot --headless --path . --script tools/quality/test_pck_range_http.gd
 
       - name: Import project
         run: |
@@ -177,27 +149,39 @@ jobs:
           use-dotnet: false
           include-templates: true
 
-      - name: Bundle verified world and model packs into the APK
+      - name: Stage all eleven verified resource packs for offline APK
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
+          set -euo pipefail
+          mkdir -p bundled
+          gh release download resource-packs-v4 --repo ZzwahwahzZ/Clash-of-Legends --pattern "*.pck" --dir bundled --clobber
           python3 - <<'PY'
-          import hashlib, json, pathlib, urllib.request
-          manifest = json.loads(pathlib.Path("RESOURCE_MANIFEST").read_text())
-          selected = {"maps", "models"}
-          pathlib.Path("bundled").mkdir(exist_ok=True)
+          import hashlib, json, pathlib
+          manifest = json.loads(pathlib.Path("RESOURCE_MANIFEST").read_text(encoding="utf-8"))
+          entries = manifest.get("resource_packages", [])
+          if len(entries) != 11:
+              raise SystemExit(f"Expected exactly 11 PCK entries, found {len(entries)}")
+          expected_names = set()
           total = 0
-          for entry in manifest["resource_packages"]:
-              if entry["package_id"] not in selected:
-                  continue
-              destination = pathlib.Path("bundled") / entry["file_name"]
-              print(f"Downloading bundled pack: {entry['package_id']} ({entry['size_bytes']} bytes)")
-              urllib.request.urlretrieve(entry["download_url"], destination)
-              data_hash = hashlib.sha256(destination.read_bytes()).hexdigest()
-              if destination.stat().st_size != int(entry["size_bytes"]) or data_hash != entry["sha256"]:
-                  raise SystemExit(f"Bundled pack integrity check failed: {entry['package_id']}")
-              total += destination.stat().st_size
-          if total == 0:
-              raise SystemExit("No bundled resource packs were staged")
-          print(f"Verified bundled APK resources: {total} bytes")
+          for entry in entries:
+              name = entry["file_name"]
+              if name in expected_names:
+                  raise SystemExit(f"Duplicate PCK filename: {name}")
+              expected_names.add(name)
+              path = pathlib.Path("bundled") / name
+              if not path.is_file():
+                  raise SystemExit(f"Missing embedded resource pack: {name}")
+              size = path.stat().st_size
+              digest = hashlib.sha256(path.read_bytes()).hexdigest()
+              if size != int(entry["size_bytes"]) or digest != entry["sha256"]:
+                  raise SystemExit(f"Embedded pack integrity failure: {name}")
+              total += size
+              print(f"VERIFIED EMBEDDED PCK: {name} {size} bytes SHA-256 OK")
+          actual_names = {p.name for p in pathlib.Path("bundled").glob("*.pck")}
+          if actual_names != expected_names:
+              raise SystemExit(f"Unexpected bundled PCK set: {sorted(actual_names ^ expected_names)}")
+          print(f"ALL 11 PCK FILES STAGED FOR APK: {total} bytes")
           PY
 
       - name: Import Godot project
@@ -213,9 +197,9 @@ jobs:
           import hashlib, json, pathlib, zipfile
           apk = pathlib.Path("builds/android/ClashOfLegends-debug.apk")
           manifest = json.loads(pathlib.Path("RESOURCE_MANIFEST").read_text())
-          expected = {e["package_id"]: e for e in manifest["resource_packages"] if e["package_id"] in {"maps", "models"}}
-          if set(expected) != {"maps", "models"}:
-              raise SystemExit("Manifest does not define both required bundled packs")
+          expected = {e["package_id"]: e for e in manifest["resource_packages"]}
+          if len(expected) != 11:
+              raise SystemExit(f"Manifest must define all 11 bundled PCKs, found {len(expected)}")
           with zipfile.ZipFile(apk) as z:
               names = z.namelist()
               for package_id, entry in expected.items():
