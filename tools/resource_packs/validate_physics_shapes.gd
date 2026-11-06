@@ -53,12 +53,18 @@ func _run_audit() -> void:
 				var bounds := mesh_instance.get_aabb()
 				if bounds.size.x > 0.0001 and bounds.size.y > 0.0001 and bounds.size.z > 0.0001:
 					valid_meshes += 1
-		if valid_meshes == 0:
-			_fail("No renderable visual meshes found beside physics body: " + scene_path)
+		var deferred_c3_visual := false
+		if valid_meshes == 0 and scene_path == "res://scenes/characters/Player.tscn":
+			var visual_root := body.get_node_or_null("VisualRoot")
+			var vat_animator := body.get_node_or_null("C3VatAnimator")
+			deferred_c3_visual = visual_root is Node3D and vat_animator is C3VatCharacterAnimator
+		if valid_meshes == 0 and not deferred_c3_visual:
+			_fail("No renderable visual meshes or validated deferred C3 model loader found beside physics body: " + scene_path)
 			body.free()
 			return
 		shape_total += valid_shapes
-		print("PHYSICS SCENE OK: ", scene_path, " | collision_shapes=", valid_shapes, " | visual_meshes=", valid_meshes, " | layer=", collision_body.collision_layer, " | mask=", collision_body.collision_mask)
+		var visual_status := "deferred_source_C3_VAT_loader" if deferred_c3_visual else str(valid_meshes)
+		print("PHYSICS SCENE OK: ", scene_path, " | collision_shapes=", valid_shapes, " | visual_meshes=", visual_status, " | layer=", collision_body.collision_layer, " | mask=", collision_body.collision_mask)
 		passed += 1
 		body.free()
 	print("PHYSICS SHAPE AUDIT PASSED: ", passed, "/", REQUIRED_SCENES.size(), " scenes; ", shape_total, " enabled collision shapes.")
