@@ -114,6 +114,17 @@ func _run() -> void:
     overview_camera.current = true
     await _capture("reports/phase1_chinese_district_preview.png")
 
+    # Orthographic layout audit: expose street corridors, block footprints, and
+    # unoccupied lots without perspective distortion before procedural infill.
+    var topdown_camera := Camera3D.new()
+    topdown_camera.projection = Camera3D.PROJECTION_ORTHOGONAL
+    topdown_camera.size = 360.0
+    topdown_camera.position = authored_center + Vector3(0.0, 360.0, 0.0)
+    root.add_child(topdown_camera)
+    topdown_camera.look_at(authored_center, Vector3.FORWARD)
+    topdown_camera.current = true
+    await _capture("reports/phase1_city_topdown_layout.png")
+
     # A wider city framing complements the source-matched camera while retaining
     # all authored transforms and excluding only outer landscape meshes from bounds.
     var district_camera := Camera3D.new()
