@@ -17,6 +17,13 @@ Local Linux:
     sudo apt-get install p7zip-full libarchive-tools binwalk ffmpeg
     python3 tools/asset_forensics/run_forensics.py /path/to/source.zip --out /path/to/private-output
 
+## Godot promotion step
+After parsing and visual review, create an approved JSON manifest using the fields documented by tools/asset_forensics/build_godot_catalog.py, then run:
+
+    python3 tools/asset_forensics/build_godot_catalog.py /path/to/private-project /path/to/extracted/root /path/to/approved-assets.json --apply
+
+The builder verifies every source SHA-256, rejects unsafe paths and unresolved dependencies, requires verified class/gender/rig mappings for complete characters, copies approved files into the project, and generates the resource catalog consumed by scripts/core/AssetCatalog.gd. It refuses to silently overwrite different existing files.
+
 ## Integration contract
 1. Raw source files and derivatives stay in private staging until provenance and rights are reviewed.
 2. Each candidate gets SHA-256, source path, size, signature and category tags.
