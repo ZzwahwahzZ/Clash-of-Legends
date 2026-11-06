@@ -17,14 +17,14 @@ func _run() -> void:
     environment.background_mode = Environment.BG_SKY
     var sky := Sky.new()
     var sky_material := ProceduralSkyMaterial.new()
-    sky_material.sky_top_color = Color(0.015, 0.050, 0.115)
-    sky_material.sky_horizon_color = Color(0.085, 0.170, 0.225)
+    sky_material.sky_top_color = Color(0.12, 0.36, 0.68)
+    sky_material.sky_horizon_color = Color(0.55, 0.72, 0.86)
     sky_material.sky_curve = 0.22
-    sky_material.sky_energy_multiplier = 0.62
-    sky_material.ground_bottom_color = Color(0.018, 0.035, 0.060)
-    sky_material.ground_horizon_color = Color(0.075, 0.125, 0.160)
+    sky_material.sky_energy_multiplier = 1.0
+    sky_material.ground_bottom_color = Color(0.09, 0.12, 0.14)
+    sky_material.ground_horizon_color = Color(0.40, 0.48, 0.52)
     sky_material.ground_curve = 0.18
-    sky_material.ground_energy_multiplier = 0.34
+    sky_material.ground_energy_multiplier = 0.55
     sky_material.sun_angle_max = 5.5
     sky_material.sun_curve = 0.10
     sky_material.use_debanding = true
@@ -32,35 +32,36 @@ func _run() -> void:
     sky.radiance_size = Sky.RADIANCE_SIZE_128
     sky.process_mode = Sky.PROCESS_MODE_INCREMENTAL
     environment.sky = sky
-    environment.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
+    environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+    environment.ambient_light_color = Color(0.55, 0.66, 0.82)
     environment.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
     environment.background_energy_multiplier = 1.0
-    environment.ambient_light_energy = 0.78
+    environment.ambient_light_energy = 1.0
     environment.fog_enabled = true
-    environment.fog_light_color = Color(0.075, 0.110, 0.145)
-    environment.fog_light_energy = 0.15
-    environment.fog_density = 0.0012
-    environment.fog_sky_affect = 0.18
+    environment.fog_light_color = Color(0.55, 0.68, 0.76)
+    environment.fog_light_energy = 0.38
+    environment.fog_density = 0.0010
+    environment.fog_sky_affect = 0.08
     environment.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-    environment.tonemap_exposure = 0.95
+    environment.tonemap_exposure = 0.98
     environment.adjustment_enabled = true
-    environment.adjustment_brightness = 0.99
-    environment.adjustment_contrast = 1.10
-    environment.adjustment_saturation = 1.10
+    environment.adjustment_brightness = 1.02
+    environment.adjustment_contrast = 0.98
+    environment.adjustment_saturation = 1.04
     world.environment = environment
     root.add_child(world)
 
     var sun := DirectionalLight3D.new()
     sun.rotation_degrees = Vector3(-42, 28, 0)
-    sun.light_color = Color(1.0, 0.56, 0.32)
-    sun.light_energy = 0.62
+    sun.light_color = Color(0.98, 0.90, 0.78)
+    sun.light_energy = 1.03
     sun.shadow_enabled = true
     root.add_child(sun)
 
     var fill := DirectionalLight3D.new()
     fill.rotation_degrees = Vector3(-18, -148, 0)
-    fill.light_color = Color(0.12, 0.25, 0.42)
-    fill.light_energy = 0.32
+    fill.light_color = Color(0.55, 0.66, 0.82)
+    fill.light_energy = 0.62
     fill.shadow_enabled = false
     root.add_child(fill)
 
@@ -83,7 +84,7 @@ func _run() -> void:
         push_error("Chinese district has no measurable horizontal geometry.")
         quit(3)
         return
-    var factor := 480.0 / horizontal_span
+    var factor := 1.0
     city.scale = Vector3.ONE * factor
     city.position = -SOURCE_GATE_ANCHOR * factor
     _tint_landscape(city)
@@ -121,9 +122,9 @@ func _tint_landscape(node: Node) -> void:
         var tint := Color.WHITE
         var should_tint := true
         if label.contains("perimetergroundcomposite"):
-            tint = Color(0.48, 0.62, 0.34)
+            tint = Color(0.42, 0.58, 0.28)
         elif label.contains("mountainmassif"):
-            tint = Color(0.68, 0.62, 0.52)
+            tint = Color(0.65, 0.62, 0.56)
         elif label.contains("oldcityfoundation"):
             tint = Color(0.62, 0.54, 0.42)
         else:
