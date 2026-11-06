@@ -394,12 +394,15 @@ jobs:
             adb shell pidof com.zwahwahzz.clashoflegends > emulator-evidence/game-pid.txt || { adb logcat -d -t 16000 > emulator-evidence/logcat-failure.txt; echo "Game process exited after launch."; exit 1; }
             adb shell screencap -p /sdcard/clash-launch.png
             adb pull /sdcard/clash-launch.png emulator-evidence/launch-screen.png
+            # Dismiss Android 13's first-run immersive-mode notice after the splash has rendered.
+            # The "Got it" target is centered near (1500, 383) on the 2400x1080 emulator.
             sleep 2
+            adb shell input tap 1500 383
+            sleep 0.5
             adb shell screencap -p /sdcard/clash-intro.png
             adb pull /sdcard/clash-intro.png emulator-evidence/intro-screen.png
             # LegendIntro.gd fades its cinematic overlay automatically after about 3.85 seconds.
-            # Wait for that transition instead of tapping stale coordinates while the splash is loading.
-            sleep 3
+            sleep 4
             adb shell screencap -p /sdcard/clash-character-select.png
             adb pull /sdcard/clash-character-select.png emulator-evidence/character-select.png
             python3 tools/ci/compare_emulator_screens.py emulator-evidence/intro-screen.png emulator-evidence/character-select.png 600,250,1800,800 --minimum-ratio 0.02
