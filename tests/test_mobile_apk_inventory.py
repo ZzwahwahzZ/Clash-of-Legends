@@ -4,14 +4,7 @@ import tempfile
 import unittest
 import zipfile
 from pathlib import Path
-import importlib.util
-
 ROOT = Path(__file__).resolve().parents[1]
-SPEC = importlib.util.spec_from_file_location(
-    "inspect_mobile_apks", ROOT / "tools/asset_forensics/inspect_mobile_apks.py"
-)
-MODULE = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(MODULE)
 
 
 class MobileApkInventoryTests(unittest.TestCase):
@@ -33,8 +26,6 @@ class MobileApkInventoryTests(unittest.TestCase):
             with zipfile.ZipFile(source, "w") as z:
                 z.write(apk, "ConquerOnline/install_time_1001.apk")
             out = root / "out"
-            report = MODULE.inspect if hasattr(MODULE, "inspect") else None
-            self.assertIsNone(report)
             # Exercise the public CLI path to cover nested APK extraction and JSON serialization.
             import subprocess, sys
             subprocess.run(
