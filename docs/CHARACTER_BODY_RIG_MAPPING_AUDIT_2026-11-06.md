@@ -95,3 +95,29 @@ The report also validates 72 VAT mesh-data entries across six clips (actions 100
 - VAT: data validated for 100/110/120; Godot runtime renderer and mobile performance not yet validated.
 
 Do not describe either path as a complete playable animation set. The next technical work is to build a Godot VAT playback test scene using the exact exported metadata and textures, validate all body parts (including armet, weapons, limbs and pelvis) in sync, and profile it on Android hardware/emulator. In parallel, improve skeletal export to preserve affine/shear transforms or use a mathematically safe decomposition/bake route, then revalidate walk/run before adopting the skeletal path.
+
+
+## Newly identified missing registry layer
+
+The prior source extraction contains `3dsimplerole.ini`, role-selection INIs, item translations, and decoded Lua data (`cqm_createrole.dat`, `i3drole.dat`, `hero.dat`, `roleselect.dat`, etc.), but it does **not** contain the full renderer registries needed for the final join. In particular, it does not include `3dobj.ini`, `3dtexture.ini`, or `3dmotion.ini`.
+
+External technical references confirm the relevant registry chain used by this C3 engine family:
+- `3dobj.ini` maps a model/object ID to a concrete C3 path.
+- `3dtexture.ini` maps the texture ID to the DDS path.
+- `3dmotion.ini` maps a motion ID to the C3 action path.
+- `3dsimplerole.ini` connects a role/simple-object to object and standby/action motion IDs.
+
+This is the missing join layer between the Mobile role/simple-object definitions and concrete body/texture/motion files. The C3Studio project documentation independently lists these INI registries and its asset tree/loader as the way to load C3 assets, making it a useful external parser/tooling reference (not an authority for our specific Mobile version).
+
+## Revised next extraction plan
+
+1. Recover the version-matched `3dobj.ini`, `3dtexture.ini`, and `3dmotion.ini` from the user's original Mobile resource archive or the matching resource package; do not substitute INIs from a different client version.
+2. Trace `rolechoose.ini` animation role -> matching `3dsimplerole.ini` section -> `3DSimpleObjID` / `3DStandByMotion` / `3DBlazeMotion` -> object and motion registries -> C3 body and action paths.
+3. Trace each creation armor/hair ID through the exact item/armor translation tables to its equipment model and texture IDs. Keep equipment attachment joins separate from the base-body join.
+4. Preserve the decoded `i3drole.dat` logic as a secondary validation layer for weapon-action compatibility, hair visibility and cloak/look adjustments; it is not itself a direct body-path registry.
+5. Reconcile every path against the extracted C3 source archive and converted GLB manifest before generating a runtime mapping.
+
+References used to identify the missing registry chain:
+- Conquer Online development training material describing `3Dobj.ini`, `3Dtexture.ini`, `3DsimpleObj.ini`, and `3Dmotion.ini`: https://www.slideserve.com/marcia-anderson/5950758
+- C3Studio parser/loader project and its documented asset-tree workflow: https://github.com/abdouthematrix/C3Studio
+- C3 file format background: https://gitlab.com/conquer-online/wiki/-/wikis/Files/C3
