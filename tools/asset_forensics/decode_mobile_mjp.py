@@ -77,7 +77,7 @@ def main():
     ap.add_argument("--out",type=Path,required=True)
     args=ap.parse_args()
     files=[args.source] if args.source.is_file() else sorted(args.source.rglob("*"))
-    files=[p for p in files if p.is_file() and (p.suffix.lower()==".mjp" or (p.is_file() and p.read_bytes()[:3]==b"MJP"))]
+    candidates=[]\n    for p in files:\n        if not p.is_file(): continue\n        if p.suffix.lower()==".mjp":\n            candidates.append(p); continue\n        try:\n            with p.open("rb") as stream:\n                if stream.read(3)==b"MJP": candidates.append(p)\n        except OSError:\n            continue\n    files=candidates
     report={"source":str(args.source),"found":len(files),"decoded":[],"errors":[]}
     for src in files:
         rel=src.name if args.source.is_file() else str(src.relative_to(args.source))
