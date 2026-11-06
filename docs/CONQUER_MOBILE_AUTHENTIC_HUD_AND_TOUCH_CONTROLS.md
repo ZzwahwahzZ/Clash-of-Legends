@@ -25,8 +25,8 @@ The existing `MainHUD.tscn` is a functional prototype only. Its rectangular text
 
 1. A visible virtual joystick is the primary continuous movement control. It must support analog direction and magnitude, smooth dead-zone handling, safe multi-touch, and release-to-stop. Walking/running is selectable through a dedicated mode control; sprint/run may also use a press/hold affordance only if it does not conflict with the reference layout.
 2. Touching a valid point on the 3D world issues a pathfinding destination, using the existing navigation system and obstacle avoidance. Touching UI must never issue a world command.
-3. A dedicated jump action and the reference-style tap/hold gesture for jump/hop must be supported without turning every world tap into an accidental jump. Gesture recognition must distinguish tap, drag, long-press, joystick contact, and UI interaction. A short tap on the world selects/interacts or path-moves according to target/context; a configured jump gesture performs a hop. Do not infer the jump gesture from a PC keyboard shortcut.
-4. Attack and each skill are separate touch targets. Skill buttons show the actual class skill icon, cooldown overlay, mana/cost state, and disabled state; no text-only generic skill buttons in the final HUD.
+3. Match the official Conquer Online Mobile behavior: a deliberate tap on a valid ground point makes the character leap/jump toward that point. The official mobile guide explicitly documents this as Jump (click the ground where you want to move). Keep auto-pathfinding as a separate command/menu, not the default result of a ground tap. Gesture recognition must distinguish a tap from a camera drag, joystick contact, and UI interaction. A dedicated jump action may be provided as an additional accessible control, but must not replace the ground-tap leap.
+4. Joystick input is the continuous walk/run control, with a clear walk/run mode toggle. Ground tap is the jump-to-destination action; auto-pathfinding is separate. Attack and each skill are separate touch targets. Skill buttons show the actual class skill icon, cooldown overlay, mana/cost state, and disabled state; no text-only generic skill buttons in the final HUD.
 5. Mount, auto-hunt, auto-loot, potion/quick slots and contextual interaction must be reachable by thumb and must not overlap the joystick or attack/skill cluster.
 6. All touch actions must work concurrently where expected (e.g. movement joystick plus skill press), with correct pointer/touch IDs and no stuck movement state when the app loses focus or a finger leaves the screen.
 7. UI must scale and reposition safely across phone aspect ratios and safe areas; target the Redmi Note 11 screen first. Preserve camera visibility and avoid covering the character/action area.
@@ -51,7 +51,7 @@ The existing `MainHUD.tscn` is a functional prototype only. Its rectangular text
 - [ ] Side-by-side mobile screenshot review completed against the current Conquer Mobile gameplay screen.
 - [ ] Correct mobile layout, visual skin, icons and spacing; not the current generic prototype.
 - [ ] Joystick analog movement and walk/run mode work.
-- [ ] World tap pathfinding and obstacle avoidance work.
+- [ ] World tap performs a jump toward the tapped ground point; separate auto-pathfinding and obstacle avoidance work.
 - [ ] Jump/hop gesture and dedicated button work without false triggers.
 - [ ] Movement + attack/skill multi-touch works; no stuck inputs after touch cancellation/focus loss.
 - [ ] Minimap, target, quest, quick slots and all visible function controls are functional.
