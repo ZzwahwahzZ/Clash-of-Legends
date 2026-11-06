@@ -59,12 +59,12 @@ def parse_wdb(data: bytes) -> dict:
         if not valid:
             continue
         payload = data[offset:offset+size]
-        ext = Path(name.replace("\\\\","/")).suffix.lower()
+        ext = Path(name.replace("\\","/")).suffix.lower()
         item = {"name":name,"hash":file_hash,"offset":offset,"size_bytes":size,
                 "sha256":sha(payload),"magic_hex":payload[:16].hex(),
                 "magic_ascii":payload[:16].decode("latin1","replace"),
                 "extension":ext}
-        if name.lower() in TARGET_DBC:
+        if Path(name.replace("\\\\","/")).name.lower() in TARGET_DBC:
             item["dbc"] = inspect_dbc(name, payload)
         entries.append(item)
     ext_counts = collections.Counter(x["extension"] or "[none]" for x in entries)
@@ -77,7 +77,7 @@ def parse_wdb(data: bytes) -> dict:
 
 def read_cstring(data: bytes, offset: int, limit=4096) -> str:
     if offset < 0 or offset >= len(data): return ""
-    end = data.find(b"\\0", offset, min(len(data), offset+limit))
+    end = data.find(b"\0", offset, min(len(data), offset+limit))
     if end < 0: end = min(len(data), offset+limit)
     return data[offset:end].decode("latin1","replace")
 
@@ -99,7 +99,7 @@ def parse_rsdb(data: bytes, prefer_big=False) -> dict | None:
             else:
                 rid, off=struct.unpack_from("<II",data,p)
             path=read_cstring(data,off)
-            plausible=bool(path) and all((ch.isprintable() or ch in "\\t\\r\\n") for ch in path)
+            plausible=bool(path) and all((ch.isprintable() or ch in "\t\r\n") for ch in path)
             if plausible: score+=1
             if len(rows)<12: rows.append({"id":rid,"offset":off,"path":path})
         candidate={"magic":data[:4].decode("ascii"),"count":count,"key_width":64 if kind=="big" else 32,
@@ -125,12 +125,12 @@ def parse_tpi(data: bytes) -> dict:
     for i in range(count):
         if pos>=len(data): malformed+=1; break
         path_len=data[pos]; pos+=1
-        if pos+path_len+18>len(data): malformed+=1; break
+        if pos+path_len+22>len(data): malformed+=1; break
         path=data[pos:pos+path_len].decode("latin1","replace"); pos+=path_len
         pos+=2
         unc, comp, comp2, unc2, offset=struct.unpack_from("<IIIII",data,pos); pos+=20
         if comp!=comp2 or unc!=unc2: malformed+=1; continue
-        norm=path.lower().replace("\\\\","/").lstrip("/")
+        norm=path.lower().replace("\\","/").lstrip("/")
         entries.append({"path":norm,"offset":offset,"compressed_size":comp,"uncompressed_size":unc})
     return {"version":version,"declared_count":count,"parsed_count":len(entries),
             "malformed_count":malformed,"entries":entries}
@@ -154,7 +154,7 @@ def decompress_entry(tpd: bytes, entry: dict) -> bytes:
     raise ValueError("decompression failed/size mismatch: "+("; ".join(errors[-2:])))
 
 def ascii_runs(data: bytes, min_len=4, max_items=20):
-    runs=re.findall(rb"[\\x20-\\x7e]{%d,}"%min_len,data)
+    runs=re.findall(rb"[\x20-\x7e]{%d,}"%min_len,data)
     return [x[:160].decode("ascii","replace") for x in runs[:max_items]]
 
 def inspect_phy(tag: str, payload: bytes) -> dict:
@@ -162,7 +162,7 @@ def inspect_phy(tag: str, payload: bytes) -> dict:
     if len(payload)<16:return out
     name_len=u32(payload,0)
     if name_len>4096 or 4+name_len+12>len(payload):return out
-    name=payload[4:4+name_len].split(b"\\0",1)[0].decode("latin1","replace")
+    name=payload[4:4+name_len].split(b"\0",1)[0].decode("latin1","replace")
     p=4+name_len
     blend,normal,alpha=struct.unpack_from("<III",payload,p);p+=12
     morph=4 if tag=="PHY " else 1
@@ -224,7 +224,7 @@ def inspect_motion(payload: bytes, include_translations=False) -> dict:
     return out
 
 def inspect_c3(data: bytes, path: str) -> dict:
-    if len(data)<16 or data[:16].rstrip(b"\\0")!=C3_MAGIC:
+    if len(data)<16 or data[:16].rstrip(b"\0")!=C3_MAGIC:
         return {"path":path,"size_bytes":len(data),"valid_c3_header":False,"prefix_hex":data[:32].hex()}
     pos=16; chunks=[]; errors=[]; motion_index=0
     family=BASE_FAMILIES.get(Path(path).name.lower())
@@ -324,6 +324,6 @@ def main():
         "errors":len(report["errors"])
     }
     args.output.parent.mkdir(parents=True,exist_ok=True)
-    args.output.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\\n",encoding="utf-8")
+    args.output.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     print(json.dumps(report["summary"],ensure_ascii=False))
 if __name__=="__main__":main()
