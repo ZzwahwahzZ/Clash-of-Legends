@@ -130,7 +130,7 @@ jobs:
       - name: Validate runtime C3 VAT idle, walk and run switching
         run: |
           mkdir -p reports
-          ALSOFT_DRIVERS=null LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a godot --path . --rendering-method gl_compatibility --script tools/resource_packs/validate_c3_vat_runtime.gd
+          ALSOFT_DRIVERS=null LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a godot --path . --rendering-method gl_compatibility res://tools/resource_packs/C3VatRuntimeValidation.tscn
       - name: Audit original DMap terrain and map catalog
         run: cargo run --manifest-path tools/c3_audit/Cargo.toml --release --bin audit_maps -- resource_stage reports/map-audit.json
       - name: Build category PCK files
