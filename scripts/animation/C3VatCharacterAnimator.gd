@@ -11,6 +11,15 @@ var _active_mesh_names: Dictionary = {}
 var _current_state: String = ""
 var _configured: bool = false
 
+const C3_SOCKET_HELPERS := {
+	"v_armet": true, "v_l_weapon": true, "v_r_weapon": true,
+	"v_l_forearm": true, "v_l_shoulder": true, "v_r_forearm": true,
+	"v_r_shoulder": true, "v_back": true, "v_l_foot": true,
+	"v_r_foot": true, "v_pelvis": true, "v_zero": true,
+	"v_slot": true, "v_l_slot01": true, "v_l_slot02": true,
+	"v_r_slot01": true, "v_r_slot02": true
+}
+
 func has_vat_for_model(model_id: int) -> bool:
 	return AssetCatalog != null and AssetCatalog.has_character_vat_animation(model_id)
 
@@ -33,6 +42,11 @@ func configure_character(model_root: Node3D, model_id: int) -> bool:
 	for node in model_root.find_children("*", "MeshInstance3D", true, false):
 		var mesh_instance := node as MeshInstance3D
 		if mesh_instance.mesh == null or mesh_instance.mesh.get_surface_count() <= 0:
+			continue
+		# C3 v_* socket meshes are tiny attachment markers, not animated body geometry.
+		# Their source vertex IDs are intentionally not part of the deforming VAT stream.
+		if C3_SOCKET_HELPERS.has(mesh_instance.name.to_lower()):
+			mesh_instance.visible = false
 			continue
 		if _mesh_by_name.has(mesh_instance.name):
 			push_error("C3 VAT Animator: duplicate mesh name makes C3 source binding ambiguous: " + mesh_instance.name)
@@ -105,6 +119,8 @@ func play_state(state: String) -> bool:
 			_current_state = ""
 			return false
 		var mesh_name := str(metadata.get("mesh_name", ""))
+		if C3_SOCKET_HELPERS.has(mesh_name.to_lower()):
+			continue
 		if mesh_name.is_empty() or not _mesh_by_name.has(mesh_name):
 			push_error("C3 VAT Animator: imported model is missing source mesh " + mesh_name)
 			_reset_all_players()
