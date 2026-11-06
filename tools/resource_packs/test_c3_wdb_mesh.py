@@ -1,7 +1,7 @@
 import struct
 import unittest
 
-from tools.resource_packs.audit_c3_wdb import parse_mesh
+from tools.resource_packs.audit_c3_wdb import parse_mesh, parse_ropt
 
 
 def sample_mesh(magic: bytes) -> bytes:
@@ -45,6 +45,31 @@ class MeshTableTests(unittest.TestCase):
         data += struct.pack("<II", 80300060, 1000)
         with self.assertRaises(ValueError):
             parse_mesh(data)
+
+
+    def test_rolepart_ropt_layout_and_paths(self):
+        header = b"ROPT" + struct.pack("<II", 1, 1)
+        name = b"body" + bytes(28)
+        mesh_name = b"ini/armor.dbc"
+        motion_name = b"ini/3dmotion.dbc"
+        mesh_ini = mesh_name + bytes(256 - len(mesh_name))
+        motion_ini = motion_name + bytes(256 - len(motion_name))
+        part = name + mesh_ini + motion_ini
+        dummy_name = b"dummy_body"
+        dummy = struct.pack("<I", 7) + dummy_name + bytes(32 - len(dummy_name))
+        result = parse_ropt(header + part + dummy)
+        self.assertEqual(result["parse_status"], "PARSED")
+        self.assertEqual(result["record_count"], 1)
+        self.assertEqual(result["dummy_record_count"], 1)
+        self.assertEqual(result["parts"][0]["name"], "body")
+        self.assertEqual(result["parts"][0]["mesh_ini"], "ini/armor.dbc")
+        self.assertEqual(result["parts"][0]["motion_ini"], "ini/3dmotion.dbc")
+        self.assertEqual(result["dummy_parts"][0], {"id": 7, "name": "dummy_body"})
+
+    def test_rolepart_rejects_invalid_record_size(self):
+        data = b"ROPT" + struct.pack("<II", 1, 0) + bytes(543)
+        with self.assertRaises(ValueError):
+            parse_ropt(data)
 
 
 if __name__ == "__main__":
