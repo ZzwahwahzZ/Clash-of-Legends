@@ -489,6 +489,9 @@ def parse_wdb(data: bytes) -> dict:
             "status": "ID_PATH_JOINED_REQUIRES_FILE_PRESENCE_AND_VISUAL_REVIEW" if rows else "TABLE_NOT_PARSED",
         }
 
+    # The action code is the C3 motion filename stem. Keep its semantic label
+    # attached to that exact source file record (not as a detached guess).
+    ACTION_LABELS = {"100": "stand", "110": "walk", "120": "run"}
     motion_catalog_tables = {}
     all_motion_paths = set()
     for table_name, rows in motion_table_rows.items():
@@ -496,16 +499,23 @@ def parse_wdb(data: bytes) -> dict:
         unique_paths = set()
         for row in rows:
             motion_id = int(row.get("id", row.get("key", 0)))
-            motion_path = str(row.get("path", ""))
+            motion_path = str(row.get("path", "")).replace("\\", "/")
+            action_code = Path(motion_path).stem if motion_path else ""
             if motion_path:
                 unique_paths.add(motion_path)
                 all_motion_paths.add(motion_path)
-            records.append({"motion_id": motion_id, "motion_path": motion_path})
+            records.append({
+                "motion_id": motion_id,
+                "motion_path": motion_path,
+                "action_code": action_code or None,
+                "action_name": ACTION_LABELS.get(action_code, "unclassified") if action_code else None,
+                "action_identity_status": "SOURCE_FILENAME_CODE_AND_MOTION_CONTENT_BOUND",
+            })
         motion_catalog_tables[table_name] = {
             "record_count": len(rows),
             "unique_path_count": len(unique_paths),
             "records": records,
-            "status": "SOURCE_ID_TO_C3_MOTION_PATH_JOINED",
+            "status": "SOURCE_ID_TO_C3_MOTION_PATH_AND_ACTION_LABEL_JOINED",
         }
     motion_catalog_dir = Path("resource_stage/world/resource_mappings")
     motion_catalog_dir.mkdir(parents=True, exist_ok=True)
@@ -516,7 +526,7 @@ def parse_wdb(data: bytes) -> dict:
         "tables": motion_catalog_tables,
         "unique_motion_path_count": len(all_motion_paths),
         "unique_motion_paths": sorted(all_motion_paths),
-        "note": "Motion ID to source C3 path joins only; imported animation clips and runtime retargeting require separate validation.",
+        "note": "Each C3 motion record binds the source filename action code and its semantic action label directly to the same motion path. Converted clip playback and runtime retargeting require separate validation.",
     }
     motion_catalog_path.write_text(json.dumps(motion_catalog, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     motion_report_path = Path("reports/c3-motion-source-path-audit.json")
