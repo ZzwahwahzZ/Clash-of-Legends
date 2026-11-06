@@ -545,5 +545,6 @@ jobs:
             resource-pack-audit.json
             resource-pack-audit.log
             /tmp/clash-dmap-format-sample.bin
+            /tmp/clash-map-pux-format-sample.bin
           if-no-files-found: warn
           retention-days: 30
