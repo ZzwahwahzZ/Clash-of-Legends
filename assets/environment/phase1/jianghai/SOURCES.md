@@ -6,5 +6,6 @@
 - Project composition license: MIT; retained as LICENSE-MIT.txt.
 - The selected Chinese temple, arcade-shop, and gate-house profiles are documented as adaptations of CC0 Chinese Temple 2, CC0 Chinese Four-corner Pavilion, and the recorded CC0 Quaternius Buildings Pack. Third-party rights remain their original licenses, not relicensed as MIT.
 - Exact source records and the retired/omitted asset list are retained in LICENSE_EVIDENCE.md and THIRD_PARTY_LICENSES.md.
-- The extractor keeps only named Chinese district nodes and their transform ancestors; it does not redistribute the full source city.
+- The extractor keeps the Chinese district, all 50 density placements, enterable residences, market props, pawnshop courtyard/entrance, and OldCityFoundation.
+- The extractor intentionally excludes the industrial factory block, the 1.2-km perimeter terrain, the 12 CC BY Hero Mountain instances, and interior shells; those are not part of this compact playable-hub candidate.
 - reports/phase1_chinese_district_extract.json records the exact selected nodes, geometry counts, output size, and SHA-256.
