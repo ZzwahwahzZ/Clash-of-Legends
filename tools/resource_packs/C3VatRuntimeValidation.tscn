@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://tools/resource_packs/validate_c3_vat_runtime.gd" id="1_vat_validation"]
+
+[node name="C3VatRuntimeValidation" type="Node"]
+script = ExtResource("1_vat_validation")
