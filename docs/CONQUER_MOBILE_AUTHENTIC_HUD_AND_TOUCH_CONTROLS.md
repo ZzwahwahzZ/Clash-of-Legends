@@ -92,3 +92,21 @@ A source review of `MainHUD.tscn`, `MainHUDController.gd`, `VirtualJoystickContr
 5. Test simultaneous joystick + skill touches, cancellation, focus loss, screen rotation, safe areas and the Redmi Note 11 aspect ratio.
 
 The joystick ownership fix and walk/run source implementation are committed on `feature/conquer-mobile-authentic-hud`. The toggle is wired to the scene and controller. These source changes are not yet runtime/device-tested. The HUD remains a prototype until the remaining missing elements are implemented and the visual comparison/device acceptance checks pass.
+
+
+## Owner clarification — persistent transformation skills and original quick-slot behavior (2026-11-06)
+
+The following behavior is mandatory and must be implemented from the original mobile skill/resource data, not inferred from skill names:
+
+- Some skills are **toggle/stance/transformation skills**, not one-shot attacks. Pressing the skill activates it and changes the player's visible form/model or attached appearance.
+- The transformed appearance persists for the full active duration/state. Releasing the touch must not immediately restore the normal model. The skill remains visibly active until the original skill's cancel action, expiry, resource condition or other verified deactivation rule occurs.
+- The same skill button must show active state and allow the correct deactivation only if the original game supports manual toggling. Cooldown, mana/energy drain, duration, cancellation and model swap must be driven by the skill's actual data.
+- Skill-button artwork must come from the matching original mobile icon/atlas resource where available. A skill label or emoji is not an acceptable substitute for the original icon.
+- Quick treatment slots must be separate, thumb-accessible controls with the correct original potion/item icon, quantity, cooldown and unavailable state. They must invoke the actual inventory/consumable system and never grant free items.
+- The minimap must represent the current map and live player position/heading, plus only markers supported by the map/NPC/quest data. A decorative static map image is not acceptable.
+
+### Transformation validation
+
+For each identified transformation skill, record and verify: skill ID, class/weapon restrictions, activation input, resource cost, duration or upkeep, cancel/expiry condition, model/body/skin resource IDs, compatible skeleton identity, required motion set, attachment/socket changes, effects/audio, cooldown and UI icon. Validate both activation and restoration on the same character rig, then test movement, attack, jump, mount and skill cancellation while transformed.
+
+Until the original skill metadata and associated C3 model/motion resources are decoded, transformation skills remain an extraction-and-mapping task; do not ship a guessed toggle implementation.
