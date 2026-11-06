@@ -21,7 +21,12 @@ func configure_character(model_root: Node3D, model_id: int) -> bool:
 	if not has_vat_for_model(model_id):
 		push_warning("C3 VAT Animator: no fully validated VAT clip catalog for model %d." % model_id)
 		return false
-	_reset_all_players()
+	for player_value in _players_by_mesh.values():
+		var old_player := player_value as C3VatPlayer
+		if old_player != null:
+			old_player.reset()
+			old_player.queue_free()
+	_players_by_mesh.clear()
 	_mesh_by_name.clear()
 	_players_by_mesh.clear()
 	_active_mesh_names.clear()
@@ -61,6 +66,8 @@ func play_state(state: String) -> bool:
 	if not ["idle", "walk", "run"].has(normalized):
 		push_warning("C3 VAT Animator: unsupported state " + state)
 		return false
+	if _current_state == normalized:
+		return true
 	var clip: Dictionary = AssetCatalog.get_character_vat_clip(_model_id, normalized)
 	var metadata_paths: Array = clip.get("metadata_paths", [])
 	if metadata_paths.is_empty():
