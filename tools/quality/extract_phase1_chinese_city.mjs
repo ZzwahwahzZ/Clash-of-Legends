@@ -70,7 +70,13 @@ const selected = allNodes.filter((node) => {
   const names = [node.getName(), node.getMesh()?.getName() ?? ''];
   const combined = names.join(' ');
   if (/FactoryGatePortal|PowerDrop|SecurityCamera/i.test(combined)) return false;
-  return keepPatterns.some((pattern) => names.some((name) => pattern.test(name)));
+  if (keepPatterns.some((pattern) => names.some((name) => pattern.test(name)))) return true;
+  let ancestor = node.getParentNode();
+  while (ancestor instanceof Node) {
+    if (/^(AuthoredStreetNetwork|AuthoredCityClutter)$/i.test(ancestor.getName())) return true;
+    ancestor = ancestor.getParentNode();
+  }
+  return false;
 });
 if (selected.length === 0) {
   await fs.writeFile(reportPath, JSON.stringify({ inventory, error: 'No approved Chinese district nodes matched.' }, null, 2));
