@@ -142,7 +142,10 @@ func _apply_character_model() -> bool:
 	# parts, NPCs and unrelated models. Only explicit, reviewed runtime mappings qualify.
 	var model_index := AssetCatalog.get_verified_character_model_index(character_class, character_gender)
 	if model_index < 0:
-		return false
+		# Profession-specific equipment/model joins remain unapproved. Show only
+		# the source-identified gender base body with validated C3 VAT motion;
+		# never mislabel a generic body as a profession-specific appearance.
+		return _apply_gender_base_model(model_entries)
 	var selected_entry: Dictionary = model_entries[model_index]
 	var selected_path := str(selected_entry.get("path", ""))
 	var model_id := _extract_c3_model_id(selected_path)
@@ -173,6 +176,46 @@ func _apply_character_model() -> bool:
 	imported_model_animation = null if use_c3_vat else candidate_animation as AnimationPlayer
 	imported_animation_name = ""
 	_set_imported_animation_state("idle")
+	for child in visual_root.get_children():
+		if child != candidate_root and child is Node3D:
+			child.visible = false
+	call_deferred("_apply_refinement_glow")
+	return true
+
+func _apply_gender_base_model(model_entries: Array) -> bool:
+	if c3_vat_animator == null or not AssetCatalog:
+		return false
+	var base_model_id := 7130000 if character_gender == "male" else 8133010
+	if not AssetCatalog.has_character_vat_animation(base_model_id):
+		return false
+	var base_path := AssetCatalog.get_character_vat_base_model_path(base_model_id)
+	if base_path.is_empty():
+		return false
+	var model_index := -1
+	for index in range(model_entries.size()):
+		if "res://" + str(model_entries[index].get("path", "")) == base_path:
+			model_index = index
+			break
+	if model_index < 0:
+		return false
+	var candidate_root := AssetCatalog.instantiate_fitted_model("characters", model_index, visual_root, 1.7, "CharacterBaseCandidate")
+	if candidate_root == null:
+		return false
+	var candidate_instance: Node3D = candidate_root.get_child(0) as Node3D if candidate_root.get_child_count() > 0 else null
+	if candidate_instance == null or candidate_instance.find_children("*", "MeshInstance3D", true, false).is_empty():
+		candidate_root.queue_free()
+		return false
+	if not c3_vat_animator.configure_character(candidate_instance, base_model_id):
+		candidate_root.queue_free()
+		return false
+	var old_root := visual_root.get_node_or_null("ImportedModelRoot")
+	if old_root:
+		old_root.queue_free()
+	candidate_root.name = "ImportedModelRoot"
+	_c3_vat_active = true
+	_current_character_model_id = base_model_id
+	imported_model_animation = null
+	imported_animation_name = ""
 	for child in visual_root.get_children():
 		if child != candidate_root and child is Node3D:
 			child.visible = false
