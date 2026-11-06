@@ -60,7 +60,7 @@ const keepPatterns = [
   /^FactoryCourtyard$/i,
   /^FactoryLoadingGuide\d{2}$/i,
   /^FactorySteamPipe$/i,
-  /^RedStarFactory(Marquee|SafetyPlaque)(Backing|Text)$/i,
+  /^(RedStarFactoryMarquee|RedStarSafetyPlaque)(Backing|Text)$/i,
   /^JianghaiPerimeterGroundComposite$/i,
   /^JianghaiMountainMassif/i,
   /^JianghaiEnterable_/i,
