@@ -497,6 +497,20 @@ jobs:
           print(f"ALL 11 RESOURCE PACKS VERIFIED: {total_bytes} bytes")
           PY
 
+      - name: Prepare verified PCK extraction inputs
+        run: |
+          mkdir -p build/source_packs reports
+          cp ci-resource-packs/*.pck build/source_packs/
+          base="https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/resource-packs-v4"
+          curl --fail --location --retry 5 --retry-all-errors "$base/resource-source-index.csv" -o resource-source-index.csv
+          python3 tools/resource_packs/prepare_pck_paths.py
+
+      - name: Rehydrate exact source files from verified PCKs
+        run: godot --headless --path . --script tools/resource_packs/extract_resource_packs.gd
+
+      - name: Build provenance-preserving runtime resource catalog
+        run: python3 tools/resource_packs/build_runtime_resource_catalog.py
+
       - name: Mount packs and inspect actual runtime 3D resources
         run: |
           set -o pipefail
