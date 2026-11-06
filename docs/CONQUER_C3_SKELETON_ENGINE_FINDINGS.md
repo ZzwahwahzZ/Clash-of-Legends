@@ -40,3 +40,24 @@ The Android package inventory lists `assets/ConquerRes/ini/3dskeleton.ini` and `
 - Associate each MOTI track with the exact skeleton identity; do not rely on bone count alone.
 - Keep body skeleton families separate from monster, NPC, mount and equipment attachment skeletons.
 - Export a machine-readable hierarchy and a GLB/Blender rig only after the original hierarchy is recovered.
+
+
+## Additional verified accessors recovered from native disassembly
+
+The following accessor behavior is now confirmed at instruction level:
+
+- `GetBoneName(i)` validates the signed index against the bone vector and returns the 64-bit name pointer stored at internal bone-record offset `0x10`. This confirms that the field is a pointer, not an inline fixed-length name.
+- `GetBoneReferencePose(i, matrix)` copies exactly 64 bytes from internal offsets `0x18..0x57` into the output matrix. These four 16-byte blocks are the full reference-pose matrix payload.
+- `GetPivotPoint(i)` reads three 32-bit floats at internal offsets `0x48`, `0x4C`, and `0x50`. These values overlap the final 16-byte block of the reference-pose payload; preserve the complete 64-byte matrix and expose this 3-float accessor separately rather than discarding either representation.
+- `GetParentBoneID(i)` reads a signed 16-bit parent at offset `0x00`. A value of -1 is the root sentinel. For non-root entries, it checks bit 0 of the candidate parent's flags byte at offset `0x08`; if the bit is not set, it returns -1. A parser must reproduce this validation rather than trusting every raw parent index.
+- `IsBoneInheritFromBone(child, ancestor)` follows the parent chain by repeatedly reading each record's signed parent index, with -1 terminating the walk. This confirms that the parent field is used as a true ancestry chain, not merely a display grouping.
+- The socket array is stored separately from the bone vector. `FindSocketByName` iterates 16-byte internal socket records and compares the name pointer at record offset `0x08`; `IsSocketInheritFromBone` checks the socket's attached bone and then follows the same parent chain.
+- The separate-root-bone accessor returns a stored integer at skeleton-object offset `0x10`. Preserve it as skeleton metadata; do not assume the only root is the bone whose parent is -1.
+
+## Safe parsing implications
+
+1. Keep the raw 84-byte V7 record and the normalized 88-byte internal-layout interpretation side by side during reverse engineering.
+2. Resolve name pointers only after the loader's relocation/string-table stage is understood. Never treat the 64-bit pointer bytes as a string offset without proof.
+3. Preserve all 64 reference-pose bytes, the three pivot floats, flags, parent sentinel, socket records and separate-root-bone ID.
+4. Validate parent references and ancestry chains before exporting a Godot `Skeleton3D`; reject cycles and out-of-range links.
+5. Do not build or retarget animation tracks until the source skeleton resource and its name-pointer resolution have been recovered.
