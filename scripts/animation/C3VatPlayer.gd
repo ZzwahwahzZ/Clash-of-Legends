@@ -16,6 +16,21 @@ func configure(mesh_instance: MeshInstance3D, metadata_path: String, binary_path
 	if not FileAccess.file_exists(metadata_path) or not FileAccess.file_exists(binary_path):
 		push_error("C3 VAT: metadata or RGBA32F data file is missing.")
 		return false
+	# Reset the previous VAT binding before reading the new frame count. reset()
+	# clears frame state, so it must never run after metadata dimensions are loaded.
+	if _target_mesh != mesh_instance:
+		reset()
+		_target_mesh = mesh_instance
+		_source_materials.clear()
+		for surface in range(mesh_instance.mesh.get_surface_count()):
+			_source_materials.append(mesh_instance.get_active_material(surface))
+	elif _source_materials.size() != mesh_instance.mesh.get_surface_count():
+		reset()
+		_source_materials.clear()
+		for surface in range(mesh_instance.mesh.get_surface_count()):
+			_source_materials.append(mesh_instance.get_active_material(surface))
+	else:
+		reset()
 	var metadata_file := FileAccess.open(metadata_path, FileAccess.READ)
 	if metadata_file == null:
 		return false
@@ -76,17 +91,6 @@ func configure(mesh_instance: MeshInstance3D, metadata_path: String, binary_path
 		push_error("C3 VAT: could not create animated RGBA8 normal texture.")
 		return false
 	var normal_texture := ImageTexture.create_from_image(normal_image)
-	if _target_mesh != mesh_instance:
-		reset()
-		_target_mesh = mesh_instance
-		_source_materials.clear()
-		for surface in range(mesh_instance.mesh.get_surface_count()):
-			_source_materials.append(mesh_instance.get_active_material(surface))
-	elif _source_materials.size() != mesh_instance.mesh.get_surface_count():
-		reset()
-		_source_materials.clear()
-		for surface in range(mesh_instance.mesh.get_surface_count()):
-			_source_materials.append(mesh_instance.get_active_material(surface))
 	_materials.clear()
 	var shader_opaque_path := "res://shaders/C3Vat.gdshader"
 	var shader_alpha_path := "res://shaders/C3VatAlpha.gdshader"
