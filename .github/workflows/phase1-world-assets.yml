@@ -292,3 +292,5 @@ jobs:
             assets/environment/phase1/SOURCES.md
           if-no-files-found: warn
           retention-days: 30
+
+# Validation workflow revision: keep phase audit runs traceable to the latest branch snapshot.
