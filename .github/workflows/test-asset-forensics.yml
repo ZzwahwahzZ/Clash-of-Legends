@@ -21,8 +21,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Install image decoder test dependency
+        run: python -m pip install Pillow
       - name: Compile scanner
-        run: python -m py_compile tools/asset_forensics/run_forensics.py tools/asset_forensics/process_standard_assets.py tools/asset_forensics/build_godot_catalog.py tests/test_asset_forensics.py tests/test_native_library_inventory.py tests/test_fui_headers.py tests/test_mobile_apk_inventory.py tools/asset_forensics/inspect_mobile_apks.py tools/asset_forensics/inspect_native_libraries.py tools/asset_forensics/inspect_fui_headers.py
+        run: python -m py_compile tools/asset_forensics/run_forensics.py tools/asset_forensics/process_standard_assets.py tools/asset_forensics/build_godot_catalog.py tests/test_asset_forensics.py tests/test_native_library_inventory.py tests/test_fui_headers.py tests/test_mobile_apk_inventory.py tools/asset_forensics/inspect_mobile_apks.py tools/asset_forensics/inspect_native_libraries.py tools/asset_forensics/inspect_fui_headers.py tools/asset_forensics/decode_mobile_mjp.py tests/test_mobile_mjp.py
       - name: Validate JavaScript parser syntax
         run: node --check tools/asset_forensics/parse_fui_packages.mjs
       - name: Validate Colab notebook JSON and single-cell contract
@@ -34,55 +36,6 @@ jobs:
           assert len(p["cells"]) == 1 and p["cells"][0]["cell_type"] == "code"
           print("Notebook JSON valid; exactly one executable cell.")
           PY
-      - name: Run archive fixtures
+      - name: Run archive and Mobile MJP decoder fixtures
         run: python -m unittest discover -s tests -v
 
-  mobile-apk-static-analysis:
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: tools/colab-drive-asset-transfer
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Download and verify the exact supplied Mobile source archive
-        run: |
-          curl -fL --retry 3 --retry-delay 2 \
-            "https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/original-mobile-assets-2026-11-06/ConquerOnline.zip" \
-            -o /tmp/ConquerOnline.zip
-          echo "b1c6958109a07c237631943fc0442d3161563d89e1020b143d95437ba9a6fdb0  /tmp/ConquerOnline.zip" | sha256sum -c -
-      - name: Inventory nested APKs, DEX, native libraries and loader clues
-        run: |
-          python -m py_compile tools/asset_forensics/inspect_mobile_apks.py tools/asset_forensics/inspect_native_libraries.py
-          python tools/asset_forensics/inspect_mobile_apks.py /tmp/ConquerOnline.zip --out mobile-apk-analysis
-          python tools/asset_forensics/inspect_native_libraries.py mobile-apk-analysis/private_apk_extract --out mobile-apk-analysis/native
-      - name: Decompile APK bytecode with official JADX release
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq jq default-jre-headless
-          URL="$(curl -fsSL https://api.github.com/repos/skylot/jadx/releases/latest | jq -r '.assets[] | select(.name | test("^jadx-[0-9.]+\\.zip$")) | .browser_download_url' | head -n 1)"
-          test -n "$URL"
-          curl -fL --retry 3 "$URL" -o /tmp/jadx.zip
-          mkdir -p /tmp/jadx
-          unzip -q /tmp/jadx.zip -d /tmp/jadx
-          JADX="$(find /tmp/jadx -type f -path '*/bin/jadx' | head -n 1)"
-          test -x "$JADX"
-          mkdir -p /tmp/jadx-main /tmp/jadx-install
-          find mobile-apk-analysis/private_apk_extract -maxdepth 1 -name 'ConquerOnline-*.apk' -print -quit | grep . | while read APK; do "$JADX" --no-res -d /tmp/jadx-main "$APK" || true; done
-          find mobile-apk-analysis/private_apk_extract -maxdepth 1 -name 'install_time_*.apk' -print -quit | grep . | while read APK; do "$JADX" --no-res -d /tmp/jadx-install "$APK" || true; done
-          grep -RInE -m 300 'Cipher|getInstance|SecretKey|IvParameter|MessageDigest|Inflater|ZipInputStream|AssetManager|System\.loadLibrary|native |decrypt|encrypt|TPI|TPD|C3|MJP|PVR|loadResource|openAsset' /tmp/jadx-main /tmp/jadx-install > mobile-apk-analysis/jadx-resource-loader-hits.txt || true
-          test -s mobile-apk-analysis/jadx-resource-loader-hits.txt || echo "No matching Java-side loader strings; native path still requires ELF analysis." > mobile-apk-analysis/jadx-resource-loader-hits.txt
-      - name: Upload metadata-only reverse-engineering report
-        uses: actions/upload-artifact@v4
-        with:
-          name: mobile-apk-static-analysis
-          path: |
-            mobile-apk-analysis/mobile-apk-static-analysis.json
-            mobile-apk-analysis/native/native-library-inventory.json
-            mobile-apk-analysis/jadx-resource-loader-hits.txt
-          if-no-files-found: error
-          retention-days: 14
