@@ -38,6 +38,18 @@ func _run() -> void:
   return
  root.add_child(city)
  await process_frame
+ var registry_script=preload("res://scripts/world/WorldInteractionRegistry.gd")
+ var interaction_registry=registry_script.new()
+ if not interaction_registry.bind_world(city):
+  push_error("Could not bind Jianghai interaction landmark registry.")
+  quit(6)
+  return
+ var missing_anchors:PackedStringArray=interaction_registry.validate_world_bindings()
+ if not missing_anchors.is_empty():
+  push_error("Unresolved Jianghai task landmark IDs: "+", ".join(missing_anchors))
+  quit(6)
+  return
+ print("JIANGHAI TASK LANDMARKS VALIDATED: ",JSON.stringify(interaction_registry.get_anchor_ids()))
  city.position=-SOURCE_GATE_ANCHOR
  _tint_landscape(city)
  await process_frame
