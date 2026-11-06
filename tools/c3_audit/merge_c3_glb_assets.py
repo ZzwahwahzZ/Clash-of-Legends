@@ -13,12 +13,16 @@ if not catalog_path.is_file():
     raise SystemExit("Prepared runtime resource catalog is missing.")
 catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
 assets = catalog.setdefault("assets", {})
+# Deduplicate within a category, not globally: an identical mesh may be
+# legitimately referenced by more than one gameplay category, and skipping it
+# globally can silently leave (for example) the monsters PCK without any model.
 existing_hashes = {
-    row.get("sha256")
-    for rows in assets.values() if isinstance(rows, list)
+    (category, row.get("sha256"))
+    for category, rows in assets.items() if isinstance(rows, list)
     for row in rows if isinstance(row, dict)
 }
 added = []
+converted_category_counts = {}
 for source in sorted(source_root.rglob("*.glb")):
     relative = source.relative_to(source_root)
     if len(relative.parts) < 2:
@@ -27,7 +31,7 @@ for source in sorted(source_root.rglob("*.glb")):
     if category not in {"characters", "monsters", "equipment", "mounts", "effects", "world"}:
         continue
     digest = hashlib.sha256(source.read_bytes()).hexdigest()
-    if digest in existing_hashes:
+    if (category, digest) in existing_hashes:
         continue
     destination = stage_root / category / "converted_c3" / Path(*relative.parts[1:])
     destination.parent.mkdir(parents=True, exist_ok=True)
@@ -43,8 +47,9 @@ for source in sorted(source_root.rglob("*.glb")):
         "mapping_status": "unreviewed",
     }
     assets.setdefault(category, []).append(entry)
-    existing_hashes.add(digest)
-    added.append({"category": category, "path": entry["path"], "size_bytes": entry["size_bytes"]})
+    existing_hashes.add((category, digest))
+    converted_category_counts[category] = converted_category_counts.get(category, 0) + 1
+    added.append({"category": category, "path": entry["path"], "size_bytes": entry["size_bytes"], "kind": "converted_c3_glb"})
 def register_additional_file(category: str, source: Path, destination: Path, source_label: str, asset_role: str, mapping_status: str) -> dict:
     if not source.is_file():
         raise SystemExit(f"Required C3 VAT runtime source is missing: {source}")
@@ -190,11 +195,13 @@ catalog["c3_conversion"] = {
     "source": "validated C3/PVR conversion",
     "models_added": len(added),
     "category_counts": {key: sum(1 for item in added if item["category"] == key) for key in sorted({item["category"] for item in added})},
+    "converted_glb_category_counts": converted_category_counts,
 }
 catalog_path.write_text(json.dumps(catalog, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 report = {
     "models_added": len(added),
     "category_counts": catalog["c3_conversion"]["category_counts"],
+    "converted_glb_category_counts": converted_category_counts,
     "character_vat_models": len(character_vat_clips),
     "character_vat_clips": {model_id: {state: len(row["metadata_paths"]) for state, row in data["states"].items()} for model_id, data in character_vat_clips.items()},
     "models": added,
