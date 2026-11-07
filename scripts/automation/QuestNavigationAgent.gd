@@ -115,9 +115,18 @@ func _advance_source_objectives(event_kind: String, target: String, map_id: Stri
 			"mob":
 				var expected_mob := str(intention.get("monster_name", "")).strip_edges()
 				matched = event_kind == "mob" and not expected_mob.is_empty() and expected_mob.casefold() == target.casefold()
+				if matched and not map_id.is_empty() and not str(intention.get("map_id", "")).is_empty():
+					matched = str(intention.get("map_id", "")) == map_id
+				if matched:
+					for companion in intentions:
+						if str(companion.get("kind", "")) == "chk_quest" and str(companion.get("quest_id", "")) == active_source_mission_id and str(companion.get("field", "")) == str(intention.get("field", "")):
+							var condition_parts: Array = companion.get("parts", [])
+							if not condition_parts.is_empty():
+								required = maxi(required, int(condition_parts[condition_parts.size() - 1]))
 			"item_t":
-				var expected_item := str(intention.get("item_name", "")).strip_edges()
-				matched = event_kind == "item" and not expected_item.is_empty() and expected_item.casefold() == target.casefold()
+				var expected_item := str(intention.get("item_name", "")).strip_edges().to_lower().replace(" ", "").replace("_", "").replace("-", "")
+				var actual_item := target.to_lower().replace(" ", "").replace("_", "").replace("-", "")
+				matched = event_kind == "item" and not expected_item.is_empty() and expected_item == actual_item
 			"chk_item":
 				var parts: Array = intention.get("parts", [])
 				if not parts.is_empty():
@@ -134,6 +143,11 @@ func _advance_source_objectives(event_kind: String, target: String, map_id: Stri
 			source_objective_counts[counter_key] = count
 			if count >= required:
 				progress[index] = true
+				if kind == "mob":
+					for companion_index in range(intentions.size()):
+						var companion: Dictionary = intentions[companion_index]
+						if str(companion.get("kind", "")) == "chk_quest" and str(companion.get("quest_id", "")) == active_source_mission_id and str(companion.get("field", "")) == str(intention.get("field", "")):
+							progress[companion_index] = true
 	source_objective_progress[active_source_mission_id] = progress
 	var all_complete := true
 	for value in progress:
