@@ -145,7 +145,9 @@ func is_available(mission_id: String, completed_ids: Array, player_level: int = 
 	if player_level > 0 and ((level_min > 0 and player_level < level_min) or (level_max > 0 and player_level > level_max)):
 		return false
 	var raw := str(mission.get("profession_raw", "0")).strip_edges()
-	if not profession_code.is_empty() and raw != "0":
+	if raw != "0":
+		if profession_code.is_empty():
+			return false
 		var allowed := false
 		for token in raw.split(","):
 			if token.strip_edges() == profession_code:
@@ -154,6 +156,14 @@ func is_available(mission_id: String, completed_ids: Array, player_level: int = 
 		if not allowed:
 			return false
 	return true
+
+func is_available_for_class(mission_id: String, completed_ids: Array, player_level: int, class_id: String) -> bool:
+	var profession_code := GameContentDatabase.get_source_profession_id(class_id) if GameContentDatabase else ""
+	return is_available(mission_id, completed_ids, player_level, profession_code)
+
+func get_available_at_npc_for_class(npc_id: String, completed_ids: Array, player_level: int, class_id: String) -> Array[Dictionary]:
+	var profession_code := GameContentDatabase.get_source_profession_id(class_id) if GameContentDatabase else ""
+	return get_available_at_npc(npc_id, completed_ids, player_level, profession_code)
 
 func get_available_at_npc(npc_id: String, completed_ids: Array = [], player_level: int = 0, profession_code: String = "") -> Array[Dictionary]:
 	var key := npc_id.lstrip("0")
