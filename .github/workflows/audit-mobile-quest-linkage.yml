@@ -103,6 +103,24 @@ jobs:
             build/mobile-quest-source/selected \
             --output reports/mobile-quest-world-links.json
           python3 -m json.tool reports/mobile-quest-world-links.json > /dev/null
+      - name: Validate quest dialogue and world-linkage acceptance checks
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path("reports/mobile-quest-world-links.json").read_text(encoding="utf-8"))
+          assert p["mission_catalog"]["record_count"] == 2510
+          assert p["mission_catalog"]["unique_mission_ids"] == 2509
+          assert p["dialogue_linkage"]["dialogue_flow_count"] >= 1900
+          assert p["dialogue_linkage"]["mission_ids_with_dialogue_flows"] >= 250
+          assert p["story_scene_linkage"]["client_realm_task_registry_count"] == 58
+          assert p["story_scene_linkage"]["client_realm_task_decoded_script_count"] == 58
+          assert p["lua_script_reference_count"] >= 1500
+          m={x["mission_id"]:x for x in p["dialogue_linkage"]["mission_dialogue_links"]}
+          assert "Whorf" in str(m["5455"]["dialogues"])
+          assert "David" in str(m["5456"]["dialogues"]) and "Jack" in str(m["5456"]["dialogues"])
+          print("Quest linkage acceptance checks passed")
+          PY
       - name: Build source-to-world cross-reference evidence pack
         run: |
           python3 - <<'PY'
