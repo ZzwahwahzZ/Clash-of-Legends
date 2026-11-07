@@ -14,6 +14,8 @@ class_name MonsterBase
 @export var gold_max: int = 80
 @export var respawn_time: float = 6.0
 @export var is_boss: bool = false
+@export var source_monster_name: String = ""
+@export var source_map_id: String = ""
 
 enum State { IDLE, PATROL, CHASE, ATTACK, RETURNING, DEAD }
 
@@ -262,8 +264,8 @@ func _on_death(killer: CharacterBody3D) -> void:
 		for qa in quest_agents:
 			if qa.has_method("on_enemy_killed"):
 				qa.on_enemy_killed(enemy_type)
-			if qa.has_method("on_source_enemy_killed"):
-				qa.on_source_enemy_killed(monster_name_en)
+			if qa.has_method("on_source_enemy_killed") and not source_monster_name.is_empty():
+				qa.on_source_enemy_killed(source_monster_name, source_map_id)
 				
 	if is_boss and GameManager:
 		var killer_name = "البطل" if GameManager.current_language == "ar" else "Hero"
