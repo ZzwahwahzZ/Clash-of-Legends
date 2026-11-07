@@ -18,6 +18,10 @@ on:
       - "scripts/world/WorldInteractionRegistry.gd"
   workflow_dispatch:
 
+concurrency:
+  group: phase1-world-assets-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
