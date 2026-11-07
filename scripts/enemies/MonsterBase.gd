@@ -262,6 +262,8 @@ func _on_death(killer: CharacterBody3D) -> void:
 		for qa in quest_agents:
 			if qa.has_method("on_enemy_killed"):
 				qa.on_enemy_killed(enemy_type)
+			if qa.has_method("on_source_enemy_killed"):
+				qa.on_source_enemy_killed(monster_name_en)
 				
 	if is_boss and GameManager:
 		var killer_name = "البطل" if GameManager.current_language == "ar" else "Hero"
