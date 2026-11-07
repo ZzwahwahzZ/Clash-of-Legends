@@ -120,7 +120,7 @@ jobs:
               "source_archive":{
                   "present":source.is_file(),
                   "size_bytes":source.stat().st_size if source.is_file() else None,
-                  "sha256":(lambda h: h)(None)
+                  "sha256":archive_hash
               },
               "gameplay_source_table_audit":{
                   "report_present":gameplay is not None,
@@ -166,6 +166,7 @@ jobs:
             reports/mobile-quest-source-audit.json
             reports/mobile-apk-reader-probe.json
             reports/quest-ecosystem-inventory.json
+            reports/quest-audit-summary.json
             build/mobile_quest_candidates/**/*.lua
             build/quest-ecosystem/decoded_candidates/**/*.candidate
           if-no-files-found: warn
