@@ -10,6 +10,7 @@ var status := "NOT_LOADED"
 var missions: Dictionary = {}
 var maps: Dictionary = {}
 var map_names: Dictionary = {}
+var map_directory: Array[Dictionary] = []
 var map_directory: Dictionary = {}
 var dependents: Dictionary = {}
 var npc_starts: Dictionary = {}
@@ -25,6 +26,7 @@ func load_graph(path: String = DEFAULT_CATALOG) -> bool:
 	missions.clear()
 	maps.clear()
 	map_names.clear()
+	map_directory.clear()
 	map_directory.clear()
 	dependents.clear()
 	npc_starts.clear()
@@ -67,6 +69,9 @@ func load_graph(path: String = DEFAULT_CATALOG) -> bool:
 			var map_id := str(row.get("map_id", ""))
 			if not map_id.is_empty():
 				map_names[map_id] = row
+	for row in root.get("map_directory", []):
+		if row is Dictionary:
+			map_directory.append(row)
 	for row in root.get("map_directory", []):
 		if row is Dictionary:
 			var map_id := str(row.get("map_id", ""))
@@ -197,7 +202,7 @@ func get_city_hub(map_id: String) -> Dictionary:
 	return {}
 
 func get_map_directory_entry(map_id: String) -> Dictionary:
-	for row in maps.values():
+	for row in map_directory:
 		if str(row.get("map_id", "")) == map_id:
 			return row.duplicate(true)
 	return {}
@@ -252,7 +257,7 @@ func get_route(mission_id: String, turn_in: bool = false) -> Dictionary:
 		"npc_id": npc_id,
 		"map_id": map_id,
 		"map_name": map_name,
-		"map_resource": str(maps.get(map_id, {}).get("resource_path", "")),
+		"map_resource": str(get_map_directory_entry(map_id).get("resource_path", "")),
 		"source_x": endpoint.get("x"),
 		"source_y": endpoint.get("y"),
 		"npc_name": str(endpoint.get("npc_name", "")),
