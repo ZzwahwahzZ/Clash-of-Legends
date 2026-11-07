@@ -171,7 +171,7 @@ def main():
         "status": "MAP_RESOURCE_INDEXED" if row.get("gamemap_resource") else "MAP_RESOURCE_MISSING_FROM_INDEX",
     } for row in world_map_names]
     mob_reference_index = {}
-    for mob_ref in world_links.get("mob_references", []):
+    for mob_ref in analysis.get("mob_references", []):
         key = (str(mob_ref.get("map_id", "")), str(mob_ref.get("x", "")), str(mob_ref.get("y", "")))
         if mob_ref.get("name") and mob_ref.get("monster_type_ids"):
             mob_reference_index.setdefault(key, []).append(mob_ref)
