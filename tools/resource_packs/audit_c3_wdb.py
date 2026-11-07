@@ -488,7 +488,7 @@ def parse_wdb(data: bytes) -> dict:
         full_records = []
         part_total = object_resolved = texture_resolved = mix_texture_resolved = fully_resolved = 0
         missing_mesh_ids = set()
-        missing_texture_ids = set()
+        missing_table_texture_ids = set()
         missing_mix_texture_ids = set()
         for row in rows:
             resolved_parts = []
@@ -505,7 +505,7 @@ def parse_wdb(data: bytes) -> dict:
                 else:
                     object_resolved += 1
                 if texture_path is None:
-                    missing_texture_ids.add(texture_id)
+                    missing_table_texture_ids.add(texture_id)
                 else:
                     texture_resolved += 1
                 if mix_texture_id:
@@ -536,10 +536,10 @@ def parse_wdb(data: bytes) -> dict:
             "mix_texture_id_matches": mix_texture_resolved,
             "fully_resolved_part_count": fully_resolved,
             "missing_mesh_id_count": len(missing_mesh_ids),
-            "missing_texture_id_count": len(missing_texture_ids),
+            "missing_texture_id_count": len(missing_table_texture_ids),
             "missing_mix_texture_id_count": len(missing_mix_texture_ids),
             "missing_mesh_id_samples": sorted(missing_mesh_ids)[:30],
-            "missing_texture_id_samples": sorted(missing_texture_ids)[:30],
+            "missing_texture_id_samples": sorted(missing_table_texture_ids)[:30],
             "missing_mix_texture_id_samples": sorted(missing_mix_texture_ids)[:30],
             "sample_records": resolved_records,
             "status": "ID_PATH_JOINED_REQUIRES_FILE_PRESENCE_AND_VISUAL_REVIEW" if rows else "TABLE_NOT_PARSED",
@@ -732,8 +732,11 @@ def parse_wdb(data: bytes) -> dict:
         "simple_object_parts": total_parts,
         "object_id_matches": object_matches,
         "object_id_match_percent": round(100.0 * object_matches / total_parts, 2) if total_parts else 0.0,
+        "simple_object_missing_object_reference_count": total_parts - object_matches,
         "texture_id_matches": texture_matches,
         "texture_id_match_percent": round(100.0 * texture_matches / total_parts, 2) if total_parts else 0.0,
+        "simple_object_missing_texture_reference_count": total_parts - texture_matches,
+        "simple_object_missing_texture_id_count": len(missing_texture_ids),
         "both_object_and_texture_match": full_matches,
         "fully_resolved_percent": round(100.0 * full_matches / total_parts, 2) if total_parts else 0.0,
         "missing_object_id_count": len(missing_object_ids),
