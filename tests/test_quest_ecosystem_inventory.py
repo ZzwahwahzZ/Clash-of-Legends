@@ -57,6 +57,17 @@ class QuestEcosystemInventoryTests(unittest.TestCase):
         data = b'local MainTask = { [0] = { ["TaskID"] = 10017 } }'
         self.assertTrue(MODULE.is_interesting(path, data))
 
+    def test_generic_named_encrypted_mobile_lua_config_is_discovered(self):
+        path = "assets/ConquerRes/ini/luacfg/config_017.dat"
+        plain = b'local MainTask = { ["TaskID"] = 10017 }'
+        key = MODULE.tq_key(9527)
+        encrypted = bytearray()
+        for i, byte in enumerate(plain):
+            shift = i & 7
+            rotated = byte if shift == 0 else ((byte << shift) | (byte >> (8 - shift))) & 0xFF
+            encrypted.append(rotated ^ key[i & 127])
+        self.assertTrue(MODULE.is_interesting(path, bytes(encrypted)))
+
     def test_generic_named_script_without_quest_signature_is_ignored(self):
         path = "assets/ConquerRes/script/common_config.dat"
         self.assertFalse(MODULE.is_interesting(path, b"local CommonConfig = {}"))
