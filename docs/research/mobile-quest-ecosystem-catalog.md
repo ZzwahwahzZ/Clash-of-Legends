@@ -60,9 +60,24 @@ Primary source: https://comobile.99.com/guide/info/quests/2023-01-31/daily_-_bou
 
 Primary source: https://comobile.99.com/guide/info/quests/2023-01-31/daily_-_farmland_defence.shtml
 
-**Hunting Battle** — listed in the official Mobile guide index; detailed page/rules/NPC/coordinates not yet verified in this research pass.
+**Hunting Battle**
+- Level 130+; entrance via Hunting Battle button; long-term activity.
+- Four daily event windows in the 2023 guide: 13:00–13:15, 16:00–16:15, 19:00–19:15 and 22:00–22:15; two rounds per character per day.
+- Forthy Ground contains Islands 1–3. Accumulate 100 Hunting Points to advance from Island 1 to 2 (points consumed), then 200 to advance to Island 3 (points consumed); stage rewards unlock at cumulative 100/200/300 and are claimable once daily.
+- Normal monster: 1 point; elite: 5; boss: 50 (boss spawns at map center at minutes 1, 6 and 11); defeating another hero: 10 plus 20% of that target's points.
+- A later official patch note (Patch 3822, Nov. 12, 2024) says Island 3 was temporarily replaced by the larger Glory Island for a special mode. Treat that as a dated variant, not permanent base behavior.
 
-**Mayhem Land Crusade** — listed in the official Mobile guide index; detailed page/rules/NPC/coordinates not yet verified in this research pass. The Main Quest in Spheres guide separately names Mayhem Land as an activity unlocked during the Scaling New Heights progression stage; this does not establish that the daily Crusade is the same quest record.
+Sources: https://comobile.99.com/guide/info/quests/2023-01-31/daily_-_hunting_battle.shtml and https://comobile.99.com/patch/2024-11-07/patch_3822_-_legendary_competition__version_bonus__inner_power_wheel_and_more.shtml
+
+**Mayhem Land Crusade**
+- Daily window: 09:00–23:55; requirement: level 40 of second rebirth.
+- Splinter — Twin City (392,324).
+- Five forces; each is cleared through phases requiring 200, 500 and 1,000 Killing Points. One Elite kill grants one Killing Point.
+- Completing each phase allows up to three Chiefs to be summoned. Killing five Chiefs advances Mayhem Lord by one phase, up to phase 3; Mayhem Lord can be summoned at 18:30.
+- Feat Points: Dogface 1, Elite 5, Chief 50, Mayhem Lord 100. Each 50 Feat Points allows one reward pack, up to 10 daily; top 10 receive extra ranking rewards.
+- The Main Quest in Spheres guide separately lists Mayhem Land as an activity unlocked during Scaling New Heights. Do not collapse the daily Crusade and the progression unlock into one quest record without checking the client data.
+
+Source: https://comobile.99.com/guide/info/quests/2023-01-31/daily_-_mayhem_land_crusade.shtml
 
 ### 2.3 Trials and repeatable challenges
 
@@ -81,7 +96,11 @@ Source: https://comobile.99.com/guide/info/quests/2023-01-31/trials_-_chi_canyon
 
 Source: https://comobile.99.com/guide/info/quests/2023-01-31/trials_-_battle_dojo.shtml
 
-**Rune Mountain** — listed in official Mobile guide index; detailed page and exact mechanics remain to be retrieved.
+**Rune Mountain**
+- Trials button; one free attempt daily or entry using Rune Challenge Letter.
+- Four waves of Bushfire Beasts must be defeated; Lich Kings appear after all four waves; defeating them awards Yellow Rune Essences.
+
+Source: https://comobile.99.com/guide/info/quests/2023-01-31/trials_-_rune_mountain.shtml
 
 ### 2.4 Class epic and inspiration quests
 
@@ -146,7 +165,7 @@ Known gaps to close:
 - Retrieve the actual GitHub Actions artifact from the quest inventory workflow and enumerate all matched resource paths.
 - Search inside generic Lua/config/script bundles for quest signatures, dialogue tables and task IDs, not only paths containing “quest/task”.
 - Determine the actual Mobile reader/cipher per file type; TQ File Cipher seeds 9527/1234 remain research probes only.
-- Find Hunting Battle, Mayhem Land Crusade and Rune Mountain detailed Mobile guides.
+- Reconcile the 2023 official guide rules with later live patches and the exact 1.1.2.3 client; event times and map variants can change.
 - Build NPC↔map↔quest↔monster↔item↔reward joins and report missing/orphan/duplicate references.
 - Compare official guide behavior with the exact 1.1.2.3 APK; guides dated 2023–2024 may be stale relative to later updates.
 
