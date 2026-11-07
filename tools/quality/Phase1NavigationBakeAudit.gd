@@ -147,7 +147,7 @@ func _save_world_scene() -> int:
 		static_body.name = "WalkableCollision_%02d" % index
 		static_body.collision_layer = 1
 		static_body.collision_mask = 0
-		static_body.transform = mesh_node.global_transform
+		static_body.transform = _transform_relative_to(city_instance, mesh_node)
 		var collision_shape := CollisionShape3D.new()
 		collision_shape.shape = collision_mesh
 		static_body.add_child(collision_shape)
@@ -168,6 +168,55 @@ func _save_world_scene() -> int:
 	var save_error := ResourceSaver.save(packed_world, WORLD_SCENE_PATH)
 	root.free()
 	return save_error
+
+func _transform_relative_to(ancestor: Node, node: Node3D) -> Transform3D:
+	var relative := Transform3D.IDENTITY
+	var cursor: Node = node
+	while cursor != null and cursor != ancestor:
+		if cursor is Node3D:
+			relative = (cursor as Node3D).transform * relative
+		cursor = cursor.get_parent()
+	if cursor != ancestor:
+		return Transform3D.IDENTITY
+	return relative
+
+func _validate_saved_runtime_scene() -> Dictionary:
+	var packed := load(WORLD_SCENE_PATH) as PackedScene
+	if packed == null:
+		return {"valid": false, "reason": "saved_scene_could_not_load"}
+	var instance := packed.instantiate()
+	if instance == null:
+		return {"valid": false, "reason": "saved_scene_could_not_instantiate"}
+	var collision_bodies := 0
+	var collision_shapes := 0
+	var navigation_regions := 0
+	var collision_transform_checks := 0
+	var transform_matches := 0
+	for child in instance.get_children():
+		if child is StaticBody3D:
+			collision_bodies += 1
+			var body := child as StaticBody3D
+			for shape_node in body.get_children():
+				if shape_node is CollisionShape3D:
+					collision_shapes += 1
+					collision_transform_checks += 1
+					if (shape_node as CollisionShape3D).transform.is_equal_approx(Transform3D.IDENTITY):
+						transform_matches += 1
+		if child is NavigationRegion3D:
+			navigation_regions += 1
+			if (child as NavigationRegion3D).navigation_mesh == null:
+				instance.free()
+				return {"valid": false, "reason": "saved_navigation_region_missing_mesh"}
+	var valid := collision_bodies == WALKABLE_PATHS.size() and collision_shapes == WALKABLE_PATHS.size() and navigation_regions == 1 and transform_matches == collision_transform_checks
+	instance.free()
+	return {
+		"valid": valid,
+		"collision_bodies": collision_bodies,
+		"collision_shapes": collision_shapes,
+		"navigation_regions": navigation_regions,
+		"collision_shape_identity_transform_count": transform_matches,
+		"collision_shape_transform_checks": collision_transform_checks
+	}
 
 func _validate_navigation_after_sync() -> void:
 	await physics_frame
@@ -242,8 +291,13 @@ func _validate_navigation_after_sync() -> void:
 		if bool(row["connected"]):
 			connected_routes += 1
 
+	var saved_scene_validation := _validate_saved_runtime_scene()
+	if not bool(saved_scene_validation.get("valid", false)):
+		_fail("Saved runtime world scene failed structural validation: " + JSON.stringify(saved_scene_validation))
+		return
 	var report := {
 		"city_scene": CITY_PATH,
+		"saved_scene_validation": saved_scene_validation,
 		"saved_navigation_mesh": NAVMESH_PATH,
 		"saved_runtime_world_scene": WORLD_SCENE_PATH,
 		"bake_status": "BAKED",
