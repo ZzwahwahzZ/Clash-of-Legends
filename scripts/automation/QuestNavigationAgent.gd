@@ -10,6 +10,19 @@ var active_quest_id: String = DEFAULT_QUEST_ID
 var quest_progress: int = 0
 var is_quest_completed: bool = false
 var completed_quest_ids: Array[String] = []
+var source_catalog := QuestSourceCatalog.new()
+
+func get_source_catalog_status() -> Dictionary:
+	return source_catalog.get_counts()
+
+func get_source_mission(mission_id: String) -> Dictionary:
+	return source_catalog.get_mission(mission_id)
+
+func get_source_missions_for_npc(npc_id: String, role: String = "") -> Array[Dictionary]:
+	return source_catalog.get_missions_for_npc(npc_id, role)
+
+func get_source_missions_for_map(map_id: String) -> Array[Dictionary]:
+	return source_catalog.get_missions_for_map(map_id)
 
 # This is an offline starter chain. Content can be expanded without changing
 # the progression API or requiring a server.
@@ -117,6 +130,7 @@ var quest_database: Dictionary = {
 }
 
 func _ready() -> void:
+	source_catalog.load_catalog()
 	_validate_quest_database()
 	_notify_game_manager()
 
