@@ -56,6 +56,15 @@ func load_index() -> bool:
 				var existing: Array = _maps_by_id[map_id].get("_duplicate_source_records", [])
 				existing.append(map_data)
 				_maps_by_id[map_id]["_duplicate_source_records"] = existing
+	for metadata_entry in _index.get("map_metadata_without_binary_path", []):
+		if not metadata_entry is Dictionary:
+			continue
+		var metadata_id := int(metadata_entry.get("map_id", -1))
+		if metadata_id >= 0 and not _maps_by_id.has(metadata_id):
+			var metadata_only: Dictionary = metadata_entry.duplicate(true)
+			metadata_only["resource_path"] = ""
+			metadata_only["metadata_only"] = true
+			_maps_by_id[metadata_id] = metadata_only
 	for quest in _index.get("quests", []):
 		if not quest is Dictionary:
 			continue
@@ -113,6 +122,7 @@ func get_index_status() -> Dictionary:
 		"source_version": str(_index.get("source_version", "")),
 		"map_records": _index.get("maps", []).size(),
 		"unique_maps": _maps_by_id.size(),
+		"map_metadata_only": _index.get("map_metadata_without_binary_path", []).size(),
 		"npc_templates": _index.get("npc_templates", []).size(),
 		"quests": _index.get("quests", []).size(),
 		"dialogue_sources": _index.get("dialogue_sources", []).size()
