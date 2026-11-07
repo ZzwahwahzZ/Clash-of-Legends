@@ -213,6 +213,29 @@ func get_dialogues_for_npc(npc_id: String) -> Array[Dictionary]:
 				break
 	return result
 
+func get_objective_routes(mission_id: String) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	var mission := get_mission(mission_id)
+	if mission.is_empty():
+		return result
+	for index in range(mission.get("intentions", []).size()):
+		var intention: Dictionary = mission.get("intentions", [])[index]
+		result.append({
+			"index": index,
+			"kind": str(intention.get("kind", "")),
+			"npc_id": str(intention.get("npc_id", "")),
+			"npc_name": str(intention.get("npc_name", "")),
+			"monster_name": str(intention.get("monster_name", "")),
+			"item_name": str(intention.get("item_name", "")),
+			"item_id": str(intention.get("item_id", "")),
+			"map_id": str(intention.get("map_id", "")),
+			"x": intention.get("x"),
+			"y": intention.get("y"),
+			"target_resolution": str(intention.get("target_resolution", "")),
+			"field": str(intention.get("field", "")),
+		})
+	return result
+
 func get_route(mission_id: String, turn_in: bool = false) -> Dictionary:
 	var mission := get_mission(mission_id)
 	if mission.is_empty():
