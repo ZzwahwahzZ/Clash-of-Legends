@@ -19,7 +19,6 @@ var current_source_map_id := "1002"
 var travel_in_progress := false
 var travel_serial := 0
 var source_quest_graph := QuestRuntimeGraph.new()
-var current_source_map_id := "1002"
 
 func _ready() -> void:
 	add_to_group("world_travel_manager")
@@ -66,23 +65,11 @@ func get_destinations() -> Dictionary:
 		}
 	return result
 
-func get_source_city_hubs() -> Array[Dictionary]:
-	var graph := QuestRuntimeGraph.new()
-	if not graph.load_graph():
-		return []
-	return graph.get_city_hubs()
-
 func get_source_map_directory_entry(map_id: String) -> Dictionary:
-	var graph := QuestRuntimeGraph.new()
-	if not graph.load_graph():
-		return {}
-	return graph.get_map_directory_entry(map_id)
+	return source_quest_graph.get_map_directory_entry(map_id)
 
 func get_source_mission_route(mission_id: String, turn_in: bool = false) -> Dictionary:
-	var graph := QuestRuntimeGraph.new()
-	if not graph.load_graph():
-		return {}
-	return graph.get_route(mission_id, turn_in)
+	return source_quest_graph.get_route(mission_id, turn_in)
 
 func navigate_to_source_route(route: Dictionary) -> bool:
 	var map_id := str(route.get("map_id", ""))
