@@ -15,6 +15,8 @@ var npc_starts: Dictionary = {}
 var npc_turnins: Dictionary = {}
 var map_missions: Dictionary = {}
 var city_hubs: Array[Dictionary] = []
+var npc_placements: Array[Dictionary] = []
+var dialogue_links: Array[Dictionary] = []
 var source_version := ""
 
 func load_graph(path: String = DEFAULT_CATALOG) -> bool:
@@ -27,6 +29,8 @@ func load_graph(path: String = DEFAULT_CATALOG) -> bool:
 	npc_turnins.clear()
 	map_missions.clear()
 	city_hubs.clear()
+	npc_placements.clear()
+	dialogue_links.clear()
 	if not FileAccess.file_exists(path):
 		status = "CATALOG_MISSING"
 		return false
@@ -64,6 +68,12 @@ func load_graph(path: String = DEFAULT_CATALOG) -> bool:
 	for row in root.get("city_hubs", []):
 		if row is Dictionary:
 			city_hubs.append(row)
+	for row in root.get("npc_placements", []):
+		if row is Dictionary:
+			npc_placements.append(row)
+	for row in root.get("dialogue_links", []):
+		if row is Dictionary:
+			dialogue_links.append(row)
 	for id in missions:
 		var mission: Dictionary = missions[id]
 		for prerequisite in mission.get("prerequisites", []):
@@ -178,6 +188,23 @@ func get_route(mission_id: String, turn_in: bool = false) -> Dictionary:
 		"runtime_transform_verified": false,
 	}
 
+func get_npc_placements(npc_id: String, map_id: String = "") -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for row in npc_placements:
+		if str(row.get("npc_id", "")).lstrip("0") != npc_id.lstrip("0"):
+			continue
+		if not map_id.is_empty() and str(row.get("map_id", "")) != map_id:
+			continue
+		result.append(row.duplicate(true))
+	return result
+
+func get_dialogue_links(mission_id: String) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for row in dialogue_links:
+		if str(row.get("mission_id", "")) == mission_id:
+			result.append(row.duplicate(true))
+	return result
+
 func get_world_summary() -> Dictionary:
 	return {
 		"missions": missions.size(),
@@ -186,6 +213,8 @@ func get_world_summary() -> Dictionary:
 		"city_hubs": city_hubs.duplicate(true),
 		"npc_start_ids": npc_starts.size(),
 		"npc_turnin_ids": npc_turnins.size(),
+		"npc_placements": npc_placements.size(),
+		"dialogue_links": dialogue_links.size(),
 		"dependency_edges": _count_edges(),
 		"status": status,
 	}
