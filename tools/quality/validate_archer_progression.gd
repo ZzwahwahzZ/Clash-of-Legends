@@ -28,6 +28,12 @@ func _run() -> void:
 	if progression.get_available_weapon_styles() != ["bow"]:
 		_fail("Throwing Knives became available before the promotion quest.")
 		return
+	if CombatEngine.get_class_skills("Archer").has("archer_path_of_shadow"):
+		_fail("Path of Shadow appeared before the promotion unlock.")
+		return
+	if progression.select_weapon_style("throwing_knives"):
+		_fail("Direct Assassin form selection succeeded before promotion.")
+		return
 
 	var incomplete_result := {
 		"promotion_quest_id": "unverified_placeholder",
@@ -45,6 +51,9 @@ func _run() -> void:
 		"promotion_reward_claimed": true,
 		"promotion_source_verified": true
 	}
+	if progression.apply_archer_promotion_result(verified_result, 39):
+		_fail("A level-39 character must not complete the level-40 promotion.")
+		return
 	if not progression.apply_archer_promotion_result(verified_result, 40):
 		_fail("A verified, completed, claimed level-40 promotion should unlock the alternate form.")
 		return
