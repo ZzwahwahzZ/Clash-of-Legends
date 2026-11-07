@@ -11,6 +11,7 @@ on:
       - "scripts/world/WorldContentIndex.gd"
       - "scripts/ui/DialogueUI.gd"
       - "scripts/npcs/NPCBase.gd"
+      - "scenes/core/MainGame.tscn"
       - "scripts/world/WorldTravelManager.gd"
       - "scripts/automation/QuestNavigationAgent.gd"
       - "scripts/progression/ClassProgressionManager.gd"
