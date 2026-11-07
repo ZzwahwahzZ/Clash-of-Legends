@@ -99,6 +99,12 @@ def main():
 
     npc_sections, npc_enc = ini(root, "ini/npc.ini")
     npc_templates = [{"source_section": s["section"], "fields": s["fields"]} for s in npc_sections]
+    class_selection = {}
+    class_encodings = {}
+    for locale, rel in [("en", "ini/selectcharacter.ini"), ("ar", "ini_ar/selectcharacter.ini"), ("sp", "ini_sp/selectcharacter.ini")]:
+        sections, encoding = ini(root, rel)
+        class_encodings[locale] = encoding
+        class_selection[locale] = [{"source_section": s["section"], "fields": s["fields"]} for s in sections]
     en_sections, en_enc = ini(root, "ini/questinfo.ini")
     ar_sections, ar_enc = ini(root, "ini_ar/questinfo.ini")
     en_tasks = [s for s in en_sections if s["section"].isdigit() and "MissionId" in s["fields"]]
@@ -152,7 +158,7 @@ def main():
     index = {"schema_version":"1.0.0", "source_version":"ConquerOnline-1.1.2.3",
         "source_policy":"Exact-version derived index. Dialogue binaries remain excluded until their mobile format is validated.",
         "maps":maps, "map_metadata_without_binary_path":extra_maps,
-        "npc_templates":npc_templates, "quests":tasks, "dialogue_sources":dialogues}
+        "npc_templates":npc_templates, "class_selection":class_selection, "quests":tasks, "dialogue_sources":dialogues}
     a.output.parent.mkdir(parents=True, exist_ok=True)
     a.output.write_text(json.dumps(index, ensure_ascii=False, separators=(",",":"))+"\n", encoding="utf-8")
     report = {"schema_version":"1.0.0","source_version":index["source_version"],
@@ -162,7 +168,8 @@ def main():
         "npc_map_ids_with_metadata_only":npc_map_ids_with_metadata_only,
         "npc_map_ids_without_any_catalog_metadata":npc_map_ids_without_any_catalog_metadata,
         "negative_npc_id_sentinel_references":negative_npc_sentinels,
-        "npc_template_sections":len(npc_templates),"english_quest_rows":len(en_tasks),
+        "npc_template_sections":len(npc_templates),"class_selection_sections":{k:len(v) for k,v in class_selection.items()},
+        "english_quest_rows":len(en_tasks),
         "arabic_quest_rows":len(ar_tasks),"runtime_quest_rows":len(tasks),
         "duplicate_mission_ids_preserved_by_source_section":duplicate_quests,
         "tasks_with_begin_npc":begin_count,"tasks_with_finish_npc":finish_count,
@@ -170,7 +177,7 @@ def main():
         "npc_map_references":dict(sorted(npc_map_refs.items())),
         "npc_map_ids_missing_from_gamemap_dat":sorted(missing_npc_maps),
         "dialogue_sources_not_decoded":dialogues,
-        "encodings":{"gamemapex":map_enc,"npc":npc_enc,"quest_en":en_enc,"quest_ar":ar_enc},
+        "encodings":{"gamemapex":map_enc,"npc":npc_enc,"quest_en":en_enc,"quest_ar":ar_enc,"class_selection":class_encodings},
         "output_bytes":a.output.stat().st_size,"validation":"SOURCE_INDEX_GENERATED_NOT_YET_RUNTIME_BEHAVIOR_VALIDATED"}
     a.report.parent.mkdir(parents=True, exist_ok=True)
     a.report.write_text(json.dumps(report, ensure_ascii=False, indent=2)+"\n", encoding="utf-8")
