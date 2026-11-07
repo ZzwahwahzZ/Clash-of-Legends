@@ -16,7 +16,7 @@ for i in range(9998800,9998872,10):
 for i in range(20001,20009):
     TOKENS.add(str(i))
 CLASS_TERMS=("Taoist","Warrior","Trojan","Archer","Ninja","Monk","Pirate","Dragon","Windwalker","Thunderstriker","LiXiaoong","Saint")
-ROLE_REGISTRY_PATH_TOKENS=("rolechoose","simplerole","rolepartsort","roleselect","createrole","i3drole","classdesc","professionalname","subprofessioninfo","/ini/luacfg/","/ini/luaui/")
+ROLE_REGISTRY_PATH_TOKENS=("rolechoose","selectcharacter","simplerole","rolepartsort","roleselect","createrole","i3drole","classdesc","professionalname","subprofessioninfo","/ini/luacfg/","/ini/luaui/")
 def decode(raw):
     for enc in ("utf-8-sig","gb18030","utf-16","cp1252"):
         try:return raw.decode(enc),enc
