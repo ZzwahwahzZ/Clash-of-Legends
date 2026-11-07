@@ -54,7 +54,7 @@ jobs:
                           if (base in {"questinfo.dat","taskitem_info.dat","questinfo.ini","questinfopassionserver.ini","terrainnpc.ini","npc.ini","npcx.ini","npcex.ini","npcdialogueinfo.dat","npcdialoguefunc.dat","npcdialoguetext_ar.dat","npcdialoguetext_en.dat","npcdialoguetext_sp.dat","gamemap.dat","gamemapex.ini","mapdestination.ini","item.ini","monstertype.ini","clienttask124.dat","scriptdialoguetext_ar.dat","scriptdialoguetext_en.dat","scriptdialoguetext_sp.dat","npcdialogueinfo.dat","npcdialoguetext_ar.dat","npcdialoguetext_en.dat","npcdialoguetext_sp.dat","luascriptmgr.dat"}
                               or "/client_realm_task/" in low and base.endswith(".dat")
                               or "/clienttask" in low and base.endswith(".dat")
-                              or "/script/" in low and any(t in low for t in ("ninjaawakening","xiakeawake","juqing","npc","task"))):
+                              or low.startswith("assets/conquerres/script/") and base.endswith(".dat")):
                               target=out/"selected"/Path(info.filename).relative_to("assets/ConquerRes")
                               target.parent.mkdir(parents=True,exist_ok=True)
                               with z.open(info) as src, target.open("wb") as dst:
