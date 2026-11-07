@@ -110,6 +110,12 @@ func select_weapon_style(style_id: String) -> bool:
 		return false
 	if normalized_style != STYLE_BOW and normalized_style != STYLE_THROWING_KNIVES:
 		return false
+	if normalized_style == STYLE_THROWING_KNIVES and is_instance_valid(GameManager.player_reference):
+		var player := GameManager.player_reference
+		if player.has_node("PlayerInventory"):
+			var inventory = player.get_node("PlayerInventory")
+			if inventory.has_method("has_weapon_for_style") and not inventory.has_weapon_for_style(STYLE_THROWING_KNIVES):
+				return false
 	selected_weapon_style = normalized_style
 	combat_form = "OrientalAssassin" if normalized_style == STYLE_THROWING_KNIVES else ARCHER_FAMILY
 	weapon_style_changed.emit(normalized_style)
