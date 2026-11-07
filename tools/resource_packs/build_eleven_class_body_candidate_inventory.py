@@ -100,10 +100,61 @@ def main():
                 "identity_status": row.get("mapping_status"),
             })
 
+    # Character-selection labels are a separate evidence layer from the
+    # rolechoose simple-object joins. Preserve all 18 UI slots and language
+    # variants; they identify selectable classes but do not identify a body mesh.
+    selection_labels = []
+    for source in roles.get("additional_ui_registry_sources", []):
+        if source.get("parse_status") != "PARSED":
+            continue
+        sections = source.get("sections", {})
+        panel = sections.get("affirmPanel", {})
+        for key, value in panel.items():
+            match = __import__("re").fullmatch(r"vocation(\\d+)", str(key), __import__("re").I)
+            if not match:
+                continue
+            label = str(value).strip()
+            low = label.lower().replace("_", " ").replace("-", " ")
+            gender = "female" if any(x in low for x in ("female", "woman", "hembra", "femen", "أنثى", "انثى", "قرصانة")) else (
+                "male" if any(x in low for x in ("male", "man ", "macho", "mascul", "ذكر")) else None
+            )
+            if "taoist" in low or "حاوى" in low or "تاوي" in low:
+                token = "Taoist"
+            elif "trojan" in low or "تروجان" in low or "تروجان" in low:
+                token = "Trojan"
+            elif "archer" in low or "رام" in low or "arqu" in low:
+                token = "Archer"
+            elif "warrior" in low or "محارب" in low or "guerrer" in low:
+                token = "Warrior"
+            elif "ninja" in low or "نينجا" in low:
+                token = "Ninja"
+            elif "monk" in low or "راهب" in low or "monje" in low:
+                token = "Monk"
+            elif "saint" in low or "قديس" in low or "monja" in low:
+                token = "Saint"
+            elif "pirate" in low or "قرصان" in low or "pirata" in low:
+                token = "Pirate"
+            elif "dragon" in low or "التنين" in low or "dragón" in low:
+                token = "Dragon Warrior"
+            elif "windwalker" in low or "راكب" in low or "genio de aire" in low:
+                token = "Windwalker"
+            else:
+                token = None
+            selection_labels.append({
+                "source_file": source.get("path"),
+                "source_section": "affirmPanel",
+                "slot": int(match.group(1)),
+                "source_label": label,
+                "normalized_source_token": token,
+                "gender": gender,
+                "evidence_status": "SOURCE_CHARACTER_SELECTION_LABEL_ONLY",
+            })
+
     matrix = []
     for name in CLASSES:
         records = unique_records(identity.get(name, []))
         joined = [r for r in records if r["simple_object_id"] is not None]
+        selection = [r for r in selection_labels if r["normalized_source_token"] == name]
         if joined:
             status = "SOURCE_CLASS_GENDER_AND_SIMPLE_ROLE_JOIN_FOUND_BODY_ASSET_UNRESOLVED"
         elif records:
@@ -115,12 +166,13 @@ def main():
             "source_identity_tokens": [name] if records else [],
             "source_identity_records": records,
             "simple_role_join_records": joined,
+            "character_selection_label_records": selection,
             "body_model_candidates": [],
-            "status": status,
+            "status": status if records or not selection else "CHARACTER_SELECTION_LABEL_FOUND_BODY_AND_SIMPLE_ROLE_JOIN_UNRESOLVED",
         })
 
     unresolved_tokens = []
-    for token in sorted(set(identity) - set(CLASSES)):
+    for token in sorted((set(identity) | {r["normalized_source_token"] for r in selection_labels if r["normalized_source_token"]}) - set(CLASSES)):
         records = unique_records(identity[token])
         unresolved_tokens.append({
             "source_identity_token": token,
@@ -131,7 +183,13 @@ def main():
 
     referenced = sum(bool(x["armor_db_mesh_reference_count"]) for x in bodies.values())
     result = {
-        "schema_version": "1.3.0",
+        "schema_version": "1.4.0",
+        "character_selection_slot_count": len(selection_labels),
+        "character_selection_normalized_tokens": sorted({r["normalized_source_token"] for r in selection_labels if r["normalized_source_token"]}),
+        "character_selection_slots_by_token": {
+            token: [r for r in selection_labels if r["normalized_source_token"] == token]
+            for token in sorted({r["normalized_source_token"] for r in selection_labels if r["normalized_source_token"]})
+        },
         "source": "Conquer Online Mobile 1.1.2.3 C3 conversion audit + WDB armor.dbc",
         "converted_unique_body_models": len(bodies),
         "armor_db_record_count": len(armor_records),
