@@ -63,6 +63,19 @@ Official guide: https://comobile.99.com/guide/info/quests/2023-02-16/inspiring_q
 - Completion unlocks the Inspiration function and publishes Trojan-specific rewards.
 - This is a UI-entry-point plus NPC-guided unlock, and must be tracked separately from ordinary NPC-only quests.
 
+
+### Epic Quest — Monk
+Official guide: https://comobile.99.com/guide/info/quests/2023-02-16/quests_-_monk_epic_quest.shtml
+- Requirement: Level 70+ second rebirth; Head Abbot in Twin City (383,315) leads to Western Paradise, with later NPCs across Western Paradise and Oriental Fairyland.
+- Three sequential item-submission trials: Red/White Flowers → Spiritual Gem → Buddha's Necklace → Boundless Heart. Failure returns the player to the preceding stage.
+- Rosewood Incense is an alternate failure output and can be exchanged with White Dragon in Oriental Fairyland; the final item transforms the Monk's weapon and unlock scrolls teach class-specific skills.
+- This is another distinct class-gated, multi-map, retryable progression chain.
+
+### Time-limited event quest examples (external mobile corroboration; not guaranteed active in the pinned snapshot)
+- **Twinkling Fest (Feb. 2026):** https://comobile.99.com/guide/2026-02-05/join_the_twinkling_fest_and_start_an_amazing_adventure.shtml — Level 80 gate, event NPC in Twin City, travel to Snowland, shard collection, event quest chain and rewards.
+- **Love Cycles (Sept. 2026):** https://comobile.99.com/guide/2026-09-03/love_cycles_is_now_live_from_sept__8th_to_sept__21st_.shtml — Level 80 gate, event NPC in Twin City, seven daily-unlocking Beast Lineage Awakening quests, daily activity threshold, repeatable bridge-repair rounds, staged rewards and point accumulation.
+- These current-year guides demonstrate that event quest structures continue to evolve beyond the 2023 evergreen guide. They are evidence of mobile event patterns, not evidence that expired events should be active in the offline build or that their online ranking/CP mechanics should be copied.
+
 ## What this evidence changes in the implementation plan
 1. The quest engine cannot be limited to a linear chain of kill/collect/talk/level objectives. The official mobile material establishes distinct daily activity modes, timed rounds, scoring, stage thresholds, claim limits, item transformation chains, failure/retry branches, class gates, unlocks and cross-map hand-offs.
 2. The quest catalogue must support typed activity definitions and objective handlers, not just one generic counter. Candidate handler families to validate against the APK include: NPC message delivery; location material collection; inventory item submission; kill/hunt counters; timed survival/defence scoring; scheduled multi-round hunting; phase/threshold progression; boss summon/kill; item transformation/consumption; skill unlock; and UI/button-triggered unlock.
