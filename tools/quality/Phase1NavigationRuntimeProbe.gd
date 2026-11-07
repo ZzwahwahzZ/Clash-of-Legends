@@ -67,7 +67,10 @@ func _run() -> void:
 	# not merely that the bake-time NavigationServer query found connected paths.
 	var runtime_route_targets := {
 		"pawnshop_approach": Vector3(-86.0, -0.078, -106.0),
-		"factory_approach": Vector3(86.0, -0.078, -12.0)
+		"factory_approach": Vector3(86.0, -0.078, -12.0),
+		"market_bridge": Vector3(0.0, 4.18, -126.0),
+		"medicine_frontage": Vector3(11.6, -0.045, -48.0),
+		"tea_frontage": Vector3(9.5, -0.14, -8.0)
 	}
 	var runtime_route_checks: Array[Dictionary] = []
 	for route_id in runtime_route_targets:
