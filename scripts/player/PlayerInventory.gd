@@ -135,6 +135,17 @@ func _initialize_starter_items() -> void:
 			"source_item_id": "500239",
 			"source_name_status": "UNRESOLVED"
 		}
+		equipment["armor"] = {
+			"id": "133080",
+			"slot": "armor",
+			"name_ar": "درع رامي السهام",
+			"name_en": "Archer Starter Armor",
+			"type": "equipment",
+			"class_req": "Archer",
+			"source_version": "1.1.2.3",
+			"source_armor_id": "133080",
+			"source_name_status": "UNRESOLVED"
+		}
 		emit_signal("equipment_updated")
 	else:
 		equip_item({
