@@ -14,7 +14,7 @@ const INSTALL_DIR := "user://resource_packs"
 const MAX_MANIFEST_BYTES := 1024 * 1024
 const APPLICATION_ID := "com.zwahwahzz.clashoflegends"
 const GODOT_VERSION := "4.3"
-const RESOURCE_RELEASE_TAG := "owned-resource-packs-v1"
+const SUPPORTED_RELEASE_TAGS := ["resource-packs-v4", "owned-resource-packs-v1"]
 const MAX_PARALLEL_DOWNLOADS := 3
 const DOWNLOAD_MAX_ATTEMPTS := 4
 const DOWNLOAD_TIMEOUT_SECONDS := 1200.0
@@ -40,7 +40,7 @@ func _bootstrap_installed_resources() -> void:
 			var parser := JSON.new()
 			var parse_error := parser.parse(cache_file.get_as_text())
 			cache_file.close()
-			if parse_error == OK and typeof(parser.data) == TYPE_DICTIONARY and str(parser.data.get("release_tag", "")) == RESOURCE_RELEASE_TAG:
+			if parse_error == OK and typeof(parser.data) == TYPE_DICTIONARY and SUPPORTED_RELEASE_TAGS.has(str(parser.data.get("release_tag", ""))):
 				_accept_manifest(parser.data)
 	if packages.is_empty():
 		await refresh_manifest()
@@ -77,7 +77,7 @@ func _accept_manifest(candidate: Dictionary) -> bool:
 	if str(candidate.get("package_id", "")) != APPLICATION_ID:
 		push_error("Resource manifest belongs to a different Android application.")
 		return false
-	if str(candidate.get("release_tag", "")) != RESOURCE_RELEASE_TAG:
+	if not SUPPORTED_RELEASE_TAGS.has(str(candidate.get("release_tag", ""))):
 		push_error("Resource manifest release tag does not match this client.")
 		return false
 	var entries: Variant = candidate.get("resource_packages", [])
