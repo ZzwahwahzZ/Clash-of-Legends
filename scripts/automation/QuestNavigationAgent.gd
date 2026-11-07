@@ -30,9 +30,9 @@ func get_source_missions_available_at_npc(npc_id: String, player_level: int = 0,
 func get_source_missions_available_for_class(npc_id: String, player_level: int, class_id: String) -> Array[Dictionary]:
 	return source_graph.get_available_at_npc_for_class(npc_id, completed_source_mission_ids, player_level, class_id)
 
-func get_source_missions_for_npc_interaction(npc_id: String, player_level: int, class_id: String) -> Array[Dictionary]:
-	var result := source_graph.get_available_at_npc_for_class(npc_id, completed_source_mission_ids, player_level, class_id)
-	if not active_source_mission_id.is_empty() and source_graph.is_turnin_npc(active_source_mission_id, npc_id):
+func get_source_missions_for_npc_interaction(npc_id: String, player_level: int, class_id: String, map_id: String = "") -> Array[Dictionary]:
+	var result := source_graph.get_available_at_npc_for_class(npc_id, completed_source_mission_ids, player_level, class_id, map_id)
+	if not active_source_mission_id.is_empty() and source_graph.is_turnin_npc(active_source_mission_id, npc_id, map_id):
 		var active := source_graph.get_mission(active_source_mission_id)
 		if not active.is_empty():
 			active["runtime_state"] = "READY_TO_TURN_IN" if source_ready_to_turn_in_ids.has(active_source_mission_id) else "ACTIVE_OBJECTIVES"
@@ -66,24 +66,26 @@ func activate_source_mission(mission_id: String, player_level: int, profession_c
 	_notify_source_quest_state()
 	return true
 
-func select_source_mission_at_npc(mission_id: String, npc_id: String, player_level: int, class_id: String) -> bool:
+func select_source_mission_at_npc(mission_id: String, npc_id: String, player_level: int, class_id: String, map_id: String = "") -> bool:
 	if mission_id == active_source_mission_id:
-		if not source_ready_to_turn_in_ids.has(mission_id) or not source_graph.is_turnin_npc(mission_id, npc_id):
+		if not source_ready_to_turn_in_ids.has(mission_id) or not source_graph.is_turnin_npc(mission_id, npc_id, map_id):
 			return false
-		return complete_source_mission_turnin(mission_id, npc_id)
+		return complete_source_mission_turnin(mission_id, npc_id, map_id)
 	var mission := source_graph.get_mission(mission_id)
 	if mission.is_empty():
 		return false
 	var begin_npc: Dictionary = mission.get("begin_npc", {})
 	if str(begin_npc.get("npc_id", "")).lstrip("0") != npc_id.lstrip("0"):
 		return false
+	if not map_id.is_empty() and str(begin_npc.get("map_id", "")) != map_id:
+		return false
 	var profession_code := GameContentDatabase.get_source_profession_id(class_id) if GameContentDatabase else ""
 	if not source_graph.is_available(mission_id, completed_source_mission_ids, player_level, profession_code):
 		return false
 	return activate_source_mission(mission_id, player_level, profession_code)
 
-func on_source_npc_talked(npc_id: String) -> void:
-	_advance_source_objectives("npc", npc_id, "", 1)
+func on_source_npc_talked(npc_id: String, map_id: String = "") -> void:
+	_advance_source_objectives("npc", npc_id, map_id, 1)
 
 func on_source_enemy_killed(monster_name: String, map_id: String = "") -> void:
 	_advance_source_objectives("mob", monster_name, map_id, 1)
@@ -112,6 +114,8 @@ func _advance_source_objectives(event_kind: String, target: String, map_id: Stri
 		match kind:
 			"npc":
 				matched = event_kind == "npc" and str(intention.get("npc_id", "")).lstrip("0") == target.lstrip("0")
+				if matched and not map_id.is_empty() and not str(intention.get("map_id", "")).is_empty():
+					matched = str(intention.get("map_id", "")) == map_id
 			"mob":
 				var expected_mob := str(intention.get("monster_name", "")).strip_edges()
 				matched = event_kind == "mob" and not expected_mob.is_empty() and expected_mob.casefold() == target.casefold()
@@ -159,12 +163,12 @@ func _advance_source_objectives(event_kind: String, target: String, map_id: Stri
 		emit_signal("quest_state_changed", active_source_mission_id, "source_ready_to_turn_in_candidate")
 	_notify_source_quest_state()
 
-func complete_source_mission_turnin(mission_id: String, npc_id: String = "") -> bool:
+func complete_source_mission_turnin(mission_id: String, npc_id: String = "", map_id: String = "") -> bool:
 	if mission_id != active_source_mission_id or completed_source_mission_ids.has(mission_id):
 		return false
 	if not source_ready_to_turn_in_ids.has(mission_id):
 		return false
-	if not npc_id.is_empty() and not source_graph.is_turnin_npc(mission_id, npc_id):
+	if not npc_id.is_empty() and not source_graph.is_turnin_npc(mission_id, npc_id, map_id):
 		return false
 	var mission := source_graph.get_mission(mission_id)
 	if mission.is_empty():
