@@ -329,6 +329,15 @@ pub fn export_document_with_mesh_textures(document: &C3Document, bindings: &[Opt
     }
     nodes[0]["children"] = json!(children);
 
+    let animations = if animation_channels.is_empty() {
+        Vec::<Value>::new()
+    } else {
+        vec![json!({
+            "name":"C3 sampled mesh motion",
+            "samplers":animation_samplers,
+            "channels":animation_channels
+        })]
+    };
     let motion_info: Vec<Value> = document.motions.iter()
         .map(|m| json!({"bone_count":m.bone_count,"frame_count":m.frame_count,"key_count":m.keys.len(),"morph_count":m.morph_count}))
         .collect();
