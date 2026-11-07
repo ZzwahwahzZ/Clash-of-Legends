@@ -47,9 +47,12 @@ func _run_validation() -> void:
 	if str(model_template.get("fields", {}).get("Name", "")).strip_edges() != "WindSage":
 		_fail("Source NPC model 5002 did not resolve to its audited WindSage template.")
 		return
-	var model_dialogue: Dictionary = index.get_npc_dialogue_for_model_id(5002)
-	if int(model_dialogue.get("dialogue_id", -1)) != 1060:
-		_fail("NPC model 5002 was not linked through its exact dialogue DlgShowInfo.id reference.")
+	var model_dialogues: Array = index.get_npc_dialogues_for_model_id(5002)
+	var model_dialogue_ids: Array[int] = []
+	for linked_dialogue in model_dialogues:
+		model_dialogue_ids.append(int(linked_dialogue.get("dialogue_id", -1)))
+	if not model_dialogue_ids.has(1060) or not model_dialogue_ids.has(1062):
+		_fail("NPC model 5002 did not preserve both exact source dialogues that reference its DlgShowInfo.id.")
 		return
 	var dialogue_scene: PackedScene = load("res://scenes/ui/DialogueUI.tscn")
 	if dialogue_scene == null:
