@@ -115,7 +115,7 @@ jobs:
           assert p["dialogue_linkage"]["mission_ids_with_dialogue_flows"] >= 250
           assert p["story_scene_linkage"]["client_realm_task_registry_count"] == 58
           assert p["story_scene_linkage"]["client_realm_task_decoded_script_count"] == 58
-          assert p["lua_script_reference_count"] >= 1500
+          assert p["lua_script_reference_count"] == 1572
           assert p["lua_npc_name_match_references"] > 0
           assert "TwinCity" in str(next(x for x in p["map_linkage"]["map_id_names"] if x["map_id"] == "1002")["quest_source_names"])
           m={x["mission_id"]:x for x in p["dialogue_linkage"]["mission_dialogue_links"]}
