@@ -18,7 +18,7 @@
       "npc_spawn_anchor": false,
       "target_offset_local": [
         0,
-        0,
+        -0.14,
         -60
       ]
     },
@@ -37,7 +37,7 @@
       "npc_spawn_anchor": false,
       "target_offset_local": [
         -86,
-        0,
+        -0.078,
         -106
       ]
     },
@@ -98,7 +98,7 @@
       "npc_spawn_anchor": false,
       "target_offset_local": [
         86,
-        0,
+        -0.078,
         -12
       ]
     },
@@ -119,7 +119,7 @@
       "role": "innkeeper",
       "spawn_offset_local": [
         0,
-        0,
+        -4.2,
         3
       ],
       "spawn_enabled": false,
@@ -148,7 +148,7 @@
       "role": "apothecary",
       "spawn_offset_local": [
         0,
-        0,
+        -4.3,
         3
       ],
       "spawn_enabled": false,
@@ -177,7 +177,7 @@
       "role": "merchant",
       "spawn_offset_local": [
         0,
-        0,
+        -4.35,
         3
       ],
       "spawn_enabled": false,
