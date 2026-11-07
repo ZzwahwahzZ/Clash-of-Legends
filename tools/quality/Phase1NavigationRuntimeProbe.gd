@@ -68,7 +68,7 @@ func _run() -> void:
 	var runtime_route_targets := {
 		"pawnshop_approach": Vector3(-86.0, -0.078, -106.0),
 		"factory_approach": Vector3(86.0, -0.078, -12.0),
-		"market_bridge_west_ramp": Vector3(-29.0, 2.0, -126.0),
+		"market_bridge_west_approach": Vector3(-29.0, 2.0, -105.0),
 		"medicine_frontage": Vector3(11.6, -0.045, -48.0),
 		"tea_frontage": Vector3(9.5, -0.14, -8.0)
 	}
