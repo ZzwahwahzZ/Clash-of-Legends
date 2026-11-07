@@ -238,36 +238,53 @@ func _validate_saved_runtime_scene() -> Dictionary:
 	var instance := packed.instantiate()
 	if instance == null:
 		return {"valid": false, "reason": "saved_scene_could_not_instantiate"}
-	var collision_bodies := 0
-	var collision_shapes := 0
+	var body_count := 0
+	var shape_count := 0
+	var walkable_body_count := 0
+	var walkable_shape_count := 0
+	var pawnshop_shape_count := 0
+	var factory_shape_count := 0
 	var navigation_regions := 0
-	var collision_transform_checks := 0
-	var transform_matches := 0
+	var walkable_transform_checks := 0
+	var walkable_transform_matches := 0
 	for child in instance.get_children():
 		if child is StaticBody3D:
-			collision_bodies += 1
+			body_count += 1
 			var body := child as StaticBody3D
 			for shape_node in body.get_children():
-				if shape_node is CollisionShape3D:
-					collision_shapes += 1
-					collision_transform_checks += 1
+				if not (shape_node is CollisionShape3D):
+					continue
+				shape_count += 1
+				if body.name.begins_with("WalkableCollision_"):
+					walkable_body_count += 1 if body.get_child_count() > 0 and walkable_shape_count == 0 else 0
+					walkable_shape_count += 1
+					walkable_transform_checks += 1
 					if (shape_node as CollisionShape3D).transform.is_equal_approx(Transform3D.IDENTITY):
-						transform_matches += 1
+						walkable_transform_matches += 1
+				elif body.name == "PawnshopObstacleCollision":
+					pawnshop_shape_count += 1
+				elif body.name == "FactoryObstacleCollision":
+					factory_shape_count += 1
 		if child is NavigationRegion3D:
 			navigation_regions += 1
 			if (child as NavigationRegion3D).navigation_mesh == null:
 				instance.free()
 				return {"valid": false, "reason": "saved_navigation_region_missing_mesh"}
-	var valid := collision_bodies == WALKABLE_PATHS.size() and collision_shapes == WALKABLE_PATHS.size() and navigation_regions == 1 and transform_matches == collision_transform_checks
-	instance.free()
-	return {
+	var valid := walkable_body_count == WALKABLE_PATHS.size() and walkable_shape_count == WALKABLE_PATHS.size() and navigation_regions == 1 and walkable_transform_matches == walkable_transform_checks and pawnshop_shape_count == _pawnshop_obstacle_shape_count and factory_shape_count == _factory_obstacle_shape_count and pawnshop_shape_count > 0 and factory_shape_count > 0
+	var result := {
 		"valid": valid,
-		"collision_bodies": collision_bodies,
-		"collision_shapes": collision_shapes,
+		"collision_bodies": body_count,
+		"collision_shapes": shape_count,
+		"walkable_collision_bodies": walkable_body_count,
+		"walkable_collision_shapes": walkable_shape_count,
+		"pawnshop_obstacle_shapes": pawnshop_shape_count,
+		"factory_obstacle_shapes": factory_shape_count,
 		"navigation_regions": navigation_regions,
-		"collision_shape_identity_transform_count": transform_matches,
-		"collision_shape_transform_checks": collision_transform_checks
+		"walkable_shape_identity_transform_count": walkable_transform_matches,
+		"walkable_shape_transform_checks": walkable_transform_checks
 	}
+	instance.free()
+	return result
 
 func _validate_navigation_after_sync() -> void:
 	await physics_frame
