@@ -16,9 +16,21 @@
       "published_gate": "all",
       "published_npc": "Eloise; Dunn Burg; Song Qing; Song Shiyu; Lieutenant Chen; Li Kui; Li Gui",
       "published_map_references": "Twin City; Wind Plain; Maple Forest",
-      "verified_guide_mechanics": "Long-term storyline outline; exact ordered steps/dialogue/rewards not published in this guide.",
+      "verified_guide_mechanics": "Long-term storyline progression published in seven bands: Newcomer (Lv1-50, Twin City introduction, NPCs and equipment upgrade/compose, first steed); Stepping Stone (Lv50-75, Wind Plain/Maple Forest, gem and sub-class systems, Twilight Towers); Reaching Delight (Lv75-130, return to Twin City and Spheres storyline with Den Berg, rebirth/lineage and Deathtrap); Stable Progress (1st Rebirth Lv1-60, Half Facet/Enigma Domains, Ether Spirit/Ethersuit/Ethercore, Mine Contest and Cyclical Trial); Scaling New Heights (1st Rebirth Lv60-130, 2nd-rebirth class, Perfection, Chi and Soul, Mayhem Land and Evil Labyrinth); Ultimate Achievement (2nd Rebirth Lv1-140, Jiang Hu, Rune and Inner Power); Peak of Glory (2nd Rebirth Lv140+, future storyline). This is a progression outline, not the ordered quest list or dialogue transcript.",
       "source_quest_id": null,
-      "admission_state": "RESEARCH_ONLY_NOT_RUNTIME_APPROVED"
+      "admission_state": "RESEARCH_ONLY_NOT_RUNTIME_APPROVED",
+      "source_text_name_variants": [
+        "Dunn Burg (NPC header)",
+        "Den Berg (progression narrative)"
+      ],
+      "unresolved_fields": [
+        "exact ordered quest steps and source quest IDs",
+        "all dialogue windows/options and branch conditions",
+        "NPC-to-step links and exact map/coordinate provenance",
+        "monster/item targets and quantity conditions",
+        "quest rewards and state/reset behavior",
+        "cross-check the guide against the 1.1.2.3 APK build"
+      ]
     },
     {
       "project_record_id": "mobile_guide.daily_bounty_hall",
