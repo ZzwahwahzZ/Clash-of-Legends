@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build a locale-aware runtime index from exact-version Mobile 1.1.2.3 source files."""
 from __future__ import annotations
-import argparse, hashlib, json, re, struct
+import argparse, hashlib, json, re, struct, subprocess, sys, tempfile
 from collections import Counter
 from pathlib import Path
 
@@ -145,20 +145,27 @@ def main():
     npc_map_ids_with_metadata_only = sorted(mid for mid in missing_npc_maps if mid in map_meta)
     npc_map_ids_without_any_catalog_metadata = sorted(mid for mid in missing_npc_maps if mid not in map_meta)
     duplicate_quests = sorted(mid for mid,n in Counter(q["mission_id"] for q in tasks if q["mission_id"] is not None).items() if n > 1)
-    dialogues = []
-    for rel in ["ini/luaui/publicfiles/otherconf/npcdialogueinfo.dat",
-                "ini/luaui/publicfiles/wordfiles/npcdialoguetext_ar.dat",
-                "ini/luaui/publicfiles/wordfiles/npcdialoguetext_en.dat",
-                "script/dialogtext/scriptdialoguetext_ar.dat",
-                "script/dialogtext/scriptdialoguetext_en.dat"]:
-        b = read(root, rel)
-        if b is not None: dialogues.append({"path": rel, "size_bytes": len(b),
-            "sha256": hashlib.sha256(b).hexdigest(), "runtime_status": "SOURCE_PRESENT_DECODE_NOT_VALIDATED"})
+    # Decrypt and parse the five exact-version Lua dialogue files before admitting
+    # them into the runtime index. The parser validates decrypted signatures.
+    with tempfile.TemporaryDirectory(prefix="world-dialogue-") as temp_dir:
+        dialogue_output = Path(temp_dir) / "dialogues.json"
+        dialogue_report_path = Path(temp_dir) / "dialogue-report.json"
+        subprocess.run([
+            sys.executable, str(Path(__file__).with_name("parse_dialogue_sources.py")),
+            "--source-dir", str(root), "--output", str(dialogue_output),
+            "--report", str(dialogue_report_path)
+        ], check=True)
+        dialogue_payload = json.loads(dialogue_output.read_text(encoding="utf-8"))
+        dialogue_report = json.loads(dialogue_report_path.read_text(encoding="utf-8"))
 
     index = {"schema_version":"1.0.0", "source_version":"ConquerOnline-1.1.2.3",
-        "source_policy":"Exact-version derived index. Dialogue binaries remain excluded until their mobile format is validated.",
+        "source_policy":"Exact-version derived index. Encrypted dialogue files are admitted only after TQ cipher signature and Lua assignment validation.",
         "maps":maps, "map_metadata_without_binary_path":extra_maps,
-        "npc_templates":npc_templates, "class_selection":class_selection, "quests":tasks, "dialogue_sources":dialogues}
+        "npc_templates":npc_templates, "class_selection":class_selection, "quests":tasks,
+        "npc_dialogues":dialogue_payload["npc_dialogues"],
+        "dialogue_texts":dialogue_payload["dialogue_texts"],
+        "script_dialogue_texts":dialogue_payload["script_dialogue_texts"],
+        "dialogue_sources":dialogue_payload["dialogue_sources"]}
     a.output.parent.mkdir(parents=True, exist_ok=True)
     a.output.write_text(json.dumps(index, ensure_ascii=False, separators=(",",":"))+"\n", encoding="utf-8")
     report = {"schema_version":"1.0.0","source_version":index["source_version"],
@@ -176,7 +183,7 @@ def main():
         "quest_map_references":dict(sorted(quest_map_refs.items())),
         "npc_map_references":dict(sorted(npc_map_refs.items())),
         "npc_map_ids_missing_from_gamemap_dat":sorted(missing_npc_maps),
-        "dialogue_sources_not_decoded":dialogues,
+        "dialogue_parse":dialogue_report,
         "encodings":{"gamemapex":map_enc,"npc":npc_enc,"quest_en":en_enc,"quest_ar":ar_enc,"class_selection":class_encodings},
         "output_bytes":a.output.stat().st_size,"validation":"SOURCE_INDEX_GENERATED_NOT_YET_RUNTIME_BEHAVIOR_VALIDATED"}
     a.report.parent.mkdir(parents=True, exist_ok=True)
