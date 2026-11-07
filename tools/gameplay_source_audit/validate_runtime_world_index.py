@@ -33,6 +33,9 @@ script_texts = data.get("script_dialogue_texts", {})
 assert len(dialogues) == 5 and all(x.get("status") == "DECRYPTED_TQ_FILE_CIPHER_SEED_9527" for x in dialogues), "All five encrypted dialogue sources must pass cipher signature validation"
 assert len(npc_dialogues) > 0, "No NPC dialogue structures were parsed"
 assert any(int(x.get("dialogue_id", 0)) == 1051 for x in npc_dialogues), "Known NPC dialogue 1051 is missing"
+assert any(int(x.get("dialogue_id", 0)) == 1060 and 5002 in x.get("model_template_ids", []) for x in npc_dialogues), "NPC model 5002 -> dialogue 1060 source link is missing"
+model_templates = data.get("npc_model_templates", [])
+assert any(int(x.get("model_id") or 0) == 5002 and x.get("fields", {}).get("Name", "").strip() == "WindSage" for x in model_templates), "Exact NPC visual model 5002/WindSage is missing"
 assert dialogue_texts.get("ar") and dialogue_texts.get("en"), "Arabic/English NPC dialogue text tables are empty"
 assert script_texts.get("ar") and script_texts.get("en"), "Arabic/English script dialogue text tables are empty"
 print("RUNTIME WORLD INDEX STRUCTURE PASSED")
