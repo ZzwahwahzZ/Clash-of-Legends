@@ -30,7 +30,7 @@ jobs:
           echo "0d21a110c09b762ed5f1a5f4da022857b0534e489eb85052d15da460cb229d2a  build/source/extracted-assets-001.zip" | sha256sum -c -
       - name: Install analyzer and run decoder tests
         run: |
-          .venv/bin/python -m venv .venv
+          python3 -m venv .venv
           .venv/bin/pip install --disable-pip-version-check polyfile
           echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
           .venv/bin/python -m py_compile tools/gameplay_source_audit/comprehensive_asset_inventory.py tools/gameplay_source_audit/audit_source_tables.py tools/gameplay_source_audit/mobile_quest_source_decoder.py tools/gameplay_source_audit/quest_ecosystem_inventory.py tools/gameplay_source_audit/mobile_apk_reader_probe.py tools/resource_packs/decode_mobile_quest_dat.py tests/test_mobile_quest_dat_cipher.py tests/test_quest_ecosystem_inventory.py tests/test_mobile_apk_reader_probe.py
