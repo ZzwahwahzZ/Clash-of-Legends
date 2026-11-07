@@ -43,6 +43,10 @@ func _run_validation() -> void:
 	if source_dialogue.is_empty() or source_dialogue.get("talks", []).is_empty():
 		_fail("Known NPC dialogue 1051 was not parsed into runtime talk steps.")
 		return
+	var model_dialogue: Dictionary = index.get_npc_dialogue_for_model_id(5002)
+	if int(model_dialogue.get("dialogue_id", -1)) != 1060:
+		_fail("NPC model 5002 was not linked through its exact dialogue DlgShowInfo.id reference.")
+		return
 	var first_talk: Dictionary = source_dialogue.get("talks", [])[0]
 	if str(first_talk.get("text_key", "")).is_empty():
 		_fail("NPC dialogue talk step has no source text key.")
