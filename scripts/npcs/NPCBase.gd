@@ -4,6 +4,7 @@ class_name NPCBase
 @export var npc_name_ar: String = "الحكيم القديم"
 @export var npc_name_en: String = "Ancient Sage"
 @export var npc_id: String = "npc_sage"
+@export var source_dialogue_id: int = 0
 @export var role: String = "sage" # "sage", "blacksmith", "merchant", "warden"
 @export var required_level: int = 1
 
@@ -72,8 +73,13 @@ func _open_dialogue() -> void:
 		return
 	var dlg = tree.get_first_node_in_group("dialogue_ui")
 	if dlg and dlg.has_method("show_dialogue"):
-		var name_str = npc_name_ar if (GameManager and GameManager.current_language == "ar") else npc_name_en
-		var lines = dialogue_lines_ar if (GameManager and GameManager.current_language == "ar") else dialogue_lines_en
+		var is_ar := GameManager and GameManager.current_language == "ar"
+		var name_str = npc_name_ar if is_ar else npc_name_en
+		var locale := "ar" if is_ar else "en"
+		if source_dialogue_id > 0 and dlg.has_method("show_source_dialogue"):
+			if dlg.show_source_dialogue(source_dialogue_id, name_str, locale):
+				return
+		var lines = dialogue_lines_ar if is_ar else dialogue_lines_en
 		dlg.show_dialogue(name_str, lines[0], ["حسناً، فهمت", "سأبذل جهدي"])
 
 func _open_blacksmith() -> void:
