@@ -128,6 +128,35 @@ No public source code for the Conquer Online Mobile quest implementation has bee
 
 If a Mobile client resource archive or a legally accessible source package is provided/located, inspect its version, hashes, format and provenance first. Decode only demonstrably relevant quest/NPC/map/item resources. Preserve raw extracts and record the exact client build. Compare extracted behavior against official Mobile guides and observed Mobile client behavior before translating any logic into Godot.
 
+
+## 6A. External technical references discovered (not Mobile-certified)
+
+The research pass now includes technical material outside the official Mobile guide:
+
+1. **Conquer Online Development Wiki** — public community documentation for older/classic Conquer clients. It indexes task-related message families such as MsgTaskStatus, MsgTaskDetailInfo and MsgTaskDialog, alongside NPC/dialogue messages and legacy client data formats:
+   - https://conquer-online.github.io/wiki/network/messages/
+   - https://conquer-online.github.io/wiki/files/formats/dat.html
+   - Reliability policy on the wiki distinguishes unverified, observed and reverse-engineered claims. Its scope is not the current Android Mobile client.
+2. **ZfProtocol5066** — an explicitly versioned protocol document for Conquer Online 2.0 English client v5066. It describes classic MsgNpc/MsgDialog structures; it is useful for understanding legacy dialogue flow, not proof of Mobile wire compatibility:
+   - https://github.com/conquer-online/cops-protocols-doc/blob/main/ZfProtocol5066.md
+3. **LongV6270 open-source server implementation** — source files provide concrete examples of task-status add/remove/update processing, task-detail state fields, and task-dialog option/answer routing:
+   - https://github.com/darkfoxdeveloper/LongV6270/blob/main/src/modules/Long.Module.TaskDetail/Network/MsgTaskStatus.cs
+   - https://github.com/darkfoxdeveloper/LongV6270/blob/main/src/modules/Long.Module.TaskDetail/Network/MsgTaskDetailInfo.cs
+   - https://github.com/darkfoxdeveloper/LongV6270/blob/main/src/Long.Kernel/Network/Game/Packets/MsgTaskDialog.cs
+   This is an independently authored server implementation, not TQ's original Mobile source. Its implementation choices and enum values must be checked against the target Mobile build before adoption.
+4. **Cooldown developer discussion on NPC/task database behavior** — a 2025 thread discusses cq_npc/cq_dynanpc task slots, cq_action execution, task-driven NPC dialogs and task-to-action chaining:
+   - https://cooldown.dev/topic/410-looking-for-help-with-tq-binary-database-npc-actions/
+   This is community technical discussion and an implementation lead, not authoritative Mobile documentation. Statements about database access/version-specific server behavior remain unverified until corroborated.
+5. **Mobile event guides outside the main Quests index** — independent event pages expose additional time-limited activity structures. Five historical examples have been added to the research catalogue: Love Cycles, Forbidden Area, Frostland Park, Into Wilds and Trial of Legends. They remain inactive historical research records; their dates, eligibility, NPCs, maps and mechanics are source-backed, while missing IDs/branches/targets are explicitly unresolved.
+
+### How these references may be used
+
+- Reuse the conceptual separation between task status, task detail, dialogue presentation, NPC activation, action dispatch and persistent per-character task state when designing our own engine.
+- Treat open-source server code as a comparative implementation sample, not as original client code or a Mobile source dump.
+- Treat protocol layouts and legacy DAT formats as version-scoped. Do not import packet IDs, field widths, enums, table schemas or binary decoders into the Godot project without target-build corroboration.
+- Treat cq_action/cq_npc/Lua concepts as a possible legacy quest-authoring model. Do not assume Mobile uses those same tables or scripts.
+- Preserve original source links, version labels, evidence grades and unresolved fields for every extracted mechanic.
+
 ## 7. Admission gate
 
 A record may move from research to implementation only when:
