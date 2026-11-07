@@ -23,16 +23,17 @@ TEXT_EXTS = {".ini", ".txt", ".lua", ".json", ".xml", ".csv", ".cfg", ".dat"}
 def sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
-def collect_sources(archive: Path) -> dict[str, list[tuple[zipfile.ZipFile, str, str]]]:
-    sources = {}
-    with zipfile.ZipFile(archive) as outer:
+def collect_sources(archive: Path) -> list[tuple[str, str, bytes]]:
+    sources = []
+    with zipfile.ZipFile(archive) as outer, tempfile.TemporaryDirectory(prefix="world-source-") as td:
         nested = []
         for name in outer.namelist():
             if VERSION in name and ROOT_MARKER in name:
                 rel = name.split(ROOT_MARKER, 1)[1].replace("\\", "/")
-                sources.setdefault(rel, []).append((outer, name, name))
+                if any(pattern.search(rel) for pattern in PATTERNS.values()):
+                    sources.append((rel, name, outer.read(name)))
             elif VERSION in name and name.lower().endswith(".apk"):
-                target = Path(tempfile.gettempdir()) / ("world-source-" + sha(name.encode())[:12] + ".apk")
+                target = Path(td) / (str(len(nested)) + ".apk")
                 with outer.open(name) as src, target.open("wb") as dst:
                     while True:
                         block = src.read(1024 * 1024)
@@ -47,8 +48,7 @@ def collect_sources(archive: Path) -> dict[str, list[tuple[zipfile.ZipFile, str,
                     sources.setdefault(rel, []).append((nested_zip, name, outer_name + "!" + name))
         return sources
 
-def inspect_member(source_zip: zipfile.ZipFile, member: str, display: str, rel: str) -> dict:
-    data = source_zip.read(member)
+def inspect_member(data: bytes, display: str, rel: str) -> dict:
     ext = Path(rel).suffix.lower()
     result = {
         "relative_path": rel, "source_member": display, "extension": ext,
@@ -86,20 +86,19 @@ def main() -> None:
     args = ap.parse_args()
     sources = collect_sources(args.archive)
     matches = []
-    for rel, candidates in sorted(sources.items()):
+    for rel, display, data in sorted(sources, key=lambda item: (item[0], item[1])):
         groups = [key for key, pattern in PATTERNS.items() if pattern.search(rel)]
         if not groups:
             continue
-        for source_zip, member, display in candidates:
-            entry = inspect_member(source_zip, member, display, rel)
-            entry["candidate_domains"] = groups
-            matches.append(entry)
+        entry = inspect_member(data, display, rel)
+        entry["candidate_domains"] = groups
+        matches.append(entry)
     matches.sort(key=lambda x: (x["candidate_domains"][0], x["relative_path"], x["source_member"]))
     summary = {
         "schema_version": "1.0.0",
         "source_version": VERSION,
         "archive_name": args.archive.name,
-        "version_matched_unique_paths": len(sources),
+        "version_matched_candidate_paths": len(sources),
         "candidate_member_count": len(matches),
         "candidate_counts_by_domain": {
             key: sum(1 for row in matches if key in row["candidate_domains"])
