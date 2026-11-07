@@ -12,6 +12,8 @@ on:
       - "tools/quality/Phase1ChineseDistrictPreview.gd"
       - "tools/quality/Phase1UrbanInfillPreview.gd"
       - "tools/quality/Phase1WorldStructureAudit.gd"
+      - "assets/environment/phase1/jianghai/interaction_anchors.json"
+      - "scripts/world/WorldInteractionRegistry.gd"
   workflow_dispatch:
 
 permissions:
