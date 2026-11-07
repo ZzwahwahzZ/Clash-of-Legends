@@ -65,9 +65,23 @@ def main() -> None:
         raise SystemExit("Runtime catalog would be empty.")
     for category in assets:
         assets[category].sort(key=lambda item: item["path"])
+    playable_audio = [
+        item for item in assets["audio"]
+        if item["extension"] in {".ogg", ".wav", ".mp3", ".flac", ".opus", ".aac", ".m4a"}
+    ]
     CATALOG.parent.mkdir(parents=True, exist_ok=True)
     catalog = {
         "catalog_version": 1,
+        "runtime_capabilities": {
+            "playable_audio": bool(playable_audio),
+            "audio_status": "READY" if playable_audio else "PENDING_SOURCE_PAYLOAD",
+            "playable_audio_count": len(playable_audio),
+            "audio_note": (
+                "At least one verified playable audio payload is present."
+                if playable_audio else
+                "The verified resource-packs-v4 baseline contains audio metadata/references but no playable audio payload; do not treat metadata as playable sound."
+            ),
+        },
         "source_release": "resource-packs-v4",
         "provenance_policy": (
             "Paths, source references, byte sizes and SHA-256 values come from the "
