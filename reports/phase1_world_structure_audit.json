@@ -5402,14 +5402,26 @@
         ]
       ],
       "id": "jianghai.pawnshop_courtyard",
-      "node_path": "JianghaiOldCityAuthoredScene/GuangchangPawnshop",
+      "mesh_aabb_local": [
+        [
+          -96,
+          -0.13799999654293,
+          -117
+        ],
+        [
+          20,
+          0.119999997317791,
+          28
+        ]
+      ],
+      "node_path": "JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/PawnshopApproach",
       "position_global": [
         0,
         0,
         0
       ],
       "resolved": true,
-      "type": "Node3D"
+      "type": "MeshInstance3D"
     },
     {
       "global_transform": [
