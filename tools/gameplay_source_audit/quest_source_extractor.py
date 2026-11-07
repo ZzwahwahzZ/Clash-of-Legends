@@ -67,7 +67,8 @@ def scan_archive(z: zipfile.ZipFile, origin: str, output: zipfile.ZipFile,
         ext=Path(raw_name).suffix.lower()
         name_match=bool(NAME_RE.search(raw_name))
         code_file=ext in CODE_EXTS
-        if not name_match and not code_file and ext not in TEXT_EXTS:
+        config_corpus_candidate = (ROOT_MARKER in raw_name and "/ini/" in raw_name and ext in TEXT_EXTS)
+        if not name_match and not code_file and not config_corpus_candidate and ext not in TEXT_EXTS:
             continue
         if info.file_size > MAX_EXTRACT:
             if name_match or code_file:
@@ -87,13 +88,13 @@ def scan_archive(z: zipfile.ZipFile, origin: str, output: zipfile.ZipFile,
                 lo=max(0,m.start()-120); hi=min(len(data),m.end()+220)
                 excerpt=data[lo:hi].decode("utf-8","replace").replace("\x00"," ")
                 text_hits.append({"byte_offset":m.start(),"term":m.group().decode("latin-1"),"excerpt":excerpt[:420]})
-        if not name_match and not code_file and not text_hits:
+        if not name_match and not code_file and not config_corpus_candidate and not text_hits:
             continue
         record={
             "origin":origin,"path":raw_name,"size_bytes":len(data),"sha256":digest(data),
-            "extension":ext,"matched_filename":name_match,
+            "extension":ext,"matched_filename":name_match,"config_corpus_candidate":config_corpus_candidate,
             "content_hit_count":len(text_hits),"code_string_hit_count":len(code_hits),
-            "evidence":"PATH_CANDIDATE_ONLY" if name_match and not text_hits and not code_hits else "PATH_OR_CONTENT_CANDIDATE_NEEDS_REVIEW"
+            "evidence":"PATH_CANDIDATE_ONLY" if name_match and not text_hits and not code_hits else ("INI_CONFIG_CORPUS_NEEDS_SEMANTIC_TRIAGE" if config_corpus_candidate and not text_hits and not code_hits else "PATH_OR_CONTENT_CANDIDATE_NEEDS_REVIEW")
         }
         if text_hits: record["content_hits"]=text_hits
         if code_hits: record["code_strings"]=code_hits
