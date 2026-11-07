@@ -292,7 +292,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             "mesh_details":document.meshes.iter().map(|mesh| json!({
                                 "name":mesh.name,"vertices":mesh.vertices.len(),
                                 "opaque_indices":mesh.opaque_indices.len(),"alpha_indices":mesh.alpha_indices.len()
-                            })).collect::<Vec<_>(),
+                            })).collect::<Vec<_>>(),
                             "texture_expected":texture_path.to_string_lossy()
                         }));
                     } else if mixed_color_and_textured {
