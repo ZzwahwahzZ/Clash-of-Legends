@@ -40,6 +40,21 @@
       "path_valid": true,
       "route": "factory_approach",
       "waypoint_count": 14
+    },
+    {
+      "path_valid": true,
+      "route": "market_bridge_west_approach",
+      "waypoint_count": 7
+    },
+    {
+      "path_valid": true,
+      "route": "medicine_frontage",
+      "waypoint_count": 8
+    },
+    {
+      "path_valid": true,
+      "route": "tea_frontage",
+      "waypoint_count": 16
     }
   ],
   "runtime_route_movement_checks": [
@@ -53,15 +68,39 @@
     },
     {
       "floor_contact": true,
-      "frames_used": 1021,
-      "horizontal_displacement": 97.037712097168,
-      "horizontal_distance_to_target": 1.49768996238708,
+      "frames_used": 1023,
+      "horizontal_displacement": 97.1401672363281,
+      "horizontal_distance_to_target": 1.39189553260803,
       "route": "factory_approach",
+      "target_reached": true
+    },
+    {
+      "floor_contact": true,
+      "frames_used": 532,
+      "horizontal_displacement": 52.2463569641113,
+      "horizontal_distance_to_target": 1.4067440032959,
+      "route": "market_bridge_west_approach",
+      "target_reached": true
+    },
+    {
+      "floor_contact": true,
+      "frames_used": 142,
+      "horizontal_displacement": 15.2750329971313,
+      "horizontal_distance_to_target": 1.4151017665863,
+      "route": "medicine_frontage",
+      "target_reached": true
+    },
+    {
+      "floor_contact": true,
+      "frames_used": 475,
+      "horizontal_displacement": 51.3325042724609,
+      "horizontal_distance_to_target": 1.44042277336121,
+      "route": "tea_frontage",
       "target_reached": true
     }
   ],
-  "runtime_route_movements_passed": 2,
-  "runtime_routes_passed": 2,
+  "runtime_route_movements_passed": 5,
+  "runtime_routes_passed": 5,
   "start_position": [
     -0.0703339651227,
     0.0139589309692383,
