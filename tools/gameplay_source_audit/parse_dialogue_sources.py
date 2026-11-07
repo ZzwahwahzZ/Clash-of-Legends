@@ -112,7 +112,7 @@ def main():
     script_en_text, sen_hash, sen_clear_hash, sen_size = load_decrypted(root, rel_script_en, None)
 
     def script_root(text, locale):
-        candidates = re.findall(r"(?m)^\\s*(?:local\\s+)?([A-Za-z_]\\w*)\\s*=\\s*\\{\\s*\\}", text)
+        candidates = re.findall(r"(?m)^\s*(?:local\s+)?([A-Za-z_]\w*)\s*=\s*\{\s*\}", text)
         preferred = [name for name in candidates if "DIALOG" in name.upper() and "TEXT" in name.upper()]
         if preferred:
             return preferred[0]
