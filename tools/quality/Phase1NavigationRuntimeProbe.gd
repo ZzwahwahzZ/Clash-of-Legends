@@ -81,9 +81,8 @@ func _run() -> void:
 	var bridge_landmark_route: Dictionary = interaction_registry.get_navigation_path("jianghai.market_bridge", START_POSITION, navigation_map) if interaction_registry_bound else {"ok": false, "reason": "registry_bind_failed"}
 	var bridge_landmark_rejected := not bool(bridge_landmark_route.get("ok", false)) and str(bridge_landmark_route.get("reason", "")) == "anchor_is_landmark_not_navigation_target"
 
-	# Verify authored city destinations at runtime. The former market_bridge_west_approach
-	# pointed at a decorative ramp and is intentionally excluded until a real West Market
-	# walkable entry is geometrically verified; nearest-point projection is not route proof.
+	# Verify authored city destinations at runtime. The decorative market ramps
+	# remain excluded until a real West Market walkable entry is geometrically verified.
 	var runtime_route_targets := {
 		"pawnshop_approach": Vector3(-86.0, -0.078, -106.0),
 		"factory_approach": Vector3(86.0, -0.078, -12.0),
@@ -97,8 +96,6 @@ func _run() -> void:
 		var runtime_path: PackedVector3Array = PackedVector3Array()
 		for _sync_frame in range(5):
 			await physics_frame
-			# NavigationAgent3D advances its path cache when this is queried
-			# during physics processing; waiting alone leaves the path empty.
 			navigation_agent.get_next_path_position()
 			runtime_path = navigation_agent.get_current_navigation_path()
 		runtime_route_checks.append({
@@ -125,18 +122,11 @@ func _run() -> void:
 			break
 
 	var final_position := player.global_position
-	var horizontal_distance_to_target := Vector2(
-		final_position.x - projected_target.x,
-		final_position.z - projected_target.z
-	).length()
-	var horizontal_displacement := Vector2(
-		final_position.x - start_after_settle.x,
-		final_position.z - start_after_settle.z
-	).length()
+	var horizontal_distance_to_target := Vector2(final_position.x - projected_target.x, final_position.z - projected_target.z).length()
+	var horizontal_displacement := Vector2(final_position.x - start_after_settle.x, final_position.z - start_after_settle.z).length()
 	var final_floor_contact := player.is_on_floor()
 	var target_reached := horizontal_distance_to_target <= 1.5
-	# Path resolution alone is not enough: drive the actual CharacterBody3D
-	# independently from the central avenue to both building approaches.
+
 	var runtime_route_movement_checks: Array[Dictionary] = []
 	for route_id in runtime_route_targets:
 		player.call("clear_movement_target")
@@ -168,10 +158,7 @@ func _run() -> void:
 		if bool(movement_check["target_reached"]) and bool(movement_check["floor_contact"]):
 			runtime_route_movements_passed += 1
 
-	# Prove traversal across the authored bridge deck only.
-	# The decorative ramps are not walkable navigation surfaces or quest destinations.
-	# Cross from the eastern deck end toward the western deck end. Stop on the
-	# authored deck: do not route over either decorative ramp.
+	# Physical bridge crossing is constrained to the authored deck; neither decorative ramp is used.
 	var bridge_cross_start_requested := Vector3(21.0, 4.45, -126.0)
 	var bridge_cross_target_requested := Vector3(-21.0, 4.45, -126.0)
 	var bridge_cross_start := NavigationServer3D.map_get_closest_point(navigation_map, bridge_cross_start_requested)
@@ -215,10 +202,7 @@ func _run() -> void:
 	var bridge_cross_next_path_position: Vector3 = navigation_agent.get_next_path_position()
 	var bridge_cross_passed := bridge_cross_path.size() >= 2 and bridge_cross_start_projection_distance <= 2.0 and bridge_cross_target_projection_distance <= 2.0 and bridge_cross_distance <= 1.5 and bridge_cross_floor_contact
 
-	# The West Market frontage candidate is taken from the authored RiverWardStreet
-	# bounds and placed outside the WestMarketRow01 building footprint. This is a
-	# diagnostic road-surface candidate, not an approved interaction anchor. A
-	# nearest-point projection alone is never accepted as route connectivity.
+	# Diagnostic candidate on RiverWardStreet, outside WestMarketRow01; never promoted to an interaction anchor by projection alone.
 	var west_market_candidate_requested := Vector3(-35.0, -0.14, -164.0)
 	var west_market_candidate_projected := NavigationServer3D.map_get_closest_point(navigation_map, west_market_candidate_requested)
 	var west_market_projection_distance := west_market_candidate_projected.distance_to(west_market_candidate_requested)
@@ -390,6 +374,12 @@ func _ray_result(from_position: Vector3, to_position: Vector3) -> Dictionary:
 	query.collide_with_areas = false
 	query.collide_with_bodies = true
 	return get_root().world_3d.direct_space_state.intersect_ray(query)
+
+func _path_length(path: PackedVector3Array) -> float:
+	var total := 0.0
+	for index in range(1, path.size()):
+		total += path[index - 1].distance_to(path[index])
+	return total
 
 func _vec(value: Vector3) -> Array:
 	return [value.x, value.y, value.z]
