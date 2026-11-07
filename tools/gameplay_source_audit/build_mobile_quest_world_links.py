@@ -180,7 +180,7 @@ def main():
                     elif head=="map" and len(p)>=4:
                         map_refs.append({"mission_id":mid,"role":key,"map_id":p[1],"x":int(p[2]) if p[2].isdigit() else None,"y":int(p[3]) if p[3].isdigit() else None})
                     elif head=="lua" and p:
-                        lua_refs.append({"mission_id":mid,"field":key,"script_function":p[0],"raw":token})
+                        lua_refs.append({"mission_id":mid,"field":key,"npc_name":p[0],"script_function":p[1].replace("</F>","") if len(p)>1 else "","raw":token})
                     elif head=="chk_item" and len(p)>=2:item_refs.append({"mission_id":mid,"item_id":p[0],"quantity":p[1]})
                     elif head=="chk_quest" and p:quest_condition_refs.append({"mission_id":mid,"condition_quest_id":p[0],"condition_args":p[1:]})
         for p in f.get("Prequest","").split("|"):
@@ -228,6 +228,20 @@ def main():
     if registry_path.is_file():
         registry=tq_decode(registry_path.read_bytes()).decode("utf-8",errors="replace")
         script_registry=[{"script_id":int(a),"file":b} for a,b in re.findall(r'\[(\d+)\]\s*=\s*\{\s*file\s*=\s*"([^"]+)"',registry)]
+    script_function_index=defaultdict(list)
+    script_source_count=0
+    for script_path in sorted((root/"script").rglob("*.dat")):
+        decoded_script=tq_decode(script_path.read_bytes()).decode("utf-8",errors="replace")
+        if not any(mark in decoded_script for mark in ("local function","function ","SCRIPT_DIALOG_TEXT","LuaScriptMgr_")):continue
+        script_source_count+=1
+        rel=str(script_path.relative_to(root))
+        function_names=set(re.findall(r"(?:local\\s+)?function\\s+([A-Za-z_][A-Za-z0-9_:]*)",decoded_script))
+        for function_name in function_names:script_function_index[function_name].append(rel)
+    for ref in lua_refs:
+        function_name=ref.get("script_function","")
+        ref["script_function_matches"]=script_function_index.get(function_name,[])
+        ref["npc_type_name_matches"]=[k for k,v in npc_types.items() if v.casefold()==ref.get("npc_name","").casefold()]
+        ref["npcx_name_matches"]=npcx_names.get(ref.get("npc_name","").casefold(),[])
     scene_scripts=[]
     for entry in script_registry:
         if "client_realm_task/juqing" not in entry["file"].lower():continue
@@ -273,7 +287,7 @@ def main():
             "mission_dialogue_links":mission_dialogue},
         "story_scene_linkage":{"lua_script_registry_count":len(script_registry),"client_realm_task_registry_count":sum("client_realm_task/juqing" in x["file"].lower() for x in script_registry),
             "client_realm_task_decoded_script_count":len(scene_scripts),"scripts":scene_scripts},
-        "mob_reference_count":len(mob_refs),"item_requirement_reference_count":len(item_refs),"lua_script_reference_count":len(lua_refs),
+        "mob_reference_count":len(mob_refs),"item_requirement_reference_count":len(item_refs),"lua_script_reference_count":len(lua_refs),"lua_script_source_files_parsed":script_source_count,"lua_script_function_match_references":sum(bool(r.get("script_function_matches")) for r in lua_refs),"lua_npc_name_match_references":sum(bool(r.get("npc_type_name_matches") or r.get("npcx_name_matches")) for r in lua_refs),
         "source_hashes":[{"path":str(p.relative_to(root)),"size_bytes":p.stat().st_size,"sha256":hashlib.sha256(p.read_bytes()).hexdigest()}
             for p in [qpath,npc_type_path,npcx_path,mapdest_path,root/"ini/gamemap.dat",gmex_path,dlg_path,text_path,registry_path] if p.is_file()],
         "npc_references":npc_refs,"map_references":map_refs,"mob_references":mob_refs,"item_references":item_refs,"lua_script_references":lua_refs,
