@@ -8,7 +8,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: gameplay-source-table-audit-${{ github.ref }}
+  group: gameplay-source-table-audit-${{ github.sha }}
   cancel-in-progress: true
 jobs:
   audit-source-tables:
