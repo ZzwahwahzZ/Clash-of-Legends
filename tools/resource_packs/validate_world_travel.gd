@@ -52,6 +52,23 @@ func _run_travel_test() -> void:
 	if not has_main_city or minor_city_count != 5:
 		_fail("Main/minor city hierarchy is incomplete: %s" % str(city_hubs))
 		return
+	if quest_graph.is_available("650", [], 8, "10"):
+		_fail("Mission 650 bypassed its prerequisite mission 608.")
+		return
+	if not quest_graph.is_available("650", ["608"], 8, "10"):
+		_fail("Mission 650 did not unlock for a valid level/profession after prerequisite 608.")
+		return
+	if quest_graph.is_available("650", ["608"], 7, "10") or quest_graph.is_available("650", ["608"], 8, "99"):
+		_fail("Mission 650 ignored its source level or profession restrictions.")
+		return
+	var npc_offers := quest_graph.get_available_at_npc("2001", ["608"], 8, "10")
+	var armorer_offer_found := false
+	for offer in npc_offers:
+		if str(offer.get("id", "")) == "650":
+			armorer_offer_found = true
+	if not armorer_offer_found:
+		_fail("Source NPC 2001 did not expose the unlocked Armorer quest.")
+		return
 	var armorer_route := quest_graph.get_route("650", true)
 	if str(armorer_route.get("npc_id", "")) != "0004" or str(armorer_route.get("map_id", "")) != "1002":
 		_fail("Source quest graph did not resolve mission 650 turn-in route.")
