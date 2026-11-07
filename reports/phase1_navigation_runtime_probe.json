@@ -30,6 +30,19 @@
     -0.14000000059605,
     -34.5
   ],
+  "runtime_route_checks": [
+    {
+      "path_valid": true,
+      "route": "pawnshop_approach",
+      "waypoint_count": 10
+    },
+    {
+      "path_valid": true,
+      "route": "factory_approach",
+      "waypoint_count": 14
+    }
+  ],
+  "runtime_routes_passed": 2,
   "start_position": [
     -0.0703339651227,
     0.0139589309692383,
