@@ -109,10 +109,11 @@ func _add_market_bridge_navigation_connectors() -> void:
 	# or physics collision, and retain the 0.5 m agent clearance profile.
 	var connector_mesh := ArrayMesh.new()
 	var vertices := PackedVector3Array([
-		Vector3(-24.0, 3.72, -128.15), Vector3(-22.0, 4.34, -128.15), Vector3(-22.0, 4.34, -123.85),
-		Vector3(-24.0, 3.72, -128.15), Vector3(-22.0, 4.34, -123.85), Vector3(-24.0, 3.72, -123.85),
-		Vector3(22.0, 4.34, -128.15), Vector3(24.0, 3.72, -128.15), Vector3(24.0, 3.72, -123.85),
-		Vector3(22.0, 4.34, -128.15), Vector3(24.0, 3.72, -123.85), Vector3(22.0, 4.34, -123.85)
+		# Counter-clockwise from above so both navigation-only strips face up.
+		Vector3(-24.0, 3.72, -128.15), Vector3(-24.0, 3.72, -123.85), Vector3(-22.0, 4.34, -123.85),
+		Vector3(-24.0, 3.72, -128.15), Vector3(-22.0, 4.34, -123.85), Vector3(-22.0, 4.34, -128.15),
+		Vector3(22.0, 4.34, -128.15), Vector3(22.0, 4.34, -123.85), Vector3(24.0, 3.72, -123.85),
+		Vector3(22.0, 4.34, -128.15), Vector3(24.0, 3.72, -123.85), Vector3(24.0, 3.72, -128.15)
 	])
 	var arrays := []
 	arrays.resize(Mesh.ARRAY_MAX)
