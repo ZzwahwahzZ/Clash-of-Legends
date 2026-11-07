@@ -6,6 +6,7 @@ on:
       - stage/phase1-world-assets
     paths:
       - "scripts/progression/ClassProgressionManager.gd"
+      - "scripts/player/PlayerInventory.gd"
       - "tools/quality/validate_archer_progression.gd"
       - ".github/workflows/archer-progression-validation.yml"
   workflow_dispatch:
