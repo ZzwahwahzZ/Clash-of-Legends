@@ -51,8 +51,19 @@ func _run() -> void:
 					anchor_row["type"] = anchor_node.get_class()
 					anchor_row["position_global"] = _vector_to_array((anchor_node as Node3D).global_position)
 					anchor_row["global_transform"] = _transform_to_array((anchor_node as Node3D).global_transform)
+				if anchor_node is Node3D and definition.get("target_offset_local", []) is Array and definition.get("target_offset_local", []).size() == 3:
+					var offset_data: Array = definition["target_offset_local"]
+					var offset := Vector3(float(offset_data[0]), float(offset_data[1]), float(offset_data[2]))
+					anchor_row["target_world"] = _vector_to_array((anchor_node as Node3D).global_transform * offset)
 				if anchor_node is MeshInstance3D and (anchor_node as MeshInstance3D).mesh != null:
-					anchor_row["mesh_aabb_local"] = _aabb_to_array((anchor_node as MeshInstance3D).get_aabb())
+					var anchor_mesh := anchor_node as MeshInstance3D
+					anchor_row["mesh_aabb_local"] = _aabb_to_array(anchor_mesh.get_aabb())
+					if definition.get("target_offset_local", []) is Array and definition.get("target_offset_local", []).size() == 3:
+						var target_data: Array = definition["target_offset_local"]
+						var target_local := Vector3(float(target_data[0]), float(target_data[1]), float(target_data[2]))
+						anchor_row["target_inside_anchor_mesh_aabb"] = anchor_mesh.get_aabb().has_point(target_local)
+				anchor_row["descendant_meshes"] = []
+				_collect_anchor_meshes(anchor_node, anchor_row["descendant_meshes"])
 				semantic_anchor_nodes.append(anchor_row)
 	var report := {
 		"city_scene": CITY_PATH,
@@ -119,6 +130,18 @@ func _walk(node: Node, relative_path: String) -> void:
 		street_nodes.append(street_row)
 	for child in node.get_children():
 		_walk(child, path)
+
+func _collect_anchor_meshes(node: Node, rows: Array) -> void:
+	if node is MeshInstance3D and (node as MeshInstance3D).mesh != null:
+		var mesh_node := node as MeshInstance3D
+		rows.append({
+			"path": str(mesh_node.get_path()),
+			"global_position": _vector_to_array(mesh_node.global_position),
+			"mesh_aabb_local": _aabb_to_array(mesh_node.get_aabb()),
+			"mesh_aabb_world": _aabb_to_array(mesh_node.global_transform * mesh_node.get_aabb())
+		})
+	for child in node.get_children():
+		_collect_anchor_meshes(child, rows)
 
 func _vector_to_array(value: Vector3) -> Array:
 	return [value.x, value.y, value.z]
