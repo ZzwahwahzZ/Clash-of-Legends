@@ -1,8 +1,18 @@
 extends Node
 
 const MODELS := [
-	{"id": 7130000, "gender": "male"},
-	{"id": 8133010, "gender": "female"}
+	{"id": 7101020, "look": 7},
+	{"id": 7102000, "look": 7},
+	{"id": 7103000, "look": 7},
+	{"id": 7130000, "look": 7},
+	{"id": 7131020, "look": 7},
+	{"id": 7132000, "look": 7},
+	{"id": 7133010, "look": 7},
+	{"id": 7134010, "look": 7},
+	{"id": 7135000, "look": 7},
+	{"id": 8133010, "look": 8},
+	{"id": 8134010, "look": 8},
+	{"id": 8135000, "look": 8},
 ]
 const STATES := ["idle", "walk", "run"]
 const HELPERS := ["v_zero", "v_slot", "v_l_slot01", "v_l_slot02", "v_r_slot01", "v_r_slot02"]
@@ -15,8 +25,8 @@ func _run() -> void:
 	get_viewport().size = Vector2i(1280, 720)
 	for _frame in range(3):
 		await get_tree().process_frame
-	if not is_instance_valid(AssetCatalog) or AssetCatalog.character_vat_clips.size() != 2:
-		push_error("C3 VAT runtime validation: runtime catalog has not exposed both validated character VAT models.")
+	if not is_instance_valid(AssetCatalog) or AssetCatalog.character_vat_clips.size() != MODELS.size():
+		push_error("C3 VAT runtime validation: runtime catalog has not exposed all validated C3 VAT candidate models.")
 		get_tree().get_tree().quit(1)
 		return
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://reports"))
@@ -139,7 +149,7 @@ func _run() -> void:
 			for _frame in range(2):
 				await get_tree().process_frame
 			var image_a: Image = get_viewport().get_texture().get_image()
-			var stem: String = str(model["gender"]) + "_" + state
+			var stem: String = "model_%d_%s" % [model_id, state]
 			var frame_a_path := "res://" + OUTPUT_DIR.path_join(stem + "_frame_a.png")
 			if image_a.save_png(ProjectSettings.globalize_path(frame_a_path)) != OK:
 				push_error("C3 VAT runtime validation: failed to save frame A for " + stem)
@@ -183,10 +193,10 @@ func _run() -> void:
 			if not valid:
 				push_error("C3 VAT runtime validation: visible motion/silhouette threshold failed for %s (%d changed / %d sampled, silhouette=%s)." % [stem, changed_pixels, sampled_pixels, str(foreground_size)])
 				all_passed = false
-			print("C3 VAT RUNTIME STATE: ", model["gender"], " ", state, " | meshes=", mesh_nodes.size(), " | changed=", changed_pixels, "/", sampled_pixels, " | silhouette=", foreground_size)
+			print("C3 VAT RUNTIME STATE: model ", model_id, " ", state, " | meshes=", mesh_nodes.size(), " | changed=", changed_pixels, "/", sampled_pixels, " | silhouette=", foreground_size)
 			clip_results.append({
 				"model_id": model_id,
-				"gender": model["gender"],
+				"look": int(model["look"]),
 				"state": state,
 				"clip_id": str(clip.get("clip_id", "")),
 				"metadata_count": metadata_paths.size(),
@@ -205,11 +215,11 @@ func _run() -> void:
 		await get_tree().process_frame
 
 	var report := {
-		"expected_states": 6,
+		"expected_states": MODELS.size() * STATES.size(),
 		"validated_states": clip_results.filter(func(row): return row.get("status") == "RUNTIME_VAT_STATE_PASSED").size(),
 		"base_models": MODELS,
 		"states": clip_results,
-		"status": "PASSED" if all_passed and clip_results.size() == 6 else "FAILED",
+		"status": "PASSED" if all_passed and clip_results.size() == MODELS.size() * STATES.size() else "FAILED",
 		"note": "Runtime state-switching test uses the merged character body GLBs and the staged position/normal VAT resources from the animations PCK."
 	}
 	var report_path := "res://reports/c3-vat-runtime-validation.json"
@@ -220,7 +230,7 @@ func _run() -> void:
 		return
 	report_file.store_string(JSON.stringify(report, "\t") + "\n")
 	report_file.close()
-	if not all_passed or clip_results.size() != 6:
+	if not all_passed or clip_results.size() != MODELS.size() * STATES.size():
 		push_error("C3 VAT runtime state-switching validation failed.")
 		get_tree().quit(1)
 		return
