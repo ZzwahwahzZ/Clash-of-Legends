@@ -42,6 +42,25 @@
       "waypoint_count": 14
     }
   ],
+  "runtime_route_movement_checks": [
+    {
+      "floor_contact": true,
+      "frames_used": 1032,
+      "horizontal_displacement": 96.1219940185547,
+      "horizontal_distance_to_target": 1.47788560390472,
+      "route": "pawnshop_approach",
+      "target_reached": true
+    },
+    {
+      "floor_contact": true,
+      "frames_used": 1021,
+      "horizontal_displacement": 97.037712097168,
+      "horizontal_distance_to_target": 1.49768996238708,
+      "route": "factory_approach",
+      "target_reached": true
+    }
+  ],
+  "runtime_route_movements_passed": 2,
   "runtime_routes_passed": 2,
   "start_position": [
     -0.0703339651227,
