@@ -28,8 +28,8 @@ standalone_decoder = load_module(
 
 
 class TQFileCipherKnownAnswerTests(unittest.TestCase):
-    # Fixed vectors generated from the published TQ File Cipher algorithm:
-    # seed 9527, 32-bit MSVC LCG, 128-byte key, XOR then byte-wise ROR.
+    # Algorithm-level known-answer vector from the published TQ cipher description.
+    # This is not a ciphertext sample from the target mobile APK.
     def test_seed_9527_key_prefix(self):
         expected = bytes.fromhex("ad6b4ffbddb80e0913338ff543091588")
         self.assertEqual(archive_decoder.key_for(9527)[:16], expected)
