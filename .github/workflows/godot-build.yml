@@ -353,7 +353,7 @@ jobs:
       - name: Install Pillow and validate screenshot-aware emulator helpers
         run: |
           python3 -m pip install --user Pillow
-          python3 -m py_compile tools/ci/tap_start_button.py tools/ci/assert_world_transition.py tools/ci/wait_for_world_entry.py
+          python3 -m py_compile tools/ci/tap_intro_skip.py tools/ci/tap_start_button.py tools/ci/assert_world_transition.py tools/ci/wait_for_world_entry.py
           python3 tools/ci/test_android_emulator_helpers.py
 
       - name: Enable KVM acceleration for Android emulator
@@ -395,21 +395,31 @@ jobs:
             adb shell pidof com.zwahwahzz.clashoflegends > emulator-evidence/game-pid.txt || { adb logcat -d -t 16000 > emulator-evidence/logcat-failure.txt; echo "Game process exited after launch."; exit 1; }
             adb shell screencap -p /sdcard/clash-launch.png
             adb pull /sdcard/clash-launch.png emulator-evidence/launch-screen.png
-            # Dismiss Android 13's first-run immersive-mode notice after the splash has rendered.
-            # The "Got it" target is centered near (1500, 500) on the 2400x1080 emulator.
-            # (The captured image is rendered scaled in reports; use native framebuffer coordinates.)
-            sleep 2
-            adb shell input tap 1500 500
-            sleep 0.5
-            adb shell screencap -p /sdcard/clash-intro.png
-            adb pull /sdcard/clash-intro.png emulator-evidence/intro-screen.png
-            # Allow the automatic intro fade, then tap the centered in-game skip control as a deterministic fallback.
-            sleep 4
-            adb shell input tap 1200 500
-            sleep 0.6
+            # Let the Android system UI settle; never tap a guessed immersive-mode coordinate.
+            # The app can take several seconds to render its first Godot frame on software CI.
+            sleep 12
+            adb shell screencap -p /sdcard/clash-intro-or-select.png
+            adb pull /sdcard/clash-intro-or-select.png emulator-evidence/intro-or-select.png
+            # Detect the actual cinematic Arabic skip label from this screenshot. Exit 2 means
+            # the timed fade already completed and the class-select start button was verified.
+            INTRO_ACTION=0
+            if python3 tools/ci/tap_intro_skip.py emulator-evidence/intro-or-select.png; then
+              INTRO_ACTION=0
+            else
+              INTRO_ACTION=$?
+            fi
+            if [ "$INTRO_ACTION" -eq 0 ]; then
+              sleep 1
+            elif [ "$INTRO_ACTION" -eq 2 ]; then
+              echo "CINEMATIC INTRO AUTO-DISMISSED; class-select button already verified."
+            else
+              exit "$INTRO_ACTION"
+            fi
             adb shell screencap -p /sdcard/clash-character-select.png
             adb pull /sdcard/clash-character-select.png emulator-evidence/character-select.png
-            python3 tools/ci/compare_emulator_screens.py emulator-evidence/intro-screen.png emulator-evidence/character-select.png 600,250,1800,800 --minimum-ratio 0.02
+            if [ "$INTRO_ACTION" -eq 0 ]; then
+              python3 tools/ci/compare_emulator_screens.py emulator-evidence/intro-or-select.png emulator-evidence/character-select.png 600,250,1800,800 --minimum-ratio 0.02
+            fi
             # Detect the gold button and Arabic label in the screenshot, then tap its measured center.
             python3 tools/ci/tap_start_button.py emulator-evidence/character-select.png
             # First-run resource packs total about 1.13 GB; wait for verified downloads rather than
