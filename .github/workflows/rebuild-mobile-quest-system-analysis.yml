@@ -1,0 +1,59 @@
+name: Rebuild quest-system analysis from retained evidence
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/rebuild-mobile-quest-system-analysis.yml"
+permissions:
+  contents: read
+  actions: read
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore full quest source pack including itemtype definitions
+        uses: actions/download-artifact@v4
+        with:
+          name: Mobile-Quest-Linkage-Evidence
+          run-id: 42364746967
+          github-token: ${{ github.token }}
+          path: /tmp/quest-evidence
+      - name: Rebuild dependencies, NPCs, dialogues, monsters and item links
+        run: |
+          set -euo pipefail
+          SOURCE=/tmp/quest-evidence/build/mobile-quest-source/selected
+          test -d "$SOURCE/ini/itemtype"
+          test "$(find "$SOURCE/ini/itemtype" -name '*.ini' | wc -l)" -eq 89
+          python3 -m py_compile tools/gameplay_source_audit/analyze_mobile_quest_system.py
+          python3 tools/gameplay_source_audit/analyze_mobile_quest_system.py "$SOURCE" --output reports/mobile-quest-system-analysis.json
+          python3 -m json.tool reports/mobile-quest-system-analysis.json > /dev/null
+      - name: Validate quest-system analysis coverage and provenance
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path("reports/mobile-quest-system-analysis.json").read_text(encoding="utf-8"))
+          assert p["mission_summary"]["records"] == 2510
+          assert p["mission_summary"]["unique_ids"] == 2509
+          assert p["mission_summary"]["type_id_names"]["1"] == "Main Quests"
+          assert p["alternate_server_catalog"]["records"] == 906
+          assert p["dependency_graph"]["prerequisite_edges"] == 1230
+          assert p["progress_conditions"]["reference_count"] == 2050
+          assert p["npc_linkage"]["exact_coordinate_matches"] == 127
+          assert p["dialogue"]["dialogue_count"] == 1931
+          assert p["dialogue"]["arabic_keys_found"] > 5000
+          assert p["monster_linkage"]["reference_count"] == 364
+          assert p["item_linkage"]["item_definitions_available"] > 50000
+          assert p["item_linkage"]["matched_item_ids"] > 0
+          print("Quest-system analysis acceptance checks passed")
+          PY
+      - name: Upload rebuilt quest-system report
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mobile-Quest-System-Analysis-v2
+          path: reports/mobile-quest-system-analysis.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 6
