@@ -132,7 +132,10 @@ def main():
     ap=argparse.ArgumentParser()
     ap.add_argument("source_dir",type=Path); ap.add_argument("--output",type=Path,required=True)
     a=ap.parse_args(); root=a.source_dir
-    q= [s for s in sections(read_text(root/"ini/questinfo.ini")) if s["section"].isdigit()]
+    q_all=sections(read_text(root/"ini/questinfo.ini"))
+    q= [s for s in q_all if s["section"].isdigit()]
+    task_type_section=next((s["fields"] for s in q_all if s["section"]=="TaskType"),{})
+    task_type_names={task_type_section.get("TypeId"+str(i),""):task_type_section.get("TypeName"+str(i),"") for i in range(1,int(task_type_section.get("Num","0"))+1)}
     ar_names={}
     arq=root/"ini_ar/questinfo.ini"
     if arq.is_file():
@@ -142,7 +145,7 @@ def main():
         f=s["fields"]; mid=f.get("MissionId","")
         if not mid:continue
         row={"mission_id":mid,"name":f.get("Name",""),"name_ar":ar_names.get(mid,""),"type_id":f.get("TypeId",""),
-             "big_type_id":f.get("BigTypeId",""),"level_min":int_or_none(f.get("Lv_min")),"level_max":int_or_none(f.get("Lv_max")),
+             "big_type_id":f.get("BigTypeId",""),"type_name":task_type_names.get(f.get("TypeId",""),""),"level_min":int_or_none(f.get("Lv_min")),"level_max":int_or_none(f.get("Lv_max")),
              "activity_type":f.get("ActivityType",""),"repeat_or_abandon":f.get("IsCanAbondon",""),
              "map_field":f.get("Map","0"),"begin_raw":f.get("BeginNpcId",""),"finish_raw":f.get("FinishNpcId","")}
         by_id[mid].append(row)
@@ -176,6 +179,12 @@ def main():
         for item_id,payload in re.findall(r"\[item\s+(\d+)\s*,\s*([^\]]*)\]",prize,re.I):
             item_refs.append({"mission_id":mid,"kind":"reward","item_id":item_id,"payload":payload})
     mission_ids=set(by_id)
+    passion_path=root/"ini/questinfopassionserver.ini"
+    passion_sections=sections(read_text(passion_path)) if passion_path.is_file() else []
+    passion_task_type=next((s["fields"] for s in passion_sections if s["section"]=="TaskType"),{})
+    passion_records=[s for s in passion_sections if s["section"].isdigit()]
+    passion_ids={s["fields"].get("MissionId","") for s in passion_records if s["fields"].get("MissionId")}
+    passion_type_names={passion_task_type.get("TypeId"+str(i),""):passion_task_type.get("TypeName"+str(i),"") for i in range(1,int(passion_task_type.get("Num","0"))+1)}
     unresolved=[{"prerequisite_id":p,"mission_id":m} for p,m in prereq if p not in mission_ids]
     cycles=scc_cycles(mission_ids,prereq)
     dupes={k:len(v) for k,v in by_id.items() if len(v)>1}
@@ -239,8 +248,9 @@ def main():
     report={
       "schema_version":"1.0.0","source_version":"Conquer Online Mobile 1.1.2.3",
       "policy":"Raw source values are preserved. Prequest edges and chk_quest progress conditions are reported separately. NPC template/name matches are candidates; exact mapdestination coordinate matches are stronger placement evidence. TypeId semantics are not guessed.",
-      "mission_summary":{"records":len(q),"unique_ids":len(mission_ids),"duplicate_ids":dupes,"arabic_name_coverage":sum(bool(next(iter(v))["name_ar"]) for v in by_id.values()),"type_id_counts":dict(type_counts)},
-      "dependency_graph":{"prerequisite_edges":len(prereq),"unique_edges":len(set(prereq)),"unresolved_edges":unresolved,"self_edges":[{"from":p,"to":m} for p,m in prereq if p==m],"cycles":cycles,"missions_with_prerequisites":len({m for p,m in prereq}),"root_mission_count":len(mission_ids-{m for p,m in prereq if m in mission_ids})},
+      "mission_summary":{"records":len(q),"unique_ids":len(mission_ids),"duplicate_ids":dupes,"arabic_name_coverage":sum(bool(next(iter(v))["name_ar"]) for v in by_id.values()),"type_id_counts":dict(type_counts),"type_id_names":task_type_names},
+      "alternate_server_catalog":{"source":"ini/questinfopassionserver.ini","records":len(passion_records),"unique_mission_ids":len(passion_ids),"overlap_with_default_catalog":len(passion_ids&mission_ids),"type_id_names":passion_type_names},
+      "dependency_graph":{"prerequisite_edges":len(prereq),"unique_edges":len(set(prereq)),"unresolved_edges":unresolved,"unique_unresolved_ids":sorted({x["prerequisite_id"] for x in unresolved},key=lambda x:int(x) if x.isdigit() else x),"unresolved_ids_also_present_in_passion_server_catalog":sorted({x["prerequisite_id"] for x in unresolved if x["prerequisite_id"] in passion_ids},key=lambda x:int(x) if x.isdigit() else x),"self_edges":[{"from":p,"to":m} for p,m in prereq if p==m],"cycles":cycles,"missions_with_prerequisites":len({m for p,m in prereq}),"root_mission_count":len(mission_ids-{m for p,m in prereq if m in mission_ids})},
       "progress_conditions":{"reference_count":len(checks),"unresolved_references":checks_unresolved,"self_references":[x for x in checks if x["condition_quest_id"]==x["mission_id"]]},
       "npc_linkage":{"reference_count":len(npc_refs),"unique_positive_npc_ids":len({r["npc_id"] for r in npc_refs if int_or_none(r["npc_id"]) and int_or_none(r["npc_id"])>0}),"mapdestination_id_map_matches":sum(bool(r["mapdestination_matches"]) for r in npc_refs),"exact_coordinate_matches":sum(r["mapdestination_exact_coordinate_match"] for r in npc_refs),"npc_type_name_candidate_refs":sum(bool(r["npc_type_name_candidates"]) for r in npc_refs),"appearance_name_candidate_refs":sum(bool(r["npc_appearance_name_candidates"]) for r in npc_refs)},
       "map_linkage":{"unique_map_ids":len(map_ids),"missing_from_all_available_map_indexes":sorted(map_ids-(gamemap|gmex|mapdest_ids)),"map_ids_in_gamemap_dat":len(gamemap),"map_ids_in_gamemapex_ini":len(gmex),"map_ids_in_mapdestination_ini":len(mapdest_ids)},
