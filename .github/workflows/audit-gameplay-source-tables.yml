@@ -73,9 +73,9 @@ jobs:
       - name: Analyze all four exact APK components with Androguard, Apktool and JADX
         run: |
           set -euo pipefail
-          mkdir -p build/apks reports/android-analysis
+          mkdir -p build/apks reports/android-analysis build/standard-dex
           python3 - <<'PY'
-          import zipfile
+          import zipfile, shutil
           from pathlib import Path
           archive=Path("build/source/extracted-assets-001.zip")
           targets=[
@@ -92,11 +92,9 @@ jobs:
             for i,name in enumerate(targets):
               out=Path("build/apks")/(f"{i:02d}-"+Path(name).name)
               with z.open(name) as src,out.open("wb") as dst:
-                import shutil
                 shutil.copyfileobj(src,dst,1024*1024)
-              print(f"EXTRACTED {name} -> {out} ({out.stat().st_size} bytes)")
+              print(f"EXTRACTED {name} -> {out} ({out.stat().st_size} bytes)",flush=True)
           PY
-          mkdir -p build/standard-dex
           for apk in build/apks/*.apk; do
             base="$(basename "$apk" .apk)"
             echo "=== ANDROGUARD APK ID: $base ==="
@@ -111,10 +109,29 @@ jobs:
             fi
             dexdir="build/standard-dex/$base"
             mkdir -p "$dexdir"
-            mapfile -t dex_entries < <(unzip -Z1 "$apk" | grep -E '^classes([0-9]+)?\.dex
-          python3 tools/gameplay_source_audit/androguard_deep_analysis.py \
-            --apk-dir build/apks \
-            --output-dir reports/android-analysis
+            mapfile -t dex_entries < <(unzip -Z1 "$apk" | grep -E '^classes([0-9]+)?\.dex$' || true)
+            dex_files=()
+            for entry in "${dex_entries[@]}"; do
+              out="$dexdir/$(basename "$entry")"
+              unzip -p "$apk" "$entry" > "$out"
+              if [ -s "$out" ]; then dex_files+=("$out"); fi
+            done
+            printf 'STANDARD_DEX_COUNT=%s\\n' "${#dex_files[@]}" > "reports/android-analysis/$base.dex-inventory.txt"
+            printf '%s\\n' "${dex_entries[@]}" >> "reports/android-analysis/$base.dex-inventory.txt"
+            echo "=== JADX STANDARD DEX DECOMPILE: $base ==="
+            if [ "${#dex_files[@]}" -gt 0 ]; then
+              if jadx --no-res --show-bad-code -d "reports/android-analysis/$base.jadx" "${dex_files[@]}" > "reports/android-analysis/$base.jadx.log" 2>&1; then
+                echo "JADX_OK $base"
+              else
+                rc=$?
+                echo "JADX_EXIT_CODE=$rc (partial sources may still be available)" >> "reports/android-analysis/$base.jadx.log"
+                echo "JADX_PARTIAL_BUT_CONTINUING $base"
+              fi
+            else
+              echo "NO_STANDARD_DEX_ENTRIES" > "reports/android-analysis/$base.jadx.log"
+            fi
+          done
+          python3 tools/gameplay_source_audit/androguard_deep_analysis.py --apk-dir build/apks --output-dir reports/android-analysis
           python3 - <<'PY'
           import json
           from pathlib import Path
@@ -132,8 +149,8 @@ jobs:
               "java_source_files":sum(1 for _ in dec.rglob("*.java")) if dec.exists() else 0,
               "native_libraries":[str(x.relative_to(resources)) for x in resources.rglob("*.so")] if resources.exists() else []
             })
-          (root/"android-analysis-summary.json").write_text(json.dumps(out,indent=2)+"\n")
-          print(json.dumps(out,indent=2))
+          (root/"android-analysis-summary.json").write_text(json.dumps(out,indent=2)+"\\n")
+          print(json.dumps(out,indent=2),flush=True)
           PY
       - name: Validate reports and print concise inventory
         run: |
