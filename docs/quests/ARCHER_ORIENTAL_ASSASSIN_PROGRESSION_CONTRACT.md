@@ -119,3 +119,19 @@ The skill guide is direct evidence for Path of Shadow, the reversible form chang
 Current status: **MOBILE_OFFICIAL mechanics documented; client mapping and full questline unresolved.**
 
 Do not mark this progression implemented or approved until the pinned APK's quest/promotion data, NPC and item identifiers, skill records, dialogue branches and Android runtime behavior have been verified.
+
+
+## 8. Implementation progress in Clash of Legends
+
+The following first-pass protections have now been committed to `stage/phase1-world-assets`:
+
+- `ClassProgressionManager` no longer unlocks the Assassin path merely because the character reaches level 40. The unlock entry point requires a completed, reward-claimed, source-verified promotion result with a non-empty source quest key. This adapter is not yet connected to a real Mobile promotion quest because its exact quest record is still unresolved.
+- Unlocking the alternate path does not change the active Bow form. Selecting Bow always restores the Archer form; selecting Throwing Knives selects Oriental Assassin. Save/load reconstructs the form from the saved active style, not merely from the fact that the alternate path is unlocked.
+- `PlayerInventory` now retains separate Bow and Throwing Knife loadouts. A player can prepare the inactive weapon without replacing the currently equipped weapon; switching form stores the outgoing weapon and restores the incoming weapon. The inactive loadout is serialized with the inventory.
+- `Path of Shadow` is registered as a source-documented form-toggle skill. It is gated behind the promotion unlock and requires a Throwing Knife in the saved Assassin loadout. Activating it swaps the active form and weapon; activating it again returns to Archer.
+- The existing HUD skill slots now refresh on promotion/form changes and filter skills by the active form. The existing class-selection screen defaults to Archer while keeping every other selectable class available.
+- Regression coverage was added at `tools/quality/validate_archer_progression.gd`, with a dedicated Godot 4.3 workflow at `.github/workflows/archer-progression-validation.yml`.
+
+**Verification status:** code and workflow commits are present, but the dedicated GitHub Actions result has not yet been retrieved in this session, and no Android device/runtime test has been performed. Do not mark the form switch or weapon visuals as visually approved. The test uses isolated fixture weapons to verify loadout behavior; it does not claim the real source weapon IDs/visuals have been joined yet.
+
+**Remaining blockers:** map the Archer creation weapon ID `500239` to the exact item type/name/model; decode and verify the Mobile promotion quest/NPC/dialogue/reward records; map all real Archer and Oriental Assassin skill IDs/ranks/effects/animations/VFX/audio; connect the verified promotion completion to `apply_archer_promotion_result`; and visually test both forms and their weapons on Android.
