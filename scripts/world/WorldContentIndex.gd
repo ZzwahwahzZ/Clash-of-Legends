@@ -99,7 +99,10 @@ func load_index() -> bool:
 	for model_template in _index.get("npc_model_templates", []):
 		if not model_template is Dictionary:
 			continue
-		var source_model_id := int(model_template.get("model_id", -1))
+		var raw_model_id: Variant = model_template.get("model_id", -1)
+		if raw_model_id == null:
+			continue
+		var source_model_id := int(raw_model_id)
 		if source_model_id > 0:
 			_npc_model_templates_by_id[source_model_id] = model_template
 	for dialogue in _index.get("npc_dialogues", []):
