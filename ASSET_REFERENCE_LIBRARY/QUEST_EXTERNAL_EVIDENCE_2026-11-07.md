@@ -128,3 +128,31 @@ The legacy PC DAT and TQ cipher documentation is useful only to understand possi
 - Into Wilds: https://comobile.99.com/guide/2026-09-24/join_into_wilds_now_for_generous_rewards_from_sept__29th_to_oct__12th_.shtml
 - New Server Bash: https://comobile.99.com/guide/info/quests/2024-01-05/new_server_-_new_server_bash.shtml
 - New Server Carnival: https://comobile.99.com/guide/info/quests/2024-03-25/new%20server%20spheres%20carnival.shtml
+
+
+## Primary-character priority — Archer / Oriental Assassin
+
+Detailed requirements and implementation status: `docs/quests/ARCHER_ORIENTAL_ASSASSIN_PROGRESSION_CONTRACT.md`.
+
+Official Mobile Archer skill guide (2023-02-02):
+https://comobile.99.com/guide/info/classes/2023-02-02/skill_-_archer.shtml
+
+Official Mobile equipment type guide (2023-02-15):
+https://comobile.99.com/guide/info/equipment/2023-02-15/equipment_-_equipment_type.shtml
+
+Mobile-official facts:
+- Path of Shadow reversibly transforms an Archer into an Oriental Assassin and back.
+- Assassin form uses the equipped Throwing Knife and cannot use Bow-required skills.
+- Fly and Scatter require an equipped Bow.
+- The guide publishes Assassin-specific skill names, ranks/level requirements, damage/chance values, stamina costs and effect descriptions.
+- Bow is listed as a two-handed weapon; Throwing Knife is listed as a one-handed weapon.
+
+Pinned-client creation mapping:
+- `resource_stage/world/resource_mappings/mobile_character_creation_source.json` maps Archer `profession_id=4` to `right_weapon_id=500239` from `assets/ConquerRes/ini/luacfg/cqm_createrole.dat`.
+- The game now uses this source ID for Archer's starter Bow without inventing item stats. Exact itemtype display name and verified weapon model join remain pending.
+
+Unresolved Mobile quest facts:
+- The exact level-40 Archer promotion quest, NPC/quest IDs, ordered objectives, dialogue branches, promotion title/reward payload and pinned-client reader mapping remain unresolved.
+- PC Conquer guides describe the Level-40 Archer→Oriental Assassin promotion and name Archer God, but this is `OTHER_CLIENT_COMPARISON` only. Do not import PC NPC IDs, coordinates, titles, requirements or rewards into Mobile runtime.
+
+Current implementation commits add quest-gated unlock handling, reversible form state, separate Bow/Throwing Knife loadouts, Path of Shadow activation, active-form skill filtering, Archer default character selection and a Godot regression workflow. Workflow/runtime results have not yet been independently retrieved; Android visual validation remains pending.
