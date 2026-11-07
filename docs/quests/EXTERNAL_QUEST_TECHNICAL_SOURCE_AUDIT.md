@@ -114,3 +114,25 @@ No runtime quest definitions are approved from this file alone. Keep all rows re
 5. objectives, state transitions and rewards have been corroborated against client code/data.
 
 The repeatable aggregate parser is `tools/gameplay_source_audit/parse_questinfo_catalogues.py`. It emits hashes, structural counts, field-presence counts and locale ID-set differences only; it does not commit the quest text or full proprietary records.
+
+
+## D. Android loader path and native-engine boundary
+
+The decompiled base APK Java code establishes the resource-loading boundary:
+
+- `com.Tq.CQ2ClientAndroid.CQ2ClientActivity` sets the resource root name to `ConquerRes` and copies the packaged `assets/ConquerRes/` tree into the application's resource directory before engine initialization.
+- `AssetHelper.copyAssetFiles(...)` recursively copies the resource tree; it does not decode the individual game `.dat` tables.
+- `com.Tq.C3Engine.C3Activity.getSoName()` returns `libCQ2ClientEn.so`.
+- `CQ2ClientActivity.loadJNILib()` loads `TqGpt`, then loads the architecture-specific `libCQ2ClientEn.so` from the resource tree (or its copied native-library location), then loads `Tq`.
+- `RelayNative.InitResPath(getResPath(), getResPath())` passes the resource directory into the native engine.
+
+**Consequence:** Java JADX output is useful for confirming the loader, paths, library names and initialization order, but the game-resource parser/decryption path is expected to be in the native engine and/or the Lua runtime/resource scripts. The next native-analysis target is the exact `libCQ2ClientEn.so` inside the ARM64 split APK, plus `TqGpt` and `Tq` dependencies. The current run's Apktool output has not yet established that all four APK components were successfully decoded; do not claim that native binaries have been inspected until the repaired four-component workflow emits their hashes, ELF headers, dependencies and string/XREF results.
+
+Relevant decompiled source files:
+- `com/Tq/CQ2ClientAndroid/CQ2ClientActivity.java`
+- `com/Tq/CQ2ClientAndroid/AssetHelper.java`
+- `com/Tq/CQ2ClientAndroid/C3LocationUtils.java`
+- `com/Tq/C3Engine/C3Activity.java`
+- `com/Tq/C3Engine/RelayNative.java`
+
+This loader evidence is direct Mobile APK evidence. It does not establish the native DAT cipher or any encryption key.
