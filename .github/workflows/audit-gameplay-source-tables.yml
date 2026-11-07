@@ -131,6 +131,7 @@ jobs:
               echo "NO_STANDARD_DEX_ENTRIES" > "reports/android-analysis/$base.jadx.log"
             fi
           done
+          python3 tools/gameplay_source_audit/parse_questinfo_catalogues.py --conquerres-root reports/android-analysis/00-ConquerOnline-1.1.2.3.apktool/assets/ConquerRes --output reports/android-analysis/questinfo-catalogue-audit.json
           python3 tools/gameplay_source_audit/androguard_deep_analysis.py --apk-dir build/apks --output-dir reports/android-analysis
           python3 - <<'PY'
           import json
@@ -149,7 +150,7 @@ jobs:
               "java_source_files":sum(1 for _ in dec.rglob("*.java")) if dec.exists() else 0,
               "native_libraries":[str(x.relative_to(resources)) for x in resources.rglob("*.so")] if resources.exists() else []
             })
-          (root/"android-analysis-summary.json").write_text(json.dumps(out,indent=2)+"\\n")
+          (root/"android-analysis-summary.json").write_text(json.dumps(out,indent=2)+"\n")
           print(json.dumps(out,indent=2),flush=True)
           PY
       - name: Validate reports and print concise inventory
@@ -160,7 +161,9 @@ jobs:
           q=json.loads(Path("reports/quest-source-extraction.json").read_text(encoding="utf-8"))
           data=json.loads(Path("reports/gameplay-source-table-audit.json").read_text(encoding="utf-8"))
           inventory=json.loads(Path("reports/comprehensive-asset-inventory.json").read_text(encoding="utf-8"))
-          android=json.loads(Path("reports/android-analysis/android-analysis-summary.json").read_text(encoding="utf-8"))\n          deep=json.loads(Path("reports/android-analysis/androguard-deep-analysis.json").read_text(encoding="utf-8"))
+          android=json.loads(Path("reports/android-analysis/android-analysis-summary.json").read_text(encoding="utf-8"))
+          deep=json.loads(Path("reports/android-analysis/androguard-deep-analysis.json").read_text(encoding="utf-8"))
+          quests=json.loads(Path("reports/android-analysis/questinfo-catalogue-audit.json").read_text(encoding="utf-8"))
           print("QUEST SOURCE EXTRACTOR:", q["source_version"])
           print("Expected APKs:", json.dumps(q.get("expected_apk_paths", []), ensure_ascii=False))
           print("Found APKs:", json.dumps(q.get("mobile_apk_candidates", []), ensure_ascii=False))
@@ -177,6 +180,7 @@ jobs:
           print("Total inventory records:", inventory["total_inventory_records"])
           print("Android specialized analysis:", json.dumps(android, ensure_ascii=False))
           print("Androguard deep DEX/XREF summary:", json.dumps({"apk_count":deep["apk_count"],"success_count":len(deep["results"]),"error_count":len(deep["errors"]),"task_string_hits":sum(len(x["quest_task_string_hits"]) for x in deep["results"])}, ensure_ascii=False))
+          print("Questinfo locale catalogue summary:", json.dumps({k:{"declared":v["declared_total"],"records":v["numeric_record_sections"],"unique_ids":v["unique_mission_ids"],"duplicate_ids":len(v["duplicate_mission_ids"])} for k,v in quests["locales"].items()}, ensure_ascii=False))
           print("Itemtype files/records:", data["itemtype_catalog"]["file_count"], data["itemtype_catalog"]["record_count"])
           print("Unlabelled column-59 candidates:", data["itemtype_catalog"].get("column_59_candidate_count", 0))
           for category, value in data["categories"].items():
