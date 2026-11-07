@@ -35,6 +35,14 @@ def digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def digest_file(path: Path) -> str:
+    hasher = hashlib.sha256()
+    with path.open("rb") as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            hasher.update(block)
+    return hasher.hexdigest()
+
+
 def tq_key(seed: int) -> bytes:
     state = seed & 0xFFFFFFFF
     result = bytearray()
@@ -145,7 +153,7 @@ def inspect_apk(apk_bytes_path: Path, apk_member: str, out_dir: Path) -> list[di
                             locale = "ar" if "ini_ar" in rel.lower() else (
                                 "sp" if "ini_sp" in rel.lower() else "default"
                             )
-                            safe_name = re.sub(r"[^A-Za-z0-9_.-]+", "_", Path(rel).name)
+                            safe_name = re.sub(r"[^A-Za-z0-9_.-]+", "_", rel)
                             target = out_dir / "decoded_candidates" / locale / f"{safe_name}.seed-{seed}.candidate"
                             target.parent.mkdir(parents=True, exist_ok=True)
                             target.write_bytes(decoded)
