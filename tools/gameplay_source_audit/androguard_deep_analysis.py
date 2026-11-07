@@ -54,7 +54,7 @@ def analyze(path: Path):
         string_hits.append({"value": text[:2000], "xref_count": len(refs), "used_by": refs[:100]})
     with zipfile.ZipFile(path) as z:
         members = z.namelist()
-        dex_names = [n for n in members if re.fullmatch(r"classes(?:\\d+)?\\.dex", Path(n).name)]
+        dex_names = [n for n in members if re.fullmatch(r"classes(?:\d+)?\.dex", Path(n).name)]
         native = [n for n in members if n.lower().endswith(".so")]
         resource_candidates = [n for n in members if re.search(r"(quest|task|npc|dialog|mission|reward|action)", n, re.I)]
     return {
@@ -95,7 +95,7 @@ def main():
             report["errors"].append({"apk": path.name, "error": f"{type(exc).__name__}: {exc}"})
             print(f"ANDROGUARD_DEEP_ERROR {path.name}: {type(exc).__name__}: {exc}", flush=True)
     out = args.output_dir / "androguard-deep-analysis.json"
-    out.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+    out.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({"apk_count": report["apk_count"], "success_count": len(report["results"]), "error_count": len(report["errors"]), "output": str(out)}, ensure_ascii=False), flush=True)
     if not paths or not report["results"]:
         raise SystemExit(2)
