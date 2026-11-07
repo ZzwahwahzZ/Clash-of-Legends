@@ -59,6 +59,9 @@ jobs:
           candidates = data.get("quest_promotion_candidate_inventory", {})
           print("Quest/promotion candidate paths:", candidates.get("file_count", 0))
           print("Archer/promotion text hits:", json.dumps(candidates.get("text_hits", []), ensure_ascii=False))
+          reader = data.get("android_reader_candidate_inventory", {})
+          print("Android DEX/SO/JAR candidates:", reader.get("file_count", 0))
+          print("Android reader string hits:", json.dumps(reader.get("raw_string_hits", []), ensure_ascii=False))
           PY
       - name: Upload source table audit report
         if: always()
