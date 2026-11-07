@@ -32,11 +32,11 @@ jobs:
           - `04_QUEST_CANDIDATES/`: previous exploratory quest and task-item decodes.
           - `05_CURRENT_RUN/`: reserved for the next validated results.
           
-          The two archives are separate sources. The historical index was generated from `extracted-assets-001.zip`; `ConquerOnline.zip` is a distinct upload. Do not merge their provenance or assume identical contents.
+          The historical index was generated from `extracted-assets-001.zip`. `ConquerOnline.zip` is a distinct uploaded archive; its verified metadata and release location are recorded in `01_ARCHIVES/ConquerOnline.zip.source.txt`. Do not merge their provenance or assume identical contents.
           
           This workflow only assembles existing material. It does not rerun inventory, decode, modify game files, or merge any pull request.
           EOF
-      - name: Download both exact source archives into the same folder
+      - name: Download and verify the 842 MB source pack; register the separate ConquerOnline archive
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
@@ -46,10 +46,14 @@ jobs:
             -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/octet-stream" "https://api.github.com/repos/ZzwahwahzZ/Conquer-Mobile-Assets./releases/assets/709852618" \
             -o mobile-source-workspace/01_ARCHIVES/extracted-assets-001.zip
           echo "0d21a110c09b762ed5f1a5f4da022857b0534e489eb85052d15da460cb229d2a  mobile-source-workspace/01_ARCHIVES/extracted-assets-001.zip" | sha256sum -c -
-          curl --fail --location --retry 5 --retry-all-errors \
-            "https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/original-mobile-assets-2026-11-06/ConquerOnline.zip" \
-            -o mobile-source-workspace/01_ARCHIVES/ConquerOnline.zip
-          echo "b1c6958109a07c237631943fc0442d3161563d89e1020b143d95437ba9a6fdb0  mobile-source-workspace/01_ARCHIVES/ConquerOnline.zip" | sha256sum -c -
+          cat > mobile-source-workspace/01_ARCHIVES/ConquerOnline.zip.source.txt <<'EOF'
+          Name: ConquerOnline.zip
+          Release page: https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/tag/original-mobile-assets-2026-11-06
+          GitHub asset ID: 716478589
+          Size bytes: 461117324
+          SHA-256: b1c6958109a07c237631943fc0442d3161563d89e1020b143d95437ba9a6fdb0
+          Note: GitHub exposes the asset metadata but the Actions runner currently receives HTTP 404/403 when downloading its binary. Keep this source as a separate linked archive; do not substitute the 842 MB archive.
+          EOF
       - name: Restore the existing source index and prior audit results
         env:
           GH_TOKEN: ${{ github.token }}
