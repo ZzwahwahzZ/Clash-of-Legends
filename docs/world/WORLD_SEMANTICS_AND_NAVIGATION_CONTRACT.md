@@ -41,6 +41,49 @@ For every semantic area or subarea record:
 
 Unknown is not permission to invent. Keep unsupported interactions, quest triggers, NPCs, and enemy spawns disabled. Preserve unknown parcels for further inspection rather than silently classifying them as empty or decorative.
 
+
+## Unified navigation system: two request modes
+
+The game has **one world-navigation and path-execution system**, with two distinct sources of automatic-movement requests. These are not two unrelated pathfinders and must not be confused with direct player movement.
+
+### A. World-tap navigation
+
+- The player taps a meaningful, selectable world target such as an eligible NPC, merchant, service interaction point, task object, or explicitly selectable destination/area.
+- The selection layer resolves the tap to a semantic target ID and its valid approach/interaction point. It must not treat every visible mesh, arbitrary ground point, landmark, or navmesh polygon as an eligible destination.
+- If the target is out of interaction range, the unified navigation system plans and executes movement to its valid approach point; interaction is attempted only when the target's actual interaction conditions are met.
+- If the target is a place rather than an actor, it must be explicitly marked as a selectable destination. Merely being walkable or visible does not make it tappable for auto-navigation.
+- A scenic landmark remains view-only/non-interactive by default. It may be tapped for navigation only if the game's documented interaction model explicitly makes that landmark a selectable destination, or a specific quest step supplies a target there.
+- Invalid, blocked, unknown, or non-selectable taps must not create arbitrary routes or silently select a nearby unrelated destination.
+
+### B. Quest/dialogue navigation
+
+- Tapping a quest entry, objective, or dialogue bubble that explicitly supports navigation asks the same unified navigation system to resolve the **current objective step's intended target**.
+- The quest system supplies a semantic target reference (NPC, map/area, object, entrance, or objective location), including prerequisites and any required map transition. The navigation system must not guess from quest text alone when the structured objective target is missing or ambiguous.
+- A dialogue bubble is a navigation request only when that bubble/action is marked as navigable. Ordinary dialogue choices must not unexpectedly move the player.
+- Multi-step tasks must route to the active step, not a later stage, a generic quest-giver, or the center of the entire map.
+- If the task requires finding a hidden character, entering a cave, reaching a monster parcel, or interacting with a specific object, route to the evidenced access/approach point and preserve the discovery/entry/interaction conditions.
+- If the objective is not yet available, already complete, blocked by prerequisites, or has no validated target, report the appropriate state rather than inventing a destination.
+
+### Shared execution and direct movement
+
+- Both automatic request modes feed one shared route planner, path follower, obstacle/collision handling, arrival detection, and interaction-range check.
+- The request source remains tagged as world-tap or quest/dialogue for diagnostics, UI feedback, cancellation, and acceptance tests, but it does not fork into separate movement implementations.
+- The virtual joystick/manual controls remain direct player input. They allow the user to explore any physically walkable area, including spaces that are not auto-navigation destinations, without requiring that every point be registered as a target.
+- Direct movement does not imply that the destination is semantically selectable or that a quest/service interaction exists there.
+- New manual input should interrupt or take priority over auto movement according to the game's input policy; auto-navigation must never fight the joystick.
+- Route requests may traverse ordinary road segments and valid open-land paths to reach a target. The road is often a connector; adjacent fields/clearings can be the actual objective or hunting area. The route graph must preserve these distinct semantic areas and real access links.
+
+## Navigation acceptance tests
+
+Test the two request modes separately at the request/target-resolution layer, then test their shared movement execution:
+
+1. **World-tap target resolution:** eligible NPC/service/object/place tap resolves to the correct semantic ID and approach point; view-only landmarks and arbitrary scenery do not become accidental targets.
+2. **Quest/dialogue target resolution:** navigable quest/objective/bubble resolves to the active step's exact target; non-navigable dialogue does not trigger movement; missing or gated targets produce a correct unavailable/prerequisite state.
+3. **Shared route execution:** both request sources use the same route planner and path follower; test route continuity, collisions, obstacle avoidance, arrival radius, interaction range, cancellation, and failure recovery.
+4. **Manual control independence:** joystick movement can reach physically walkable non-target ground; it interrupts/overrides automatic movement as designed and is not constrained to registered auto-navigation points.
+5. **Semantic route correctness:** verify the actual route through roads, junctions, open parcels, entrances, and map transitions against canonical map evidence. A geometrically successful route to the wrong task step is a failure.
+6. **Negative cases:** tap a landmark, decorative object, blocked area, or unsupported target; test an ambiguous/missing quest target; confirm no invented destination, NPC, spawn, or route is activated.
+
 ## Navigation policy
 
 - Route planning starts from a meaningful requested destination, not from arbitrary navmesh connectivity.
