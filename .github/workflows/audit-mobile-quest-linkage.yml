@@ -27,6 +27,18 @@ jobs:
             "https://api.github.com/repos/ZzwahwahzZ/Conquer-Mobile-Assets./releases/assets/709852618" \
             -o build/source/extracted-assets-001.zip
           echo "0d21a110c09b762ed5f1a5f4da022857b0534e489eb85052d15da460cb229d2a  build/source/extracted-assets-001.zip" | sha256sum -c -
+      - name: Download and verify the complete arm64 split APK bundle
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p build/source
+          curl --fail --location --retry 5 --retry-all-errors \
+            -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/octet-stream" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/assets/716478589" \
+            -o build/source/ConquerOnline.zip
+          echo "b1c6958109a07c237631943fc0442d3161563d89e1020b143d95437ba9a6fdb0  build/source/ConquerOnline.zip" | sha256sum -c -
+          unzip -l build/source/ConquerOnline.zip | tee reports-full-split-list.txt
       - name: Extract the exact 1.1.2.3 APK and quest-world source files
         run: |
           set -euo pipefail
@@ -117,6 +129,63 @@ jobs:
                       target.write_bytes(apk.read(info))
           print("APK bytecode and in-APK native libraries extracted for static inspection")
           PY
+      - name: Extract and inventory every split APK and install-time asset pack
+        run: |
+          set -euo pipefail
+          mkdir -p build/apk-reader/split-apks build/apk-reader/split-assets build/apk-reader/native/splits build/apk-reader/embedded-payloads/splits
+          python3 - <<'PY'
+          import hashlib, json, zipfile
+          from pathlib import Path
+          bundle=zipfile.ZipFile("build/source/ConquerOnline.zip")
+          report=[]
+          for info in bundle.infolist():
+              if not info.filename.lower().endswith(".apk"):
+                  continue
+              name=Path(info.filename).name
+              apk_path=Path("build/apk-reader/split-apks")/name
+              with bundle.open(info) as src, apk_path.open("wb") as dst:
+                  while block:=src.read(1024*1024): dst.write(block)
+              row={"bundle_member":info.filename,"apk_path":str(apk_path),"apk_bytes":apk_path.stat().st_size,"apk_sha256":hashlib.sha256(apk_path.read_bytes()).hexdigest(),"native_libraries":[],"dex_payloads":[],"conquerres_files":0,"conquerres_bytes":0}
+              with zipfile.ZipFile(apk_path) as split:
+                  for item in split.infolist():
+                      low=item.filename.lower()
+                      if low.endswith(".so"):
+                          target=Path("build/apk-reader/native/splits")/Path(name).stem/Path(item.filename).name
+                          target.parent.mkdir(parents=True,exist_ok=True)
+                          target.write_bytes(split.read(item))
+                          row["native_libraries"].append({"path":item.filename,"bytes":item.file_size,"sha256":hashlib.sha256(split.read(item)).hexdigest(),"output":str(target)})
+                      if low.startswith("assets/") and ("dex" in low.rsplit("/",1)[-1] or low.endswith(".dex")):
+                          target=Path("build/apk-reader/embedded-payloads/splits")/Path(name).stem/Path(item.filename).name
+                          target.parent.mkdir(parents=True,exist_ok=True)
+                          target.write_bytes(split.read(item))
+                          row["dex_payloads"].append({"path":item.filename,"bytes":item.file_size,"sha256":hashlib.sha256(split.read(item)).hexdigest(),"output":str(target)})
+                      if low.startswith("assets/conquerres/"):
+                          row["conquerres_files"]+=1
+                          row["conquerres_bytes"]+=item.file_size
+                          target=Path("build/apk-reader/split-assets")/Path(name).stem/Path(item.filename).relative_to("assets/ConquerRes")
+                          target.parent.mkdir(parents=True,exist_ok=True)
+                          if not item.is_dir():
+                              target.write_bytes(split.read(item))
+              report.append(row)
+          Path("reports/split-apk-inventory.json").write_text(json.dumps(report,indent=2)+"\n")
+          print(json.dumps(report,indent=2))
+          assert any("install_time_1001" in r["bundle_member"].lower() for r in report), "install_time_1001 split was not present"
+          PY
+      - name: Run APKiD and unblob against the APK bundle and opaque payloads
+        continue-on-error: true
+        run: |
+          set -u
+          python3 -m pip install --user --disable-pip-version-check apkid unblob
+          export PATH="$HOME/.local/bin:$PATH"
+          mkdir -p reports/unblob-39285EFA
+          apkid --version > reports/apkid-version.txt 2>&1 || true
+          set +e
+          apkid -j -o reports/apkid-results.json build/apk-reader/ConquerOnline-1.1.2.3.apk build/apk-reader/split-apks/*.apk > reports/apkid.log 2>&1
+          echo "$?" > reports/apkid-exit-code.txt
+          unblob --report reports/unblob-39285EFA.json --extract-dir build/apk-reader/unblob-39285EFA --depth 3 --entropy-depth 2 -vvv build/apk-reader/embedded-payloads/39285EFA.dex > reports/unblob-39285EFA.log 2>&1
+          echo "$?" > reports/unblob-39285EFA-exit-code.txt
+          set -e
+          echo "APKiD and unblob diagnostics captured; failures are non-blocking and preserved."
       - name: Locate and preserve external game-engine native libraries
         run: |
           set -euo pipefail
