@@ -42,6 +42,8 @@ var _navigation_mesh: NavigationMesh
 var _source_geometry: NavigationMeshSourceGeometryData3D
 var _selected_sources: Array[String] = []
 var _walkable_collision_count := 0
+var _pawnshop_obstacle_shape_count := 0
+var _factory_obstacle_shape_count := 0
 
 func _initialize() -> void:
 	call_deferred("_run")
@@ -155,6 +157,7 @@ func _save_world_scene() -> int:
 		static_body.owner = root
 		collision_shape.owner = root
 		_walkable_collision_count += 1
+	_add_building_obstacle_collisions(city_instance, root)
 	var navigation_region := NavigationRegion3D.new()
 	navigation_region.name = "CuratedNavigationRegion"
 	navigation_region.navigation_mesh = _navigation_mesh
@@ -168,6 +171,54 @@ func _save_world_scene() -> int:
 	var save_error := ResourceSaver.save(packed_world, WORLD_SCENE_PATH)
 	root.free()
 	return save_error
+
+func _add_building_obstacle_collisions(city_instance: Node3D, scene_root: Node3D) -> void:
+	# Keep each building's collision in a single StaticBody with per-wall
+	# trimesh shapes. Door frames, lintels, roofs, caps, and decorative pieces
+	# are deliberately excluded so the authored entrance openings stay clear.
+	var sections := [
+		{"path": "JianghaiOldCityAuthoredScene/GuangchangPawnshop", "name": "PawnshopObstacleCollision", "counter": "pawnshop"},
+		{"path": "JianghaiOldCityAuthoredScene/RedStarElectronicsFactory", "name": "FactoryObstacleCollision", "counter": "factory"}
+	]
+	for definition in sections:
+		var section := city_instance.get_node_or_null(NodePath(definition["path"])) as Node3D
+		if section == null:
+			push_error("Missing building section for obstacle collision: " + str(definition["path"]))
+			continue
+		var body := StaticBody3D.new()
+		body.name = str(definition["name"])
+		body.collision_layer = 1
+		body.collision_mask = 0
+		body.transform = _transform_relative_to(city_instance, section)
+		scene_root.add_child(body)
+		body.owner = scene_root
+		var section_shape_count := 0
+		for mesh_node in section.find_children("*", "MeshInstance3D", true, false):
+			var mesh_instance := mesh_node as MeshInstance3D
+			if mesh_instance == null or mesh_instance.mesh == null:
+				continue
+			var mesh_name := str(mesh_instance.name)
+			if not mesh_name.contains("Wall"):
+				continue
+			if mesh_name.contains("Cap") or mesh_name.contains("DoorFrame") or mesh_name.contains("Lintel"):
+				continue
+			var shape := mesh_instance.mesh.create_trimesh_shape()
+			if shape == null:
+				push_warning("Could not create wall collision for " + str(mesh_instance.get_path()))
+				continue
+			var collision := CollisionShape3D.new()
+			collision.name = mesh_name + "_Collision"
+			collision.shape = shape
+			collision.transform = _transform_relative_to(section, mesh_instance)
+			body.add_child(collision)
+			collision.owner = scene_root
+			section_shape_count += 1
+		if str(definition["counter"]) == "pawnshop":
+			_pawnshop_obstacle_shape_count = section_shape_count
+		else:
+			_factory_obstacle_shape_count = section_shape_count
+		if section_shape_count == 0:
+			push_error("No selective wall collision shapes were generated for " + str(definition["name"]))
 
 func _transform_relative_to(ancestor: Node, node: Node3D) -> Transform3D:
 	var relative := Transform3D.IDENTITY
@@ -326,7 +377,10 @@ func _validate_navigation_after_sync() -> void:
 		"npc_spawning_enabled": false,
 		"collision_bake_included": true,
 		"walkable_floor_collision_shape_count": _walkable_collision_count,
-		"building_obstacle_collisions_included": false,
+		"building_obstacle_collisions_included": true,
+		"pawnshop_obstacle_shape_count": _pawnshop_obstacle_shape_count,
+		"factory_obstacle_shape_count": _factory_obstacle_shape_count,
+		"doorway_openings_preserved_by_excluding_door_frames_and_lintels": true,
 		"runtime_android_performance_validated": false
 	}
 	var file := FileAccess.open(REPORT_PATH, FileAccess.WRITE)
