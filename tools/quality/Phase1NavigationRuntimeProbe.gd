@@ -61,13 +61,13 @@ func _run() -> void:
 	var interaction_registry = WORLD_INTERACTION_REGISTRY_SCRIPT.new()
 	var interaction_registry_bound := authored_city != null and interaction_registry.bind_world(authored_city)
 
-	# Verify authored city destinations at runtime. The decorative market ramps
-	# remain excluded until a real West Market walkable entry is geometrically verified.
+	# Geometry-only movement samples in an unverified authored environment.
+	# These points are not Conquer Mobile destinations or quest targets.
 	var runtime_route_targets := {
-		"pawnshop_approach": Vector3(-86.0, -0.078, -106.0),
-		"factory_approach": Vector3(86.0, -0.078, -12.0),
-		"medicine_frontage": Vector3(11.6, -0.045, -48.0),
-		"tea_frontage": Vector3(9.5, -0.14, -8.0)
+		"engineering_sample_01": Vector3(-86.0, -0.078, -106.0),
+		"engineering_sample_02": Vector3(86.0, -0.078, -12.0),
+		"engineering_sample_03": Vector3(11.6, -0.045, -48.0),
+		"engineering_sample_04": Vector3(9.5, -0.14, -8.0)
 	}
 	var runtime_route_checks: Array[Dictionary] = []
 	for route_id in runtime_route_targets:
@@ -138,62 +138,6 @@ func _run() -> void:
 		if bool(movement_check["target_reached"]) and bool(movement_check["floor_contact"]):
 			runtime_route_movements_passed += 1
 
-	# West Market is approached from the authored CentralAvenue -> RiverWardStreet road junction.
-	# The bridge is deliberately excluded from this route and from the acceptance criteria.
-	var west_market_start_requested := START_POSITION
-	var west_market_start_projected := NavigationServer3D.map_get_closest_point(navigation_map, west_market_start_requested)
-	var west_market_candidate_requested := Vector3(-35.0, 0.15, -164.0)
-	var west_market_candidate_projected := NavigationServer3D.map_get_closest_point(navigation_map, west_market_candidate_requested)
-	var west_market_start_projection_distance := west_market_start_projected.distance_to(west_market_start_requested)
-	var west_market_projection_distance := west_market_candidate_projected.distance_to(west_market_candidate_requested)
-	var west_market_route_path := NavigationServer3D.map_get_path(navigation_map, west_market_start_projected, west_market_candidate_projected, false, 1)
-	var west_market_path_waypoints: Array = []
-	for waypoint in west_market_route_path:
-		west_market_path_waypoints.append(_vec(waypoint))
-	var west_market_expected_direct_distance := Vector2(west_market_start_projected.x - west_market_candidate_projected.x, west_market_start_projected.z - west_market_candidate_projected.z).length()
-	var west_market_path_length := _path_length(west_market_route_path)
-	var west_market_path_start_error := west_market_route_path[0].distance_to(west_market_start_projected) if west_market_route_path.size() >= 2 else -1.0
-	var west_market_path_end_error := west_market_route_path[west_market_route_path.size() - 1].distance_to(west_market_candidate_projected) if west_market_route_path.size() >= 2 else -1.0
-	var west_market_route_connected := west_market_start_projection_distance <= 1.0 and west_market_projection_distance <= 1.0 and west_market_route_path.size() >= 2 and west_market_path_start_error <= 1.0 and west_market_path_end_error <= 1.0 and west_market_path_length >= west_market_expected_direct_distance * 0.9
-	var west_market_movement := {
-		"attempted": false,
-		"reached": false,
-		"floor_contact": false,
-		"frames_used": 0,
-		"final_position": _vec(west_market_start_projected),
-		"distance_to_candidate": -1.0,
-		"next_path_position": _vec(west_market_start_projected),
-		"velocity": [0.0, 0.0, 0.0],
-		"slide_collisions": []
-	}
-	if west_market_route_connected:
-		player.call("clear_movement_target")
-		player.velocity = Vector3.ZERO
-		player.global_position = west_market_start_projected
-		for _reset_frame in range(8):
-			await physics_frame
-		player.call("move_towards_target_position", west_market_candidate_projected, 1.0 / 60.0)
-		var west_frames := 0
-		for west_frame in range(3600):
-			await physics_frame
-			west_frames = west_frame + 1
-			var west_distance := Vector2(player.global_position.x - west_market_candidate_projected.x, player.global_position.z - west_market_candidate_projected.z).length()
-			if west_distance <= 1.5 or not bool(player.get("is_moving_to_target")):
-				break
-		var west_final: Vector3 = player.global_position
-		var west_final_distance := Vector2(west_final.x - west_market_candidate_projected.x, west_final.z - west_market_candidate_projected.z).length()
-		west_market_movement = {
-			"attempted": true,
-			"reached": west_final_distance <= 1.5,
-			"floor_contact": player.is_on_floor(),
-			"frames_used": west_frames,
-			"final_position": _vec(west_final),
-			"distance_to_candidate": west_final_distance,
-			"next_path_position": _vec(navigation_agent.get_next_path_position()),
-			"velocity": _vec(player.velocity),
-			"slide_collisions": _capture_slide_collisions(player)
-		}
-	var west_market_passed := west_market_route_connected and bool(west_market_movement["attempted"]) and bool(west_market_movement["reached"]) and bool(west_market_movement["floor_contact"])
 
 	var report := {
 		"world_scene_loaded": true,
@@ -207,27 +151,8 @@ func _run() -> void:
 		"navigation_map_region_count": map_region_count,
 		"navigation_map_cell_height": map_cell_height,
 		"interaction_registry_bound": interaction_registry_bound,
-		"west_market_route_status": "PHYSICALLY_REACHED_FROM_CENTRAL_AVENUE" if west_market_passed else "FAILED_OR_DISCONNECTED",
-		"west_market_route_candidate": {
-			"surface_source": "AuthoredStreetNetwork/RiverWardStreet",
-			"outside_building_footprint": "WestMarketRow01",
-			"start_requested_position": _vec(west_market_start_requested),
-			"start_projected_position": _vec(west_market_start_projected),
-			"start_projection_distance": west_market_start_projection_distance,
-			"requested_position": _vec(west_market_candidate_requested),
-			"projected_position": _vec(west_market_candidate_projected),
-			"projection_distance": west_market_projection_distance,
-			"path_waypoint_count": west_market_route_path.size(),
-			"path_length": west_market_path_length,
-			"expected_direct_distance": west_market_expected_direct_distance,
-			"path_start_error": west_market_path_start_error,
-			"path_end_error": west_market_path_end_error,
-			"path_waypoints": west_market_path_waypoints,
-			"connected": west_market_route_connected,
-			"physical_movement": west_market_movement,
-			"physical_route_passed": west_market_passed,
-			"approved_interaction_anchor": west_market_passed
-		},
+		"semantic_gameplay_validation": false,
+		"world_identity_verified_as_conquer_mobile": false,
 		"project_default_cell_height": expected_cell_height,
 		"navigation_cell_height_matches": is_equal_approx(map_cell_height, expected_cell_height),
 		"path_waypoint_count": path_waypoint_count,
@@ -280,16 +205,6 @@ func _run() -> void:
 	if runtime_route_movements_passed != runtime_route_targets.size():
 		_fail("Player did not physically reach every verified city destination: " + JSON.stringify(runtime_route_movement_checks))
 		return
-	if not west_market_passed:
-		_fail("Player could not physically reach the authored West Market entry from CentralAvenue via RiverWardStreet: " + JSON.stringify({
-			"route_connected": west_market_route_connected,
-			"start_projection_distance": west_market_start_projection_distance,
-			"target_projection_distance": west_market_projection_distance,
-			"path_length": west_market_path_length,
-			"direct_distance": west_market_expected_direct_distance,
-			"movement": west_market_movement
-		}))
-		return
 
 	if horizontal_displacement < 8.0 or not target_reached:
 		_fail("Player did not follow the baked navigation path to the hotel frontage.")
@@ -298,7 +213,7 @@ func _run() -> void:
 		_fail("Player did not remain supported by the generated walkable floor collisions.")
 		return
 
-	print("PHASE1 NAVIGATION PLAYER MOVEMENT, CITY ROUTES, WEST MARKET ACCESS AND FLOOR COLLISION: PASS")
+	print("PHASE1 AUTHORED-ENVIRONMENT GEOMETRY MOVEMENT AND FLOOR COLLISION: PASS")
 	quit(0)
 
 func _ray_is_clear(from_position: Vector3, to_position: Vector3) -> bool:
