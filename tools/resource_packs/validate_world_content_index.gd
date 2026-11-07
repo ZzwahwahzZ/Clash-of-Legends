@@ -35,6 +35,23 @@ func _run_validation() -> void:
 	if metadata_only_entry.is_empty() or not bool(metadata_only_entry.get("metadata_only", false)):
 		_fail("Metadata-only map lookup incorrectly claims an archive exists.")
 		return
+	var dialogue_status: Array = index.get_dialogue_source_status()
+	if dialogue_status.size() != 5:
+		_fail("Five decrypted source dialogue files were not registered.")
+		return
+	var source_dialogue: Dictionary = index.get_npc_dialogue(1051)
+	if source_dialogue.is_empty() or source_dialogue.get("talks", []).is_empty():
+		_fail("Known NPC dialogue 1051 was not parsed into runtime talk steps.")
+		return
+	var first_talk: Dictionary = source_dialogue.get("talks", [])[0]
+	if str(first_talk.get("text_key", "")).is_empty():
+		_fail("NPC dialogue talk step has no source text key.")
+		return
+	var ar_text := index.get_dialogue_text(str(first_talk.get("text_key", "")), "ar")
+	var en_text := index.get_dialogue_text(str(first_talk.get("text_key", "")), "en")
+	if ar_text.is_empty() and en_text.is_empty():
+		_fail("NPC dialogue text key could not be resolved in Arabic or English.")
+		return
 	var known_quest: Array = index.get_quests_by_mission_id(6126)
 	if known_quest.is_empty():
 		_fail("Known source quest 6126 is missing.")
