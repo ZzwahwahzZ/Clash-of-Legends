@@ -10,6 +10,7 @@ func _initialize() -> void:
 
 func _run() -> void:
 	var progression = ClassProgressionManager
+	GameManager.selected_class = "Archer"
 	var player := TestArcherPlayer.new()
 	player.name = "TestArcherPlayer"
 	root.add_child(player)
@@ -68,7 +69,11 @@ func _run() -> void:
 	inventory.name = "PlayerInventory"
 	player.add_child(inventory)
 	await process_frame
-	# The starter prototype weapon is not part of this focused fixture.
+	var starter_weapon: Variant = inventory.equipment.get("weapon", null)
+	if not starter_weapon is Dictionary or str(starter_weapon.get("id", "")) != "500239" or str(starter_weapon.get("weapon_style", "")) != "bow":
+		_fail("Archer character creation did not equip the pinned Mobile source weapon ID 500239 as a Bow.")
+		return
+	# Reset starter state before the isolated two-loadout switching fixture.
 	inventory.equipment["weapon"] = null
 	inventory.weapon_loadouts["bow"] = null
 	inventory.weapon_loadouts["throwing_knives"] = null
