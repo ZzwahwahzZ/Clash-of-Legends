@@ -93,13 +93,73 @@ jobs:
                       target.write_bytes(apk.read(info))
           print("APK bytecode and native libraries extracted for static inspection")
           PY
+          # Diagnose every embedded DEX-like asset instead of silently excluding it.
+          # If it is a real DEX with stale integrity fields, repair only a disposable copy.
+          python3 - <<'PY'
+          import hashlib, json, struct, zlib, zipfile
+          from pathlib import Path
+          apk=zipfile.ZipFile("build/apk-reader/ConquerOnline-1.1.2.3.apk")
+          out=Path("build/apk-reader/embedded-payloads")
+          out.mkdir(parents=True,exist_ok=True)
+          report=[]
+          for info in apk.infolist():
+              low=info.filename.lower()
+              if not (low.startswith("assets/") and (low.endswith(".dex") or "dex" in low.rsplit("/",1)[-1].lower())):
+                  continue
+              raw=apk.read(info)
+              target=out/Path(info.filename).name
+              target.write_bytes(raw)
+              row={"apk_path":info.filename,"bytes":len(raw),"sha256":hashlib.sha256(raw).hexdigest(),"magic_hex":raw[:16].hex(),"magic_ascii":raw[:8].decode("latin1")}
+              if raw.startswith(b"dex\n") and len(raw)>=0x70:
+                  declared=struct.unpack_from("<I",raw,0x20)[0]
+                  header=struct.unpack_from("<I",raw,0x24)[0]
+                  row.update({"classification":"dex_header_present","declared_file_size":declared,"header_size":header})
+                  if declared==len(raw) and header==0x70:
+                      fixed=bytearray(raw)
+                      fixed[12:32]=hashlib.sha1(fixed[32:]).digest()
+                      struct.pack_into("<I",fixed,8,zlib.adler32(fixed[12:]) & 0xffffffff)
+                      fixed_path=out/(target.stem+".integrity-repaired.dex")
+                      fixed_path.write_bytes(fixed)
+                      row["integrity_repaired_copy"]=str(fixed_path)
+                      row["integrity_repair"]="SHA-1 signature and Adler-32 checksum recalculated; original preserved"
+                  else:
+                      row["classification"]="dex_header_inconsistent"
+              elif raw.startswith(b"PK\x03\x04"):
+                  row["classification"]="zip_container"
+              elif raw.startswith(b"\x1f\x8b"):
+                  row["classification"]="gzip_container"
+              else:
+                  row["classification"]="no_plain_dex_magic_possible_packed_or_custom_container"
+                  for wbits,label in [(zlib.MAX_WBITS,"zlib"),(-zlib.MAX_WBITS,"raw_deflate"),(zlib.MAX_WBITS|16,"gzip")]:
+                      try:
+                          dec=zlib.decompress(raw,wbits)
+                          if dec:
+                              dp=out/(target.stem+"."+label+".bin"); dp.write_bytes(dec)
+                              row.setdefault("decompression_candidates",[]).append({"method":label,"path":str(dp),"bytes":len(dec),"magic_hex":dec[:8].hex()})
+                      except Exception:
+                          pass
+              report.append(row)
+          Path("reports/embedded-dex-payload-triage.json").write_text(json.dumps(report,indent=2)+"\n")
+          print(json.dumps(report,indent=2))
+          PY
           curl --fail --location --retry 3             "https://github.com/skylot/jadx/releases/download/v1.5.3/jadx-1.5.3.zip"             -o /tmp/jadx.zip
           mkdir -p /tmp/jadx
           unzip -q /tmp/jadx.zip -d /tmp/jadx
           chmod +x /tmp/jadx/bin/jadx
           /tmp/jadx/bin/jadx --version
-          # The APK also carries non-standard encrypted DEX payloads under assets/*.dex.
-          # Keep them intact as evidence, but exclude them from the standard DEX decompiler pass.
+          # Use baksmali as an independent parser on embedded payloads and integrity-repaired copies.
+          curl --fail --location --retry 3 "https://repo1.maven.org/maven2/org/smali/baksmali/2.5.2/baksmali-2.5.2.jar" -o /tmp/baksmali.jar
+          mkdir -p build/apk-reader/baksmali
+          find build/apk-reader/embedded-payloads -type f -name "*.dex" -print0 | while IFS= read -r -d '' dex; do
+            name=$(basename "$dex" .dex)
+            java -jar /tmp/baksmali.jar disassemble "$dex" -o "build/apk-reader/baksmali/$name" >"reports/baksmali-$name.log" 2>&1 || true
+          done
+          find build/apk-reader/embedded-payloads -type f -name "*.integrity-repaired.dex" -print0 | while IFS= read -r -d '' dex; do
+            name=$(basename "$dex" .integrity-repaired.dex)
+            java -jar /tmp/baksmali.jar disassemble "$dex" -o "build/apk-reader/baksmali/$name-repaired" >"reports/baksmali-$name-repaired.log" 2>&1 || true
+          done
+          # The APK carries embedded payloads. They are now triaged and independently parsed above;
+          # omit them only from the whole-APK JADX pass to prevent a malformed payload aborting sibling DEX parsing.
           python3 - <<'PY'
           import zipfile
           src="build/apk-reader/ConquerOnline-1.1.2.3.apk"
@@ -121,7 +181,7 @@ jobs:
           import json,re
           from pathlib import Path
           roots=[Path("build/apk-reader/decompiled"),Path("build/apk-reader/native")]
-          terms=re.compile(r"AesDecrypt|AesDecryptWithKey|AesEncrypt|DataEncryptUtil|CIPHER_KEY|TQ_FILE_CIPHER|questinfo\\.dat|taskitem_info\\.dat|client_realm_task|NpcDialogueText",re.I)
+          terms=re.compile(r"AesDecrypt|AesDecryptWithKey|AesEncrypt|DataEncryptUtil|CIPHER_KEY|TQ_FILE_CIPHER|questinfo\\.dat|taskitem_info\\.dat|client_realm_task|NpcDialogueText|DexClassLoader|InMemoryDexClassLoader|PathClassLoader|BaseDexClassLoader|loadDex|loadLibrary|OpenMemory|OpenCommon|decrypt|cipher|JNI_OnLoad",re.I)
           hits=[]
           for root in roots:
               for p in root.rglob("*"):
@@ -131,7 +191,9 @@ jobs:
                   for no,line in enumerate(lines,1):
                       if terms.search(line):
                           hits.append({"file":str(p),"line":no,"text":line.strip()[:500]})
-          Path("reports/mobile-apk-reader-implementation-hits.json").write_text(json.dumps({"target":"ConquerOnline-1.1.2.3","hit_count":len(hits),"hits":hits,"policy":"String and decompiler hits are leads only; method call paths and file read sites must be traced before cipher approval."},ensure_ascii=False,indent=2)+"\\n",encoding="utf-8")
+          payload_report=Path("reports/embedded-dex-payload-triage.json")
+          payloads=json.loads(payload_report.read_text()) if payload_report.exists() else []
+          Path("reports/mobile-apk-reader-implementation-hits.json").write_text(json.dumps({"target":"ConquerOnline-1.1.2.3","hit_count":len(hits),"hits":hits,"embedded_payloads":payloads,"native_libraries":[str(p) for p in Path("build/apk-reader/native").glob("*.so")],"policy":"Trace actual asset read -> transform/decrypt -> class-loader call path. A DEX checksum repair is attempted only on a copy and is not treated as decryption. If payload has no DEX magic, derive the exact transform from app Java/JNI code or runtime capture; do not guess AES parameters."},ensure_ascii=False,indent=2)+"\\n",encoding="utf-8")
           print("reader implementation hits:",len(hits))
           PY
       - name: Run existing quest decoder, ecosystem inventory, and APK reader probe
