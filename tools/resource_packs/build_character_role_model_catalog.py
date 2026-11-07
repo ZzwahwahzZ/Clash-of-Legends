@@ -178,6 +178,47 @@ def main() -> None:
                     "error": str(error),
                 })
 
+    # The Mobile selection UI also has a separate six-slot registry.
+    # Its proAni/proIndex pair is an explicit source relation to Role0..Role7;
+    # retain that evidence separately from unresolved model-part paths.
+    js_registry = next((row for row in ui_registry_sources
+                        if row["path"].endswith("/rolechoose_js.ini")
+                        and row["parse_status"] == "PARSED"), None)
+    js_role_rows = []
+    if js_registry:
+        js_sections = js_registry["sections"]
+        js_animations = js_sections.get("proAni", {})
+        js_indices = js_sections.get("proIndex", {})
+        for key, animation_role in sorted(js_animations.items()):
+            slot = key.removeprefix("pro_")
+            profession_index = js_indices.get("index_" + slot, "").strip()
+            role_section_key = f"Role{profession_index}" if profession_index.isdigit() else ""
+            joined_role = simple_by_section.get(role_section_key)
+            identity_match = re.fullmatch(r"Role_(Male|Female)([A-Za-z]+)", animation_role)
+            identity = ({
+                "gender": identity_match.group(1).lower(),
+                "class_token": identity_match.group(2),
+            } if identity_match else {
+                "gender": None,
+                "class_token": animation_role.removeprefix("Role_"),
+            })
+            js_role_rows.append({
+                "slot": int(slot) if slot.isdigit() else slot,
+                "animation_role": animation_role,
+                "profession_index": profession_index,
+                "role_section_key": role_section_key or None,
+                "source_identity": identity,
+                "simple_role_join": ({
+                    "source_section": joined_role["source_section"],
+                    "simple_object_id": joined_role["simple_object_id"],
+                } if joined_role else None),
+                "mapping_status": (
+                    "SOURCE_CLASS_GENDER_AND_SIMPLE_ROLE_JOIN_CONFIRMED_MODEL_ASSET_UNRESOLVED"
+                    if joined_role and identity_match
+                    else "SOURCE_ROLE_JOIN_INCOMPLETE"
+                ),
+            })
+
     # Cross-reference exact numeric keys from the simple-role table against
     # text configuration files. This is a discovery report only: a hit is
     # not promoted unless a direct source relation and visual/rig checks exist.
@@ -229,6 +270,7 @@ def main() -> None:
         },
         "role_simple_object_candidates": role_rows,
         "selection_ui_roles_unjoined": selection_rows,
+        "rolechoose_js_source_role_joins": js_role_rows,
         "additional_ui_registry_sources": ui_registry_sources,
         "role_source_cross_reference": {
             "searched_ini_file_count": searched_ini_count,
@@ -248,11 +290,16 @@ def main() -> None:
             "selection_ui_direct_section_join_candidates": direct_section_joins,
             "source_role_identity_candidates": source_identity_candidates,
             "joined_source_role_identities": joined_source_role_identities,
+            "rolechoose_js_slots": len(js_role_rows),
+            "rolechoose_js_class_gender_simple_role_joins": sum(
+                1 for row in js_role_rows
+                if row["mapping_status"] == "SOURCE_CLASS_GENDER_AND_SIMPLE_ROLE_JOIN_CONFIRMED_MODEL_ASSET_UNRESOLVED"
+            ),
             "standby_motion_id_fields_found": sum(1 for row in role_rows if row["standby_motion_id"] > 0),
             "blaze_motion_id_fields_found": sum(1 for row in role_rows if row["blaze_motion_id"] > 0),
             "class_gender_mappings_approved": 0,
         },
-        "policy": "All rows are source-backed joins or explicit unresolved UI slots. No class/gender mapping is approved without a direct source key and visual/rig validation.",
+        "policy": "rolechoose_js proAni/proIndex establishes explicit source class/gender-to-simple-role joins where present, but no production character model is approved until model parts, textures, rig and visual identity are resolved and validated.",
     }
     MAPPING_DIR.mkdir(parents=True, exist_ok=True)
     out = MAPPING_DIR / "role_model_candidate_catalog.json"
