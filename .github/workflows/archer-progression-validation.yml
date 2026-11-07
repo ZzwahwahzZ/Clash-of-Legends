@@ -7,6 +7,10 @@ on:
     paths:
       - "scripts/progression/ClassProgressionManager.gd"
       - "scripts/player/PlayerInventory.gd"
+      - "scripts/core/GameContentDatabase.gd"
+      - "scripts/combat/CombatEngine.gd"
+      - "scripts/ui/MainHUDController.gd"
+      - "scripts/ui/LegendIntro.gd"
       - "tools/quality/validate_archer_progression.gd"
       - ".github/workflows/archer-progression-validation.yml"
   workflow_dispatch:
