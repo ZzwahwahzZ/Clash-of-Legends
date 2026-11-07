@@ -124,6 +124,8 @@ def main():
                 token = "Trojan"
             elif "archer" in low or "رام" in low or "arqu" in low:
                 token = "Archer"
+            elif "dragon" in low or "التنين" in low or "dragón" in low:
+                token = "Dragon Warrior"
             elif "warrior" in low or "محارب" in low or "guerrer" in low:
                 token = "Warrior"
             elif "ninja" in low or "نينجا" in low:
@@ -134,9 +136,7 @@ def main():
                 token = "Saint"
             elif "pirate" in low or "قرصان" in low or "pirata" in low:
                 token = "Pirate"
-            elif "dragon" in low or "التنين" in low or "dragón" in low:
-                token = "Dragon Warrior"
-            elif "windwalker" in low or "راكب" in low or "genio de aire" in low:
+            elif "windwalker" in low or "راكب" in low or "genio de aire" in low or "geniodeaire" in low:
                 token = "Windwalker"
             else:
                 token = None
