@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "catalogue_id": "mobile_official_guide_research",
+  "target_client": "Conquer Online Mobile Android 1.1.2.3",
+  "target_client_verification": "NOT_CROSS_VERIFIED",
+  "status": "PARTIAL_NON_EXHAUSTIVE_RESEARCH_ONLY",
+  "runtime_activation_allowed": false,
+  "id_policy": "project_record_id is an internal key only; source quest IDs are not known and must not be fabricated.",
+  "coordinate_policy": "Published guide coordinates are evidence notes, not runtime scene coordinates until coordinate-space and map identity are cross-validated.",
+  "records": [
+    {
+      "project_record_id": "mobile_guide.main_quest_in_spheres",
+      "source_title": "Main Quest in Spheres",
+      "category": "main",
+      "source_uri": "https://comobile.99.com/guide/2024-03-19/main_quest_in_spheres.shtml",
+      "published_gate": "all",
+      "published_npc": "Eloise; Dunn Burg; Song Qing; Song Shiyu; Lieutenant Chen; Li Kui; Li Gui",
+      "published_map_references": "Twin City; Wind Plain; Maple Forest",
+      "verified_guide_mechanics": "Long-term storyline outline; exact ordered steps/dialogue/rewards not published in this guide.",
+      "source_quest_id": null,
+      "admission_state": "RESEARCH_ONLY_NOT_RUNTIME_APPROVED"
+    },
+    {
+      "project_record_id": "mobile_guide.daily_bounty_hall",
+      "source_title": "Bounty Hall",
+      "category": "daily",
+      "source_uri": "https://comobile.99.com/guide/info/quests/2023-01-31/daily_-_bounty_hall.shtml",
+      "published_gate": "Level 80+",
+      "published_npc": "Chinju (Twin City 443,293)",
+      "published_map_references": "Twin City; required places unresolved",
+      "verified_guide_mechanics": "3 random quests/day; 6 added/day; storage cap 18; message delivery, material collection, monster kills/hunts, item submission; Go pathfinding.",
+      "source_quest_id": null,
+      "admission_state": "RESEARCH_ONLY_NOT_RUNTIME_APPROVED"
+    },
+    {
+      "project_record_id": "mobile_guide.daily_farmland_defence",
+      "source_title": "Farmland Defence",
+      "category": "daily_activity",
+      "source_uri": "https://comobile.99.com/guide/info/quests/2023-01-31/daily_-_farmland_defence.shtml",
+      "published_gate": "Level 50",
+      "published_npc": "Roberts (Twin City 349,342)",
+      "published_map_references": "Twin City; farmland area exact map ID unresolved",
+      "verified_guide_mechanics": "One 60-second session/day; Evil Locust 3 points, Evil Aphid 1, Evil Bee 0 and 3-second stun.",
+      "source_quest_id": null,
+      "admission_state": "RESEARCH_ONLY_NOT_RUNTIME_APPROVED"
+    },
+    {
+      "project_record_id": "mobile_guide.daily_hunting_battle",
+      "source_title": "Hunting Battle",
+      "category": "daily_activity",
+      "source_uri": "https://comobile.99.com/guide/info/quests/2023-01-31/daily_-_hunting_battle.shtml",
+      "published_gate": "Level 130+",
+      "published_npc": "Hunting Battle entry button",
+      "published_map_references": "Forthy Ground; three islands",
+      "verified_guide_mechanics": "Four daily time windows; 2 rounds/day; stage thresholds, scoring, scheduled bosses and daily claims.",
+      "source_quest_id": null,
+      "admission_state": "RESEARCH_ONLY_NOT_RUNTIME_APPROVED"
+    },
+    {
+      "project_record_id": "mobile_guide.daily_mayhem_land_crusade",
+      "source_title": "Mayhem Land Crusade",
+      "category": "daily_activity",
+      "source_uri": "https://comobile.99.com/guide/info/quests/2023-01-31/daily_-_mayhem_land_crusade.shtml",
+      "published_gate": "Level 40, second rebirth",
+      "published_npc": "Splinter (Twin City 392,324)",
+      "published_map_references": "Mayhem Land; five forces",
+      "verified_guide_mechanics": "Three kill-point phases; Chief summons; Mayhem Lord phases; scheduled boss, feat points, pack limits.",
+      "source_quest_id": null,
+      "admission_state": "RESEARCH_ONLY_NOT_RUNTIME_APPROVED"
+    },
+    {
+      "project_record_id": "mobile_guide.epic_ninja",
+      "source_title": "Ninja Epic Quest",
+      "category": "class_epic",
+      "source_uri": "https://comobile.99.com/guide/info/quests/2023-02-16/quest_-_ninja_epic_quest.shtml",
+      "published_gate": "Level 70+, second rebirth; Ninja",
+      "published_npc": "Wind Sage (Twin City 388,316)",
+      "published_map_references": "Twin City; Infinite Abyss",
+      "verified_guide_mechanics": "Three sequential item trials; 10% success chance described; failure/retry and Stardust exchange.",
+      "source_quest_id": null,
+      "admission_state": "RESEARCH_ONLY_NOT_RUNTIME_APPROVED"
+    },
+    {
+      "project_record_id": "mobile_guide.epic_taoist",
+      "source_title": "Taoist Epic Quest",
+      "category": "class_epic",
+      "source_uri": "https://comobile.99.com/guide/info/quests/2023-02-16/quest_-_taoist_epic_quest.shtml",
+      "published_gate": "Level 70+, second rebirth; Taoist",
+      "published_npc": "Taoist Moon (Twin City 381,318)",
+      "published_map_references": "Twin City; Taoist Temple",
+      "verified_guide_mechanics": "Three-stage item transformation chain; 10% success chance described; retry and alternate outcome.",
+      "source_quest_id": null,
+      "admission_state": "RESEARCH_ONLY_NOT_RUNTIME_APPROVED"
+    },
+    {
+      "project_record_id": "mobile_guide.epic_monk",
+      "source_title": "Monk Epic Quest",
+      "category": "class_epic",
+      "source_uri": "https://comobile.99.com/guide/info/quests/2023-02-16/quests_-_monk_epic_quest.shtml",
+      "published_gate": "Level 70+, second rebirth; Monk",
+      "published_npc": "Head Abbot (Twin City 383,315)",
+      "published_map_references": "Twin City; Western Paradise; Oriental Fairyland",
+      "verified_guide_mechanics": "Three sequential item trials; failure/retry; alternate failure output/exchange.",
+      "source_quest_id": null,
+      "admission_state": "RESEARCH_ONLY_NOT_RUNTIME_APPROVED"
+    },
+    {
+      "project_record_id": "mobile_guide.inspiring_trojan",
+      "source_title": "Trojan Inspiring Quest",
+      "category": "class_inspiring",
+      "source_uri": "https://comobile.99.com/guide/info/quests/2023-02-16/inspiring_quests_-_trojan_inspiring_quest.shtml",
+      "published_gate": "Level 45+; Trojan",
+      "published_npc": "Aeneas (Twin City 441,379)",
+      "published_map_references": "Twin City",
+      "verified_guide_mechanics": "Inspiration Guide UI entry; unlocks Inspiration and Trojan-specific rewards.",
+      "source_quest_id": null,
+      "admission_state": "RESEARCH_ONLY_NOT_RUNTIME_APPROVED"
+    }
+  ],
+  "official_mobile_map_names": [
+    "Twin City",
+    "Central Plain",
+    "Maple Forest",
+    "Love Canyon",
+    "Desert",
+    "Bird Island"
+  ],
+  "excluded": [
+    "PC Conquer quest lists",
+    "legacy PC DAT decoding assumptions",
+    "unapproved questinfo.dat/taskitem_info.dat candidate decodes"
+  ],
+  "admission_rule": "Do not activate a record until exact steps, branches, IDs, targets, UI states, rewards, and matching pinned-client evidence are verified. Expired event content is not active by default."
+}
