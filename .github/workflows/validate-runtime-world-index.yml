@@ -1,0 +1,53 @@
+name: Validate runtime world content index
+on:
+  push:
+    branches:
+      - feat/runtime-world-content-index
+    paths:
+      - "project.godot"
+      - "scripts/world/WorldContentIndex.gd"
+      - "scripts/world/WorldTravelManager.gd"
+      - "scripts/automation/QuestNavigationAgent.gd"
+      - "tools/resource_packs/validate_world_content_index.gd"
+      - "data/world_content_index.json"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  godot-world-index:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Godot 4.3
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.3.0
+          use-dotnet: false
+          include-templates: false
+      - name: Import and parse all project scripts and autoloads
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          godot --headless --editor --path . --quit 2>&1 | tee ci-logs/import.log
+          if grep -Eq "SCRIPT ERROR:|Parse Error:|Compile Error:|ERROR: Failed to load script|ERROR: Failed to create an autoload" ci-logs/import.log; then
+            echo "Godot import reported script or autoload errors."
+            exit 1
+          fi
+      - name: Validate source-backed map, quest and NPC runtime links
+        run: |
+          set -o pipefail
+          godot --headless --path . --script tools/resource_packs/validate_world_content_index.gd --quit-after 5 2>&1 | tee ci-logs/world-content-index.log
+          grep -q "RUNTIME WORLD CONTENT INDEX AUDIT PASSED" ci-logs/world-content-index.log
+          if grep -Eq "SCRIPT ERROR:|Parse Error:|Compile Error:|RUNTIME WORLD CONTENT INDEX AUDIT FAILED" ci-logs/world-content-index.log; then
+            echo "Runtime world content index audit failed."
+            exit 1
+          fi
+      - name: Upload world index validation logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Runtime-World-Content-Index-Validation
+          path: ci-logs/
+          if-no-files-found: warn
+          retention-days: 30
