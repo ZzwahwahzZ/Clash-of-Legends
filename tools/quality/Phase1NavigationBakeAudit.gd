@@ -109,11 +109,13 @@ func _add_market_bridge_navigation_connectors() -> void:
 	# or physics collision, and retain the 0.5 m agent clearance profile.
 	var connector_mesh := ArrayMesh.new()
 	var vertices := PackedVector3Array([
-		# Counter-clockwise from above so both navigation-only strips face up.
-		Vector3(-24.0, 3.72, -128.15), Vector3(-24.0, 3.72, -123.85), Vector3(-22.0, 4.34, -123.85),
-		Vector3(-24.0, 3.72, -128.15), Vector3(-22.0, 4.34, -123.85), Vector3(-22.0, 4.34, -128.15),
-		Vector3(22.0, 4.34, -128.15), Vector3(22.0, 4.34, -123.85), Vector3(24.0, 3.72, -123.85),
-		Vector3(22.0, 4.34, -128.15), Vector3(24.0, 3.72, -123.85), Vector3(24.0, 3.72, -128.15)
+		# Extend navigation along the actual ramp slope to x=-29/+29.
+		# The authored deck ends at +/-22.5; the ramps continue outward.
+		# Keep the strips inside the bridge width and match the ramp height.
+		Vector3(-29.0, 2.18, -128.15), Vector3(-29.0, 2.18, -123.85), Vector3(-22.5, 4.18, -123.85),
+		Vector3(-29.0, 2.18, -128.15), Vector3(-22.5, 4.18, -123.85), Vector3(-22.5, 4.18, -128.15),
+		Vector3(22.5, 4.18, -128.15), Vector3(22.5, 4.18, -123.85), Vector3(29.0, 2.18, -123.85),
+		Vector3(22.5, 4.18, -128.15), Vector3(29.0, 2.18, -123.85), Vector3(29.0, 2.18, -128.15)
 	])
 	var arrays := []
 	arrays.resize(Mesh.ARRAY_MAX)
@@ -125,7 +127,7 @@ func _add_market_bridge_navigation_connectors() -> void:
 	connector.add_to_group("jianghai_nav_walkable")
 	_city.add_child(connector)
 	_selected_sources.append("Generated/MarketBridgeNavigationSeamConnectors")
-	print("PHASE1 BRIDGE NAVIGATION SEAM CONNECTORS: added two ramp-profile strips with 0.5 m agent clearance")
+	print("PHASE1 BRIDGE NAVIGATION SEAM CONNECTORS: extended west/east ramp-profile strips to x=+/-29 with 0.5 m agent clearance")
 
 func _on_source_geometry_parsed() -> void:
 	NavigationServer3D.bake_from_source_geometry_data_async(
