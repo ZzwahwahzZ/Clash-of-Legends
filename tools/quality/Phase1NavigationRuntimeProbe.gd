@@ -68,7 +68,7 @@ func _run() -> void:
 	var runtime_route_targets := {
 		"pawnshop_approach": Vector3(-86.0, -0.078, -106.0),
 		"factory_approach": Vector3(86.0, -0.078, -12.0),
-		"market_bridge": Vector3(0.0, 4.18, -126.0),
+		"market_bridge_west_ramp": Vector3(-29.0, 2.0, -126.0),
 		"medicine_frontage": Vector3(11.6, -0.045, -48.0),
 		"tea_frontage": Vector3(9.5, -0.14, -8.0)
 	}
@@ -199,7 +199,7 @@ func _run() -> void:
 		_fail("Player NavigationAgent3D could not resolve both pawnshop and factory approach routes: " + JSON.stringify(runtime_route_checks))
 		return
 	if runtime_route_movements_passed != runtime_route_targets.size():
-		_fail("Player did not physically reach both pawnshop and factory approach targets: " + JSON.stringify(runtime_route_movement_checks))
+		_fail("Player did not physically reach every tested city landmark: " + JSON.stringify(runtime_route_movement_checks))
 		return
 	if horizontal_displacement < 8.0 or not target_reached:
 		_fail("Player did not follow the baked navigation path to the hotel frontage.")
