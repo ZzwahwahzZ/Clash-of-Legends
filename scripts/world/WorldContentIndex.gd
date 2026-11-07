@@ -149,6 +149,7 @@ func get_index_status() -> Dictionary:
 		"unique_maps": _maps_by_id.size(),
 		"map_metadata_only": _index.get("map_metadata_without_binary_path", []).size(),
 		"npc_templates": _index.get("npc_templates", []).size(),
+		"npc_model_templates": _index.get("npc_model_templates", []).size(),
 		"quests": _index.get("quests", []).size(),
 		"dialogue_sources": _index.get("dialogue_sources", []).size()
 	}
