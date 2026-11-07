@@ -94,7 +94,7 @@ func instantiate_fitted_model(category: String, index: int, parent: Node3D, targ
 		var mesh_instance := mesh_node as MeshInstance3D
 		if mesh_instance and mesh_instance.mesh:
 			var relative_transform := _relative_transform_to_root(root, mesh_instance)
-			var mesh_bounds: AABB = _transform_aabb(mesh_instance.get_aabb(), relative_transform)
+			var mesh_bounds: AABB = _transform_aabb(mesh_instance.mesh.get_aabb(), relative_transform)
 			combined_bounds = mesh_bounds if not has_bounds else combined_bounds.merge(mesh_bounds)
 			has_bounds = true
 	if has_bounds and combined_bounds.size.y > 0.001:
