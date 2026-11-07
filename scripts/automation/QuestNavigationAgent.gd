@@ -57,7 +57,7 @@ func on_item_collected(item_id: String, quantity: int = 1) -> void:
 func on_npc_talked(npc_id: String) -> void:
 	if is_quest_completed:
 		var ready_quest := get_active_quest()
-		var turn_in_id := str(ready_quest.get("turn_in_npc_id", "npc_sage"))
+		var turn_in_id := str(ready_quest.get("turn_in_npc_id", ""))
 		if npc_id == turn_in_id:
 			_claim_completed_quest()
 		return
@@ -96,7 +96,6 @@ func _complete_quest() -> void:
 	_notify_game_manager()
 	if GameManager:
 		var title := str(quest["title_ar"]) if GameManager.current_language == "ar" else str(quest["title_en"])
-		var npc_name := str(quest.get("turn_in_npc_id", "npc_sage"))
 		var message_ar := "اكتمل الهدف: %s. عُد إلى صاحب المهمة لتسلّم المكافأة." % title
 		var message_en := "Objective complete: %s. Return to the quest NPC to claim your reward." % title
 		GameManager.post_notification(message_ar if GameManager.current_language == "ar" else message_en, false)
