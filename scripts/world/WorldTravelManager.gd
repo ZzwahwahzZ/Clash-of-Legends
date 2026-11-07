@@ -76,3 +76,32 @@ func _notify(message: String, alert: bool) -> void:
 	var game_manager := _get_game_manager()
 	if game_manager != null:
 		game_manager.call("post_notification", message, alert)
+
+
+## Exact-version source-map catalog access. This is metadata resolution only:
+## it does not pretend a source map archive is already a playable Godot scene.
+func get_source_map_catalog() -> Array:
+	if not WorldContentIndex or not WorldContentIndex.index_ready:
+		return []
+	return WorldContentIndex.get_maps()
+
+func get_source_map_by_id(map_id: int) -> Dictionary:
+	if not WorldContentIndex or not WorldContentIndex.index_ready:
+		return {}
+	return WorldContentIndex.get_map_by_id(map_id)
+
+func get_source_map_for_quest(mission_id: int, for_finish: bool = false) -> Dictionary:
+	if not WorldContentIndex or not WorldContentIndex.index_ready:
+		return {}
+	var npc_target: Dictionary = WorldContentIndex.get_quest_npc_target(mission_id, for_finish)
+	if npc_target.is_empty():
+		return {}
+	var map_id := int(npc_target.get("map_id", -1))
+	var map_data := WorldContentIndex.get_map_by_id(map_id)
+	return {
+		"map_id": map_id,
+		"map": map_data,
+		"npc_target": npc_target,
+		"source_map_available": not map_data.is_empty(),
+		"world_transform_status": "NOT_VALIDATED"
+	}
