@@ -276,6 +276,17 @@ def main():
     duplicate=sorted(k for k,v in Counter(q["fields"].get("MissionId","") for q in quests).items() if k and v>1)
     missing_prereqs=sorted({r["required_mission_id"] for r in prereq_refs if r["required_mission_id"] not in all_ids})
     positive_npc_refs=[r for r in npc_refs if r.get("npc_id") not in (None,"","0000","-1")]
+    placement_index=defaultdict(set);placement_data={}
+    for r in npc_refs:
+        if r.get("status")=="NPC_REFERENCE" and r.get("npc_id") not in (None,"","0000","-1"):
+            key=(r.get("npc_id"),r.get("map_id"),r.get("x"),r.get("y"),r.get("name"))
+            placement_index[key].add(r.get("mission_id",""))
+            placement_data[key]={"npc_id":key[0],"map_id":key[1],"x":key[2],"y":key[3],"name":key[4],
+                "npc_type_name_matches":r.get("npc_type_name_matches",[]),"npcx_name_matches":r.get("npcx_name_matches",[])}
+    npc_placements=[]
+    for key,data in sorted(placement_data.items(),key=lambda x:(x[0][1] or "",x[0][0] or "",x[0][2] or -1,x[0][3] or -1)):
+        npc_placements.append({**data,"mission_ids":sorted(x for x in placement_index[key] if x)})
+    location_only_references=[r for r in npc_refs if r.get("status")=="LOCATION_ONLY"]
     exact_matches=sum(bool(r.get("map_destination_exact_match")) for r in positive_npc_refs)
     same_npc_map=sum(bool(r.get("map_destination_matches")) for r in positive_npc_refs)
     report={
@@ -291,6 +302,7 @@ def main():
         "prerequisites":{"reference_count":len(prereq_refs),"unresolved_ids_across_locales":missing_prereqs},
         "quest_condition_reference_count":len(quest_condition_refs),"quest_condition_references":quest_condition_refs,
         "npc_linkage":{"reference_count":len(npc_refs),"unique_positive_npc_ids":len({r.get("npc_id") for r in positive_npc_refs}),
+        "unique_npc_placement_count":len(npc_placements),"unique_npc_placements_by_map":dict(Counter(r["map_id"] for r in npc_placements)),
             "npc_type_name_match_references":sum(bool(r.get("npc_type_name_matches")) for r in positive_npc_refs),
             "npcx_name_match_references":sum(bool(r.get("npcx_name_matches")) for r in positive_npc_refs),
             "mapdestination_same_npc_map_matches":same_npc_map,"mapdestination_exact_coordinate_matches":exact_matches,
@@ -305,7 +317,7 @@ def main():
         "mob_reference_count":len(mob_refs),"item_requirement_reference_count":len(item_refs),"lua_script_reference_count":len(lua_refs),"lua_script_source_files_parsed":script_source_count,"lua_script_function_match_references":sum(bool(r.get("script_function_matches")) for r in lua_refs),"lua_npc_name_match_references":sum(bool(r.get("npc_type_name_matches") or r.get("npcx_name_matches")) for r in lua_refs),
         "source_hashes":[{"path":str(p.relative_to(root)),"size_bytes":p.stat().st_size,"sha256":hashlib.sha256(p.read_bytes()).hexdigest()}
             for p in [qpath,npc_type_path,npcx_path,mapdest_path,root/"ini/gamemap.dat",gmex_path,dlg_path,text_path,registry_path] if p.is_file()],
-        "npc_references":npc_refs,"map_references":map_refs,"mob_references":mob_refs,"item_references":item_refs,"lua_script_references":lua_refs,
+        "npc_placements":npc_placements,"location_only_references":location_only_references,"prerequisite_references":prereq_refs,"npc_references":npc_refs,"map_references":map_refs,"mob_references":mob_refs,"item_references":item_refs,"lua_script_references":lua_refs,
         "gamemap_catalog":gamemap,
     }
     args.output.parent.mkdir(parents=True,exist_ok=True)
