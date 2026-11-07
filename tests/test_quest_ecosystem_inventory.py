@@ -52,6 +52,15 @@ class QuestEcosystemInventoryTests(unittest.TestCase):
             with self.subTest(path=path):
                 self.assertTrue(MODULE.is_interesting(path))
 
+    def test_generic_named_lua_quest_table_is_discovered_by_content(self):
+        path = "assets/ConquerRes/ini/luacfg/config_017.dat"
+        data = b'local MainTask = { [0] = { ["TaskID"] = 10017 } }'
+        self.assertTrue(MODULE.is_interesting(path, data))
+
+    def test_generic_named_script_without_quest_signature_is_ignored(self):
+        path = "assets/ConquerRes/script/common_config.dat"
+        self.assertFalse(MODULE.is_interesting(path, b"local CommonConfig = {}"))
+
     def test_other_asset_and_non_game_paths_are_not_discovered(self):
         self.assertFalse(MODULE.is_interesting("assets/ConquerRes/texture/sky.dds"))
         self.assertFalse(MODULE.is_interesting("res/drawable/icon.png"))
