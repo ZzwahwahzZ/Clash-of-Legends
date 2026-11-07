@@ -1,5 +1,7 @@
 extends SceneTree
 
+# Regression coverage for the two supported resource distribution generations.
+
 const RESOURCE_MANAGER_SCRIPT = preload("res://scripts/core/ResourcePackManager.gd")
 const EXPECTED_APP_ID := "com.zwahwahzz.clashoflegends"
 const VALID_RELEASE_TAGS := ["resource-packs-v4", "owned-resource-packs-v1"]
