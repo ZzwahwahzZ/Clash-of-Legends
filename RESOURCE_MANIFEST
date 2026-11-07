@@ -12,8 +12,8 @@
       "file_name": "owned-core.pck",
       "display_name_ar": "موارد اللعبة الأصلية",
       "display_name_en": "Project-owned Core Resources",
-      "size_bytes": 660128,
-      "sha256": "674990f39325415f4dcb67a96c48fffd3a3c6ab632ccc5174a5400402e80108d",
+      "size_bytes": 865840,
+      "sha256": "5f42ba3b0c75e0b0ae944ee5c3925b92dd20502e28f8d2755bc3e0089745d5cd",
       "download_url": "https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/owned-resource-packs-v1/owned-core.pck",
       "godot_version": "4.3",
       "platform": "all"
