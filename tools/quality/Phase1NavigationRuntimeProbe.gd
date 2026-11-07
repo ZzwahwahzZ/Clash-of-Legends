@@ -206,15 +206,25 @@ func _run() -> void:
 	var west_market_candidate_requested := Vector3(-35.0, -0.14, -164.0)
 	var west_market_candidate_projected := NavigationServer3D.map_get_closest_point(navigation_map, west_market_candidate_requested)
 	var west_market_projection_distance := west_market_candidate_projected.distance_to(west_market_candidate_requested)
-	var west_market_route_path := NavigationServer3D.map_get_path(navigation_map, bridge_cross_target, west_market_candidate_projected, true, 1)
-	var west_market_route_connected := west_market_projection_distance <= 2.0 and west_market_route_path.size() >= 2
+	var west_market_route_path := NavigationServer3D.map_get_path(navigation_map, bridge_cross_target, west_market_candidate_projected, false, 1)
+	var west_market_path_waypoints: Array = []
+	for waypoint in west_market_route_path:
+		west_market_path_waypoints.append(_vec(waypoint))
+	var west_market_expected_direct_distance := Vector2(bridge_cross_target.x - west_market_candidate_projected.x, bridge_cross_target.z - west_market_candidate_projected.z).length()
+	var west_market_path_length := _path_length(west_market_route_path)
+	var west_market_path_start_error := west_market_route_path[0].distance_to(bridge_cross_target) if west_market_route_path.size() >= 2 else -1.0
+	var west_market_path_end_error := west_market_route_path[west_market_route_path.size() - 1].distance_to(west_market_candidate_projected) if west_market_route_path.size() >= 2 else -1.0
+	var west_market_route_connected := west_market_projection_distance <= 2.0 and west_market_route_path.size() >= 2 and west_market_path_start_error <= 2.0 and west_market_path_end_error <= 2.0 and west_market_path_length >= west_market_expected_direct_distance * 0.9
 	var west_market_movement := {
 		"attempted": false,
 		"reached": false,
 		"floor_contact": false,
 		"frames_used": 0,
 		"final_position": _vec(bridge_cross_target),
-		"distance_to_candidate": -1.0
+		"distance_to_candidate": -1.0,
+		"next_path_position": _vec(bridge_cross_target),
+		"velocity": [0.0, 0.0, 0.0],
+		"slide_collisions": []
 	}
 	if west_market_route_connected:
 		player.call("clear_movement_target")
@@ -238,7 +248,10 @@ func _run() -> void:
 			"floor_contact": player.is_on_floor(),
 			"frames_used": west_frames,
 			"final_position": _vec(west_final),
-			"distance_to_candidate": west_final_distance
+			"distance_to_candidate": west_final_distance,
+			"next_path_position": _vec(navigation_agent.get_next_path_position()),
+			"velocity": _vec(player.velocity),
+			"slide_collisions": _capture_slide_collisions(player)
 		}
 
 	var report := {
@@ -265,7 +278,11 @@ func _run() -> void:
 			"projected_position": _vec(west_market_candidate_projected),
 			"projection_distance": west_market_projection_distance,
 			"path_waypoint_count": west_market_route_path.size(),
-			"path_length": _path_length(west_market_route_path),
+			"path_length": west_market_path_length,
+			"expected_direct_distance": west_market_expected_direct_distance,
+			"path_start_error": west_market_path_start_error,
+			"path_end_error": west_market_path_end_error,
+			"path_waypoints": west_market_path_waypoints,
 			"connected": west_market_route_connected,
 			"physical_movement": west_market_movement,
 			"approved_interaction_anchor": false
@@ -374,6 +391,18 @@ func _ray_result(from_position: Vector3, to_position: Vector3) -> Dictionary:
 	query.collide_with_areas = false
 	query.collide_with_bodies = true
 	return get_root().world_3d.direct_space_state.intersect_ray(query)
+
+func _capture_slide_collisions(body: CharacterBody3D) -> Array:
+	var collisions: Array = []
+	for index in range(body.get_slide_collision_count()):
+		var slide := body.get_slide_collision(index)
+		var collider := slide.get_collider()
+		collisions.append({
+			"collider": str(collider.name) if collider else "null",
+			"position": _vec(slide.get_position()),
+			"normal": _vec(slide.get_normal())
+		})
+	return collisions
 
 func _path_length(path: PackedVector3Array) -> float:
 	var total := 0.0
