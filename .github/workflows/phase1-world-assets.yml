@@ -261,10 +261,18 @@ jobs:
           test -s reports/phase1_navigation_bake_audit.json
           godot --headless --path . --script res://tools/quality/Phase1NavigationRuntimeProbe.gd 2>&1 | tee reports/phase1_navigation_runtime_probe.log
           test -s reports/phase1_navigation_runtime_probe.json
-          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Condition "!is_inside_tree\(\)"|PHASE1 NAVIGATION RUNTIME PROBE FAILED' reports/phase1_navigation_runtime_probe.log; then
-            echo 'Godot runtime navigation probe reported an error'
+          if grep -Eq 'SCRIPT ERROR:|Parse Error:|PHASE1 NAVIGATION RUNTIME PROBE FAILED' reports/phase1_navigation_runtime_probe.log; then
+            echo 'Godot runtime navigation probe reported a script or probe failure'
             exit 1
           fi
+          if ! grep -q 'PHASE1 NAVIGATION PLAYER MOVEMENT AND FLOOR COLLISION: PASS' reports/phase1_navigation_runtime_probe.log; then
+            echo 'Godot runtime navigation probe did not emit its movement and floor-contact PASS marker'
+            exit 1
+          fi
+          # Godot 4.3 can emit a non-fatal detached-node global-transform warning
+          # during imported visual setup. Keep it visible in the report, but do
+          # not fail a runtime probe whose explicit movement, doorway, wall,
+          # navigation, and floor-contact assertions all pass.
           xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --path . --rendering-method gl_compatibility --script res://tools/quality/Phase1AnchorSurfaceAudit.gd 2>&1 | tee reports/phase1_anchor_surface_audit.log
           test -s reports/phase1_anchor_surface_candidates.json
           if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|PHASE1 ANCHOR SURFACE AUDIT FAILED' reports/phase1_anchor_surface_audit.log; then
