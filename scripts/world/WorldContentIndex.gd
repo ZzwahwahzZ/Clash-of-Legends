@@ -220,6 +220,32 @@ func get_quest_npc_target(mission_id: int, for_finish: bool = false) -> Dictiona
 func get_dialogue_source_status() -> Array:
 	return _index.get("dialogue_sources", []).duplicate(true)
 
+func get_npc_dialogue(dialogue_id: int) -> Dictionary:
+	for entry in _index.get("npc_dialogues", []):
+		if int(entry.get("dialogue_id", -1)) == dialogue_id:
+			return entry.duplicate(true)
+	return {}
+
+func get_dialogue_text(text_key: String, locale: String = "ar") -> String:
+	var localized: Dictionary = _index.get("dialogue_texts", {})
+	var selected: Dictionary = localized.get(locale, {})
+	var value: Variant = selected.get(text_key, null)
+	if value == null:
+		var fallback_locale := "en" if locale != "en" else "ar"
+		selected = localized.get(fallback_locale, {})
+		value = selected.get(text_key, "")
+	return str(value)
+
+func get_script_dialogue_text(text_key: String, locale: String = "ar") -> String:
+	var localized: Dictionary = _index.get("script_dialogue_texts", {})
+	var selected: Dictionary = localized.get(locale, {})
+	var value: Variant = selected.get(text_key, null)
+	if value == null:
+		var fallback_locale := "en" if locale != "en" else "ar"
+		selected = localized.get(fallback_locale, {})
+		value = selected.get(text_key, "")
+	return str(value)
+
 
 func get_class_selection_source(locale: String = "en") -> Array:
 	var selection: Dictionary = _index.get("class_selection", {})
