@@ -27,8 +27,8 @@ func get_source_graph_summary() -> Dictionary:
 func get_source_missions_available_at_npc(npc_id: String, player_level: int = 0, profession_code: String = "") -> Array[Dictionary]:
 	return source_graph.get_available_at_npc(npc_id, completed_source_mission_ids, player_level, profession_code)
 
-func get_source_missions_available_for_class(npc_id: String, player_level: int, class_id: String) -> Array[Dictionary]:
-	return source_graph.get_available_at_npc_for_class(npc_id, completed_source_mission_ids, player_level, class_id)
+func get_source_missions_available_for_class(npc_id: String, player_level: int, class_id: String, map_id: String = "") -> Array[Dictionary]:
+	return source_graph.get_available_at_npc_for_class(npc_id, completed_source_mission_ids, player_level, class_id, map_id)
 
 func get_source_missions_for_npc_interaction(npc_id: String, player_level: int, class_id: String, map_id: String = "") -> Array[Dictionary]:
 	var result := source_graph.get_available_at_npc_for_class(npc_id, completed_source_mission_ids, player_level, class_id, map_id)
@@ -79,6 +79,8 @@ func select_source_mission_at_npc(mission_id: String, npc_id: String, player_lev
 		return false
 	if not map_id.is_empty() and str(begin_npc.get("map_id", "")) != map_id:
 		return false
+	if not map_id.is_empty() and str(begin_npc.get("map_id", "")) != map_id:
+		return false
 	var profession_code := GameContentDatabase.get_source_profession_id(class_id) if GameContentDatabase else ""
 	if not source_graph.is_available(mission_id, completed_source_mission_ids, player_level, profession_code):
 		return false
@@ -113,7 +115,7 @@ func _advance_source_objectives(event_kind: String, target: String, map_id: Stri
 		var required := 1
 		match kind:
 			"npc":
-				matched = event_kind == "npc" and str(intention.get("npc_id", "")).lstrip("0") == target.lstrip("0")
+				matched = event_kind == "npc" and str(intention.get("npc_id", "")).lstrip("0") == target.lstrip("0") and (map_id.is_empty() or str(intention.get("map_id", "")) == map_id)
 				if matched and not map_id.is_empty() and not str(intention.get("map_id", "")).is_empty():
 					matched = str(intention.get("map_id", "")) == map_id
 			"mob":
