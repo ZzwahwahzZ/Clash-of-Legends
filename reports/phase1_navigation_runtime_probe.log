@@ -1,0 +1,23 @@
+Godot Engine v4.3.stable.official.77dcf97d8 - https://godotengine.org
+
+GameAudioManager: indexed 298 offline OGG cues.
+ERROR: Condition "!is_inside_tree()" is true. Returning: Transform3D()
+   at: get_global_transform (scene/3d/node_3d.cpp:345)
+ERROR: Condition "!is_inside_tree()" is true. Returning: Transform3D()
+   at: get_global_transform (scene/3d/node_3d.cpp:345)
+ERROR: Condition "!is_inside_tree()" is true. Returning: Transform3D()
+   at: get_global_transform (scene/3d/node_3d.cpp:345)
+ERROR: Condition "!is_inside_tree()" is true. Returning: Transform3D()
+   at: get_global_transform (scene/3d/node_3d.cpp:345)
+ERROR: Condition "!is_inside_tree()" is true. Returning: Transform3D()
+   at: get_global_transform (scene/3d/node_3d.cpp:345)
+ERROR: Condition "!is_inside_tree()" is true. Returning: Transform3D()
+   at: get_global_transform (scene/3d/node_3d.cpp:345)
+ERROR: Condition "!is_inside_tree()" is true. Returning: Transform3D()
+   at: get_global_transform (scene/3d/node_3d.cpp:345)
+ERROR: Condition "!is_inside_tree()" is true. Returning: Transform3D()
+   at: get_global_transform (scene/3d/node_3d.cpp:345)
+ERROR: Condition "!is_inside_tree()" is true. Returning: Transform3D()
+   at: get_global_transform (scene/3d/node_3d.cpp:345)
+PHASE1 NAVIGATION RUNTIME PROBE: {"final_floor_contact":true,"final_player_position":[-8.68390560150146,-0.07539879530668,-34.694522857666],"frames_used":248,"horizontal_displacement":26.5373611450195,"horizontal_distance_to_projected_target":0.203686788678169,"initial_floor_contact":true,"navigation_cell_height_matches":true,"navigation_map_cell_height":0.100000001490116,"navigation_map_region_count":1,"navigation_map_valid":true,"path_waypoint_count":5,"player_scene_loaded":true,"project_default_cell_height":0.1,"projected_target_position":[-8.75,0.106675714254379,-34.5018577575684],"requested_target_position":[-9.5,-0.14000000059605,-34.5],"start_position":[-0.0703339651227,0.0139589309692383,-59.7950782775879],"target_reached":true,"world_scene_loaded":true}
+PHASE1 NAVIGATION PLAYER MOVEMENT AND FLOOR COLLISION: PASS
