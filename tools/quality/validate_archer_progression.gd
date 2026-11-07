@@ -98,11 +98,30 @@ func _run() -> void:
 	if str(inventory.weapon_loadouts["throwing_knives"].get("id", "")) != "test_oriental_throwing_knife":
 		_fail("The Throwing Knife was not stored in its separate loadout.")
 		return
-	if not progression.select_weapon_style("throwing_knives"):
-		_fail("Could not switch to the unlocked Throwing Knives form.")
+	var archer_skills := CombatEngine.get_class_skills("Archer")
+	if archer_skills.is_empty() or archer_skills[0] != "archer_path_of_shadow":
+		_fail("Path of Shadow is not exposed as the first available Archer form-toggle skill.")
 		return
-	if str(inventory.equipment.get("weapon", {}).get("id", "")) != "test_oriental_throwing_knife":
-		_fail("Switching form did not equip the stored Throwing Knife.")
+	if not CombatEngine.can_cast_skill("archer_path_of_shadow", player):
+		_fail("Path of Shadow should be available after promotion with a Throwing Knife loadout.")
+		return
+	if not CombatEngine.execute_skill("archer_path_of_shadow", player, null):
+		_fail("Path of Shadow failed to transform the Archer.")
+		return
+	if progression.get_form_id() != "OrientalAssassin" or str(inventory.equipment.get("weapon", {}).get("id", "")) != "test_oriental_throwing_knife":
+		_fail("Path of Shadow did not activate Assassin form and its Throwing Knife.")
+		return
+	if not CombatEngine.execute_skill("archer_path_of_shadow", player, null):
+		_fail("Path of Shadow failed to return to Archer form.")
+		return
+	if progression.get_form_id() != "Archer" or str(inventory.equipment.get("weapon", {}).get("id", "")) != "test_archer_bow":
+		_fail("Path of Shadow did not restore Archer form and its Bow.")
+		return
+	if not CombatEngine.execute_skill("archer_path_of_shadow", player, null):
+		_fail("Path of Shadow failed on the second Assassin activation.")
+		return
+	if progression.get_form_id() != "OrientalAssassin" or str(inventory.equipment.get("weapon", {}).get("id", "")) != "test_oriental_throwing_knife":
+		_fail("Repeated Path of Shadow use did not restore the Assassin loadout.")
 		return
 	if str(inventory.weapon_loadouts["bow"].get("id", "")) != "test_archer_bow":
 		_fail("Switching form did not preserve the Bow in its own loadout.")
