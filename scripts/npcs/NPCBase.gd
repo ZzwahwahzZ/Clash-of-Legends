@@ -62,7 +62,7 @@ func interact(player: CharacterBody3D) -> void:
 		if agent.has_method("on_npc_talked"):
 			agent.on_npc_talked(npc_id)
 		if not source_npc_id.is_empty() and agent.has_method("on_source_npc_talked"):
-			agent.on_source_npc_talked(source_npc_id)
+			agent.on_source_npc_talked(source_npc_id, source_map_id)
 	if not source_npc_id.is_empty() and _open_source_quest_dialogue(player):
 		return
 	match role:
@@ -86,7 +86,7 @@ func _open_source_quest_dialogue(player: CharacterBody3D) -> bool:
 		if not agent.has_method("get_source_missions_for_npc_interaction"):
 			continue
 		var class_id := str(player.get("character_class"))
-		var offers: Array = agent.get_source_missions_for_npc_interaction(source_npc_id, player.current_level, class_id)
+		var offers: Array = agent.get_source_missions_for_npc_interaction(source_npc_id, player.current_level, class_id, source_map_id)
 		if offers.is_empty():
 			continue
 		if not _source_quest_callback.is_null() and dlg.source_quest_selected.is_connected(_source_quest_callback):
@@ -112,7 +112,7 @@ func _on_source_quest_selected(mission_id: String, agent: Node, selected_npc_id:
 	if not is_instance_valid(agent) or not is_instance_valid(player):
 		return
 	var class_id := str(player.call("get_character_class")) if player.has_method("get_character_class") else ""
-	var success := bool(agent.call("select_source_mission_at_npc", mission_id, selected_npc_id, player.current_level, class_id))
+	var success := bool(agent.call("select_source_mission_at_npc", mission_id, selected_npc_id, player.current_level, class_id, source_map_id))
 	if not success:
 		if GameManager:
 			GameManager.post_notification("المهمة غير متاحة بعد أو لم يكتمل هدفها." if GameManager.current_language == "ar" else "This quest is locked or its objectives are not complete.", true)
