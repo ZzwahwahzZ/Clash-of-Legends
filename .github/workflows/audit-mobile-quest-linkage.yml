@@ -1,6 +1,9 @@
 name: Audit Mobile quest reader and world linkage
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/audit-mobile-quest-linkage.yml"
 permissions:
   contents: read
   actions: read
