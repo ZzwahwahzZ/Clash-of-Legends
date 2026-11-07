@@ -41,6 +41,7 @@ jobs:
         run: |
           python3 tools/gameplay_source_audit/audit_source_tables.py \
             build/source/extracted-assets-001.zip \
+            --lookup-item-ids 500239 \
             --output reports/gameplay-source-table-audit.json
       - name: Validate report JSON and print concise inventory
         run: |
