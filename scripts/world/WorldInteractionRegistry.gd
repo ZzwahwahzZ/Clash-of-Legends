@@ -60,11 +60,16 @@ func get_anchor_target(anchor_id: String) -> Dictionary:
 	var node := resolve_anchor_node(anchor_id)
 	if definition.is_empty() or node == null:
 		return {"ok": false, "anchor_id": anchor_id}
+	var target_offset_data: Array = definition.get("target_offset_local", [0.0, 0.0, 0.0])
+	if target_offset_data.size() != 3:
+		return {"ok": false, "anchor_id": anchor_id, "reason": "invalid_target_offset"}
+	var target_offset := Vector3(float(target_offset_data[0]), float(target_offset_data[1]), float(target_offset_data[2]))
+	var reference_position := node.global_transform * target_offset
 	return {
 		"ok": true,
 		"anchor_id": anchor_id,
 		"node": node,
-		"reference_position": node.global_position,
+		"reference_position": reference_position,
 		"requires_navmesh_projection": bool(definition.get("requires_navmesh_projection", true)),
 		"requires_runtime_trigger": bool(definition.get("requires_runtime_trigger", true)),
 		"interaction_enabled": bool(definition.get("interaction_enabled", false)),
