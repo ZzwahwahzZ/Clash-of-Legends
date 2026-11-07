@@ -6,6 +6,7 @@ on:
       - ".github/workflows/extract-world-content-source.yml"
       - "tools/gameplay_source_audit/extract_world_content_sources.py"
       - "tools/gameplay_source_audit/build_runtime_world_index.py"
+      - "tools/gameplay_source_audit/validate_runtime_world_index.py"
 permissions:
   contents: write
 concurrency:
@@ -34,6 +35,7 @@ jobs:
         run: |
           python3 tools/gameplay_source_audit/build_runtime_world_index.py --source-dir build/world-content-source --output data/world_content_index.json --report reports/world-content-index-validation.json
           python3 -m json.tool data/world_content_index.json > /dev/null
+          python3 tools/gameplay_source_audit/validate_runtime_world_index.py data/world_content_index.json
           python3 -m json.tool reports/world-content-index-validation.json > /dev/null
       - name: Commit generated runtime index to this feature branch
         run: |
