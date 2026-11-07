@@ -79,15 +79,16 @@ def parse_lua_assignments(text: str, root_name: str):
         matched += 1
     return root, matched
 
-def load_decrypted(root: Path, rel: str, signature: str):
+def load_decrypted(root: Path, rel: str, signature: str | None):
     path = root / rel
     if not path.is_file():
         raise FileNotFoundError(rel)
     raw = path.read_bytes()
     clear = tq_decrypt(raw)
     text = decode(clear)
-    if signature not in text:
-        raise ValueError(f"Decryption signature not found in {rel}; seed/schema validation failed")
+    if signature is not None and signature not in text:
+        preview = repr(text[:180])
+        raise ValueError(f"Decryption signature not found in {rel}; seed/schema validation failed; prefix={preview}")
     return text, hashlib.sha256(raw).hexdigest(), hashlib.sha256(clear).hexdigest(), len(raw)
 
 def main():
@@ -107,14 +108,24 @@ def main():
     info, info_hash, info_clear_hash, info_size = load_decrypted(root, rel_info, "Dialog_Dialogue = {}")
     ar_text, ar_hash, ar_clear_hash, ar_size = load_decrypted(root, rel_ar, "NpcDialogueText_AR = {}")
     en_text, en_hash, en_clear_hash, en_size = load_decrypted(root, rel_en, "NpcDialogueText_EN = {}")
-    script_ar_text, sar_hash, sar_clear_hash, sar_size = load_decrypted(root, rel_script_ar, "SCRIPT_DIALOG_TEXT_AR = {}")
-    script_en_text, sen_hash, sen_clear_hash, sen_size = load_decrypted(root, rel_script_en, "SCRIPT_DIALOG_TEXT_EN = {}")
+    script_ar_text, sar_hash, sar_clear_hash, sar_size = load_decrypted(root, rel_script_ar, None)
+    script_en_text, sen_hash, sen_clear_hash, sen_size = load_decrypted(root, rel_script_en, None)
+
+    def script_root(text, locale):
+        candidates = re.findall(r"(?m)^\\s*(?:local\\s+)?([A-Za-z_]\\w*)\\s*=\\s*\\{\\s*\\}", text)
+        preferred = [name for name in candidates if "DIALOG" in name.upper() and "TEXT" in name.upper()]
+        if preferred:
+            return preferred[0]
+        raise ValueError(f"Could not identify script dialogue text table for {locale}; prefix={text[:220]!r}")
+
+    script_ar_root = script_root(script_ar_text, "ar")
+    script_en_root = script_root(script_en_text, "en")
 
     dialogs, dialog_assignments = parse_lua_assignments(info, "Dialog_Dialogue")
     ar, ar_count = parse_lua_assignments(ar_text, "NpcDialogueText_AR")
     en, en_count = parse_lua_assignments(en_text, "NpcDialogueText_EN")
-    script_ar, script_ar_count = parse_lua_assignments(script_ar_text, "SCRIPT_DIALOG_TEXT_AR")
-    script_en, script_en_count = parse_lua_assignments(script_en_text, "SCRIPT_DIALOG_TEXT_EN")
+    script_ar, script_ar_count = parse_lua_assignments(script_ar_text, script_ar_root)
+    script_en, script_en_count = parse_lua_assignments(script_en_text, script_en_root)
 
     def flatten_text(d):
         return {str(k): v for k, v in d.items() if isinstance(v, (str, int, float))}
@@ -158,7 +169,7 @@ def main():
         {"path": rel_script_en, "size_bytes": sen_size, "sha256_encrypted": sen_hash, "sha256_decrypted": sen_clear_hash, "status": "DECRYPTED_TQ_FILE_CIPHER_SEED_9527"}
     ]
     payload = {"npc_dialogues": npc_dialogues, "dialogue_texts": {"ar": ar_flat, "en": en_flat},
-               "script_dialogue_texts": {"ar": sar_flat, "en": sen_flat}, "dialogue_sources": sources}
+               "script_dialogue_texts": {"ar": sar_flat, "en": sen_flat}, "dialogue_sources": sources, "script_text_table_names": {"ar": script_ar_root, "en": script_en_root}}
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
     report = {"npc_dialogues": len(npc_dialogues), "dialogue_assignments": dialog_assignments,
