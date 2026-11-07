@@ -358,3 +358,14 @@ func get_source_quest_navigation_target(mission_id: int, for_finish: bool = fals
 	if not WorldContentIndex or not WorldContentIndex.index_ready:
 		return {}
 	return WorldContentIndex.get_quest_npc_target(mission_id, for_finish)
+
+
+func get_source_quests_for_profession_code(profession_id: int) -> Array:
+	if not WorldContentIndex or not WorldContentIndex.index_ready:
+		return []
+	return WorldContentIndex.get_quests_for_profession(profession_id)
+
+func get_available_source_quests(level: int, profession_id: int, sex: int = 0, completed_mission_ids: Array = []) -> Array:
+	if not WorldContentIndex or not WorldContentIndex.index_ready:
+		return []
+	return WorldContentIndex.get_available_quests_for_character(level, profession_id, sex, completed_mission_ids)
