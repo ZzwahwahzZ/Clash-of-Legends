@@ -150,6 +150,23 @@ def main():
                 "evidence_status": "SOURCE_CHARACTER_SELECTION_LABEL_ONLY",
             })
 
+    english_selection_labels = [
+        r for r in selection_labels
+        if str(r.get("source_file", "")).lower().endswith("/ini/selectcharacter.ini")
+    ]
+    english_slots = {r["slot"] for r in english_selection_labels}
+    required_source_tokens = {
+        "Taoist", "Trojan", "Archer", "Warrior", "Ninja",
+        "Monk", "Saint", "Pirate", "Dragon Warrior", "Windwalker",
+    }
+    found_source_tokens = {r["normalized_source_token"] for r in english_selection_labels if r["normalized_source_token"]}
+    missing_source_tokens = sorted(required_source_tokens - found_source_tokens)
+    if len(english_slots) != 18 or missing_source_tokens:
+        raise SystemExit(
+            "Character selection source validation failed: "
+            f"slots={len(english_slots)}/18 missing_tokens={missing_source_tokens}"
+        )
+
     matrix = []
     for name in CLASSES:
         records = unique_records(identity.get(name, []))
@@ -186,6 +203,8 @@ def main():
         "schema_version": "1.4.0",
         "character_selection_slot_count": len({r["slot"] for r in selection_labels}),
         "character_selection_localized_label_count": len(selection_labels),
+        "character_selection_english_slot_count": len(english_slots),
+        "character_selection_required_source_tokens_validated": sorted(required_source_tokens),
         "character_selection_normalized_tokens": sorted({r["normalized_source_token"] for r in selection_labels if r["normalized_source_token"]}),
         "character_selection_slots_by_token": {
             token: [r for r in selection_labels if r["normalized_source_token"] == token]
