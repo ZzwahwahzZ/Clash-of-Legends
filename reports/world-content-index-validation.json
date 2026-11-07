@@ -425,5 +425,10 @@
     }
   },
   "output_bytes": 15107113,
-  "validation": "SOURCE_INDEX_GENERATED_NOT_YET_RUNTIME_BEHAVIOR_VALIDATED"
-}
+  "validation": "GODOT_RUNTIME_AUDIT_PASSED",
+  "godot_runtime_validation": {
+    "engine": "Godot 4.3",
+    "status": "PASSED",
+    "log": "ci-logs/world-index.log"
+  }
+}\n
