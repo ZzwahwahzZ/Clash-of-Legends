@@ -15,10 +15,18 @@ PATTERNS = {
     "quest": re.compile(r"(quest|task|mission|taskitem)", re.I),
     "dialogue": re.compile(r"(dialog|talk|speech|chat|message|story)", re.I),
     "npc": re.compile(r"(^|[/_.-])(npc|role|character)([/_.-]|$)", re.I),
-    "world_map": re.compile(r"(dmap|mapinfo|maplist|mapid|mapname|worldmap|map/|maps/)", re.I),
+    "world_map": re.compile(r"(gamemap|dmap|mapinfo|maplist|mapid|mapname|worldmap)", re.I),
     "city_portal": re.compile(r"(city|town|portal|teleport|transfer|gate|warp)", re.I),
 }
-TEXT_EXTS = {".ini", ".txt", ".lua", ".json", ".xml", ".csv", ".cfg", ".dat"}
+TEXT_EXTS = {".ini", ".txt", ".lua", ".json", ".xml", ".csv", ".cfg", ".dat", ".dmap", ".otherdata", ".scene", ".pux"}
+
+def should_inspect(rel: str) -> bool:
+    ext = Path(rel).suffix.lower()
+    if ext not in TEXT_EXTS:
+        return False
+    if ext in {".dmap", ".otherdata", ".scene", ".pux"}:
+        return bool(re.search(r"(map|city|town|portal|gate|world)", rel, re.I))
+    return True
 
 def sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
@@ -30,7 +38,7 @@ def collect_sources(archive: Path) -> list[tuple[str, str, bytes]]:
         for name in outer.namelist():
             if VERSION in name and ROOT_MARKER in name:
                 rel = name.split(ROOT_MARKER, 1)[1].replace("\\\\", "/")
-                if any(pattern.search(rel) for pattern in PATTERNS.values()):
+                if should_inspect(rel) and any(pattern.search(rel) for pattern in PATTERNS.values()):
                     sources.append((rel, name, outer.read(name)))
             elif VERSION in name and name.lower().endswith(".apk"):
                 target = Path(td) / (str(len(nested)) + ".apk")
