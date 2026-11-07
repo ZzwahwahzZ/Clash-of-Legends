@@ -26,6 +26,13 @@ for q in quests:
         if ref is not None and ref.get("parse_status") == "parsed":
             assert int(ref["map_id"]) > 0, f"Quest {q['mission_id']} has invalid {key} map ID"
 dialogues = data.get("dialogue_sources", [])
-assert dialogues and all(x.get("runtime_status") == "SOURCE_PRESENT_DECODE_NOT_VALIDATED" for x in dialogues), "Encrypted dialogue must remain explicitly unapproved"
+npc_dialogues = data.get("npc_dialogues", [])
+dialogue_texts = data.get("dialogue_texts", {})
+script_texts = data.get("script_dialogue_texts", {})
+assert len(dialogues) == 5 and all(x.get("status") == "DECRYPTED_TQ_FILE_CIPHER_SEED_9527" for x in dialogues), "All five encrypted dialogue sources must pass cipher signature validation"
+assert len(npc_dialogues) > 0, "No NPC dialogue structures were parsed"
+assert any(int(x.get("dialogue_id", 0)) == 1051 for x in npc_dialogues), "Known NPC dialogue 1051 is missing"
+assert dialogue_texts.get("ar") and dialogue_texts.get("en"), "Arabic/English NPC dialogue text tables are empty"
+assert script_texts.get("ar") and script_texts.get("en"), "Arabic/English script dialogue text tables are empty"
 print("RUNTIME WORLD INDEX STRUCTURE PASSED")
-print(f"maps={len(maps)} unique_maps={len(unique_maps)} npc_templates={len(npcs)} quests={len(quests)} dialogue_sources={len(dialogues)}")
+print(f"maps={len(maps)} unique_maps={len(unique_maps)} npc_templates={len(npcs)} quests={len(quests)} npc_dialogues={len(npc_dialogues)} dialogue_texts_ar={len(dialogue_texts.get(chr(97)+chr(114), {}))} dialogue_texts_en={len(dialogue_texts.get(chr(101)+chr(110), {}))}")
