@@ -24,7 +24,7 @@ const NPC_SPAWN_CANDIDATES := {
 	"npc_jianghai_apothecary": Vector3(13.0, -0.045, -48.0),
 	"npc_jianghai_tea_merchant": Vector3(8.7, -0.14, -8.0)
 }
-const ANCHORS :=
+const ANCHORS := {
 	"jianghai.central_avenue": Vector3(0.0, -0.14, -60.0),
 	"jianghai.pawnshop_approach": Vector3(-86.0, -0.078, -106.0),
 	"jianghai.factory_approach": Vector3(86.0, -0.078, -12.0),
