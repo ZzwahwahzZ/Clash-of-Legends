@@ -77,3 +77,24 @@ A map transition/instant-travel action is not the same as walking navigation. It
 ## Acceptance gate
 
 A future pass requires a runtime demonstration for both automatic request origins using the same executor, a manual joystick interruption test, correct approach/interaction arrival, and a separate verified transition test for any cross-map objective. Passing a route to an arbitrary coordinate is not sufficient.
+
+
+## Follow-up implementation — quest/UI preservation boundary
+
+Commit: `0672279236c12c77d4358aae9c3a2606b42a9d27`
+
+The quest-navigation call path was changed without editing quest progression content or the player-facing HUD/dialogue scenes:
+
+- Removed the quest navigation dependency on `WorldTravelManager.travel_to(..., "quest")`. Quest navigation no longer requests an instant relocation.
+- Kept `WorldTravelManager`, its destination registry, and the manual travel panel wired by `MainHUDController` intact. This is the separate Travel Scroll/instant-travel feature and is not removed or repurposed.
+- The active completed-quest state resolves its existing `turn_in_npc_id` against live NPC nodes. An active `talk` objective resolves its existing `objective_target` NPC ID against the same live NPC group.
+- Kill/collect objectives may navigate only when the quest data explicitly supplies a `navigation_target` with `navigation_enabled`, `target_type`, `target_id`, `map_id`, and `approach_anchor_id`, and a matching live node is registered in `quest_navigation_targets`. Missing data produces a visible unavailable message; no quest-ID coordinate guesses or map-center fallback are used.
+- The quest database entries, objective counts/types/IDs, titles, descriptions, reward amounts, turn-in rules, and chain links were not edited by this change.
+- `MainHUDController`, `DialogueUI.gd`, and their scenes were not edited. Existing quest banner, HUD layout, dialogue panel and dialogue options remain the presentation surface; this change deliberately adds no replacement quest UI.
+
+### Remaining acceptance limits
+
+- The current starter quest data does not yet provide authored `navigation_target` records for its kill/collect regions. Those objectives therefore report unavailable rather than routing to invented coordinates.
+- The current talk progression callback still fires from `NPCBase.interact()` before a dialogue option is selected. That progression/dialogue coupling needs a separate behavior-preserving correction after the existing quest dialogue branches are fully inventoried; this navigation commit does not alter it.
+- NPC resolution currently uses the live `npcs` group and NPC IDs. A complete semantic world registry, cross-map exits/transports, world-tap picking, and arrival/interaction-range acceptance remain unimplemented/unverified.
+- No runtime Godot or Android acceptance is claimed for this source change. The player movement method's second argument is currently ignored by its implementation, so interaction-range enforcement remains a separate required task.
