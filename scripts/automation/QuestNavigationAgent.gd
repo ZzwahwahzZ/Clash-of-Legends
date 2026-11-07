@@ -93,7 +93,10 @@ func on_source_enemy_killed(monster_name: String, map_id: String = "") -> void:
 	_advance_source_objectives("mob", monster_name, map_id, 1)
 
 func on_source_item_collected(item_id: String, item_name: String = "", map_id: String = "", quantity: int = 1) -> void:
-	_advance_source_objectives("item", item_id if not item_id.is_empty() else item_name, map_id, maxi(1, quantity))
+	if not item_id.is_empty():
+		_advance_source_objectives("item_id", item_id, map_id, maxi(1, quantity))
+	if not item_name.is_empty():
+		_advance_source_objectives("item_name", item_name, map_id, maxi(1, quantity))
 
 func on_source_map_entered(map_id: String) -> void:
 	_advance_source_objectives("map", map_id, map_id, 1)
@@ -132,11 +135,11 @@ func _advance_source_objectives(event_kind: String, target: String, map_id: Stri
 			"item_t":
 				var expected_item := str(intention.get("item_name", "")).strip_edges().to_lower().replace(" ", "").replace("_", "").replace("-", "")
 				var actual_item := target.to_lower().replace(" ", "").replace("_", "").replace("-", "")
-				matched = event_kind == "item" and not expected_item.is_empty() and expected_item == actual_item
+				matched = event_kind == "item_name" and not expected_item.is_empty() and expected_item == actual_item
 			"chk_item":
 				var parts: Array = intention.get("parts", [])
 				if not parts.is_empty():
-					matched = event_kind == "item" and str(parts[0]) == target
+					matched = event_kind == "item_id" and str(parts[0]) == target
 					if parts.size() > 1:
 						required = maxi(1, int(parts[1]))
 			"map":
