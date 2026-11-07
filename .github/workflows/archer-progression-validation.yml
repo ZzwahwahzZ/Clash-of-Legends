@@ -15,6 +15,7 @@ on:
       - "scripts/ui/MainHUDController.gd"
       - "scripts/ui/LegendIntro.gd"
       - "tools/quality/validate_archer_progression.gd"
+      - "tools/quality/ArcherProgressionTestRunner.tscn"
       - ".github/workflows/archer-progression-validation.yml"
   workflow_dispatch:
 
@@ -43,7 +44,7 @@ jobs:
       - name: Validate Archer promotion gate, form switching and save/load
         run: |
           set -o pipefail
-          godot --headless --path . --script tools/quality/validate_archer_progression.gd --quit-after 5 2>&1 | tee archer-progression.log
+          timeout 180s godot --headless --path . res://tools/quality/ArcherProgressionTestRunner.tscn 2>&1 | tee archer-progression.log
           grep -q "ARCHER PROGRESSION PASSED" archer-progression.log
           if grep -Eq "SCRIPT ERROR:|Parse Error:|Compile Error:|ARCHER PROGRESSION FAILED" archer-progression.log; then
             echo "Archer progression regression test failed"
