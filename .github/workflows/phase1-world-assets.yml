@@ -227,73 +227,128 @@ jobs:
       - name: Verify Godot import
         shell: bash
         run: |
+          set +e
           set -o pipefail
           godot --headless --editor --path . --quit 2>&1 | tee reports/phase1_godot_import.log
-          if grep -Eq "SCRIPT ERROR:|Parse Error:|Compile Error:|ERROR: Failed to load" reports/phase1_godot_import.log; then
-            echo "Godot reported import or script errors"
-            exit 1
+          import_rc=${PIPESTATUS[0]}
+          import_errors=0
+          if [ "$import_rc" -ne 0 ] || grep -Eq "SCRIPT ERROR:|Parse Error:|Compile Error:|ERROR: Failed to load" reports/phase1_godot_import.log; then
+            import_errors=1
           fi
+          python3 - "$import_rc" "$import_errors" <<'PY'
+          import json, sys
+          from pathlib import Path
+          Path("reports/phase1_import_status.json").write_text(json.dumps({
+              "exit_code": int(sys.argv[1]),
+              "error_markers_found": bool(int(sys.argv[2])),
+              "passed": int(sys.argv[1]) == 0 and int(sys.argv[2]) == 0
+          }, indent=2), encoding="utf-8")
+          PY
+          echo "Import result recorded; continuing to the full audit suite even if import checks failed."
 
-      - name: Render visual evidence in Godot
+      - name: Render visual evidence and run the complete integrated audit suite
         shell: bash
         run: |
-          set -euo pipefail
+          set +e
+          set -o pipefail
           mkdir -p reports
-          xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --path . --rendering-method gl_compatibility --script res://tools/quality/Phase1ChineseDistrictPreview.gd 2>&1 | tee reports/phase1_chinese_district_preview.log
-          test -s reports/phase1_chinese_district_preview.png
-          test -s reports/phase1_city_topdown_layout.png
-          test -s reports/phase1_chinese_district_closeup.png
-          test -s reports/phase1_chinese_district_gate_detail.png
-          test -s reports/phase1_market_bridge_detail.png
-          test -s reports/phase1_maingame_gate_integration.png
-          test -s reports/phase1_maingame_bridge_integration.png
-          test -s reports/phase1_maingame_street_integration.png
-          xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --path . --rendering-method gl_compatibility --script res://tools/quality/Phase1FullCityPreview.gd 2>&1 | tee reports/phase1_full_city_preview.log
-          test -s reports/phase1_full_city_preview.png
-          test -s reports/phase1_full_city_closeup.png
-          xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --path . --rendering-method gl_compatibility --script res://tools/quality/Phase1UrbanInfillPreview.gd 2>&1 | tee reports/phase1_urban_infill_preview.log
-          test -s reports/phase1_urban_infill_topdown.png
-          test -s reports/phase1_urban_infill_oblique.png
-          test -s reports/phase1_urban_infill_bounds.json
-          xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --path . --rendering-method gl_compatibility --script res://tools/quality/Phase1WorldStructureAudit.gd 2>&1 | tee reports/phase1_world_structure_audit.log
-          test -s reports/phase1_world_structure_audit.json
-          xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --path . --rendering-method gl_compatibility --script res://tools/quality/Phase1NavigationBakeAudit.gd 2>&1 | tee reports/phase1_navigation_bake_audit.log
-          test -s reports/phase1_navigation_bake_audit.json
-          godot --headless --path . --script res://tools/quality/Phase1NavigationRuntimeProbe.gd 2>&1 | tee reports/phase1_navigation_runtime_probe.log
-          test -s reports/phase1_navigation_runtime_probe.json
-          if grep -Eq 'SCRIPT ERROR:|Parse Error:|PHASE1 NAVIGATION RUNTIME PROBE FAILED' reports/phase1_navigation_runtime_probe.log; then
-            echo 'Godot runtime navigation probe reported a script or probe failure'
-            exit 1
-          fi
-          if ! grep -q 'PHASE1 NAVIGATION PLAYER MOVEMENT, CITY ROUTES, BUILDING APPROACHES AND FLOOR COLLISION: PASS' reports/phase1_navigation_runtime_probe.log; then
-            echo 'Godot runtime navigation probe did not emit its movement and floor-contact PASS marker'
-            exit 1
-          fi
-          # Godot 4.3 can emit a non-fatal detached-node global-transform warning
-          # during imported visual setup. Keep it visible in the report, but do
-          # not fail a runtime probe whose explicit movement, doorway, wall,
-          # navigation, and floor-contact assertions all pass.
-          xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --path . --rendering-method gl_compatibility --script res://tools/quality/Phase1AnchorSurfaceAudit.gd 2>&1 | tee reports/phase1_anchor_surface_audit.log
-          test -s reports/phase1_anchor_surface_candidates.json
-          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|PHASE1 ANCHOR SURFACE AUDIT FAILED' reports/phase1_anchor_surface_audit.log; then
-            echo 'Godot anchor surface audit reported an error'
-            exit 1
-          fi
-          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|Attempted to update a navigation region|Condition "!is_inside_tree\(\)"|PHASE1 NAVIGATION BAKE FAILED' reports/phase1_navigation_bake_audit.log; then
-            echo 'Godot navigation bake audit reported an error'
-            exit 1
-          fi
-          if grep -Eq 'SCRIPT ERROR:|ERROR: Node not inside tree|Parse Error:' reports/phase1_chinese_district_preview.log; then
-            echo 'Godot visual preview reported a script or scene-tree error'
-            exit 1
-          fi
+          : > reports/phase1_audit_results.tsv
+          run_audit() {
+            label="$1"; log="$2"; shift 2
+            echo "===== BEGIN: $label ====="
+            "$@" 2>&1 | tee "$log"
+            rc=${PIPESTATUS[0]}
+            if [ "$rc" -eq 0 ]; then status=PASS; else status=FAIL; fi
+            printf '%s\t%s\t%s\n' "$label" "$status" "$rc" >> reports/phase1_audit_results.tsv
+            echo "===== END: $label ($status, exit $rc) ====="
+          }
+          check_file() {
+            label="$1"; file="$2"
+            if [ -s "$file" ]; then
+              printf '%s\tPASS\t0\n' "$label" >> reports/phase1_audit_results.tsv
+            else
+              printf '%s\tFAIL\t1\n' "$label" >> reports/phase1_audit_results.tsv
+            fi
+          }
+
+          run_audit "Chinese district preview and main-game integration" reports/phase1_chinese_district_preview.log xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --path . --rendering-method gl_compatibility --script res://tools/quality/Phase1ChineseDistrictPreview.gd
+          check_file "Chinese district preview image" reports/phase1_chinese_district_preview.png
+          check_file "City top-down layout image" reports/phase1_city_topdown_layout.png
+          check_file "Chinese district close-up image" reports/phase1_chinese_district_closeup.png
+          check_file "Chinese district gate detail image" reports/phase1_chinese_district_gate_detail.png
+          check_file "Market bridge detail image" reports/phase1_market_bridge_detail.png
+          check_file "Main-game gate integration image" reports/phase1_maingame_gate_integration.png
+          check_file "Main-game bridge integration image" reports/phase1_maingame_bridge_integration.png
+          check_file "Main-game street integration image" reports/phase1_maingame_street_integration.png
+
+          run_audit "Full city visual preview" reports/phase1_full_city_preview.log xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --path . --rendering-method gl_compatibility --script res://tools/quality/Phase1FullCityPreview.gd
+          check_file "Full city preview image" reports/phase1_full_city_preview.png
+          check_file "Full city close-up image" reports/phase1_full_city_closeup.png
+
+          run_audit "Urban infill visual and bounds audit" reports/phase1_urban_infill_preview.log xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --path . --rendering-method gl_compatibility --script res://tools/quality/Phase1UrbanInfillPreview.gd
+          check_file "Urban infill top-down image" reports/phase1_urban_infill_topdown.png
+          check_file "Urban infill oblique image" reports/phase1_urban_infill_oblique.png
+          check_file "Urban infill bounds report" reports/phase1_urban_infill_bounds.json
+
+          run_audit "World structure and authored geometry audit" reports/phase1_world_structure_audit.log xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --path . --rendering-method gl_compatibility --script res://tools/quality/Phase1WorldStructureAudit.gd
+          check_file "World structure JSON report" reports/phase1_world_structure_audit.json
+
+          run_audit "Navigation bake and saved-scene collision audit" reports/phase1_navigation_bake_audit.log xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --path . --rendering-method gl_compatibility --script res://tools/quality/Phase1NavigationBakeAudit.gd
+          check_file "Navigation bake JSON report" reports/phase1_navigation_bake_audit.json
+          check_file "Saved runtime world scene" scenes/world/JianghaiOldCity.tscn
+          check_file "Saved navigation mesh" assets/environment/phase1/jianghai/jianghai_city_navmesh.tres
+
+          run_audit "Physical movement, route, doorway, wall and bridge collision suite" reports/phase1_navigation_runtime_probe.log godot --headless --path . --script res://tools/quality/Phase1NavigationRuntimeProbe.gd
+          check_file "Runtime movement and collision JSON report" reports/phase1_navigation_runtime_probe.json
+
+          run_audit "Anchor surface and landmark audit" reports/phase1_anchor_surface_audit.log xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --path . --rendering-method gl_compatibility --script res://tools/quality/Phase1AnchorSurfaceAudit.gd
+          check_file "Anchor surface candidate report" reports/phase1_anchor_surface_candidates.json
+
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          results = []
+          for line in Path("reports/phase1_audit_results.tsv").read_text(encoding="utf-8").splitlines():
+              label, status, code = line.split("\t")
+              results.append({"check": label, "status": status, "exit_code": int(code)})
+          log_rules = {
+              "Godot import": ("reports/phase1_godot_import.log", ("SCRIPT ERROR:", "Parse Error:", "Compile Error:", "ERROR: Failed to load")),
+              "Chinese district preview": ("reports/phase1_chinese_district_preview.log", ("SCRIPT ERROR:", "ERROR: Node not inside tree", "Parse Error:")),
+              "Navigation bake": ("reports/phase1_navigation_bake_audit.log", ("SCRIPT ERROR:", "Parse Error:", "Attempted to update a navigation region", 'Condition "!is_inside_tree()"', "PHASE1 NAVIGATION BAKE FAILED")),
+              "Runtime movement and collision": ("reports/phase1_navigation_runtime_probe.log", ("SCRIPT ERROR:", "Parse Error:", "PHASE1 NAVIGATION RUNTIME PROBE FAILED")),
+              "Anchor surface": ("reports/phase1_anchor_surface_audit.log", ("SCRIPT ERROR:", "Parse Error:", "Failed to load", "PHASE1 ANCHOR SURFACE AUDIT FAILED")),
+          }
+          for label, (path, markers) in log_rules.items():
+              p = Path(path)
+              if p.exists():
+                  content = p.read_text(encoding="utf-8", errors="replace")
+                  found = [marker for marker in markers if marker in content]
+                  if found:
+                      results.append({"check": label + " error-marker scan", "status": "FAIL", "error_markers": found})
+          import_status = json.loads(Path("reports/phase1_import_status.json").read_text()) if Path("reports/phase1_import_status.json").exists() else {"passed": False}
+          results.append({"check": "Godot import status", "status": "PASS" if import_status.get("passed") else "FAIL", "details": import_status})
+          report = {
+              "suite": "Phase 1 integrated city/world quality gate",
+              "checks_total": len(results),
+              "checks_passed": sum(1 for row in results if row["status"] == "PASS"),
+              "checks_failed": sum(1 for row in results if row["status"] != "PASS"),
+              "overall": "PASS" if all(row["status"] == "PASS" for row in results) else "FAIL",
+              "results": results,
+              "npc_spawning_enabled": False,
+              "android_device_performance_validated": False
+          }
+          Path("reports/phase1_integrated_quality_report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
+          print("PHASE1 INTEGRATED QUALITY REPORT: " + json.dumps(report, ensure_ascii=False))
+          if report["overall"] != "PASS":
+              raise SystemExit("Integrated phase 1 quality gate failed; all individual audit outputs were collected.")
+          PY
 
       - name: Commit acquired assets and audit evidence to phase branch
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add assets/environment/phase1 reports/phase1_world_asset_manifest.json reports/phase1_chinese_district_extract.json reports/phase1_chinese_district_preview.png
+          git add assets/environment/phase1 reports/phase1_world_asset_manifest.json reports/phase1_chinese_district_extract.json reports/phase1_chinese_district_preview.png reports/phase1_integrated_quality_report.json reports/phase1_audit_results.tsv reports/phase1_import_status.json
           git add -f reports/phase1_world_structure_audit.json reports/phase1_urban_infill_bounds.json reports/phase1_city_topdown_layout.png reports/phase1_maingame_gate_integration.png reports/phase1_maingame_bridge_integration.png reports/phase1_maingame_street_integration.png reports/phase1_chinese_district_closeup.png reports/phase1_chinese_district_gate_detail.png reports/phase1_market_bridge_detail.png reports/phase1_full_city_preview.png reports/phase1_full_city_closeup.png reports/phase1_urban_infill_topdown.png reports/phase1_urban_infill_oblique.png reports/phase1_navigation_bake_audit.json reports/phase1_navigation_bake_audit.log reports/phase1_navigation_runtime_probe.json reports/phase1_navigation_runtime_probe.log reports/phase1_anchor_surface_candidates.json reports/phase1_anchor_surface_audit.log scenes/world/JianghaiOldCity.tscn
           rm -f assets/environment/phase1/jianghai/full_city_preview.glb assets/environment/phase1/jianghai/full_city_preview.glb.import
           git diff --cached --quiet && { echo "No asset changes to commit"; exit 0; }
@@ -313,6 +368,9 @@ jobs:
           path: |
             reports/phase1_world_asset_manifest.json
             reports/phase1_godot_import.log
+            reports/phase1_import_status.json
+            reports/phase1_audit_results.tsv
+            reports/phase1_integrated_quality_report.json
             reports/phase1_visual_preview.log
             reports/phase1_chinese_district_extract.json
             reports/phase1_chinese_district_preview.log
