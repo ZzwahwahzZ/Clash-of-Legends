@@ -15629,6 +15629,91 @@
         -8
       ],
       "type": "MeshInstance3D"
+    },
+    {
+      "descendant_meshes": [
+        {
+          "global_position": [
+            0,
+            0,
+            0
+          ],
+          "mesh_aabb_local": [
+            [
+              -143,
+              -0.14000000059605,
+              -169.5
+            ],
+            [
+              286,
+              0.120000004768372,
+              11
+            ]
+          ],
+          "mesh_aabb_world": [
+            [
+              -143,
+              -0.14000000059605,
+              -169.5
+            ],
+            [
+              286,
+              0.120000004768372,
+              11
+            ]
+          ],
+          "path": "/root/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/RiverWardStreet"
+        }
+      ],
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "id": "jianghai.west_market_entry",
+      "mesh_aabb_local": [
+        [
+          -143,
+          -0.14000000059605,
+          -169.5
+        ],
+        [
+          286,
+          0.120000004768372,
+          11
+        ]
+      ],
+      "node_path": "JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/RiverWardStreet",
+      "position_global": [
+        0,
+        0,
+        0
+      ],
+      "resolved": true,
+      "target_inside_anchor_mesh_aabb": false,
+      "target_world": [
+        -35,
+        0.150000005960464,
+        -164
+      ],
+      "type": "MeshInstance3D"
     }
   ],
   "street_network_nodes": [

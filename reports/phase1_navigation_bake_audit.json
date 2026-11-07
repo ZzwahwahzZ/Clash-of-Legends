@@ -97,6 +97,21 @@
         -0.14000000059605,
         -8
       ]
+    },
+    {
+      "id": "jianghai.west_market_entry",
+      "projected_position": [
+        -35,
+        0.150004476308823,
+        -164
+      ],
+      "projection_distance": 0.0000044703483581543,
+      "projection_valid": true,
+      "source_position": [
+        -35,
+        0.150000005960464,
+        -164
+      ]
     }
   ],
   "bake_status": "BAKED",
@@ -179,7 +194,7 @@
   "parsed_geometry_type": "MESH_INSTANCES",
   "pawnshop_obstacle_shape_count": 40,
   "polygon_count": 88,
-  "projection_pass_count": 6,
+  "projection_pass_count": 7,
   "route_connectivity": [
     {
       "connected": true,
@@ -222,9 +237,16 @@
       "path_length": 224.028342425823,
       "to": "jianghai.factory_approach",
       "waypoint_count": 22
+    },
+    {
+      "connected": true,
+      "from": "jianghai.central_avenue",
+      "path_length": 126.099417924881,
+      "to": "jianghai.west_market_entry",
+      "waypoint_count": 12
     }
   ],
-  "route_connectivity_pass_count": 6,
+  "route_connectivity_pass_count": 7,
   "route_status": "CONNECTED",
   "runtime_android_performance_validated": false,
   "saved_navigation_mesh": "res://assets/environment/phase1/jianghai/jianghai_city_navmesh.tres",
