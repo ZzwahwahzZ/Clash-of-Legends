@@ -68,7 +68,8 @@ func load_graph(path: String = DEFAULT_CATALOG) -> bool:
 		var mission: Dictionary = missions[id]
 		for prerequisite in mission.get("prerequisites", []):
 			var parent := str(prerequisite)
-			dependents.setdefault(parent, [])
+			if not dependents.has(parent):
+				dependents[parent] = []
 			if not dependents[parent].has(id):
 				dependents[parent].append(id)
 		_index_npc(npc_starts, mission.get("begin_npc", {}), id)
@@ -95,7 +96,8 @@ func _index_map(endpoint: Dictionary, mission_id: String) -> void:
 		_index_value(map_missions, map_id, mission_id)
 
 func _index_value(index: Dictionary, key: String, mission_id: String) -> void:
-	index.setdefault(key, [])
+	if not index.has(key):
+		index[key] = []
 	if not index[key].has(mission_id):
 		index[key].append(mission_id)
 
@@ -143,9 +145,13 @@ func get_available_at_npc(npc_id: String, completed_ids: Array = [], player_leve
 		if is_available(str(id), completed_ids, player_level, profession_code):
 			result.append(get_mission(str(id)))
 	for id in npc_turnins.get(key, []):
-		var mission := get_mission(str(id))
-		if not result.any(func(row: Dictionary) -> bool: return str(row.get("id", "")) == str(id)):
-			result.append(mission)
+		var already_added := false
+		for existing in result:
+			if str(existing.get("id", "")) == str(id):
+				already_added = true
+				break
+		if not already_added:
+			result.append(get_mission(str(id)))
 	return result
 
 func get_route(mission_id: String, turn_in: bool = false) -> Dictionary:
