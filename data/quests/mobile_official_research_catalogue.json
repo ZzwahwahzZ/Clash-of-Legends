@@ -263,6 +263,29 @@
         "badge drop amounts and per-player limits",
         "exchange transaction IDs and claim semantics"
       ]
+    },
+    {
+      "project_record_id": "mobile_guide.daily_evil_labyrinth",
+      "source_title": "New Evil Labyrinth",
+      "category": "daily_activity",
+      "source_uri": "https://comobile.99.com/guide/2023-08-29/new_evil_labyrinth.shtml",
+      "source_type": "official_mobile_guide_update",
+      "published_window": "After the Aug. 29, 2023 update; no expiry stated in the guide",
+      "published_gate": "Level 110+",
+      "published_npc": "Simon (Twin City 431,405); Dark Furnace (Twin City 433,405 / Endless Tower 55,33)",
+      "published_map_references": "Evil Labyrinth floors 1-4; exact map IDs and floor topology unresolved",
+      "verified_guide_mechanics": "Simon enters the Labyrinth quest map. The guide reports updated Labyrinth daily quests with more concise targets and a daily activity quest changed to composing a box. Evil Chief spawns at 00:00 on a random floor 2-4 and every four hours, unless the previous day's boss remains alive; first daily participation in attacking it grants a floor-specific box. Treasure-map boxes are obtained on floors 1-4. Shared daily opening limit is 5 across Solar, Lunar, Starry, Cloud and Dark boxes.",
+      "source_quest_id": null,
+      "admission_state": "RESEARCH_ONLY_NOT_RUNTIME_APPROVED",
+      "unresolved_fields": [
+        "exact daily quest titles and ordered objectives",
+        "exact item/material requirements and quantities",
+        "exact quest UI states, claim flow and reset behavior",
+        "floor map IDs, portal links and treasure-map interaction coordinates",
+        "Evil Chief spawn IDs and reward-claim transaction details",
+        "verify continued availability in the target 1.1.2.3 APK build"
+      ],
+      "evidence_notes": "The source establishes the daily quest optimization and activity-quest type change, but does not publish the exact daily quest list or step-by-step quest definitions. Reward-box limits are shared across five box types and must not be mistaken for a quest acceptance limit."
     }
   ],
   "official_mobile_map_names": [
