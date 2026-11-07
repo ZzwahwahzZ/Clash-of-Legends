@@ -227,3 +227,16 @@ func _get_player_level() -> int:
 	if GameManager and is_instance_valid(GameManager.player_reference):
 		return int(GameManager.player_reference.get("current_level"))
 	return 1
+
+
+## Source profession codes are passed in from audited role data; no numeric code
+## is inferred from the display class name.
+func get_source_quests_for_current_character(profession_id: int, sex: int = 0, completed_mission_ids: Array = []) -> Array:
+	if not WorldContentIndex or not WorldContentIndex.index_ready:
+		return []
+	return WorldContentIndex.get_available_quests_for_character(
+		_get_player_level(),
+		profession_id,
+		sex,
+		completed_mission_ids
+	)
