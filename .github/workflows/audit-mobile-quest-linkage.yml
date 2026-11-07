@@ -1,0 +1,122 @@
+name: Audit Mobile quest reader and world linkage
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: mobile-quest-linkage-audit-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  quest-linkage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and verify the indexed source archive
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p build/source build/mobile-quest-source reports
+          curl --fail --location --retry 5 --retry-all-errors \
+            -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/octet-stream" \
+            "https://api.github.com/repos/ZzwahwahzZ/Conquer-Mobile-Assets./releases/assets/709852618" \
+            -o build/source/extracted-assets-001.zip
+          echo "0d21a110c09b762ed5f1a5f4da022857b0534e489eb85052d15da460cb229d2a  build/source/extracted-assets-001.zip" | sha256sum -c -
+      - name: Extract the exact 1.1.2.3 APK and quest-world source files
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import zipfile
+          from pathlib import Path
+          archive=Path("build/source/extracted-assets-001.zip")
+          out=Path("build/mobile-quest-source")
+          version="ConquerOnline-1.1.2.3"
+          with zipfile.ZipFile(archive) as outer:
+              matches=[n for n in outer.namelist() if version in n and n.lower().endswith(".apk")]
+              if not matches:
+                  raise SystemExit("Pinned 1.1.2.3 APK not found")
+              for i,name in enumerate(matches):
+                  apk=out/f"apk-{i}.apk"
+                  apk.parent.mkdir(parents=True,exist_ok=True)
+                  with outer.open(name) as src, apk.open("wb") as dst:
+                      while block:=src.read(1024*1024): dst.write(block)
+                  with zipfile.ZipFile(apk) as z:
+                      selected=[]
+                      for info in z.infolist():
+                          low=info.filename.lower()
+                          if not info.filename.startswith("assets/ConquerRes/"): continue
+                          base=low.rsplit("/",1)[-1]
+                          if (base in {"questinfo.dat","taskitem_info.dat","questinfo.ini","questinfopassionserver.ini","terrainnpc.ini","npc.ini","gamemap.dat","gamemapex.ini","mapdestination.ini","clienttask124.dat","scriptdialoguetext_ar.dat","scriptdialoguetext_en.dat","scriptdialoguetext_sp.dat","luascriptmgr.dat"}
+                              or "/client_realm_task/" in low and base.endswith(".dat")
+                              or "/clienttask" in low and base.endswith(".dat")
+                              or "/script/" in low and any(t in low for t in ("ninjaawakening","xiakeawake","juqing","npc","task"))):
+                              target=out/"selected"/Path(info.filename).relative_to("assets/ConquerRes")
+                              target.parent.mkdir(parents=True,exist_ok=True)
+                              with z.open(info) as src, target.open("wb") as dst:
+                                  while block:=src.read(1024*1024): dst.write(block)
+                              selected.append({"path":info.filename,"size_bytes":info.file_size})
+                  print({"apk_member":name,"selected_count":len(selected),"selected_files":selected})
+          PY
+      - name: Run existing quest decoder, ecosystem inventory, and APK reader probe
+        run: |
+          set -euo pipefail
+          python3 tools/gameplay_source_audit/mobile_quest_source_decoder.py \
+            build/source/extracted-assets-001.zip \
+            --output reports/mobile-quest-source-audit.json \
+            --decoded-dir build/mobile_quest_candidates
+          python3 tools/gameplay_source_audit/quest_ecosystem_inventory.py \
+            build/source/extracted-assets-001.zip \
+            --output reports/quest-ecosystem-inventory.json \
+            --output-dir build/quest-ecosystem
+          python3 tools/gameplay_source_audit/mobile_apk_reader_probe.py \
+            build/source/extracted-assets-001.zip \
+            --output reports/mobile-apk-reader-probe.json
+      - name: Build source-to-world cross-reference evidence pack
+        run: |
+          python3 - <<'PY'
+          import csv, hashlib, json, re, zipfile
+          from pathlib import Path
+          root=Path("build/mobile-quest-source/selected")
+          rows=[]
+          for p in sorted(root.rglob("*")):
+              if not p.is_file(): continue
+              raw=p.read_bytes()
+              text=raw.decode("utf-8",errors="replace")
+              if not text.strip():
+                  text=raw.decode("gbk",errors="replace")
+              fields=sorted(set(re.findall(r'(?m)^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=',text)))
+              ids=sorted(set(re.findall(r'(?<!\d)(?:10\d{2,5}|[1-9]\d{2,7})(?!\d)',text)))
+              rows.append({"path":str(p.relative_to(root)),"size_bytes":len(raw),"sha256":hashlib.sha256(raw).hexdigest(),"text_lines":len(text.splitlines()),"field_names":fields[:250],"numeric_tokens_sample":ids[:500]})
+          (Path("reports")/"selected-world-source-index.json").write_text(json.dumps(rows,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+          quest=json.loads(Path("reports/mobile-quest-source-audit.json").read_text())
+          ecosystem=json.loads(Path("reports/quest-ecosystem-inventory.json").read_text())
+          reader=json.loads(Path("reports/mobile-apk-reader-probe.json").read_text())
+          summary={
+            "source_archive_sha256":"0d21a110c09b762ed5f1a5f4da022857b0534e489eb85052d15da460cb229d2a",
+            "selected_world_source_files":len(rows),
+            "selected_world_source_paths":[r["path"] for r in rows],
+            "quest_decoder":{"files_found":quest.get("files_found"),"apk_members":quest.get("apk_members"),"candidate_records":[{"path":r.get("relative_path"),"raw_classification":r.get("raw_classification"),"cipher_candidates":r.get("cipher_candidates",[])} for r in quest.get("records",[]) if any(x in r.get("relative_path","").lower() for x in ("questinfo","taskitem","client_realm_task","clienttask"))]},
+            "quest_ecosystem":{"files_found":ecosystem.get("files_found"),"category_file_counts":ecosystem.get("category_file_counts"),"candidate_task_ids":ecosystem.get("unique_task_ids_in_candidates")},
+            "apk_reader":{"apk_count":reader.get("apk_count"),"reader_hint_count":reader.get("reader_hint_count"),"results":reader.get("results")},
+            "policy":"Discovery and cross-reference evidence only. No guessed field meanings or runtime approval."
+          }
+          Path("reports/mobile-quest-linkage-summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+          PY
+      - name: Upload compact quest linkage evidence and selected raw source files
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mobile-Quest-Linkage-Evidence
+          path: |
+            reports/mobile-quest-source-audit.json
+            reports/quest-ecosystem-inventory.json
+            reports/mobile-apk-reader-probe.json
+            reports/selected-world-source-index.json
+            reports/mobile-quest-linkage-summary.json
+            build/mobile-quest-source/selected/
+            build/mobile_quest_candidates/
+            build/quest-ecosystem/decoded_candidates/
+          if-no-files-found: warn
+          retention-days: 30
+          compression-level: 6
