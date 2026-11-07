@@ -88,8 +88,11 @@ jobs:
                   low=info.filename.lower()
                   if name.startswith("classes") and name.endswith(".dex"):
                       (Path("build/apk-reader/dex")/name).write_bytes(apk.read(info))
-                  elif low.startswith("lib/") and low.endswith(".so"):
-                      target=Path("build/apk-reader/native")/Path(info.filename).name
+                  elif (low.startswith("lib/") or low.startswith("assets/conquerres/lib/")) and low.endswith(".so"):
+                      # The game engine libraries are shipped as ConquerRes assets and copied
+                      # to app-private storage by CQ2ClientActivity before System.load().
+                      target=Path("build/apk-reader/native")/Path(info.filename).relative_to("assets/ConquerRes/lib") if low.startswith("assets/conquerres/lib/") else Path("build/apk-reader/native")/Path(info.filename).name
+                      target.parent.mkdir(parents=True,exist_ok=True)
                       target.write_bytes(apk.read(info))
           print("APK bytecode and native libraries extracted for static inspection")
           PY
@@ -304,6 +307,10 @@ jobs:
             reports/mobile-apk-reader-implementation-hits.json
             build/apk-reader/dex/
             build/apk-reader/native/
+            build/apk-reader/embedded-payloads/
+            build/apk-reader/baksmali/
+            reports/embedded-dex-payload-triage.json
+            reports/baksmali-*.log
             build/apk-reader/decompiled/
             reports/selected-world-source-index.json
             reports/mobile-quest-linkage-summary.json
