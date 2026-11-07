@@ -32,6 +32,7 @@ jobs:
           python3 tools/gameplay_source_audit/build_runtime_mobile_quest_catalog.py \
             --catalog /tmp/quest-evidence/reports/mobile-quest-catalog.json \
             --analysis /tmp/quest-evidence/reports/mobile-quest-system-analysis.json \
+            --world-links /tmp/quest-evidence/reports/mobile-quest-world-links.json \
             --output data/quests/mobile_quest_catalog.json
           python3 -m json.tool data/quests/mobile_quest_catalog.json >/dev/null
       - name: Commit imported catalog to research branch
