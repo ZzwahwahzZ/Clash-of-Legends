@@ -77,16 +77,11 @@
         "cross",
         "transition"
       ],
-      "requires_navmesh_projection": true,
-      "requires_runtime_trigger": true,
+      "requires_navmesh_projection": false,
+      "requires_runtime_trigger": false,
       "interaction_enabled": false,
       "npc_spawn_anchor": false,
-      "target_offset_local": [
-        0,
-        0,
-        -150
-      ],
-      "surface_validation_status": "landmark_only_no_walkable_ramp; destination must be projected to the verified west-market walkable route after bridge crossing"
+      "surface_validation_status": "landmark_only_no_walkable_ramp; not a player destination; west-market entry must be a separately verified walkable anchor beyond the bridge"
     },
     {
       "id": "jianghai.factory_approach",
