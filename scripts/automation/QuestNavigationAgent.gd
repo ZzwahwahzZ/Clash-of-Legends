@@ -14,6 +14,9 @@ var source_catalog := QuestSourceCatalog.new()
 var source_graph := QuestRuntimeGraph.new()
 var active_source_mission_id := ""
 var completed_source_mission_ids: Array[String] = []
+var source_objective_progress: Dictionary = {}
+var source_objective_counts: Dictionary = {}
+var source_ready_to_turn_in_ids: Array[String] = []
 
 func get_source_catalog_status() -> Dictionary:
 	return source_catalog.get_counts()
@@ -27,23 +30,132 @@ func get_source_missions_available_at_npc(npc_id: String, player_level: int = 0,
 func get_source_missions_available_for_class(npc_id: String, player_level: int, class_id: String) -> Array[Dictionary]:
 	return source_graph.get_available_at_npc_for_class(npc_id, completed_source_mission_ids, player_level, class_id)
 
+func get_source_missions_for_npc_interaction(npc_id: String, player_level: int, class_id: String) -> Array[Dictionary]:
+	var result := source_graph.get_available_at_npc_for_class(npc_id, completed_source_mission_ids, player_level, class_id)
+	if not active_source_mission_id.is_empty() and source_graph.is_turnin_npc(active_source_mission_id, npc_id):
+		var active := source_graph.get_mission(active_source_mission_id)
+		if not active.is_empty():
+			active["runtime_state"] = "READY_TO_TURN_IN" if source_ready_to_turn_in_ids.has(active_source_mission_id) else "ACTIVE_OBJECTIVES"
+			result.push_front(active)
+	return result
+
+func get_source_active_state() -> Dictionary:
+	if active_source_mission_id.is_empty():
+		return {}
+	return {
+		"mission_id": active_source_mission_id,
+		"ready_to_turn_in": source_ready_to_turn_in_ids.has(active_source_mission_id),
+		"objective_progress": source_objective_progress.get(active_source_mission_id, []).duplicate(true),
+	}
+
 func get_source_mission_route(mission_id: String, turn_in: bool = false) -> Dictionary:
 	return source_graph.get_route(mission_id, turn_in)
 
 func activate_source_mission(mission_id: String, player_level: int, profession_code: String = "") -> bool:
-	if not source_graph.is_available(mission_id, completed_source_mission_ids, player_level, profession_code):
+	if not active_source_mission_id.is_empty() or not source_graph.is_available(mission_id, completed_source_mission_ids, player_level, profession_code):
+		return false
+	var mission := source_graph.get_mission(mission_id)
+	if mission.is_empty():
 		return false
 	active_source_mission_id = mission_id
+	source_objective_progress[mission_id] = []
+	for _intention in mission.get("intentions", []):
+		source_objective_progress[mission_id].append(false)
+	source_ready_to_turn_in_ids.erase(mission_id)
 	emit_signal("quest_state_changed", mission_id, "source_active_candidate")
 	return true
 
-func complete_source_mission_turnin(mission_id: String) -> bool:
+func select_source_mission_at_npc(mission_id: String, npc_id: String, player_level: int, class_id: String) -> bool:
+	if mission_id == active_source_mission_id:
+		if not source_ready_to_turn_in_ids.has(mission_id) or not source_graph.is_turnin_npc(mission_id, npc_id):
+			return false
+		return complete_source_mission_turnin(mission_id, npc_id)
+	var mission := source_graph.get_mission(mission_id)
+	if mission.is_empty():
+		return false
+	var begin_npc: Dictionary = mission.get("begin_npc", {})
+	if str(begin_npc.get("npc_id", "")).lstrip("0") != npc_id.lstrip("0"):
+		return false
+	var profession_code := GameContentDatabase.get_source_profession_id(class_id) if GameContentDatabase else ""
+	if not source_graph.is_available(mission_id, completed_source_mission_ids, player_level, profession_code):
+		return false
+	return activate_source_mission(mission_id, player_level, profession_code)
+
+func on_source_npc_talked(npc_id: String) -> void:
+	_advance_source_objectives("npc", npc_id, "", 1)
+
+func on_source_enemy_killed(monster_name: String, map_id: String = "") -> void:
+	_advance_source_objectives("mob", monster_name, map_id, 1)
+
+func on_source_item_collected(item_id: String, item_name: String = "", map_id: String = "", quantity: int = 1) -> void:
+	_advance_source_objectives("item", item_id if not item_id.is_empty() else item_name, map_id, maxi(1, quantity))
+
+func on_source_map_entered(map_id: String) -> void:
+	_advance_source_objectives("map", map_id, map_id, 1)
+
+func _advance_source_objectives(event_kind: String, target: String, map_id: String, amount: int) -> void:
+	if active_source_mission_id.is_empty() or amount <= 0:
+		return
+	var mission := source_graph.get_mission(active_source_mission_id)
+	var intentions: Array = mission.get("intentions", [])
+	var progress: Array = source_objective_progress.get(active_source_mission_id, [])
+	if intentions.is_empty() or progress.size() != intentions.size():
+		return
+	for index in range(intentions.size()):
+		if bool(progress[index]):
+			continue
+		var intention: Dictionary = intentions[index]
+		var kind := str(intention.get("kind", ""))
+		var matched := false
+		var required := 1
+		match kind:
+			"npc":
+				matched = event_kind == "npc" and str(intention.get("npc_id", "")).lstrip("0") == target.lstrip("0")
+			"mob":
+				var expected_mob := str(intention.get("monster_name", "")).strip_edges()
+				matched = event_kind == "mob" and not expected_mob.is_empty() and expected_mob.casefold() == target.casefold()
+			"item_t":
+				var expected_item := str(intention.get("item_name", "")).strip_edges()
+				matched = event_kind == "item" and not expected_item.is_empty() and expected_item.casefold() == target.casefold()
+			"chk_item":
+				var parts: Array = intention.get("parts", [])
+				if not parts.is_empty():
+					matched = event_kind == "item" and str(parts[0]) == target
+					if parts.size() > 1:
+						required = maxi(1, int(parts[1]))
+			"map":
+				matched = event_kind == "map" and str(intention.get("map_id", "")) == map_id
+			_:
+				matched = false
+		if matched:
+			var counter_key := "%s:%d" % [active_source_mission_id, index]
+			var count := int(source_objective_counts.get(counter_key, 0)) + amount
+			source_objective_counts[counter_key] = count
+			if count >= required:
+				progress[index] = true
+	source_objective_progress[active_source_mission_id] = progress
+	var all_complete := true
+	for value in progress:
+		if not bool(value):
+			all_complete = false
+			break
+	if all_complete and not source_ready_to_turn_in_ids.has(active_source_mission_id):
+		source_ready_to_turn_in_ids.append(active_source_mission_id)
+		emit_signal("quest_state_changed", active_source_mission_id, "source_ready_to_turn_in_candidate")
+
+func complete_source_mission_turnin(mission_id: String, npc_id: String = "") -> bool:
 	if mission_id != active_source_mission_id or completed_source_mission_ids.has(mission_id):
+		return false
+	if not source_ready_to_turn_in_ids.has(mission_id):
+		return false
+	if not npc_id.is_empty() and not source_graph.is_turnin_npc(mission_id, npc_id):
 		return false
 	var mission := source_graph.get_mission(mission_id)
 	if mission.is_empty():
 		return false
 	completed_source_mission_ids.append(mission_id)
+	source_ready_to_turn_in_ids.erase(mission_id)
+	source_objective_progress.erase(mission_id)
 	active_source_mission_id = ""
 	emit_signal("quest_state_changed", mission_id, "source_completed_candidate")
 	return true
