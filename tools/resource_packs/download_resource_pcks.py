@@ -9,7 +9,7 @@ from pathlib import Path
 from urllib.request import urlopen
 
 ROOT = Path.cwd()
-MANIFEST = ROOT / "RESOURCE_MANIFEST"
+MANIFEST = ROOT / "RESOURCE_MANIFEST_INTERNAL"
 OUTPUT = ROOT / "build" / "source_packs"
 REPORTS = ROOT / "reports"
 INDEX_NAME = "resource-source-index.csv"
@@ -47,12 +47,12 @@ def download(url: str, destination: Path) -> None:
 
 def main() -> None:
     if not MANIFEST.is_file():
-        raise SystemExit("RESOURCE_MANIFEST is missing.")
+        raise SystemExit("RESOURCE_MANIFEST_INTERNAL is missing.")
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
     if manifest.get("release_tag") != "resource-packs-v4":
-        raise SystemExit("RESOURCE_MANIFEST does not point to resource-packs-v4.")
-    if manifest.get("distribution_allowed") is not True:
-        raise SystemExit("The user-approved resource distribution ledger does not permit this baseline.")
+        raise SystemExit("RESOURCE_MANIFEST_INTERNAL does not point to the pinned resource-packs-v4 baseline.")
+    if manifest.get("internal_use_only") is not True or manifest.get("distribution_allowed") is not False:
+        raise SystemExit("The source baseline must be explicitly marked internal-only and non-distributable.")
     packages = manifest.get("resource_packages", [])
     if not packages:
         raise SystemExit("RESOURCE_MANIFEST contains no resource packages.")
@@ -88,7 +88,8 @@ def main() -> None:
         raise RuntimeError(f"resource-source-index.csv is missing required columns: {sorted(required - set(header))}")
     report = {
         "baseline_release": "resource-packs-v4",
-        "distribution_allowed": True,
+        "distribution_allowed": False,
+        "internal_use_only": True,
         "distribution_policy": manifest.get("distribution_policy", ""),
         "verified_packages": verified,
         "source_index": {"file_name": INDEX_NAME, "size_bytes": index_path.stat().st_size, "sha256": index_hash},
