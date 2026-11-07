@@ -207,7 +207,7 @@ func _run() -> void:
 		return
 
 	if horizontal_displacement < 8.0 or not target_reached:
-		_fail("Player did not follow the baked navigation path to the hotel frontage.")
+		_fail("Player did not follow the baked navigation path to the engineering sample target.")
 		return
 	if not final_floor_contact or final_position.y < -1.0:
 		_fail("Player did not remain supported by the generated walkable floor collisions.")
