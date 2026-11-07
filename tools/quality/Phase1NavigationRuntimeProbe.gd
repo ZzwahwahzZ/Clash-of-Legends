@@ -81,12 +81,12 @@ func _run() -> void:
 	var bridge_landmark_route: Dictionary = interaction_registry.get_navigation_path("jianghai.market_bridge", START_POSITION, navigation_map) if interaction_registry_bound else {"ok": false, "reason": "registry_bind_failed"}
 	var bridge_landmark_rejected := not bool(bridge_landmark_route.get("ok", false)) and str(bridge_landmark_route.get("reason", "")) == "anchor_is_landmark_not_navigation_target"
 
-	# Verify that the runtime NavigationAgent can resolve the two long city routes,
-	# not merely that the bake-time NavigationServer query found connected paths.
+	# Verify authored city destinations at runtime. The former market_bridge_west_approach
+	# pointed at a decorative ramp and is intentionally excluded until a real West Market
+	# walkable entry is geometrically verified; nearest-point projection is not route proof.
 	var runtime_route_targets := {
 		"pawnshop_approach": Vector3(-86.0, -0.078, -106.0),
 		"factory_approach": Vector3(86.0, -0.078, -12.0),
-		"market_bridge_west_approach": Vector3(-29.0, 2.0, -105.0),
 		"medicine_frontage": Vector3(11.6, -0.045, -48.0),
 		"tea_frontage": Vector3(9.5, -0.14, -8.0)
 	}
@@ -170,8 +170,10 @@ func _run() -> void:
 
 	# Prove traversal across the authored bridge deck only.
 	# The decorative ramps are not walkable navigation surfaces or quest destinations.
-	var bridge_cross_start_requested := Vector3(-21.0, 4.45, -126.0)
-	var bridge_cross_target_requested := Vector3(21.0, 4.45, -126.0)
+	# Cross from the eastern deck end toward the western deck end. Stop on the
+	# authored deck: do not route over either decorative ramp.
+	var bridge_cross_start_requested := Vector3(21.0, 4.45, -126.0)
+	var bridge_cross_target_requested := Vector3(-21.0, 4.45, -126.0)
 	var bridge_cross_start := NavigationServer3D.map_get_closest_point(navigation_map, bridge_cross_start_requested)
 	var bridge_cross_target := NavigationServer3D.map_get_closest_point(navigation_map, bridge_cross_target_requested)
 	var bridge_cross_start_projection_distance := bridge_cross_start.distance_to(bridge_cross_start_requested)
@@ -229,6 +231,7 @@ func _run() -> void:
 		"interaction_registry_bound": interaction_registry_bound,
 		"bridge_landmark_route_rejected": bridge_landmark_rejected,
 		"bridge_landmark_route_result": bridge_landmark_route,
+		"west_market_route_status": "NOT_TESTED_NO_VERIFIED_WALKABLE_ENTRY_ANCHOR",
 		"project_default_cell_height": expected_cell_height,
 		"navigation_cell_height_matches": is_equal_approx(map_cell_height, expected_cell_height),
 		"path_waypoint_count": path_waypoint_count,
@@ -297,10 +300,10 @@ func _run() -> void:
 		_fail("Player NavigationAgent3D did not receive a usable path.")
 		return
 	if runtime_routes_passed != runtime_route_targets.size():
-		_fail("Player NavigationAgent3D could not resolve both pawnshop and factory approach routes: " + JSON.stringify(runtime_route_checks))
+		_fail("Player NavigationAgent3D could not resolve an authored city approach route: " + JSON.stringify(runtime_route_checks))
 		return
 	if runtime_route_movements_passed != runtime_route_targets.size():
-		_fail("Player did not physically reach every tested city landmark: " + JSON.stringify(runtime_route_movement_checks))
+		_fail("Player did not physically reach every verified city destination: " + JSON.stringify(runtime_route_movement_checks))
 		return
 	if not bridge_cross_passed:
 		_fail("Player could not physically cross the authored market bridge deck (ramps are excluded): " + JSON.stringify({
