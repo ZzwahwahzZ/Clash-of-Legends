@@ -1,0 +1,55 @@
+name: Rebuild Mobile quest linkage from existing evidence
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/rebuild-mobile-quest-linkage-from-evidence.yml"
+      - "tools/gameplay_source_audit/build_mobile_quest_world_links.py"
+permissions:
+  contents: read
+  actions: read
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore the already-audited quest source evidence (no archive rescan)
+        uses: actions/download-artifact@v4
+        with:
+          name: Mobile-Quest-Linkage-Evidence
+          run-id: 42363100750
+          github-token: ${{ github.token }}
+          path: /tmp/mobile-quest-evidence
+      - name: Rebuild normalized world links from the retained raw files
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tools/gameplay_source_audit/build_mobile_quest_world_links.py
+          python3 tools/gameplay_source_audit/build_mobile_quest_world_links.py \
+            /tmp/mobile-quest-evidence/build/mobile-quest-source/selected \
+            --output reports/mobile-quest-world-links.json
+          python3 -m json.tool reports/mobile-quest-world-links.json > /dev/null
+      - name: Validate stable quest counts and handler metadata
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path("reports/mobile-quest-world-links.json").read_text(encoding="utf-8"))
+          assert p["mission_catalog"]["record_count"] == 2510
+          assert p["mission_catalog"]["unique_mission_ids"] == 2509
+          assert p["lua_script_reference_count"] == 1572
+          assert p["dialogue_linkage"]["mission_ids_with_dialogue_flows"] >= 250
+          assert p["story_scene_linkage"]["client_realm_task_decoded_script_count"] == 58
+          refs=p["lua_script_references"]
+          assert any(r.get("handler_data","").startswith("N:") for r in refs)
+          assert all(r.get("handler_marker") == "F" for r in refs)
+          print("Existing-evidence rebuild checks passed")
+          PY
+      - name: Upload corrected quest world-link report
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mobile-Quest-World-Links-Final
+          path: reports/mobile-quest-world-links.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 6
