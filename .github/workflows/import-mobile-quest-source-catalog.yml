@@ -1,0 +1,48 @@
+name: Import verified-shape Mobile quest source catalog
+on:
+  push:
+    branches: [research/mobile-quest-dat-decoder]
+    paths:
+      - "tools/gameplay_source_audit/build_runtime_mobile_quest_catalog.py"
+      - ".github/workflows/import-mobile-quest-source-catalog.yml"
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/mobile-quest-dat-decoder
+          persist-credentials: true
+      - name: Restore retained source evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: Mobile-Quest-Linkage-Evidence
+          run-id: 42364746967
+          github-token: ${{ github.token }}
+          path: /tmp/quest-evidence
+      - name: Build compact source catalog
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tools/gameplay_source_audit/build_runtime_mobile_quest_catalog.py
+          python3 tools/gameplay_source_audit/build_runtime_mobile_quest_catalog.py \
+            --catalog /tmp/quest-evidence/reports/mobile-quest-catalog.json \
+            --analysis /tmp/quest-evidence/reports/mobile-quest-system-analysis.json \
+            --output data/quests/mobile_quest_catalog.json
+          python3 -m json.tool data/quests/mobile_quest_catalog.json >/dev/null
+      - name: Commit imported catalog to research branch
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/quests/mobile_quest_catalog.json
+          if git diff --cached --quiet; then
+            echo "Quest catalog is already current."
+            exit 0
+          fi
+          git commit -m "Import source-backed Mobile quest and map catalog"
+          git push origin HEAD:research/mobile-quest-dat-decoder
