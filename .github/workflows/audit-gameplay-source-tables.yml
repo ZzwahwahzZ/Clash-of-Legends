@@ -147,7 +147,8 @@ jobs:
           print("Read errors:", len(q["read_errors"]))
           print("Version-matched members:", data["version_matched_member_count"])
           print("Total inventory records:", inventory["total_inventory_records"])
-          print("Android specialized analysis:", json.dumps(android, ensure_ascii=False))\n          print("Androguard deep DEX/XREF summary:", json.dumps({"apk_count":deep["apk_count"],"success_count":len(deep["results"]),"error_count":len(deep["errors"]),"task_string_hits":sum(len(x["quest_task_string_hits"]) for x in deep["results"])}, ensure_ascii=False))
+          print("Android specialized analysis:", json.dumps(android, ensure_ascii=False))
+          print("Androguard deep DEX/XREF summary:", json.dumps({"apk_count":deep["apk_count"],"success_count":len(deep["results"]),"error_count":len(deep["errors"]),"task_string_hits":sum(len(x["quest_task_string_hits"]) for x in deep["results"])}, ensure_ascii=False))
           print("Itemtype files/records:", data["itemtype_catalog"]["file_count"], data["itemtype_catalog"]["record_count"])
           print("Unlabelled column-59 candidates:", data["itemtype_catalog"].get("column_59_candidate_count", 0))
           for category, value in data["categories"].items():
