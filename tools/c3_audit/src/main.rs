@@ -373,7 +373,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut external_motion_poc: Vec<Value> = Vec::new();
     let mut skeletal_motion_poc: Vec<Value> = Vec::new();
     let mut vat_motion_poc: Vec<Value> = Vec::new();
-    for (model_id, look) in [(7130000_u32, 7_u32), (8133010_u32, 8_u32)] {
+    for (model_id, look) in [
+        (7101020_u32, 7_u32),
+        (7102000_u32, 7_u32),
+        (7103000_u32, 7_u32),
+        (7130000_u32, 7_u32),
+        (7131020_u32, 7_u32),
+        (7132000_u32, 7_u32),
+        (7133010_u32, 7_u32),
+        (7134010_u32, 7_u32),
+        (7135000_u32, 7_u32),
+        (8133010_u32, 8_u32),
+        (8134010_u32, 8_u32),
+        (8135000_u32, 8_u32),
+    ] {
         let body_suffix = format!("/c3/body/{model_id}.c3");
         let Some(body_path) = files.iter().find(|path| path.to_string_lossy().replace('\\', "/").ends_with(&body_suffix)) else {
             external_motion_poc.push(json!({"model_id":model_id,"status":"SKIPPED","reason":"base body C3 file not found"}));
