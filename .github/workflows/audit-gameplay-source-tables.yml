@@ -43,9 +43,29 @@ jobs:
             build/source/extracted-assets-001.zip \
             --lookup-item-ids 500239 \
             --output reports/gameplay-source-table-audit.json
+      - name: Extract all Mobile quest, task, NPC, dialogue and action candidates
+        run: |
+          python3 -m py_compile tools/gameplay_source_audit/quest_source_extractor.py
+          python3 tools/gameplay_source_audit/quest_source_extractor.py \
+            build/source/extracted-assets-001.zip \
+            --output-dir reports/quest-source-extraction \
+            --report reports/quest-source-extraction.json
+          python3 -m json.tool reports/quest-source-extraction.json > /dev/null
       - name: Validate report JSON and print concise inventory
         run: |
           python3 -m json.tool reports/gameplay-source-table-audit.json > /dev/null
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          q=json.loads(Path("reports/quest-source-extraction.json").read_text(encoding="utf-8"))
+          print("QUEST SOURCE EXTRACTOR:", q["source_version"])
+          print("Candidate files:", q["candidate_count"])
+          print("Filename matches:", q["filename_match_count"])
+          print("Content/code matches:", q["content_match_count"])
+          print("Extracted files:", q["extracted_file_count"])
+          print("Bundle bytes:", q["output_bundle_size_bytes"])
+          print("Oversize skipped:", len(q["oversize_skipped"]))
+          print("Read errors:", len(q["read_errors"]))
           python3 - <<'PY'
           import json
           from pathlib import Path
@@ -72,5 +92,7 @@ jobs:
             reports/gameplay-source-table-audit.json
             reports/comprehensive-asset-inventory.json
             reports/polyfile-mobile-*.json
+            reports/quest-source-extraction.json
+            reports/quest-source-extraction/quest-source-candidates.zip
           if-no-files-found: error
           retention-days: 30
