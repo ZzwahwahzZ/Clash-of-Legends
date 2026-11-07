@@ -55,6 +55,10 @@ jobs:
           print("Unlabelled column-59 candidates:", data["itemtype_catalog"].get("column_59_candidate_count", 0))
           for category, value in data["categories"].items():
               print(category, value["file_count"])
+          print("Archer creation weapon ID lookup:", json.dumps(data.get("itemtype_id_lookups", {}), ensure_ascii=False))
+          candidates = data.get("quest_promotion_candidate_inventory", {})
+          print("Quest/promotion candidate paths:", candidates.get("file_count", 0))
+          print("Archer/promotion text hits:", json.dumps(candidates.get("text_hits", []), ensure_ascii=False))
           PY
       - name: Upload source table audit report
         if: always()
