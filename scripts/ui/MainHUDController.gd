@@ -83,6 +83,7 @@ func _ready() -> void:
 		joystick.joystick_moved.connect(_on_joystick_moved)
 
 	_refresh_hud_labels()
+	_update_skill_buttons()
 	_update_interact_button()
 
 func _on_player_registered(_player: CharacterBody3D) -> void:
