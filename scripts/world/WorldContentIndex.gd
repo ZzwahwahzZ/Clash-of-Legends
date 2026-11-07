@@ -160,6 +160,15 @@ func get_index_status() -> Dictionary:
 func get_maps() -> Array:
 	return _index.get("maps", []).duplicate(true)
 
+func get_source_map_archives() -> Array:
+	return _index.get("source_map_archives", []).duplicate(true)
+
+func get_source_map_archive(map_id: int) -> Dictionary:
+	for archive in _index.get("source_map_archives", []):
+		if int(archive.get("map_id", -1)) == map_id:
+			return archive.duplicate(true)
+	return {}
+
 func get_map_by_id(map_id: int) -> Dictionary:
 	return _maps_by_id.get(map_id, {}).duplicate(true)
 
