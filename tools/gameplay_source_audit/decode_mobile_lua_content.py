@@ -71,7 +71,7 @@ def main():
                 row["text_key_count"]=len(set(re.findall(r'NpcDialogueText_[A-Z]+\["([^"]+)"\]\s*=',text)))
                 row["task_text_key_count"]=len(set(re.findall(r'"(STR_TASK_\d+)"',text)))
             if "luascriptmgr" in str(rel).lower():
-                row["script_registry"]=[{"script_id":int(a),"file":b} for a,b in re.findall(r"\[(\d+)\]\s*=\s*\\{\s*file\s*=\s*[\\"']([^\\"']+)",text)]
+                row["script_registry"]=[{"script_id":int(a),"file":b} for a,b in re.findall(r'\[(\d+)\]\s*=\s*\{\s*file\s*=\s*"([^"]+)"',text)]
             if "client_realm_task" in str(rel).lower():
                 row["scene_function_names"]=re.findall(r"local function\s+(\w+)",text)
                 row["scene_api_calls"]=sorted(set(re.findall(r"(LuaScriptMgr_\w+)\s*\(",text)))
