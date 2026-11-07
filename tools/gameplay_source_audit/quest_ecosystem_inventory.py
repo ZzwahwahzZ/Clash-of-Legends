@@ -105,10 +105,7 @@ def parse_ascii_ids(data: bytes) -> dict:
     }
 
 
-DISCOVERY_DIRS = (
-    "/ini/luacfg/", "/script/", "/data/client_realm_task/",
-    "/data/quest/", "/data/task/",
-)
+DISCOVERY_DIRS = ("/ini/", "/script/", "/data/")
 QUEST_CONTENT_MARKERS = (
     b"MainTask", b"TaskID", b"NpcID", b"ReachNpcID", b"MapID",
     b"GoalPos", b"IntentionCount", b"TaskReward", b"taskitem",
@@ -147,7 +144,8 @@ def is_interesting(path: str, data: bytes | None = None) -> bool:
     # Generic filenames may hide TQ-encrypted Lua/config tables. Probe the two
     # documented seeds only as discovery hints; never accept a candidate here.
     if Path(path).suffix.lower() == ".dat":
-        return any(has_quest_content_signature(decrypt_tq(data, seed)) for seed in SEEDS)
+        sample = data[:2 * 1024 * 1024]
+        return any(has_quest_content_signature(decrypt_tq(sample, seed)) for seed in SEEDS)
     return False
 
 
