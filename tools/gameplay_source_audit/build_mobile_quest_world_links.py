@@ -192,7 +192,6 @@ def main():
                             handler_marker=marker_match.group(1);function_name=raw_handler[:marker_match.start()];handler_data=marker_match.group(2)
                         else:handler_marker="";function_name=raw_handler;handler_data=""
                         lua_refs.append({"mission_id":mid,"field":key,"npc_name":p[0],"script_function":function_name,"handler_marker":handler_marker,"handler_data":handler_data,"raw":token})
-                        lua_refs.append({"mission_id":mid,"field":key,"npc_name":p[0],"script_function":p[1].replace("</F>","") if len(p)>1 else "","raw":token})
                     elif head=="chk_item" and len(p)>=2:item_refs.append({"mission_id":mid,"item_id":p[0],"quantity":p[1]})
                     elif head=="chk_quest" and p:quest_condition_refs.append({"mission_id":mid,"condition_quest_id":p[0],"condition_args":p[1:]})
         for p in f.get("Prequest","").split("|"):
