@@ -45,6 +45,16 @@ def synthetic_dex(strings: list[str]) -> bytes:
 
 
 class MobileApkReaderProbeTests(unittest.TestCase):
+
+    def test_sha256_file_streams_and_matches_expected_digest(self):
+        import hashlib
+        import tempfile
+        payload = b"mobile-apk-fingerprint" * 1000
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / "sample.apk"
+            target.write_bytes(payload)
+            self.assertEqual(MODULE.sha256_file(target), hashlib.sha256(payload).hexdigest())
+
     def test_reads_dex_string_table_and_finds_resource_tokens(self):
         dex = synthetic_dex(["questinfo.dat", "com.example.Loader", "TaskID"])
         strings = MODULE.decode_dex_strings(dex)
