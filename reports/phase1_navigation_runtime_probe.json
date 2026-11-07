@@ -28,7 +28,7 @@
     ],
     "floor_contact": true,
     "frames_used": 375,
-    "is_moving_to_target_at_finish": true,
+    "is_moving_to_target_at_finish": false,
     "next_path_position_at_finish": [
       -21,
       4.44999980926514,
@@ -54,7 +54,7 @@
       ]
     ],
     "player_velocity_at_finish": [
-      -6.5,
+      0,
       0,
       0
     ],
@@ -181,6 +181,37 @@
     -59.7950782775879
   ],
   "target_reached": true,
-  "west_market_route_status": "NOT_TESTED_NO_VERIFIED_WALKABLE_ENTRY_ANCHOR",
+  "west_market_route_candidate": {
+    "approved_interaction_anchor": false,
+    "connected": true,
+    "outside_building_footprint": "WestMarketRow01",
+    "path_length": 1.67705094814301,
+    "path_waypoint_count": 2,
+    "physical_movement": {
+      "attempted": true,
+      "distance_to_candidate": 39.0975341796875,
+      "final_position": [
+        -21.6298141479492,
+        4.34075689315796,
+        -127.259620666504
+      ],
+      "floor_contact": true,
+      "frames_used": 17,
+      "reached": false
+    },
+    "projected_position": [
+      -35,
+      0.150003999471664,
+      -164
+    ],
+    "projection_distance": 0.290004014968872,
+    "requested_position": [
+      -35,
+      -0.14000000059605,
+      -164
+    ],
+    "surface_source": "AuthoredStreetNetwork/RiverWardStreet"
+  },
+  "west_market_route_status": "CONNECTED_DIAGNOSTIC_CANDIDATE",
   "world_scene_loaded": true
 }
