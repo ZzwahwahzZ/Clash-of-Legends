@@ -12,6 +12,7 @@ on:
       - "tools/quality/Phase1ChineseDistrictPreview.gd"
       - "tools/quality/Phase1UrbanInfillPreview.gd"
       - "tools/quality/Phase1WorldStructureAudit.gd"
+      - "tools/quality/Phase1NavigationBakeAudit.gd"
       - "assets/environment/phase1/jianghai/interaction_anchors.json"
       - "scripts/world/WorldInteractionRegistry.gd"
   workflow_dispatch:
@@ -246,6 +247,12 @@ jobs:
           test -s reports/phase1_urban_infill_bounds.json
           xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --path . --rendering-method gl_compatibility --script res://tools/quality/Phase1WorldStructureAudit.gd 2>&1 | tee reports/phase1_world_structure_audit.log
           test -s reports/phase1_world_structure_audit.json
+          xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --path . --rendering-method gl_compatibility --script res://tools/quality/Phase1NavigationBakeAudit.gd 2>&1 | tee reports/phase1_navigation_bake_audit.log
+          test -s reports/phase1_navigation_bake_audit.json
+          if grep -Eq 'SCRIPT ERROR:|ERROR:|Parse Error:' reports/phase1_navigation_bake_audit.log; then
+            echo 'Godot navigation bake audit reported an error'
+            exit 1
+          fi
           if grep -Eq 'SCRIPT ERROR:|ERROR: Node not inside tree|Parse Error:' reports/phase1_chinese_district_preview.log; then
             echo 'Godot visual preview reported a script or scene-tree error'
             exit 1
