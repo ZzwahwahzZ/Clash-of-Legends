@@ -9,6 +9,8 @@ on:
       - "tools/gameplay_source_audit/parse_dialogue_sources.py"
       - "tools/gameplay_source_audit/validate_runtime_world_index.py"
       - "scripts/world/WorldContentIndex.gd"
+      - "scripts/ui/DialogueUI.gd"
+      - "scripts/npcs/NPCBase.gd"
       - "scripts/world/WorldTravelManager.gd"
       - "scripts/automation/QuestNavigationAgent.gd"
       - "scripts/progression/ClassProgressionManager.gd"
