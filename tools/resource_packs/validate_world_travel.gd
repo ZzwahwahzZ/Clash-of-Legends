@@ -58,6 +58,15 @@ func _run_travel_test() -> void:
 	if not quest_graph.is_available("650", ["608"], 8, "10"):
 		_fail("Mission 650 did not unlock for a valid level/profession after prerequisite 608.")
 		return
+	if not quest_graph.is_available_for_class("650", ["608"], 8, "Monk"):
+		_fail("Source profession ID 10 did not resolve the Monk quest restriction.")
+		return
+	if not quest_graph.is_available_for_class("650", ["608"], 8, "Pirate") or not quest_graph.is_available_for_class("650", ["608"], 8, "DragonWarrior"):
+		_fail("Source profession IDs 12/14 did not resolve their class quest restrictions.")
+		return
+	if quest_graph.is_available_for_class("650", ["608"], 8, "Trojan") or quest_graph.is_available_for_class("650", ["608"], 8, "Thunderstriker"):
+		_fail("Quest profession filtering admitted a class without a matching verified source ID.")
+		return
 	if quest_graph.is_available("650", ["608"], 7, "10") or quest_graph.is_available("650", ["608"], 8, "99"):
 		_fail("Mission 650 ignored its source level or profession restrictions.")
 		return
