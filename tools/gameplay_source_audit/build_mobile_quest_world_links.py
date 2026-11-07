@@ -242,7 +242,8 @@ def main():
 
     duplicate=sorted(k for k,v in Counter(q["fields"].get("MissionId","") for q in quests).items() if k and v>1)
     missing_prereqs=sorted({r["required_mission_id"] for r in prereq_refs if r["required_mission_id"] not in all_ids})
-    positive_npc_refs=[r for r in npc_refs if r.get("npc_id") not in (None,"","0000","-1")]\n    exact_matches=sum(bool(r.get("map_destination_exact_match")) for r in positive_npc_refs)
+    positive_npc_refs=[r for r in npc_refs if r.get("npc_id") not in (None,"","0000","-1")]
+    exact_matches=sum(bool(r.get("map_destination_exact_match")) for r in positive_npc_refs)
     same_npc_map=sum(bool(r.get("map_destination_matches")) for r in positive_npc_refs)
     report={
         "schema_version":"1.0.0","source_version":"Conquer Online Mobile 1.1.2.3",
