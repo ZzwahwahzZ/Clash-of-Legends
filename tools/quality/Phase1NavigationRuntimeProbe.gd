@@ -23,6 +23,20 @@ func _run() -> void:
 	for _frame in range(4):
 		await physics_frame
 
+	var pawnshop_doorway_clear := _ray_is_clear(Vector3(-86.0, 1.0, -115.0), Vector3(-86.0, 1.0, -109.0))
+	var factory_doorway_clear := _ray_is_clear(Vector3(86.0, 1.0, -11.0), Vector3(86.0, 1.0, -5.0))
+	var pawnshop_wall_blocks := _ray_hits_collision(Vector3(-88.5, 1.0, -115.0), Vector3(-88.5, 1.0, -109.0))
+	var factory_wall_blocks := _ray_hits_collision(Vector3(83.5, 1.0, -11.0), Vector3(83.5, 1.0, -5.0))
+	print("PHASE1 BUILDING DOORWAY COLLISION PROBE: ", JSON.stringify({
+		"pawnshop_doorway_clear": pawnshop_doorway_clear,
+		"factory_doorway_clear": factory_doorway_clear,
+		"pawnshop_adjacent_wall_blocks": pawnshop_wall_blocks,
+		"factory_adjacent_wall_blocks": factory_wall_blocks
+	}))
+	if not pawnshop_doorway_clear or not factory_doorway_clear or not pawnshop_wall_blocks or not factory_wall_blocks:
+		_fail("Pawnshop or factory doorway clearance / adjacent wall collision validation failed.")
+		return
+
 	var player_packed := load(PLAYER_SCENE_PATH) as PackedScene
 	if player_packed == null:
 		_fail("Player scene could not be loaded.")
@@ -75,6 +89,10 @@ func _run() -> void:
 	var target_reached := horizontal_distance_to_target <= 1.5
 	var report := {
 		"world_scene_loaded": true,
+		"pawnshop_doorway_clear": pawnshop_doorway_clear,
+		"factory_doorway_clear": factory_doorway_clear,
+		"pawnshop_adjacent_wall_blocks": pawnshop_wall_blocks,
+		"factory_adjacent_wall_blocks": factory_wall_blocks,
 		"player_scene_loaded": true,
 		"navigation_map_valid": navigation_map.is_valid(),
 		"navigation_map_region_count": map_region_count,
@@ -119,6 +137,18 @@ func _run() -> void:
 
 	print("PHASE1 NAVIGATION PLAYER MOVEMENT AND FLOOR COLLISION: PASS")
 	quit(0)
+
+func _ray_is_clear(from_position: Vector3, to_position: Vector3) -> bool:
+	return _ray_result(from_position, to_position).is_empty()
+
+func _ray_hits_collision(from_position: Vector3, to_position: Vector3) -> bool:
+	return not _ray_result(from_position, to_position).is_empty()
+
+func _ray_result(from_position: Vector3, to_position: Vector3) -> Dictionary:
+	var query := PhysicsRayQueryParameters3D.create(from_position, to_position, 1)
+	query.collide_with_areas = false
+	query.collide_with_bodies = true
+	return get_root().world_3d.direct_space_state.intersect_ray(query)
 
 func _vec(value: Vector3) -> Array:
 	return [value.x, value.y, value.z]
