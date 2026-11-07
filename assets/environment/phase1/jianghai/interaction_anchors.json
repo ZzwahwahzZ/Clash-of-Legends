@@ -58,14 +58,14 @@
       "role": "merchant",
       "spawn_offset_local": [
         -86,
-        0,
+        -0.078,
         -101
       ],
       "spawn_enabled": false,
       "requires_clearance_validation": true,
       "target_offset_local": [
         -86,
-        0,
+        -0.078,
         -106
       ]
     },
