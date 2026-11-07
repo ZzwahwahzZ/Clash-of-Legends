@@ -35,10 +35,10 @@ func _ready() -> void:
 	slots.resize(MAX_SLOTS)
 	for i in range(MAX_SLOTS):
 		slots[i] = null
+	_initialize_starter_items()
 	if ClassProgressionManager and not ClassProgressionManager.weapon_style_changed.is_connected(_on_weapon_style_changed):
 		ClassProgressionManager.weapon_style_changed.connect(_on_weapon_style_changed)
-	# Parent PlayerController configures the selected class before deferred starter gear is granted.
-	call_deferred("_initialize_starter_items")
+	# Parent PlayerController finishes class configuration before this deferred loadout sync.
 	call_deferred("_sync_active_weapon_style")
 
 func _sync_active_weapon_style() -> void:
@@ -123,7 +123,7 @@ func _initialize_starter_items() -> void:
 	# preserve the source ID and weapon family without inventing stats.
 	var selected_class := str(GameManager.selected_class) if GameManager else "Warrior"
 	if selected_class == "Archer":
-		equip_item({
+		equipment["weapon"] = {
 			"id": "500239",
 			"slot": "weapon",
 			"name_ar": "سلاح رامي السهام",
@@ -134,7 +134,8 @@ func _initialize_starter_items() -> void:
 			"source_version": "1.1.2.3",
 			"source_item_id": "500239",
 			"source_name_status": "UNRESOLVED"
-		})
+		}
+		emit_signal("equipment_updated")
 	else:
 		equip_item({
 			"id": "coronet_trojan_bronze",
