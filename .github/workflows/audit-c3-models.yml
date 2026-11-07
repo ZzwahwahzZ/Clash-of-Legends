@@ -55,6 +55,37 @@ jobs:
         run: cargo test --manifest-path tools/c3_audit/Cargo.toml --release
       - name: Audit all original C3 models
         run: cargo run --manifest-path tools/c3_audit/Cargo.toml --release --bin clash-c3-audit -- build/c3-source build/pvr-png build/c3-glb reports/c3-model-audit.json
+      - name: Preserve failed C3 samples for binary format investigation
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, shutil
+          from pathlib import Path
+          report = json.loads(Path("reports/c3-model-audit.json").read_text())
+          source_root = Path("build/c3-source").resolve()
+          output_root = Path("build/c3-failed-samples")
+          output_root.mkdir(parents=True, exist_ok=True)
+          manifest = []
+          for row in report.get("failed", []):
+              rel = Path(row["path"])
+              source = (source_root / rel).resolve()
+              if source_root not in source.parents or not source.is_file():
+                  continue
+              target = output_root / rel
+              target.parent.mkdir(parents=True, exist_ok=True)
+              shutil.copy2(source, target)
+              data = target.read_bytes()
+              manifest.append({
+                  "source": rel.as_posix(),
+                  "sample": target.relative_to(output_root).as_posix(),
+                  "size_bytes": len(data),
+                  "sha256": hashlib.sha256(data).hexdigest(),
+                  "parser_error": row.get("error", "")
+              })
+          Path("reports/c3-failed-sample-manifest.json").write_text(
+              json.dumps({"count": len(manifest), "samples": manifest}, indent=2) + "\\n"
+          )
+          print("PRESERVED_FAILED_C3_SAMPLES", len(manifest))
+          PY
       - name: Build per-family helmet, weapon and equipment candidate inventory
         run: |
           python3 tools/external_assets/audit_c3_equipment_families.py reports/c3-model-audit.json --project-root . --output reports/equipment/c3-equipment-family-audit.json
@@ -91,6 +122,8 @@ jobs:
           name: C3-Model-Conversion-Reports
           path: |
             reports/c3-model-audit.json
+            reports/c3-failed-sample-manifest.json
+            build/c3-failed-samples/**/*.c3
             reports/equipment/c3-equipment-family-audit.json
             reports/equipment/c3-validation-subset.json
             reports/equipment/previews/**
