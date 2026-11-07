@@ -16,6 +16,17 @@ assert len(unique_maps) >= 400, f"Expected at least 400 unique source map IDs, g
 assert len(npcs) >= 2500, f"Expected at least 2500 NPC template sections, got {len(npcs)}"
 assert len(quests) >= 2400, f"Expected at least 2400 quest rows, got {len(quests)}"
 assert 1002 in unique_maps, "Twin City/WindPlain source map 1002 is missing"
+source_map_archives = {int(x.get("map_id", -1)): x for x in data.get("source_map_archives", [])}
+for expected_map_id, expected_path in {
+    1002: "map/map/newplain.7z",
+    1000: "map/map/desert.7z",
+    1011: "map/map/woods.7z",
+    1014: "map/map/dragon.7z",
+    1036: "map/map/street.7z",
+}.items():
+    archive = source_map_archives.get(expected_map_id, {})
+    assert archive.get("resource_path") == expected_path, f"Source map {expected_map_id} archive path mismatch"
+    assert archive.get("status") == "SOURCE_ARCHIVE_EXTRACTED_NOT_RUNTIME_READY", f"Source map archive {expected_path} was not extracted and hashed"
 assert any(q.get("mission_id") == 6126 for q in quests), "Known source quest 6126 is missing"
 assert any(q.get("mission_id") == 650 and 10 in q.get("profession_ids", []) and 608 in q.get("prerequisite_ids", []) for q in quests), "Known profession/prerequisite source quest 650 is missing its exact gates"
 assert sum(1 for q in quests if q.get("mission_id") == 3938) == 2, "Duplicate mission 3938 rows must be preserved, not overwritten"
