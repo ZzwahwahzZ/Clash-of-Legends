@@ -433,6 +433,16 @@ func _get_navigation_target() -> Dictionary:
 func navigate_to_quest_target() -> void:
 	if not GameManager or not is_instance_valid(GameManager.player_reference):
 		return
+	if not active_source_mission_id.is_empty():
+		var source_turn_in := source_ready_to_turn_in_ids.has(active_source_mission_id)
+		var source_route := source_graph.get_route(active_source_mission_id, source_turn_in)
+		var source_travel_manager := get_tree().get_first_node_in_group("world_travel_manager")
+		if source_travel_manager and source_travel_manager.has_method("navigate_to_source_route"):
+			if source_travel_manager.navigate_to_source_route(source_route):
+				return
+		if GameManager:
+			GameManager.post_notification("تعذر الوصول إلى خريطة أو شخصية المهمة من المشهد المحمّل." if GameManager.current_language == "ar" else "The quest map or NPC is not available in the loaded scene.", true)
+		return
 	var target := _get_navigation_target()
 	if target.is_empty():
 		return
