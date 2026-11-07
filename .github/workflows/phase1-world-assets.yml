@@ -18,6 +18,7 @@ on:
       - "scripts/world/WorldInteractionRegistry.gd"
       - "scripts/player/PlayerController.gd"
       - "scenes/characters/Player.tscn"
+      - "project.godot"
   workflow_dispatch:
 
 concurrency:
