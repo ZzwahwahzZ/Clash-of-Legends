@@ -28,7 +28,7 @@
     ],
     "floor_contact": true,
     "frames_used": 375,
-    "is_moving_to_target_at_finish": false,
+    "is_moving_to_target_at_finish": true,
     "next_path_position_at_finish": [
       -21,
       4.44999980926514,
@@ -54,7 +54,7 @@
       ]
     ],
     "player_velocity_at_finish": [
-      0,
+      -6.5,
       0,
       0
     ],
@@ -183,21 +183,52 @@
   "target_reached": true,
   "west_market_route_candidate": {
     "approved_interaction_anchor": false,
-    "connected": true,
+    "connected": false,
+    "expected_direct_distance": 40.4969139099121,
     "outside_building_footprint": "WestMarketRow01",
-    "path_length": 1.67705094814301,
-    "path_waypoint_count": 2,
-    "physical_movement": {
-      "attempted": true,
-      "distance_to_candidate": 39.0975341796875,
-      "final_position": [
-        -21.6298141479492,
-        4.34075689315796,
-        -127.259620666504
+    "path_end_error": 39.0679206848145,
+    "path_length": 43.0513687133789,
+    "path_start_error": 0,
+    "path_waypoint_count": 3,
+    "path_waypoints": [
+      [
+        -21,
+        4.44999980926514,
+        -126
       ],
-      "floor_contact": true,
-      "frames_used": 17,
-      "reached": false
+      [
+        0.125,
+        4.44999980926514,
+        -126
+      ],
+      [
+        -21.75,
+        4.44999980926514,
+        -127.5
+      ]
+    ],
+    "physical_movement": {
+      "attempted": false,
+      "distance_to_candidate": -1,
+      "final_position": [
+        -21,
+        4.44999980926514,
+        -126
+      ],
+      "floor_contact": false,
+      "frames_used": 0,
+      "next_path_position": [
+        -21,
+        4.44999980926514,
+        -126
+      ],
+      "reached": false,
+      "slide_collisions": [],
+      "velocity": [
+        0,
+        0,
+        0
+      ]
     },
     "projected_position": [
       -35,
@@ -212,6 +243,6 @@
     ],
     "surface_source": "AuthoredStreetNetwork/RiverWardStreet"
   },
-  "west_market_route_status": "CONNECTED_DIAGNOSTIC_CANDIDATE",
+  "west_market_route_status": "NO_CONTINUOUS_ROUTE_TO_VERIFIED_RIVER_WARD_STREET_CANDIDATE",
   "world_scene_loaded": true
 }
