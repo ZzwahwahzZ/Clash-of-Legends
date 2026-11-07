@@ -134,7 +134,7 @@ def main():
 
     npc_dialogues = []
     unresolved = set()
-    for dialogue_id, data in sorted(dialogs.items(), key=lambda item: int(item[0]) if str(item[0]).isdigit() else str(item[0])):
+    for dialogue_id, data in sorted(dialogs.items(), key=lambda item: (0, int(item[0])) if str(item[0]).isdigit() else (1, str(item[0]))):
         if not isinstance(data, dict):
             continue
         talks = data.get("DlgTalk", {})
