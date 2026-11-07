@@ -72,7 +72,7 @@ def scc_cycles(vertices, edges):
         if v not in ids:visit(v)
     return out
 
-def parse_dialogue_file(path, ar_path, mission_ids):
+def parse_dialogue_file(path, ar_path, mission_ids, npc_type_names, npc_appearance_names):
     if not path.is_file():return {"status":"MISSING","dialogue_count":0,"mission_flows":[]}
     text=tq_decode(path.read_bytes()).decode("utf-8",errors="replace")
     ar={}
@@ -117,7 +117,9 @@ def parse_dialogue_file(path, ar_path, mission_ids):
             dtype=fields.get("DlgType")
             if dtype is not None:dlg_type_counts[str(dtype)]+=1
             talks.append({"index":tid,"fields":fields,"text_key":text_key,"arabic_text":ar.get(text_key),
-                "show_info":{"id":show_id,"name_key":name_key,"arabic_name":ar.get(name_key)},"buttons":buttons})
+                "show_info":{"id":show_id,"npc_type_name":npc_type_names.get(str(show_id)) if show_id is not None else None,
+                "appearance_candidates":npc_appearance_names.get(npc_type_names.get(str(show_id),"").casefold(),[]) if show_id is not None else [],
+                "name_key":name_key,"arabic_name":ar.get(name_key)},"buttons":buttons})
         flow={"dialogue_id":did,"mission_id":mid,"link_method":link_method,"talk_count":len(talks),"talks":talks}
         flows.append(flow)
         if mid:mission_flows[mid].append(flow)
@@ -232,7 +234,25 @@ def main():
         except Exception:pass
     gmex={s["section"] for s in sections(read_text(root/"ini/gamemapex.ini")) if s["section"].isdigit()} if (root/"ini/gamemapex.ini").is_file() else set()
     mapdest_ids={k[0] for k in md}
-    dialogue=parse_dialogue_file(root/"ini/luaui/publicfiles/otherconf/npcdialogueinfo.dat",root/"ini/luaui/publicfiles/wordfiles/npcdialoguetext_ar.dat",mission_ids)
+    npc_type_names={s["section"].replace("NpcType",""):s["fields"].get("Name","") for s in npc_types if s["section"].startswith("NpcType")}
+    dialogue=parse_dialogue_file(root/"ini/luaui/publicfiles/otherconf/npcdialogueinfo.dat",root/"ini/luaui/publicfiles/wordfiles/npcdialoguetext_ar.dat",mission_ids,npc_type_names,skins)
+    dialogue_npc_refs=[]
+    mission_dialogue_npcs=defaultdict(list)
+    for flow in dialogue["flows"]:
+        if not flow.get("mission_id"):continue
+        for talk in flow["talks"]:
+            info=talk.get("show_info",{})
+            if info.get("npc_type_name"):
+                ref={"mission_id":flow["mission_id"],"dialogue_id":flow["dialogue_id"],"talk_index":talk["index"],
+                     "npc_type_id":str(info["id"]),"npc_type_name":info["npc_type_name"],
+                     "arabic_display_name":info.get("arabic_name"),"name_key":info.get("name_key"),
+                     "appearance_candidates":info.get("appearance_candidates",[])}
+                dialogue_npc_refs.append(ref)
+                mission_dialogue_npcs[flow["mission_id"]].append(ref)
+    dialogue_npc_summary={"reference_count":len(dialogue_npc_refs),
+        "unique_npc_type_ids":len({r["npc_type_id"] for r in dialogue_npc_refs}),
+        "mission_ids_with_dialogue_npcs":len(mission_dialogue_npcs),
+        "npc_type_name_match_refs":sum(bool(r["appearance_candidates"]) for r in dialogue_npc_refs)}
     # Item lookup is optional until the itemtype directory is included in the selected source pack.
     item_defs={}
     for ip in sorted((root/"ini/itemtype").glob("*.ini")) if (root/"ini/itemtype").exists() else []:
@@ -260,9 +280,9 @@ def main():
       "map_linkage":{"unique_map_ids":len(map_ids),"missing_from_all_available_map_indexes":sorted(map_ids-(gamemap|gmex|mapdest_ids)),"map_ids_in_gamemap_dat":len(gamemap),"map_ids_in_gamemapex_ini":len(gmex),"map_ids_in_mapdestination_ini":len(mapdest_ids)},
       "monster_linkage":{"reference_count":len(mob_refs),"unique_names":len({r["name"] for r in mob_refs}),"matched_references":sum(bool(r["monster_type_ids"]) for r in mob_refs),"unmatched_names":sorted({r["name"] for r in mob_refs if not r["monster_type_ids"]})},
       "item_linkage":{"reference_count":len(item_refs),"unique_item_ids":len({r.get("item_id") for r in item_refs if r.get("item_id")}),"item_definitions_available":len(item_defs),"matched_item_ids":sum(bool(r.get("item_definition")) for r in item_refs if r.get("item_id")),"unmatched_item_ids":sorted({r["item_id"] for r in item_refs if r.get("item_id") and r["item_id"] not in item_defs},key=lambda x:int(x) if x.isdigit() else x),"matched_world_item_name_references":sum(bool(r.get("item_name_candidate_ids")) for r in item_refs)},
-      "dialogue":{k:v for k,v in dialogue.items() if k not in ("flows","mission_flows")},
+      "dialogue":{k:v for k,v in dialogue.items() if k not in ("flows","mission_flows")},"dialogue_npc_linkage":dialogue_npc_summary,
       "missions": [rows[0] for _,rows in sorted(by_id.items(),key=lambda x:int(x[0]))],
-      "npc_references":npc_refs,"map_references":map_refs,"mob_references":mob_refs,"item_references":item_refs,
+      "npc_references":npc_refs,"dialogue_npc_references":dialogue_npc_refs,"mission_dialogue_npcs":[{"mission_id":k,"npc_references":v} for k,v in sorted(mission_dialogue_npcs.items(),key=lambda x:int(x[0]))],"map_references":map_refs,"mob_references":mob_refs,"item_references":item_refs,
       "dialogue_flows":dialogue["flows"],"mission_dialogue_flows":dialogue["mission_flows"]
     }
     # Keep a compact source fingerprint manifest with the report.
