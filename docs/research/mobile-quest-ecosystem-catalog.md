@@ -13,6 +13,40 @@ Public Android package listings identify the app as `com.Tq.CQ2ClientAndroid`, v
 - APKPure version history: https://apkpure.net/conquer-online-mmorpg-game/com.Tq.CQ2ClientAndroid/versions
 - APKFab package/split listing: https://apkfab.com/conquer-online/com.Tq.CQ2ClientAndroid
 
+### 1.1 Version-specific delta for 1.1.2.3
+
+The public Android listing identifies the target package as `com.Tq.CQ2ClientAndroid`, version `1.1.2.3`, updated 2026-07-21, with package SHA-256 `b087b66abb20120a09d90f5b3c155adc3819c11a2ad5737eb3a0b576f2c424de`. It describes the headline addition as the **Wanderer** class and its Awakening System. This is a useful external fingerprint, but it does not prove that the extracted-assets ZIP contains the same APK bytes; compare the APK member hash independently.
+
+Sources:
+- https://apkpure.net/conquer-online-mmorpg-game/com.Tq.CQ2ClientAndroid
+- https://conquer-online.apkcafe.ae/
+
+**Catalogue consequence:** the old guide index is incomplete for the 1.1.2.3 class roster. Add Wanderer/Dune Wanderer as a class-specific content domain and search for its awakening quest scripts, NPC/dialogue, skill books, class items, maps and unlock flags. Do not invent its quest chain from the class announcement alone.
+
+### 1.2 Later Mobile event quests — dated, not permanent
+
+The official Mobile news/guide stream is newer than the static quest index. Event quest content must be stored as dated content with availability windows, reset rules, NPCs, prerequisites, objective sequence and rewards; never fold a temporary event into the permanent Main Quest.
+
+**Wolf Cliff / Wolf Vale Defense (July 21–August 3, 2026)**
+- Level 80; two-stage event. Day 1 opens Wolf Cliff as a solo challenge; Day 2 opens Wolf Vale Defense as solo or team content.
+- The defense challenge has seven enemy waves; protect Liu Yi, whose HP decreases when hit; fail when his HP reaches zero.
+- Event rewards include Skydust Treasure Maps and Skydust Coins.
+- Treat the end date as a historical availability window, not current availability.
+
+Source: https://comobile.99.com/guide/2026-07-17/wolf_vale_defense.shtml
+
+**Love Cycles / Beast Lineage Awakening (September 8–21, 2026)**
+- Level 80; NPC Suyi at Twin City (455,366).
+- Seven Beast Lineage Awakening quests, one newly unlocked each day at 00:00; after completing the daily awakening quest, reincarnation through the reincarnation interface grants the event reward.
+- A separate daily Active Points target and Fate Oak / Magpie Bridge progression exists; keep these objectives and reward claims as distinct linked event stages.
+- This is an event-specific chain, not a permanent Beast Lineage main quest unless the client resources prove a permanent counterpart.
+
+Source: https://comobile.99.com/guide/2026-09-03/love_cycles_is_now_live_from_sept__8th_to_sept__21st_.shtml
+
+**Version/patch context:** official Mobile site news continues to publish patch and event content beyond the static 2023 quest guide. Therefore, keep the catalogue versioned and date-stamped; the 2023 Bounty/Trials rules are baseline documented behavior, not guaranteed exact live rules in 1.1.2.3.
+
+Source: https://comobile.99.com/
+
 ## 2. Official Mobile quest catalogue discovered
 
 The official Mobile guide index lists these sections: Daily Quests (Bounty Hall, Farmland Defence, Hunting Battle, Mayhem Land Crusade); Trials (Chi Canyon, Battle Dojo, Rune Mountain); Epic Quests (Ninja, Taoist, Monk); Inspiring Quests (Trojan Inspiring Quest). This index is a discovery checklist, not a claim that every activity is a conventional story quest.
