@@ -119,6 +119,25 @@ func _run_travel_test() -> void:
 	if str(armorer_route.get("npc_id", "")) != "0004" or str(armorer_route.get("map_id", "")) != "1002":
 		_fail("Source quest graph did not resolve mission 650 turn-in route.")
 		return
+	var source_agent := QuestNavigationAgent.new()
+	get_root().add_child(source_agent)
+	await process_frame
+	source_agent.completed_source_mission_ids.append("608")
+	if not source_agent.select_source_mission_at_npc("650", "2001", 8, "Monk"):
+		_fail("Source quest 650 could not be accepted at its exact start NPC for an eligible class.")
+		return
+	source_agent.on_source_npc_talked("0004")
+	var source_active_state: Dictionary = source_agent.get_source_active_state()
+	if not bool(source_active_state.get("ready_to_turn_in", false)):
+		_fail("Source NPC objective did not move mission 650 to ready-to-turn-in.")
+		return
+	if not source_agent.select_source_mission_at_npc("650", "0004", 8, "Monk"):
+		_fail("Source quest 650 could not be turned in at its exact Armorer NPC.")
+		return
+	if not source_agent.completed_source_mission_ids.has("650"):
+		_fail("Source quest turn-in did not record mission 650 as completed.")
+		return
+	source_agent.queue_free()
 	print("QUEST GRAPH AUDIT PASSED: ", graph_summary, " | city map IDs missing resource index: ", missing_city_maps)
 
 	var player := CharacterBody3D.new()
