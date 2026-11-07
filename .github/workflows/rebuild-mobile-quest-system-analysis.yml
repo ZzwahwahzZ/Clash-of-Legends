@@ -58,9 +58,11 @@ jobs:
           assert all(x["simple_object_id"] in ("214","8") for x in mn["5456"] if x["npc_type_name"] in ("David","Jack"))
           exports=Path("reports/quest_exports")
           manifest=json.loads((exports/"manifest.json").read_text(encoding="utf-8"))
-          assert len(manifest["exports"]) == 9
+          assert len(manifest["exports"]) == 10
           assert sum(1 for _ in (exports/"mission_npc_map_links.csv").open(encoding="utf-8-sig")) == 4919
           assert sum(1 for _ in (exports/"mission_catalog.csv").open(encoding="utf-8-sig")) == 2510
+          assert sum(1 for _ in (exports/"mission_catalog_source_records.csv").open(encoding="utf-8-sig")) == 2511
+          assert sum(1 for _ in (exports/"mission_map_links.csv").open(encoding="utf-8-sig")) == 5502
           print("Quest-system analysis acceptance checks passed")
           PY
       - name: Upload rebuilt quest-system report
