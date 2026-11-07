@@ -33,7 +33,7 @@ expected_skeletons = int(report.get("skeleton_catalog_poc_count", 0))
 actual_skeletons = sum(1 for p in (root / "skeleton-poc").rglob("*.glb"))
 if expected_skeletons <= 0 or actual_skeletons != expected_skeletons:
     raise SystemExit(f"Skeleton proof subset mismatch: expected={expected_skeletons} actual={actual_skeletons}")
-expected_clips = 6
+expected_clips = sum(1 for row in report.get("external_motion_poc", []) if row.get("status") == "EXPORTED_PENDING_GODOT_IMPORT_VALIDATION")
 actual_clips = sum(1 for p in (root / "motion-poc").glob("*.glb"))
 if actual_clips != expected_clips:
     raise SystemExit(f"Animation proof subset mismatch: expected={expected_clips} actual={actual_clips}")
@@ -47,7 +47,7 @@ payload = {
     "animation_clips_expected": expected_clips,
     "animation_clips_imported": actual_clips,
     "status": "SKELETAL_AND_ANIMATION_PROOF_SUBSET_READY",
-    "note": "All converted outputs remain preserved in /tmp/c3-glb-full; only the skeletal catalog and six full-character animation proof resources enter Godot's importer in this phase."
+    "note": "All converted outputs remain preserved in /tmp/c3-glb-full; only the skeletal catalog and every exact-signature full-character motion proof resource enter Godot's importer in this phase."
 }
 Path("reports").mkdir(exist_ok=True)
 Path("reports/c3-import-subset.json").write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
