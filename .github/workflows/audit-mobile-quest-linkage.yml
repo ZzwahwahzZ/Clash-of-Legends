@@ -54,7 +54,8 @@ jobs:
                           if (base in {"questinfo.dat","taskitem_info.dat","questinfo.ini","questinfopassionserver.ini","terrainnpc.ini","npc.ini","npcx.ini","npcex.ini","npcdialogueinfo.dat","npcdialoguefunc.dat","npcdialoguetext_ar.dat","npcdialoguetext_en.dat","npcdialoguetext_sp.dat","gamemap.dat","gamemapex.ini","mapdestination.ini","item.ini","monstertype.ini","slotnpc.ini","clienttask124.dat","scriptdialoguetext_ar.dat","scriptdialoguetext_en.dat","scriptdialoguetext_sp.dat","npcdialogueinfo.dat","npcdialoguetext_ar.dat","npcdialoguetext_en.dat","npcdialoguetext_sp.dat","luascriptmgr.dat"}
                               or "/client_realm_task/" in low and base.endswith(".dat")
                               or "/clienttask" in low and base.endswith(".dat")
-                              or low.startswith("assets/conquerres/script/") and base.endswith(".dat")):
+                              or low.startswith("assets/conquerres/ini/itemtype/") and base.endswith(".ini")
+                          or low.startswith("assets/conquerres/script/") and base.endswith(".dat")):
                               target=out/"selected"/Path(info.filename).relative_to("assets/ConquerRes")
                               target.parent.mkdir(parents=True,exist_ok=True)
                               with z.open(info) as src, target.open("wb") as dst:
@@ -103,6 +104,11 @@ jobs:
             build/mobile-quest-source/selected \
             --output reports/mobile-quest-world-links.json
           python3 -m json.tool reports/mobile-quest-world-links.json > /dev/null
+          python3 -m py_compile tools/gameplay_source_audit/analyze_mobile_quest_system.py
+          python3 tools/gameplay_source_audit/analyze_mobile_quest_system.py \
+            build/mobile-quest-source/selected \
+            --output reports/mobile-quest-system-analysis.json
+          python3 -m json.tool reports/mobile-quest-system-analysis.json > /dev/null
       - name: Validate quest dialogue and world-linkage acceptance checks
         run: |
           python3 - <<'PY'
@@ -167,6 +173,7 @@ jobs:
             reports/mobile-quest-catalog.json
             reports/mobile-lua-decode-candidates.json
             reports/mobile-quest-world-links.json
+            reports/mobile-quest-system-analysis.json
             build/mobile-quest-source/selected/
             build/mobile_quest_candidates/
             build/mobile_lua_candidates/
