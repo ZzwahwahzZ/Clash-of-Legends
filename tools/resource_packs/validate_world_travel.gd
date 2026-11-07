@@ -27,6 +27,37 @@ func _run_travel_test() -> void:
 		return
 	print("QUEST SOURCE CATALOG AUDIT PASSED: ", source_counts)
 
+	var quest_graph := QuestRuntimeGraph.new()
+	if not quest_graph.load_graph():
+		_fail("Source quest dependency graph failed to load.")
+		return
+	var graph_summary: Dictionary = quest_graph.get_world_summary()
+	if int(graph_summary.get("missions", 0)) != 2509 or int(graph_summary.get("map_ids", 0)) != 411:
+		_fail("Quest graph counts are inconsistent: %s" % str(graph_summary))
+		return
+	var city_hubs: Array = graph_summary.get("city_hubs", [])
+	if city_hubs.size() != 6:
+		_fail("Expected Twin City plus five source-named smaller city hubs, got %d." % city_hubs.size())
+		return
+	var has_main_city := false
+	var minor_city_count := 0
+	var missing_city_maps: Array[String] = []
+	for hub in city_hubs:
+		if str(hub.get("map_id", "")) == "1002" and str(hub.get("kind", "")) == "main":
+			has_main_city = true
+		if str(hub.get("kind", "")) == "minor":
+			minor_city_count += 1
+		if str(hub.get("status", "")).contains("MAP_RESOURCE_INDEX_MISSING"):
+			missing_city_maps.append(str(hub.get("map_id", "")))
+	if not has_main_city or minor_city_count != 5:
+		_fail("Main/minor city hierarchy is incomplete: %s" % str(city_hubs))
+		return
+	var armorer_route := quest_graph.get_route("650", true)
+	if str(armorer_route.get("npc_id", "")) != "0004" or str(armorer_route.get("map_id", "")) != "1002":
+		_fail("Source quest graph did not resolve mission 650 turn-in route.")
+		return
+	print("QUEST GRAPH AUDIT PASSED: ", graph_summary, " | city map IDs missing resource index: ", missing_city_maps)
+
 	var player := CharacterBody3D.new()
 	player.name = "TravelTestPlayer"
 	get_root().add_child(player)
