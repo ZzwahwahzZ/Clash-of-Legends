@@ -22,19 +22,20 @@ def find_source(name: str) -> Path:
     return matches[0]
 
 
+def decode_source_text(path: Path) -> tuple[str, str]:
+    raw = path.read_bytes()
+    for encoding in ("utf-8-sig", "gb18030", "cp1252"):
+        try:
+            return raw.decode(encoding), encoding
+        except UnicodeDecodeError:
+            pass
+    return raw.decode("utf-8", errors="replace"), "utf-8-replacement"
+
+
 def parse_ini(path: Path) -> dict[str, dict[str, str]]:
     parser = configparser.ConfigParser(interpolation=None, strict=False)
     parser.optionxform = str
-    raw = path.read_bytes()
-    text = None
-    for encoding in ("utf-8-sig", "gb18030", "cp1252"):
-        try:
-            text = raw.decode(encoding)
-            break
-        except UnicodeDecodeError:
-            pass
-    if text is None:
-        text = raw.decode("utf-8", errors="replace")
+    text, _encoding = decode_source_text(path)
     parser.read_string(text)
     return {section: dict(parser.items(section)) for section in parser.sections()}
 
@@ -153,6 +154,68 @@ def main() -> None:
             "mapping_status": "DIRECT_SOURCE_ROLE_INDEX_JOIN_CANDIDATE_NOT_CLASS_GENDER_APPROVED" if joined_role is not None else "UI_ROLE_TO_SIMPLE_ROLE_JOIN_NOT_ESTABLISHED",
         })
 
+    # Inspect every source-side character-selection registry as evidence.
+    # These files may contain UI model keys that are not represented in
+    # 3dsimplerole.ini; preserve the raw parsed sections without approving
+    # a class/gender mapping from a numeric coincidence.
+    ui_registry_sources = []
+    for wanted_name in ("rolechoose_js.ini", "selectcharacter.ini"):
+        for source_path in sorted(RESOURCE.rglob(wanted_name)):
+            try:
+                sections = parse_ini(source_path)
+                ui_registry_sources.append({
+                    "path": source_path.relative_to(ROOT).as_posix(),
+                    "section_count": len(sections),
+                    "sections": sections,
+                    "parse_status": "PARSED",
+                })
+            except (configparser.Error, UnicodeDecodeError) as error:
+                ui_registry_sources.append({
+                    "path": source_path.relative_to(ROOT).as_posix(),
+                    "section_count": 0,
+                    "sections": {},
+                    "parse_status": "PARSE_FAILED",
+                    "error": str(error),
+                })
+
+    # Cross-reference exact numeric keys from the simple-role table against
+    # text configuration files. This is a discovery report only: a hit is
+    # not promoted unless a direct source relation and visual/rig checks exist.
+    candidate_tokens = set()
+    for row in role_rows:
+        for field_name in ("simple_object_id", "standby_motion_id", "blaze_motion_id"):
+            value = int(row.get(field_name, 0) or 0)
+            if value > 0:
+                candidate_tokens.add(str(value))
+        simple = row.get("simple_object")
+        if isinstance(simple, dict):
+            for part in simple.get("parts", []):
+                if not isinstance(part, dict):
+                    continue
+                for field_name in ("part_id", "texture_id"):
+                    value = int(part.get(field_name, 0) or 0)
+                    if value > 0:
+                        candidate_tokens.add(str(value))
+
+    reference_hits = []
+    searched_ini_count = 0
+    for source_path in sorted(RESOURCE.rglob("*.ini")):
+        try:
+            source_text, encoding = decode_source_text(source_path)
+        except OSError:
+            continue
+        searched_ini_count += 1
+        for line_number, line in enumerate(source_text.splitlines(), start=1):
+            for token in candidate_tokens:
+                if re.search(rf"(?<![0-9]){re.escape(token)}(?![0-9])", line):
+                    reference_hits.append({
+                        "token": token,
+                        "path": source_path.relative_to(ROOT).as_posix(),
+                        "line": line_number,
+                        "encoding": encoding,
+                        "text": line.strip()[:500],
+                    })
+
     output = {
         "schema_version": "1.0.0",
         "source_client": "Conquer Online Mobile 1.1.2.3",
@@ -166,6 +229,15 @@ def main() -> None:
         },
         "role_simple_object_candidates": role_rows,
         "selection_ui_roles_unjoined": selection_rows,
+        "additional_ui_registry_sources": ui_registry_sources,
+        "role_source_cross_reference": {
+            "searched_ini_file_count": searched_ini_count,
+            "candidate_token_count": len(candidate_tokens),
+            "reference_hit_count": len(reference_hits),
+            "unmatched_candidate_tokens": sorted(candidate_tokens - {row["token"] for row in reference_hits}),
+            "hits": reference_hits,
+            "status": "DISCOVERY_ONLY_NO_CLASS_OR_GENDER_MAPPING_APPROVED",
+        },
         "rolepart": mesh_catalog.get("role_parts", {}),
         "summary": {
             "simple_role_records": len(role_rows),
