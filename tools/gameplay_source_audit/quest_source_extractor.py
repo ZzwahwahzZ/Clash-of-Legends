@@ -61,7 +61,7 @@ def scan_archive(z: zipfile.ZipFile, origin: str, output: zipfile.ZipFile,
     for info in z.infolist():
         if info.is_dir(): continue
         raw_name=info.filename.replace("\\","/")
-        if only_mobile_root and not raw_name.startswith(ROOT_MARKER) and Path(raw_name).suffix.lower() not in CODE_EXTS:
+        if only_mobile_root and not raw_name.startswith(ROOT_MARKER) and not raw_name.startswith("res/") and Path(raw_name).suffix.lower() not in CODE_EXTS:
             continue
         base=Path(raw_name).name
         ext=Path(raw_name).suffix.lower()
