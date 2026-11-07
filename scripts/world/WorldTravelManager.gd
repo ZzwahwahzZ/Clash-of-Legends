@@ -90,6 +90,16 @@ func get_source_map_by_id(map_id: int) -> Dictionary:
 		return {}
 	return WorldContentIndex.get_map_by_id(map_id)
 
+func get_source_map_archive(map_id: int) -> Dictionary:
+	if not WorldContentIndex or not WorldContentIndex.index_ready:
+		return {}
+	return WorldContentIndex.get_source_map_archive(map_id)
+
+func get_source_map_archive_catalog() -> Array:
+	if not WorldContentIndex or not WorldContentIndex.index_ready:
+		return []
+	return WorldContentIndex.get_source_map_archives()
+
 func get_source_map_for_quest(mission_id: int, for_finish: bool = false) -> Dictionary:
 	if not WorldContentIndex or not WorldContentIndex.index_ready:
 		return {}
