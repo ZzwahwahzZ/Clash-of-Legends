@@ -94,7 +94,29 @@ jobs:
                       target=Path("build/apk-reader/native")/Path(info.filename).relative_to("assets/ConquerRes/lib") if low.startswith("assets/conquerres/lib/") else Path("build/apk-reader/native")/Path(info.filename).name
                       target.parent.mkdir(parents=True,exist_ok=True)
                       target.write_bytes(apk.read(info))
-          print("APK bytecode and native libraries extracted for static inspection")
+          print("APK bytecode and in-APK native libraries extracted for static inspection")
+          PY
+      - name: Locate and preserve external game-engine native libraries
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, zipfile
+          from pathlib import Path
+          src=zipfile.ZipFile("build/source/extracted-assets-001.zip")
+          out=Path("build/apk-reader/native")
+          out.mkdir(parents=True,exist_ok=True)
+          found=[]
+          for info in src.infolist():
+              low=info.filename.lower()
+              if low.endswith(".so") and ("conquerres" in low or "/lib/" in low or low.startswith("lib")):
+                  target=out/Path(info.filename).name
+                  if target.exists() and target.stat().st_size==info.file_size:
+                      continue
+                  with src.open(info) as r, target.open("wb") as w:
+                      while block:=r.read(1024*1024): w.write(block)
+                  found.append({"archive_path":info.filename,"output":str(target),"bytes":info.file_size})
+          Path("reports/native-library-inventory.json").write_text(json.dumps(found,indent=2)+"\\n")
+          print(json.dumps({"native_library_count":len(found),"libraries":found},indent=2))
           PY
           # Diagnose every embedded DEX-like asset instead of silently excluding it.
           # If it is a real DEX with stale integrity fields, repair only a disposable copy.
@@ -151,15 +173,23 @@ jobs:
           chmod +x /tmp/jadx/bin/jadx
           /tmp/jadx/bin/jadx --version
           # Use baksmali as an independent parser on embedded payloads and integrity-repaired copies.
-          curl --fail --location --retry 3 "https://repo1.maven.org/maven2/org/smali/baksmali/2.5.2/baksmali-2.5.2.jar" -o /tmp/baksmali.jar
+          # Use the official fat release jar (the Maven baksmali artifact is a thin jar without a Main-Class).
+          curl --fail --location --retry 3 "https://github.com/baksmali/smali/releases/download/v3.0.10/baksmali-3.0.10-fat-release.jar" -o /tmp/baksmali-fat.jar
+          jar tf /tmp/baksmali-fat.jar | grep -q 'org/jf/baksmali/Baksmali.class'
+          java -jar /tmp/baksmali-fat.jar --version
           mkdir -p build/apk-reader/baksmali
+          # Parse all six standard DEX files independently, then the suspicious embedded payload.
+          find build/apk-reader/dex -maxdepth 1 -type f -name "classes*.dex" -print0 | sort -z | while IFS= read -r -d '' dex; do
+            name=$(basename "$dex" .dex)
+            java -jar /tmp/baksmali-fat.jar disassemble "$dex" -o "build/apk-reader/baksmali/$name" >"reports/baksmali-$name.log" 2>&1 || echo "PARSER_FAILED:$name" >> reports/baksmali-status.txt
+          done
           find build/apk-reader/embedded-payloads -type f -name "*.dex" -print0 | while IFS= read -r -d '' dex; do
             name=$(basename "$dex" .dex)
-            java -jar /tmp/baksmali.jar disassemble "$dex" -o "build/apk-reader/baksmali/$name" >"reports/baksmali-$name.log" 2>&1 || true
+            java -jar /tmp/baksmali-fat.jar disassemble "$dex" -o "build/apk-reader/baksmali/$name" >"reports/baksmali-$name.log" 2>&1 || echo "PARSER_FAILED:$name" >> reports/baksmali-status.txt
           done
           find build/apk-reader/embedded-payloads -type f -name "*.integrity-repaired.dex" -print0 | while IFS= read -r -d '' dex; do
             name=$(basename "$dex" .integrity-repaired.dex)
-            java -jar /tmp/baksmali.jar disassemble "$dex" -o "build/apk-reader/baksmali/$name-repaired" >"reports/baksmali-$name-repaired.log" 2>&1 || true
+            java -jar /tmp/baksmali-fat.jar disassemble "$dex" -o "build/apk-reader/baksmali/$name-repaired" >"reports/baksmali-$name-repaired.log" 2>&1 || echo "PARSER_FAILED:$name-repaired" >> reports/baksmali-status.txt
           done
           # The APK carries embedded payloads. They are now triaged and independently parsed above;
           # omit them only from the whole-APK JADX pass to prevent a malformed payload aborting sibling DEX parsing.
