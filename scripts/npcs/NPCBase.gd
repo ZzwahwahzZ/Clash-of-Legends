@@ -85,7 +85,7 @@ func _open_source_quest_dialogue(player: CharacterBody3D) -> bool:
 	for agent in tree.get_nodes_in_group("quest_agents"):
 		if not agent.has_method("get_source_missions_for_npc_interaction"):
 			continue
-		var class_id := str(player.call("get_character_class")) if player.has_method("get_character_class") else ""
+		var class_id := str(player.get("character_class"))
 		var offers: Array = agent.get_source_missions_for_npc_interaction(source_npc_id, player.current_level, class_id)
 		if offers.is_empty():
 			continue
