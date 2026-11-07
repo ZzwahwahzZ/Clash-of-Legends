@@ -12,6 +12,8 @@ var _quests_by_section: Dictionary = {}
 var _quests_by_mission_id: Dictionary = {}
 var _quests_by_npc_id: Dictionary = {}
 var _quests_by_map_id: Dictionary = {}
+var _npc_dialogues_by_id: Dictionary = {}
+var _npc_dialogues_by_model_id: Dictionary = {}
 
 func _ready() -> void:
 	load_index()
@@ -25,6 +27,8 @@ func load_index() -> bool:
 	_quests_by_mission_id.clear()
 	_quests_by_npc_id.clear()
 	_quests_by_map_id.clear()
+	_npc_dialogues_by_id.clear()
+	_npc_dialogues_by_model_id.clear()
 	if not FileAccess.file_exists(INDEX_PATH):
 		index_error = "Runtime source index is missing: " + INDEX_PATH
 		push_warning(index_error)
@@ -90,6 +94,19 @@ func load_index() -> bool:
 			_index_quest_map(quest, source_map_id)
 		_index_quest_npc(quest, quest.get("begin_npc", null), "begin")
 		_index_quest_npc(quest, quest.get("finish_npc", null), "finish")
+	for dialogue in _index.get("npc_dialogues", []):
+		if not dialogue is Dictionary:
+			continue
+		var dialogue_id := int(dialogue.get("dialogue_id", -1))
+		if dialogue_id > 0:
+			_npc_dialogues_by_id[dialogue_id] = dialogue
+		for model_id_value in dialogue.get("model_template_ids", []):
+			var model_id := int(model_id_value)
+			if model_id <= 0:
+				continue
+			if not _npc_dialogues_by_model_id.has(model_id):
+				_npc_dialogues_by_model_id[model_id] = []
+			_npc_dialogues_by_model_id[model_id].append(dialogue)
 	index_ready = true
 	return true
 
@@ -221,10 +238,24 @@ func get_dialogue_source_status() -> Array:
 	return _index.get("dialogue_sources", []).duplicate(true)
 
 func get_npc_dialogue(dialogue_id: int) -> Dictionary:
-	for entry in _index.get("npc_dialogues", []):
-		if int(entry.get("dialogue_id", -1)) == dialogue_id:
-			return entry.duplicate(true)
+	return _npc_dialogues_by_id.get(dialogue_id, {}).duplicate(true)
+
+func get_npc_dialogues_for_model_id(model_id: int) -> Array:
+	return _npc_dialogues_by_model_id.get(model_id, []).duplicate(true)
+
+func get_npc_dialogue_for_model_id(model_id: int) -> Dictionary:
+	var candidates: Array = _npc_dialogues_by_model_id.get(model_id, [])
+	if candidates.size() == 1:
+		return candidates[0].duplicate(true)
 	return {}
+
+func get_npc_dialogue_ids_for_model_id(model_id: int) -> Array[int]:
+	var result: Array[int] = []
+	for entry in _npc_dialogues_by_model_id.get(model_id, []):
+		var dialogue_id := int(entry.get("dialogue_id", -1))
+		if dialogue_id > 0:
+			result.append(dialogue_id)
+	return result
 
 func get_dialogue_text(text_key: String, locale: String = "ar") -> String:
 	var localized: Dictionary = _index.get("dialogue_texts", {})
