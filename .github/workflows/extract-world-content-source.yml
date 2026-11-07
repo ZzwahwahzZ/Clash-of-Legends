@@ -1,0 +1,42 @@
+name: Extract exact-version world content sources
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/extract-world-content-source.yml"
+      - "tools/gameplay_source_audit/extract_world_content_sources.py"
+permissions:
+  contents: read
+concurrency:
+  group: world-content-source-extraction-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  extract-world-content:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and verify the exact Mobile 1.1.2.3 source archive
+        run: |
+          set -euo pipefail
+          mkdir -p build/source build/world-content-source reports
+          curl --fail --location --retry 5 --retry-all-errors \\
+            "https://github.com/ZzwahwahzZ/Conquer-Mobile-Assets./releases/download/mobile-extracted-assets/extracted-assets-001.zip" \\
+            -o build/source/extracted-assets-001.zip
+          echo "0d21a110c09b762ed5f1a5f4da022857b0534e489eb85052d15da460cb229d2a  build/source/extracted-assets-001.zip" | sha256sum -c -
+      - name: Extract only version-matched map, NPC, quest and dialogue source members
+        run: |
+          python3 tools/gameplay_source_audit/extract_world_content_sources.py \\
+            build/source/extracted-assets-001.zip \\
+            --output-dir build/world-content-source \\
+            --report reports/world-content-source-subset.json
+          python3 -m json.tool reports/world-content-source-subset.json > /dev/null
+      - name: Upload source subset for schema inspection
+        uses: actions/upload-artifact@v4
+        with:
+          name: World-Dialogue-Quest-Source-Subset
+          path: |
+            build/world-content-source/
+            reports/world-content-source-subset.json
+          if-no-files-found: error
+          retention-days: 30
