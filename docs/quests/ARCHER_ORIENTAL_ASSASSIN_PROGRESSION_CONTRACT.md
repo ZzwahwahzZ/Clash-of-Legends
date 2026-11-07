@@ -9,7 +9,9 @@
 
 The Archer and Oriental Assassin are two combat forms / paths of the same Archer character, not two separately created characters and not a class reroll. Preserve one character identity, save slot, level, experience, attributes, inventory, quest history, social identity and progression state.
 
-At the documented level-40 threshold, the character must complete the verified Archer advancement/promotion requirements and unlock the Oriental Assassin transformation. The official Mobile skill guide documents the transformation skill as **Path of Shadow**: it transforms the Archer into an Oriental Assassin, allows use of the equipped Throwing Knife, disables skills requiring a Bow while transformed, and toggles back to the normal Archer form when activated again.
+**Level-40 evidence distinction:** Level 40 is the owner's required promotion milestone for this project. The currently located official Archer skill page independently lists Level 40 as the unlock requirement for Mortal Wound skill rank 0; it does **not** state that Path of Shadow itself unlocks at Level 40 or publish the promotion quest. Therefore, retain the owner's level-40 promotion requirement as the target behavior, but keep the exact quest gate and its source mapping unresolved until verified in the pinned Mobile client. Do not misrepresent Mortal Wound's level requirement as proof of the promotion quest.
+
+The official Mobile skill guide documents **Path of Shadow** as the reversible form toggle: it transforms the Archer into an Oriental Assassin, allows use of the equipped Throwing Knife, disables skills requiring a Bow while transformed, and toggles back to normal Archer form when activated again.
 
 Do not treat the word “promotion” as proof that the character permanently changes into a separate class. The Mobile skill description establishes a reversible form switch.
 
@@ -24,13 +26,16 @@ Do not treat the word “promotion” as proof that the character permanently ch
 ### Oriental Assassin form
 - Weapon used by the transformation: equipped Throwing Knife (one-handed in the official equipment type guide).
 - Path of Shadow enables the Oriental Assassin form and its Throwing Knife use.
-- Assassin-exclusive skills documented by the Mobile Archer skill guide include:
-  - **Mortal Wound** — multi-knife attack against one target; first listed skill level unlocks at character level 40.
-  - **Kinetic Spark** — toggleable chi effect with level-based upgrades.
-  - **Blistering Wave** — area attack with level-based upgrades.
-  - **Spirit Focus** — channelled attack-power boost; cannot move while charging.
-  - **Dagger Storm** — timed area attack with cooldown and level-based upgrades.
-  - **Blade Flurry** — Oriental Assassin XP skill with movement-speed increase and spinning-blade area damage.
+- Assassin-exclusive skills documented by the Mobile Archer skill guide:
+  - **Mortal Wound** — single-target multi-knife attack; 12 Stamina. Rank 0: 420% at Level 40; rank 1: 450% at 60; rank 2: 470% at 80; rank 3: 500% at 100; rank 4: 520%.
+  - **Kinetic Spark** — toggleable chi effect; 42% trigger chance at Level 50, 44% at 60, 46% at 70, 54% at 80 and 80% at 90; can affect up to six nearby enemies, with 20% less damage per additional target.
+  - **Blistering Wave** — area attack, 12 Stamina; 280% at Level 70, 300% at 80 and 90, 330% at 100, 350% at 110.
+  - **Spirit Focus** — 5-second channel, cannot move while charging; attack power 250% at Level 90, 260% at 95, 280% at 100, 300% at 110, 320% max.
+  - **Dagger Storm** — four-second area attack, 10-second cooldown; 300% at Level 100, 350% at 105, 400% at 110, 450% at 115, 500% at 120.
+  - **Blade Flurry** — Oriental Assassin XP skill; lasts 40 seconds, increases movement speed by 50%, deals 300% damage to monsters and 200% to human targets.
+- Bow-specific skills explicitly documented:
+  - **Fly** — requires an equipped Bow; lasts 40 seconds at rank 0 or 60 seconds at rank 1; costs 100 Stamina.
+  - **Scatter** — requires an equipped Bow; range 13, costs 10 Stamina; rank damage 50% at Level 32, 55% at 48, 60% at 54, 65% at 66, 68% at 72 and 72% max.
 - These are separate skill eligibility rules, not cosmetic renames of Archer skills.
 
 ### Form switch invariants
