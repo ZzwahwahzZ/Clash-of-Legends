@@ -17,6 +17,7 @@ assert len(npcs) >= 2500, f"Expected at least 2500 NPC template sections, got {l
 assert len(quests) >= 2400, f"Expected at least 2400 quest rows, got {len(quests)}"
 assert 1002 in unique_maps, "Twin City/WindPlain source map 1002 is missing"
 assert any(q.get("mission_id") == 6126 for q in quests), "Known source quest 6126 is missing"
+assert any(q.get("mission_id") == 650 and 10 in q.get("profession_ids", []) and 608 in q.get("prerequisite_ids", []) for q in quests), "Known profession/prerequisite source quest 650 is missing its exact gates"
 assert sum(1 for q in quests if q.get("mission_id") == 3938) == 2, "Duplicate mission 3938 rows must be preserved, not overwritten"
 for q in quests:
     assert q.get("mission_id") is not None, f"Quest row {q.get('source_section')} has no MissionId"
