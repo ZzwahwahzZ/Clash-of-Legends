@@ -88,6 +88,12 @@ func _run() -> void:
 		_fail("Archer form skill compatibility is incorrect.")
 		return
 
+	if CombatEngine.can_cast_skill("archer_path_of_shadow", player):
+		_fail("Path of Shadow must remain unavailable until the Throwing Knife is prepared.")
+		return
+	if CombatEngine.execute_skill("archer_path_of_shadow", player, null):
+		_fail("Path of Shadow activated without a prepared Throwing Knife.")
+		return
 	var knife_index := _find_item_index(inventory, "test_oriental_throwing_knife")
 	if knife_index < 0 or not inventory.equip_item_from_slot(knife_index):
 		_fail("Could not equip the inactive Oriental Assassin weapon loadout.")
