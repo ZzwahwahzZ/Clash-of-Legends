@@ -15,6 +15,7 @@ const DESTINATIONS := {
 }
 
 var current_destination_id := "twin_city"
+var current_source_map_id := "1002"
 var travel_in_progress := false
 var travel_serial := 0
 var source_quest_graph := QuestRuntimeGraph.new()
@@ -82,6 +83,37 @@ func get_source_mission_route(mission_id: String, turn_in: bool = false) -> Dict
 		return {}
 	return graph.get_route(mission_id, turn_in)
 
+func navigate_to_source_route(route: Dictionary) -> bool:
+	var map_id := str(route.get("map_id", ""))
+	var npc_id := str(route.get("npc_id", ""))
+	if map_id.is_empty() or npc_id.is_empty():
+		_notify("بيانات موقع المهمة غير مكتملة" if GameManager.current_language == "ar" else "Quest route is missing its map or NPC ID.", true)
+		return false
+	if map_id != current_source_map_id or current_destination_id != "twin_city":
+		_notify("خريطة المهمة غير محمّلة حاليًا؛ لن ننقل اللاعب إلى إحداثيات غير مؤكدة." if GameManager.current_language == "ar" else "The quest map is not loaded; refusing to navigate to unverified coordinates.", true)
+		return false
+	var matched_npc: Node3D = null
+	for candidate in get_tree().get_nodes_in_group("npcs"):
+		if not candidate is Node3D:
+			continue
+		var candidate_id := str(candidate.get("source_npc_id")).lstrip("0")
+		var candidate_map := str(candidate.get("source_map_id"))
+		if candidate_id == npc_id.lstrip("0") and candidate_map == map_id:
+			matched_npc = candidate as Node3D
+			break
+	if matched_npc == null:
+		_notify("صاحب المهمة غير موجود في مشهد المدينة المحمّل." if GameManager.current_language == "ar" else "The quest NPC is not present in the loaded city scene.", true)
+		return false
+	var game_manager := _get_game_manager()
+	if game_manager == null or not is_instance_valid(game_manager.get("player_reference")):
+		return false
+	var player: Node = game_manager.get("player_reference")
+	if player.has_method("move_towards_target_position"):
+		player.call("move_towards_target_position", matched_npc.global_position, 0.0)
+		_notify("جارٍ التوجه إلى %s" % str(route.get("npc_name", npc_id)), false)
+		return true
+	return false
+
 func get_current_destination_id() -> String:
 	return current_destination_id
 
@@ -126,6 +158,8 @@ func travel_to(destination_id: String, reason: String = "manual") -> bool:
 		player.clear_movement_target()
 	player.global_position = target
 	current_destination_id = destination_id
+	if destination_id == "twin_city":
+		current_source_map_id = "1002"
 	if GameAudioManager:
 		GameAudioManager.play_map_music(destination_id)
 	travel_in_progress = false
