@@ -113,6 +113,10 @@ def main():
         if p.is_file():
             locales[locale]={s["fields"].get("MissionId","") for s in sections(read_text(p)) if s["section"].isdigit()}
     all_ids=mission_ids|set().union(*locales.values()) if locales else mission_ids
+    ar_mission_names={}
+    ar_path=root/"ini_ar/questinfo.ini"
+    if ar_path.is_file():
+        ar_mission_names={s["fields"].get("MissionId",""):s["fields"].get("Name","") for s in sections(read_text(ar_path)) if s["section"].isdigit()}
 
     npc_type_path=root/"ini/npc.ini"
     npc_types={}
@@ -136,7 +140,7 @@ def main():
                 except ValueError:x=y=None
                 mapdest[(mid,f["npcid"].zfill(4))].append({"section":s["section"],"title":f.get("title",""),"x":x,"y":y,"radius":f.get("radius","")})
 
-    npc_refs=[]; map_refs=[]; mob_refs=[]; item_refs=[]; prereq_refs=[]; lua_refs=[]
+    npc_refs=[]; map_refs=[]; mob_refs=[]; item_refs=[]; prereq_refs=[]; quest_condition_refs=[]; lua_refs=[]
     for s in quests:
         f=s["fields"];mid=f.get("MissionId","")
         for role,key in [("begin","BeginNpcId"),("finish","FinishNpcId")]:
@@ -178,7 +182,7 @@ def main():
                     elif head=="lua" and p:
                         lua_refs.append({"mission_id":mid,"field":key,"script_function":p[0],"raw":token})
                     elif head=="chk_item" and len(p)>=2:item_refs.append({"mission_id":mid,"item_id":p[0],"quantity":p[1]})
-                    elif head=="chk_quest" and p:prereq_refs.append({"mission_id":mid,"required_mission_id":p[0]})
+                    elif head=="chk_quest" and p:quest_condition_refs.append({"mission_id":mid,"condition_quest_id":p[0],"condition_args":p[1:]})
         for p in f.get("Prequest","").split("|"):
             if p and p not in ("0","-1"):prereq_refs.append({"mission_id":mid,"required_mission_id":p})
 
@@ -217,7 +221,7 @@ def main():
         if suffix in range(1,10) and str(mid) in mission_ids:
             by_mission[str(mid)].append(b)
     mission_dialogue=[{"mission_id":mid,"mission_name":next((q["fields"].get("Name","") for q in quests if q["fields"].get("MissionId")==mid),""),
-        "dialogues":by_mission[mid]} for mid in sorted(by_mission,key=lambda x:int(x))]
+        "mission_name_ar":ar_mission_names.get(mid,""),"dialogues":by_mission[mid]} for mid in sorted(by_mission,key=lambda x:int(x))]
 
     script_registry=[]
     registry_path=root/"script/luascriptmgr.dat"
@@ -256,6 +260,7 @@ def main():
             "begin_location_only":sum(parse_loc(q["fields"].get("BeginNpcId",""))["status"]=="LOCATION_ONLY" for q in quests),
             "finish_location_only":sum(parse_loc(q["fields"].get("FinishNpcId",""))["status"]=="LOCATION_ONLY" for q in quests)},
         "prerequisites":{"reference_count":len(prereq_refs),"unresolved_ids_across_locales":missing_prereqs},
+        "quest_condition_reference_count":len(quest_condition_refs),"quest_condition_references":quest_condition_refs,
         "npc_linkage":{"reference_count":len(npc_refs),"unique_positive_npc_ids":len({r.get("npc_id") for r in positive_npc_refs}),
             "npc_type_name_match_references":sum(bool(r.get("npc_type_name_matches")) for r in positive_npc_refs),
             "npcx_name_match_references":sum(bool(r.get("npcx_name_matches")) for r in positive_npc_refs),
