@@ -17,7 +17,8 @@ const CLASSES := [
 	{"ar":"طاووس الماء","en":"Water Taoist","tag":"سحر الماء"},
 	{"ar":"طاووس النار","en":"Fire Taoist","tag":"سحر النار"}
 ]
-var selected_class := 0
+# Archer is the owner's primary character; all other classes remain selectable.
+var selected_class := 2
 var music_player: AudioStreamPlayer
 var pulse := 0.0
 var class_status: Label
@@ -158,7 +159,7 @@ func _build_screen() -> void:
 	footer.add_theme_color_override("font_color", Color("#9aaecb"))
 	footer.add_theme_font_size_override("font_size", 12)
 	root.add_child(footer)
-	_select_class(0)
+	_select_class(2)
 
 
 func _build_cinematic_intro() -> void:
