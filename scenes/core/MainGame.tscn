@@ -234,17 +234,30 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
 
 [node name="NPC_Sage" parent="." instance=ExtResource("2_npc")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.1, 3)
-npc_name_ar = "حكيم التوأم"
-npc_name_en = "Twin Sage"
+npc_name_ar = "قائد مدينة التوأم"
+npc_name_en = "Twin City Captain"
 npc_id = "npc_sage"
 role = "sage"
+source_npc_id = "2001"
+source_map_id = "1002"
 
 [node name="NPC_Blacksmith" parent="." instance=ExtResource("2_npc")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.1, 4)
-npc_name_ar = "حداد الأساطير"
-npc_name_en = "Master Blacksmith"
+npc_name_ar = "صانع السلاح"
+npc_name_en = "Blacksmith"
 npc_id = "npc_blacksmith"
 role = "blacksmith"
+source_npc_id = "0005"
+source_map_id = "1002"
+
+[node name="NPC_Armorer" parent="." instance=ExtResource("2_npc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0.1, 4)
+npc_name_ar = "تاجر الملابس الحربية"
+npc_name_en = "Armorer"
+npc_id = "npc_armorer"
+role = "armorer"
+source_npc_id = "0004"
+source_map_id = "1002"
 
 [node name="NPC_Merchant" parent="." instance=ExtResource("2_npc")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0.1, -4)
