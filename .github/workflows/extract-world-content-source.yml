@@ -6,6 +6,7 @@ on:
       - ".github/workflows/extract-world-content-source.yml"
       - "tools/gameplay_source_audit/extract_world_content_sources.py"
       - "tools/gameplay_source_audit/build_runtime_world_index.py"
+      - "tools/gameplay_source_audit/parse_dialogue_sources.py"
       - "tools/gameplay_source_audit/validate_runtime_world_index.py"
       - "scripts/world/WorldContentIndex.gd"
       - "scripts/world/WorldTravelManager.gd"
