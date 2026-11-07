@@ -28,7 +28,13 @@ jobs:
         run: |
           set -euo pipefail
           sudo apt-get update
-          sudo apt-get install -y apktool jadx
+          sudo apt-get install -y apktool default-jre-headless unzip
+          curl --fail --location --retry 4 --retry-all-errors \
+            "https://github.com/skylot/jadx/releases/download/v1.5.6/jadx-1.5.6.zip" \
+            -o /tmp/jadx-1.5.6.zip
+          echo "545ea2be9c242511bc145755cf4bda2485ade42966e096f8b4d3da2a230e8974  /tmp/jadx-1.5.6.zip" | sha256sum -c -
+          sudo unzip -q /tmp/jadx-1.5.6.zip -d /opt
+          sudo ln -sf /opt/jadx-1.5.6/bin/jadx /usr/local/bin/jadx
           python3 -m venv .venv
           .venv/bin/pip install --disable-pip-version-check polyfile androguard==4.1.4
           echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
