@@ -74,10 +74,10 @@ func _run() -> void:
 	_navigation_mesh.sample_partition_type = NavigationMesh.SAMPLE_PARTITION_LAYERS
 	_navigation_mesh.agent_radius = 0.5
 	_navigation_mesh.agent_height = 1.8
-	_navigation_mesh.agent_max_climb = 0.45
+	_navigation_mesh.agent_max_climb = 0.4
 	_navigation_mesh.agent_max_slope = 38.0
 	_navigation_mesh.cell_size = 0.25
-	_navigation_mesh.cell_height = 0.25
+	_navigation_mesh.cell_height = 0.1
 	_navigation_mesh.filter_ledge_spans = true
 	_navigation_mesh.filter_walkable_low_height_spans = true
 	_navigation_mesh.region_min_size = 1.0
