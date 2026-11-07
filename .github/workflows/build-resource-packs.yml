@@ -41,6 +41,17 @@ jobs:
         run: |
           rm -rf resource_stage
           godot --headless --path . --script tools/resource_packs/extract_resource_packs.gd
+      - name: Restore full original source archives including supplemental assets
+        run: |
+          mkdir -p build/source_archives
+          base="https://github.com/ZzwahwahzZ/Conquer-Mobile-Assets./releases/download/mobile-extracted-assets"
+          curl --fail --location --retry 10 --retry-all-errors --retry-delay 5 "$base/extracted-assets-001.zip" -o build/source_archives/extracted-assets-001.zip
+          curl --fail --location --retry 10 --retry-all-errors --retry-delay 5 "$base/conquer-mobile-prepared-assets.zip" -o build/source_archives/conquer-mobile-prepared-assets.zip
+          curl --fail --location --retry 10 --retry-all-errors --retry-delay 5 "$base/conquer-mobile-supplemental-assets.zip" -o build/source_archives/conquer-mobile-supplemental-assets.zip
+          echo "0d21a110c09b762ed5f1a5f4da022857b0534e489eb85052d15da460cb229d2a  build/source_archives/extracted-assets-001.zip" | sha256sum --check
+          echo "18c6a3f4461fb01827436466c3af18ec782cf5555793c7ac32a198030db75c26  build/source_archives/conquer-mobile-prepared-assets.zip" | sha256sum --check
+          echo "28233860b864efc0fc5a9181c18ca2f0ee9a4c4f3441a689b3c9f5f91d34f7f7  build/source_archives/conquer-mobile-supplemental-assets.zip" | sha256sum --check
+          python3 tools/resource_packs/prepare_assets.py
       - name: Test safe nested audio extraction and provenance
         run: python3 -m unittest tools/resource_packs/test_nested_audio_7z.py
       - name: Extract and index audio embedded in nested 7z archives
