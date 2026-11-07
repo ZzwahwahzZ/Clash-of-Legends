@@ -110,13 +110,13 @@ def main():
         sections = source.get("sections", {})
         panel = sections.get("affirmPanel", {})
         for key, value in panel.items():
-            match = __import__("re").fullmatch(r"vocation(\\d+)", str(key), __import__("re").I)
+            match = __import__("re").fullmatch(r"vocation(\d+)", str(key), __import__("re").I)
             if not match:
                 continue
             label = str(value).strip()
             low = label.lower().replace("_", " ").replace("-", " ")
-            gender = "female" if any(x in low for x in ("female", "woman", "hembra", "femen", "أنثى", "انثى", "قرصانة")) else (
-                "male" if any(x in low for x in ("male", "man ", "macho", "mascul", "ذكر")) else None
+            gender = "female" if any(x in low for x in ("female", "woman", "hembra", "femen", "أنثى", "انثى", "قرصانة", "troyana", "arquera", "guerrera")) else (
+                "male" if any(x in low for x in ("male", "man ", "macho", "mascul", "ذكر", "troyano", "arquero", "guerrero")) else None
             )
             if "taoist" in low or "حاوى" in low or "تاوي" in low:
                 token = "Taoist"
@@ -184,7 +184,8 @@ def main():
     referenced = sum(bool(x["armor_db_mesh_reference_count"]) for x in bodies.values())
     result = {
         "schema_version": "1.4.0",
-        "character_selection_slot_count": len(selection_labels),
+        "character_selection_slot_count": len({r["slot"] for r in selection_labels}),
+        "character_selection_localized_label_count": len(selection_labels),
         "character_selection_normalized_tokens": sorted({r["normalized_source_token"] for r in selection_labels if r["normalized_source_token"]}),
         "character_selection_slots_by_token": {
             token: [r for r in selection_labels if r["normalized_source_token"] == token]
