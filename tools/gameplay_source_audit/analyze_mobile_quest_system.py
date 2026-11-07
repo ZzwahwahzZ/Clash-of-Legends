@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Evidence-led analysis of Mobile quest dependencies, dialogue flows and world targets."""
 from __future__ import annotations
-import argparse, hashlib, json, re, struct
+import argparse, csv, hashlib, json, re, struct
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -306,6 +306,75 @@ def main():
     for rel in ["ini/questinfo.ini","ini_ar/questinfo.ini","ini/npc.ini","ini/npcx.ini","ini/mapdestination.ini","ini/monstertype.ini","ini/gamemap.dat","ini/gamemapex.ini","ini/luaui/publicfiles/otherconf/npcdialogueinfo.dat","ini/luaui/publicfiles/wordfiles/npcdialoguetext_ar.dat"]:
         p=root/rel
         if p.is_file():report["source_hashes"][rel]=hashlib.sha256(p.read_bytes()).hexdigest()
+    export_dir=a.output.parent/"quest_exports"
+    export_dir.mkdir(parents=True,exist_ok=True)
+    mission_lookup={mid:rows[0] for mid,rows in by_id.items()}
+    def write_csv(filename, rows, columns):
+        path=export_dir/filename
+        with path.open("w",encoding="utf-8-sig",newline="") as handle:
+            writer=csv.DictWriter(handle,fieldnames=columns,extrasaction="ignore")
+            writer.writeheader()
+            for row in rows:
+                clean={}
+                for key,value in row.items():
+                    clean[key]=json.dumps(value,ensure_ascii=False) if isinstance(value,(dict,list)) else value
+                writer.writerow(clean)
+        return {"path":str(path.relative_to(a.output.parent)),"rows":len(rows)}
+    npc_export=[]
+    for r in npc_refs:
+        mrow=mission_lookup.get(r["mission_id"],{})
+        npc_export.append({**r,"mission_name":mrow.get("name",""),"mission_name_ar":mrow.get("name_ar",""),
+            "mission_type_id":mrow.get("type_id",""),"mission_type_name":mrow.get("type_name","")})
+    dialogue_npc_export=[]
+    for r in dialogue_npc_refs:
+        mrow=mission_lookup.get(r["mission_id"],{})
+        dialogue_npc_export.append({**r,"mission_name":mrow.get("name",""),"mission_name_ar":mrow.get("name_ar","")})
+    map_export=[]
+    for r in map_refs:
+        mrow=mission_lookup.get(r["mission_id"],{})
+        map_export.append({**r,"mission_name":mrow.get("name",""),"mission_name_ar":mrow.get("name_ar","")})
+    mob_export=[]
+    for r in mob_refs:
+        mrow=mission_lookup.get(r["mission_id"],{})
+        mob_export.append({**r,"mission_name":mrow.get("name",""),"target_type":"mob"})
+    item_export=[]
+    for r in item_refs:
+        mrow=mission_lookup.get(r["mission_id"],{})
+        item_export.append({**r,"mission_name":mrow.get("name",""),"target_type":r.get("kind","item")})
+    prereq_export=[]
+    for parent,child in prereq:
+        prereq_export.append({"prerequisite_mission_id":parent,"mission_id":child,
+            "parent_in_default_catalog":parent in mission_ids,"parent_in_alternate_catalog":parent in passion_ids,
+            "self_reference":parent==child})
+    check_export=[]
+    for r in checks:
+        check_export.append({"mission_id":r["mission_id"],"condition_quest_id":r["condition_quest_id"],
+            "condition_args":r["args"],"field":r["field"],"condition_is_self":r["condition_quest_id"]==r["mission_id"],
+            "condition_id_in_default_catalog":r["condition_quest_id"] in mission_ids})
+    dialogue_export=[]
+    for flow in dialogue["flows"]:
+        mrow=mission_lookup.get(flow.get("mission_id"),{})
+        speakers=sorted({t.get("show_info",{}).get("npc_type_name","") for t in flow["talks"] if t.get("show_info",{}).get("npc_type_name")})
+        text_keys=sorted({t.get("text_key","") for t in flow["talks"] if t.get("text_key")})
+        dialogue_export.append({"mission_id":flow.get("mission_id"),"mission_name":mrow.get("name",""),
+            "dialogue_id":flow["dialogue_id"],"link_method":flow["link_method"],"talk_count":flow["talk_count"],
+            "npc_speakers":speakers,"dialogue_text_keys":text_keys})
+    exports=[
+        write_csv("mission_catalog.csv",[mission_lookup[k] for k in sorted(mission_lookup,key=lambda x:int(x))],
+            ["mission_id","name","name_ar","type_id","type_name","big_type_id","level_min","level_max","activity_type","repeat_or_abandon","map_field","begin_raw","finish_raw"]),
+        write_csv("mission_npc_map_links.csv",npc_export,
+            ["mission_id","mission_name","mission_name_ar","mission_type_id","mission_type_name","role","npc_id","name","map_id","map_name","x","y","npc_type_name_candidates","npc_appearance_name_candidates","mapdestination_exact_coordinate_match","mapdestination_matches"]),
+        write_csv("mission_dialogue_npc_links.csv",dialogue_npc_export,
+            ["mission_id","mission_name","mission_name_ar","dialogue_id","talk_index","npc_type_id","npc_type_name","simple_object_id","effect","standby_motion","arabic_display_name","name_key","appearance_candidates","quest_location_candidates"]),
+        write_csv("mission_map_links.csv",map_export,["mission_id","mission_name","mission_name_ar","role","map_id","x","y"]),
+        write_csv("mission_objective_monsters.csv",mob_export,["mission_id","mission_name","name","map_id","x","y","monster_type_ids","target_type"]),
+        write_csv("mission_item_links.csv",item_export,["mission_id","mission_name","target_type","kind","item_id","quantity","payload","name","map_id","x","y","item_definition","item_name_candidate_ids"]),
+        write_csv("mission_prerequisites.csv",prereq_export,["prerequisite_mission_id","mission_id","parent_in_default_catalog","parent_in_alternate_catalog","self_reference"]),
+        write_csv("mission_progress_conditions.csv",check_export,["mission_id","condition_quest_id","condition_args","field","condition_is_self","condition_id_in_default_catalog"]),
+        write_csv("mission_dialogue_flows.csv",dialogue_export,["mission_id","mission_name","dialogue_id","link_method","talk_count","npc_speakers","dialogue_text_keys"])
+    ]
+    (export_dir/"manifest.json").write_text(json.dumps({"schema_version":"1.0.0","exports":exports,
+        "source_version":"Conquer Online Mobile 1.1.2.3","note":"CSV convenience exports are derived from the adjacent JSON evidence report; unresolved and candidate links remain explicitly labelled."},ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     a.output.parent.mkdir(parents=True,exist_ok=True)
     a.output.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     print(json.dumps({k:v for k,v in report.items() if k in ("mission_summary","dependency_graph","progress_conditions","npc_linkage","map_linkage","monster_linkage","item_linkage","dialogue")},ensure_ascii=False))
