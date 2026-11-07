@@ -15,7 +15,11 @@ func _run_travel_test() -> void:
 	if int(source_counts.get("maps", 0)) != 411:
 		_fail("Expected 411 unique source map records, got %s." % str(source_counts.get("maps", 0)))
 		return
-	var source_mission := source_catalog.get_mission("650")
+	var localized_mission := source_catalog.get_mission("650")
+	if str(localized_mission.get("name_ar", "")) != "تاجر الملابس الحربية" or str(localized_mission.get("content_ar", "")).is_empty():
+		_fail("Arabic localized mission title/content were not preserved in the runtime catalog.")
+		return
+	var source_mission := localized_mission
 	if source_mission.is_empty() or str(source_mission.get("finish_npc", {}).get("npc_id", "")) != "0004":
 		_fail("Source mission 650 did not preserve its Armorer turn-in NPC reference.")
 		return
@@ -39,6 +43,14 @@ func _run_travel_test() -> void:
 	if city_hubs.size() != 6:
 		_fail("Expected Twin City plus five source-named smaller city hubs, got %d." % city_hubs.size())
 		return
+	var expected_city_ids := ["1002", "1000", "1010", "1011", "1015", "1020"]
+	var found_city_ids: Array[String] = []
+	for hub in city_hubs:
+		found_city_ids.append(str(hub.get("map_id", "")))
+	for expected_city_id in expected_city_ids:
+		if not found_city_ids.has(expected_city_id):
+			_fail("Source city hub %s is missing from the runtime city registry." % expected_city_id)
+			return
 	var has_main_city := false
 	var minor_city_count := 0
 	var missing_city_maps: Array[String] = []
@@ -131,6 +143,18 @@ func _run_travel_test() -> void:
 		_fail("WorldTravelManager did not expose Desert City source map metadata.")
 		return
 	var destinations: Dictionary = manager.get_destinations()
+	for city_id in expected_city_ids:
+		var city_destination_id := "city_" + city_id
+		if not destinations.has(city_destination_id):
+			_fail("World map UI is missing source city destination %s." % city_destination_id)
+			return
+		var city_destination: Dictionary = destinations[city_destination_id]
+		if city_id == "1002" and not bool(city_destination.get("enabled", false)):
+			_fail("Main Twin City must remain an available world destination.")
+			return
+		if city_id != "1002" and bool(city_destination.get("enabled", false)):
+			_fail("A minor city was exposed as travel-ready without a dedicated runtime scene: %s." % city_id)
+			return
 	if destinations.size() < 7:
 		_fail("World travel catalog must expose at least seven regions.")
 		return
