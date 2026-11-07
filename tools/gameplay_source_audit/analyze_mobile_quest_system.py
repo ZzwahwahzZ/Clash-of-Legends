@@ -223,20 +223,61 @@ def main():
         for line in read_text(mpath).splitlines():
             p=line.split("@@")
             if len(p)>=2 and p[0].strip().isdigit():monster_ids.setdefault(p[1].strip().casefold(),[]).append(p[0].strip())
-    for r in mob_refs:r["monster_type_ids"]=monster_ids.get(r["name"].casefold(),[])
+    mapdest_titles_by_name=defaultdict(list)
+    mapdest_titles_by_id=defaultdict(list)
+    for (mapid,nid),entries in md.items():
+        for entry in entries:
+            title=entry.get("title","").replace("~"," ")
+            if title:
+                mapdest_titles_by_name[title.casefold()].append(entry["section"])
+                mapdest_titles_by_id[mapid].append(title)
+    for r in mob_refs:
+        name=r["name"].casefold()
+        r["monster_type_ids"]=monster_ids.get(name,[])
+        r["npc_type_ids"]=types.get(name,[])
+        r["npc_appearance_ids"]=skins.get(name,[])
+        r["mapdestination_title_sections"]=mapdest_titles_by_name.get(name,[])
+        classes=[]
+        if r["monster_type_ids"]:classes.append("monster_type")
+        if r["npc_type_ids"]:classes.append("npc_type")
+        if r["npc_appearance_ids"]:classes.append("npc_appearance")
+        if r["mapdestination_title_sections"]:classes.append("map_destination_marker")
+        r["target_classifications"]=classes or ["unresolved_or_scripted_object"]
     map_ids=set(r["map_id"] for r in map_refs if r.get("map_id"))
-    gamemap=set()
+    gamemap=set();gamemap_resources={}
     gp=root/"ini/gamemap.dat"
     if gp.is_file():
         b=gp.read_bytes()
         try:
             count=struct.unpack_from("<I",b,0)[0]; pos=4
             for _ in range(count):
-                mid,n=struct.unpack_from("<II",b,pos);pos+=8+n
-                gamemap.add(str(mid));pos+=4
+                mid,n=struct.unpack_from("<II",b,pos)
+                resource=b[pos+8:pos+8+n].decode("utf-8",errors="replace")
+                gamemap.add(str(mid));gamemap_resources[str(mid)]=resource;pos+=8+n+4
         except Exception:pass
-    gmex={s["section"] for s in sections(read_text(root/"ini/gamemapex.ini")) if s["section"].isdigit()} if (root/"ini/gamemapex.ini").is_file() else set()
+    gmex_sections=sections(read_text(root/"ini/gamemapex.ini")) if (root/"ini/gamemapex.ini").is_file() else []
+    gmex={s["section"] for s in gmex_sections if s["section"].isdigit()}
+    gmex_names={s["section"]:s["fields"].get("Name","") for s in gmex_sections if s["section"].isdigit()}
+    map_source_names=defaultdict(set)
+    for r in npc_refs:
+        if r.get("map_name") and r.get("map_id"):map_source_names[r["map_id"]].add(r["map_name"])
     mapdest_ids={k[0] for k in md}
+    map_id_details=[]
+    for mid in sorted(map_ids,key=lambda x:int(x) if x.isdigit() else x):
+        refs=[r for r in map_refs if r.get("map_id")==mid]
+        detail={"map_id":mid,"gamemapex_name":gmex_names.get(mid),"resource_path":gamemap_resources.get(mid),
+            "quest_source_names":sorted(map_source_names.get(mid,set())),
+            "mapdestination_marker_titles":sorted(set(mapdest_titles_by_id.get(mid,[]))),
+            "reference_count":len(refs),"mission_count":len({r["mission_id"] for r in refs}),
+            "indexed_by_gamemap_dat":mid in gamemap,"indexed_by_gamemapex":mid in gmex,"indexed_by_mapdestination":mid in mapdest_ids}
+        detail["status"]="PLACEHOLDER_ID" if mid=="0" else ("INDEXED" if detail["indexed_by_gamemap_dat"] or detail["indexed_by_gamemapex"] or detail["indexed_by_mapdestination"] else ("QUEST_NAME_ONLY" if detail["quest_source_names"] else "UNRESOLVED_IN_AVAILABLE_MAP_INDEXES"))
+        map_id_details.append(detail)
+    map_detail_by_id={x["map_id"]:x for x in map_id_details}
+    for r in map_refs:
+        detail=map_detail_by_id.get(r.get("map_id"),{})
+        r["gamemapex_name"]=detail.get("gamemapex_name")
+        r["map_resource_path"]=detail.get("resource_path")
+        r["quest_source_map_names"]=detail.get("quest_source_names",[])
     npc_type_names={s["section"].replace("NpcType",""):s["fields"].get("Name","") for s in npc_types if s["section"].startswith("NpcType")}
     npc_type_defs={s["section"].replace("NpcType",""):s["fields"] for s in npc_types if s["section"].startswith("NpcType")}
     dialogue=parse_dialogue_file(root/"ini/luaui/publicfiles/otherconf/npcdialogueinfo.dat",root/"ini/luaui/publicfiles/wordfiles/npcdialoguetext_ar.dat",mission_ids,npc_type_names,skins)
@@ -294,10 +335,10 @@ def main():
       "mission_summary":{"records":len(q),"unique_ids":len(mission_ids),"duplicate_ids":dupes,"arabic_name_coverage":sum(bool(next(iter(v))["name_ar"]) for v in by_id.values()),"type_id_counts":dict(type_counts),"type_id_names":task_type_names},
       "alternate_server_catalog":{"source":"ini/questinfopassionserver.ini","records":len(passion_records),"unique_mission_ids":len(passion_ids),"overlap_with_default_catalog":len(passion_ids&mission_ids),"type_id_names":passion_type_names},
       "dependency_graph":{"prerequisite_edges":len(prereq),"unique_edges":len(set(prereq)),"unresolved_edges":unresolved,"unique_unresolved_ids":sorted({x["prerequisite_id"] for x in unresolved},key=lambda x:int(x) if x.isdigit() else x),"unresolved_ids_also_present_in_passion_server_catalog":sorted({x["prerequisite_id"] for x in unresolved if x["prerequisite_id"] in passion_ids},key=lambda x:int(x) if x.isdigit() else x),"self_edges":[{"from":p,"to":m} for p,m in prereq if p==m],"cycles":cycles,"missions_with_prerequisites":len({m for p,m in prereq}),"root_mission_count":len(mission_ids-{m for p,m in prereq if m in mission_ids})},
-      "progress_conditions":{"reference_count":len(checks),"unresolved_references":checks_unresolved,"self_references":[x for x in checks if x["condition_quest_id"]==x["mission_id"]]},
+      "progress_conditions":{"reference_count":len(checks),"unresolved_references":checks_unresolved,"self_reference_count":sum(x["condition_quest_id"]==x["mission_id"] for x in checks),"cross_mission_reference_count":sum(x["condition_quest_id"]!=x["mission_id"] for x in checks),"self_references":[x for x in checks if x["condition_quest_id"]==x["mission_id"]]},
       "npc_linkage":{"reference_count":len(npc_refs),"unique_positive_npc_ids":len({r["npc_id"] for r in npc_refs if int_or_none(r["npc_id"]) and int_or_none(r["npc_id"])>0}),"mapdestination_id_map_matches":sum(bool(r["mapdestination_matches"]) for r in npc_refs),"exact_coordinate_matches":sum(r["mapdestination_exact_coordinate_match"] for r in npc_refs),"npc_type_name_candidate_refs":sum(bool(r["npc_type_name_candidates"]) for r in npc_refs),"appearance_name_candidate_refs":sum(bool(r["npc_appearance_name_candidates"]) for r in npc_refs)},
-      "map_linkage":{"unique_map_ids":len(map_ids),"missing_from_all_available_map_indexes":sorted(map_ids-(gamemap|gmex|mapdest_ids)),"map_ids_in_gamemap_dat":len(gamemap),"map_ids_in_gamemapex_ini":len(gmex),"map_ids_in_mapdestination_ini":len(mapdest_ids)},
-      "monster_linkage":{"reference_count":len(mob_refs),"unique_names":len({r["name"] for r in mob_refs}),"matched_references":sum(bool(r["monster_type_ids"]) for r in mob_refs),"unmatched_names":sorted({r["name"] for r in mob_refs if not r["monster_type_ids"]})},
+      "map_linkage":{"unique_map_ids":len(map_ids),"missing_from_all_available_map_indexes":sorted(map_ids-(gamemap|gmex|mapdest_ids)),"map_ids_in_gamemap_dat":len(gamemap),"map_ids_in_gamemapex_ini":len(gmex),"map_ids_in_mapdestination_ini":len(mapdest_ids),"map_id_details":map_id_details},
+      "monster_linkage":{"reference_count":len(mob_refs),"unique_names":len({r["name"] for r in mob_refs}),"matched_references":sum(bool(r["monster_type_ids"]) for r in mob_refs),"npc_type_candidate_references":sum(bool(r["npc_type_ids"]) for r in mob_refs),"npc_appearance_candidate_references":sum(bool(r["npc_appearance_ids"]) for r in mob_refs),"mapdestination_title_candidate_references":sum(bool(r["mapdestination_title_sections"]) for r in mob_refs),"unresolved_or_scripted_object_references":sum(not r["target_classifications"] or r["target_classifications"]==["unresolved_or_scripted_object"] for r in mob_refs),"unmatched_names":sorted({r["name"] for r in mob_refs if not r["monster_type_ids"]})},
       "item_linkage":{"reference_count":len(item_refs),"unique_item_ids":len({r.get("item_id") for r in item_refs if r.get("item_id")}),"item_definitions_available":len(item_defs),"matched_item_ids":sum(bool(r.get("item_definition")) for r in item_refs if r.get("item_id")),"unmatched_item_ids":sorted({r["item_id"] for r in item_refs if r.get("item_id") and r["item_id"] not in item_defs},key=lambda x:int(x) if x.isdigit() else x),"matched_world_item_name_references":sum(bool(r.get("item_name_candidate_ids")) for r in item_refs)},
       "dialogue":{k:v for k,v in dialogue.items() if k not in ("flows","mission_flows")},"dialogue_npc_linkage":dialogue_npc_summary,
       "missions": [rows[0] for _,rows in sorted(by_id.items(),key=lambda x:int(x[0]))],"mission_source_records":mission_records_all,
@@ -371,8 +412,8 @@ def main():
             ["mission_id","mission_name","mission_name_ar","mission_type_id","mission_type_name","role","npc_id","name","map_id","map_name","x","y","npc_type_name_candidates","npc_appearance_name_candidates","mapdestination_exact_coordinate_match","mapdestination_matches"]),
         write_csv("mission_dialogue_npc_links.csv",dialogue_npc_export,
             ["mission_id","mission_name","mission_name_ar","dialogue_id","talk_index","npc_type_id","npc_type_name","simple_object_id","effect","standby_motion","arabic_display_name","name_key","appearance_candidates","quest_location_candidates"]),
-        write_csv("mission_map_links.csv",map_export,["mission_id","mission_name","mission_name_ar","role","map_id","x","y"]),
-        write_csv("mission_objective_monsters.csv",mob_export,["mission_id","mission_name","name","map_id","x","y","monster_type_ids","target_type"]),
+        write_csv("mission_map_links.csv",map_export,["mission_id","mission_name","mission_name_ar","role","map_id","x","y","gamemapex_name","map_resource_path","quest_source_map_names"]),
+        write_csv("mission_objective_monsters.csv",mob_export,["mission_id","mission_name","name","map_id","x","y","monster_type_ids","npc_type_ids","npc_appearance_ids","mapdestination_title_sections","target_classifications","target_type"]),
         write_csv("mission_item_links.csv",item_export,["mission_id","mission_name","target_type","kind","item_id","quantity","payload","name","map_id","x","y","item_definition","item_name_candidate_ids"]),
         write_csv("mission_prerequisites.csv",prereq_export,["prerequisite_mission_id","mission_id","parent_in_default_catalog","parent_in_alternate_catalog","self_reference"]),
         write_csv("mission_progress_conditions.csv",check_export,["mission_id","condition_quest_id","condition_args","field","condition_is_self","condition_id_in_default_catalog"]),
