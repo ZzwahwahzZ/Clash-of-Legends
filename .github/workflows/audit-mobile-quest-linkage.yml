@@ -80,12 +80,12 @@ jobs:
           set -euo pipefail
           git clone --depth 1 --branch 3.0.10 https://github.com/google/smali.git /tmp/smali-src
           cd /tmp/smali-src
-          ./gradlew --no-daemon smali:fatJar
-          BAKSMALI_JAR="$(find smali/build/libs -maxdepth 1 -type f -name '*fat.jar' -print -quit)"
+          ./gradlew --no-daemon baksmali:fatJar
+          BAKSMALI_JAR="$(find baksmali/build/libs -maxdepth 1 -type f -name '*fat.jar' -print -quit)"
           test -n "$BAKSMALI_JAR"
           cp "$BAKSMALI_JAR" /tmp/baksmali-fat.jar
+          unzip -p /tmp/baksmali-fat.jar META-INF/MANIFEST.MF | grep -q '^Main-Class: com.android.tools.smali.baksmali.Main'
           java -jar /tmp/baksmali-fat.jar --version
-          unzip -p /tmp/baksmali-fat.jar META-INF/MANIFEST.MF | grep -q '^Main-Class:'
       - name: Set up Java 17 for JADX and APK inspection
         uses: actions/setup-java@v4
         with:
