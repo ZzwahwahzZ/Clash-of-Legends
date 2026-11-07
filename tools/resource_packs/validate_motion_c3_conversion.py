@@ -26,8 +26,13 @@ def normalize_source(source):
 
 converted = {}
 for row in audit.get("converted", []):
-    inner = normalize_source(row.get("source", ""))
-    converted[inner] = row
+    # Full-character motion POCs are exported from a body C3 plus a separate
+    # motion-only C3. Count the external motion source as converted too; using
+    # only "source" silently counted the body path and under-reported clips.
+    for source_field in ("source", "external_motion_source"):
+        inner = normalize_source(row.get(source_field, ""))
+        if inner:
+            converted[inner] = {**row, "conversion_source_field": source_field}
 
 all_motion_paths = sorted(set(str(p).replace("\\", "/").lower() for p in motion.get("unique_motion_paths", [])))
 available = []
