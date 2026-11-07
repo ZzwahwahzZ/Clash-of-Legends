@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - ".github/workflows/rebuild-mobile-quest-system-analysis.yml"
+      - "tools/gameplay_source_audit/analyze_mobile_quest_system.py"
 permissions:
   contents: read
   actions: read
@@ -46,7 +47,11 @@ jobs:
           assert p["dialogue"]["arabic_keys_found"] > 5000
           assert p["monster_linkage"]["reference_count"] == 364
           assert p["item_linkage"]["item_definitions_available"] > 50000
-          assert p["item_linkage"]["matched_item_ids"] > 0
+          assert p["item_linkage"]["matched_item_ids"] > 1000
+          assert p["dialogue_npc_linkage"]["mission_ids_with_dialogue_npcs"] >= 250
+          mn={x["mission_id"]:x["npc_references"] for x in p["mission_dialogue_npcs"]}
+          assert "Whorf" in str(mn["5455"])
+          assert "David" in str(mn["5456"]) and "Jack" in str(mn["5456"])
           print("Quest-system analysis acceptance checks passed")
           PY
       - name: Upload rebuilt quest-system report
