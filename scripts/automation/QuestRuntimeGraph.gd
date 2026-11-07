@@ -10,7 +10,6 @@ var status := "NOT_LOADED"
 var missions: Dictionary = {}
 var maps: Dictionary = {}
 var map_names: Dictionary = {}
-var map_directory: Array[Dictionary] = []
 var map_directory: Dictionary = {}
 var dependents: Dictionary = {}
 var npc_starts: Dictionary = {}
@@ -26,7 +25,6 @@ func load_graph(path: String = DEFAULT_CATALOG) -> bool:
 	missions.clear()
 	maps.clear()
 	map_names.clear()
-	map_directory.clear()
 	map_directory.clear()
 	dependents.clear()
 	npc_starts.clear()
@@ -69,9 +67,6 @@ func load_graph(path: String = DEFAULT_CATALOG) -> bool:
 			var map_id := str(row.get("map_id", ""))
 			if not map_id.is_empty():
 				map_names[map_id] = row
-	for row in root.get("map_directory", []):
-		if row is Dictionary:
-			map_directory.append(row)
 	for row in root.get("map_directory", []):
 		if row is Dictionary:
 			var map_id := str(row.get("map_id", ""))
@@ -202,10 +197,8 @@ func get_city_hub(map_id: String) -> Dictionary:
 	return {}
 
 func get_map_directory_entry(map_id: String) -> Dictionary:
-	for row in map_directory:
-		if str(row.get("map_id", "")) == map_id:
-			return row.duplicate(true)
-	return {}
+	var entry: Variant = map_directory.get(map_id, {})
+	return entry.duplicate(true) if entry is Dictionary else {}
 
 func get_dialogues_for_npc(npc_id: String) -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
