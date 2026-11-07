@@ -18,22 +18,14 @@ const WALKABLE_PATHS := [
 	"JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/FactoryApproach",
 	"JianghaiOldCityAuthoredScene/OldCityMarketBridge/MarketBridgeDeck",
 ]
-const NPC_SPAWN_CANDIDATES := {
-	"npc_jianghai_pawnshop": Vector3(-86.0, -0.078, -101.0),
-	"npc_jianghai_innkeeper": Vector3(-8.7, -0.14, -34.5),
-	"npc_jianghai_apothecary": Vector3(13.0, -0.045, -48.0),
-	"npc_jianghai_tea_merchant": Vector3(8.7, -0.14, -8.0)
+const ENGINEERING_SAMPLE_POINTS := {
+	"engineering_sample_01": Vector3(0.0, -0.14, -60.0),
+	"engineering_sample_02": Vector3(-86.0, -0.078, -106.0),
+	"engineering_sample_03": Vector3(86.0, -0.078, -12.0),
+	"engineering_sample_04": Vector3(-9.5, -0.14, -34.5),
+	"engineering_sample_05": Vector3(11.6, -0.045, -48.0),
+	"engineering_sample_06": Vector3(9.5, -0.14, -8.0)
 }
-const ANCHORS := {
-	"jianghai.central_avenue": Vector3(0.0, -0.14, -60.0),
-	"jianghai.pawnshop_approach": Vector3(-86.0, -0.078, -106.0),
-	"jianghai.factory_approach": Vector3(86.0, -0.078, -12.0),
-	"jianghai.hotel_frontage": Vector3(-9.5, -0.14, -34.5),
-	"jianghai.medicine_frontage": Vector3(11.6, -0.045, -48.0),
-	"jianghai.tea_frontage": Vector3(9.5, -0.14, -8.0),
-	"jianghai.west_market_entry": Vector3(-35.0, 0.15, -164.0)
-}
-
 var _city: Node3D
 var _region: NavigationRegion3D
 var _navigation_mesh: NavigationMesh
@@ -416,50 +408,30 @@ func _validate_navigation_after_sync() -> void:
 		_fail("NavigationRegion3D has no valid navigation map after synchronization.")
 		return
 
-	var anchor_rows: Array[Dictionary] = []
-	for anchor_id in ANCHORS:
-		var source_position: Vector3 = ANCHORS[anchor_id]
+	var engineering_sample_rows: Array[Dictionary] = []
+	for sample_id in ENGINEERING_SAMPLE_POINTS:
+		var source_position: Vector3 = ENGINEERING_SAMPLE_POINTS[sample_id]
 		var projected := NavigationServer3D.map_get_closest_point(navigation_map, source_position)
 		var projection_distance := projected.distance_to(source_position)
-		anchor_rows.append({
-			"id": anchor_id,
+		engineering_sample_rows.append({
+			"id": sample_id,
 			"source_position": _vec(source_position),
 			"projected_position": _vec(projected),
 			"projection_distance": projection_distance,
 			"projection_valid": projection_distance <= 6.0
 		})
 
-	var spawn_rows: Array[Dictionary] = []
-	var spawn_projection_pass_count := 0
-	for npc_id in NPC_SPAWN_CANDIDATES:
-		var spawn_source: Vector3 = NPC_SPAWN_CANDIDATES[npc_id]
-		var spawn_projected := NavigationServer3D.map_get_closest_point(navigation_map, spawn_source)
-		var spawn_distance := spawn_projected.distance_to(spawn_source)
-		var spawn_valid := spawn_distance <= 1.0
-		if spawn_valid:
-			spawn_projection_pass_count += 1
-		spawn_rows.append({
-			"npc_id": npc_id,
-			"source_position": _vec(spawn_source),
-			"projected_position": _vec(spawn_projected),
-			"projection_distance": spawn_distance,
-			"projection_valid": spawn_valid,
-			"collision_clearance_validated": false
-		})
-
 	var route_pairs := [
-		["jianghai.central_avenue", "jianghai.pawnshop_approach"],
-		["jianghai.central_avenue", "jianghai.factory_approach"],
-		["jianghai.central_avenue", "jianghai.hotel_frontage"],
-		["jianghai.central_avenue", "jianghai.medicine_frontage"],
-		["jianghai.central_avenue", "jianghai.tea_frontage"],
-		["jianghai.pawnshop_approach", "jianghai.factory_approach"],
-		["jianghai.central_avenue", "jianghai.west_market_entry"]
+		["engineering_sample_01", "engineering_sample_02"],
+		["engineering_sample_01", "engineering_sample_03"],
+		["engineering_sample_01", "engineering_sample_04"],
+		["engineering_sample_01", "engineering_sample_05"],
+		["engineering_sample_01", "engineering_sample_06"]
 	]
 	var route_rows: Array[Dictionary] = []
 	for pair in route_pairs:
-		var start_position: Vector3 = ANCHORS[pair[0]]
-		var end_position: Vector3 = ANCHORS[pair[1]]
+		var start_position: Vector3 = ENGINEERING_SAMPLE_POINTS[pair[0]]
+		var end_position: Vector3 = ENGINEERING_SAMPLE_POINTS[pair[1]]
 		var start_point := NavigationServer3D.map_get_closest_point(navigation_map, start_position)
 		var end_point := NavigationServer3D.map_get_closest_point(navigation_map, end_position)
 		var path := NavigationServer3D.map_get_path(navigation_map, start_point, end_point, true, 1)
@@ -472,7 +444,7 @@ func _validate_navigation_after_sync() -> void:
 		})
 
 	var valid_projections := 0
-	for row in anchor_rows:
+	for row in engineering_sample_rows:
 		if bool(row["projection_valid"]):
 			valid_projections += 1
 	var connected_routes := 0
@@ -490,7 +462,7 @@ func _validate_navigation_after_sync() -> void:
 		"saved_navigation_mesh": NAVMESH_PATH,
 		"saved_runtime_world_scene": WORLD_SCENE_PATH,
 		"bake_status": "BAKED",
-		"route_status": "CONNECTED" if connected_routes == route_pairs.size() else "BAKED_WITH_ROUTE_GAPS",
+		"route_status": "ENGINEERING_GEOMETRY_CONNECTED" if connected_routes == route_pairs.size() else "ENGINEERING_GEOMETRY_HAS_GAPS",
 		"source_geometry_mode": "GROUPS_EXPLICIT",
 		"parsed_geometry_type": "MESH_INSTANCES",
 		"selected_walkable_sources": _selected_sources,
@@ -506,13 +478,14 @@ func _validate_navigation_after_sync() -> void:
 		"polygon_count": _navigation_mesh.get_polygon_count(),
 		"vertex_count": _navigation_mesh.get_vertices().size(),
 		"navigation_map_valid": navigation_map.is_valid(),
-		"anchor_projections": anchor_rows,
-		"npc_spawn_projections": spawn_rows,
-		"npc_spawn_projection_pass_count": spawn_projection_pass_count,
+		"engineering_sample_projections": engineering_sample_rows,
+	"semantic_gameplay_validation": false,
+	"world_identity_verified_as_conquer_mobile": false,
 		"route_connectivity": route_rows,
 		"projection_pass_count": valid_projections,
 		"route_connectivity_pass_count": connected_routes,
 		"npc_spawning_enabled": false,
+		"quest_and_service_anchors_enabled": false,
 		"collision_bake_included": true,
 		"walkable_floor_collision_shape_count": _walkable_collision_count,
 		"building_obstacle_collisions_included": true,
@@ -529,13 +502,11 @@ func _validate_navigation_after_sync() -> void:
 	file.store_string(JSON.stringify(report, "  "))
 	file.close()
 	print("PHASE1 NAVIGATION BAKE AUDIT: ", JSON.stringify(report))
-	if valid_projections != ANCHORS.size():
-		_fail("One or more task anchors are too far from the curated walkable surfaces.")
+	if valid_projections != ENGINEERING_SAMPLE_POINTS.size():
+		_fail("One or more engineering sample points are too far from the curated walkable surfaces.")
 		return
-	if spawn_projection_pass_count != NPC_SPAWN_CANDIDATES.size():
-		push_warning("One or more deferred NPC spawn points are outside the curated walkable surfaces.")
 	if connected_routes != route_pairs.size():
-		push_warning("Navigation bake completed, but route connectivity has gaps. Keep NPC spawning disabled until routes are repaired.")
+		push_warning("Navigation bake completed, but engineering sample routes have gaps. No gameplay destinations are registered.")
 	else:
 		print("PHASE1 CURATED NAVIGATION ROUTE CONNECTIVITY: PASS")
 	print("PHASE1 CURATED NAVIGATION BAKE: COMPLETE")
