@@ -14,6 +14,7 @@ var pawnshop_nodes: Array = []
 var navigation_nodes: Array = []
 var street_nodes: Array = []
 var semantic_anchor_nodes: Array = []
+var major_city_sections: Array = []
 
 func _initialize() -> void:
 	call_deferred("_run")
@@ -30,6 +31,10 @@ func _run() -> void:
 	get_root().add_child(city)
 	await process_frame
 	_walk(city, "")
+	var authored_root := city.get_node_or_null("JianghaiOldCityAuthoredScene")
+	if authored_root != null:
+		for section in authored_root.get_children():
+			major_city_sections.append(_summarize_section(section))
 	var pawnshop := city.get_node_or_null("JianghaiOldCityAuthoredScene/GuangchangPawnshop") as Node3D
 	var candidate := Vector3.ZERO
 	var pawnshop_transform := Transform3D.IDENTITY
@@ -76,6 +81,7 @@ func _run() -> void:
 		"navigation_nodes": navigation_nodes,
 		"street_network_nodes": street_nodes,
 		"semantic_anchor_nodes": semantic_anchor_nodes,
+		"major_city_sections": major_city_sections,
 		"interpretation": "A NavigationRegion3D count of zero means no authored runtime navigation surface was found in the city GLB. A positive count still requires runtime map synchronization and route connectivity tests."
 	}
 	var file := FileAccess.open(REPORT_PATH, FileAccess.WRITE)
@@ -131,6 +137,39 @@ func _walk(node: Node, relative_path: String) -> void:
 	for child in node.get_children():
 		_walk(child, path)
 
+func _summarize_section(section: Node) -> Dictionary:
+	var meshes: Array = []
+	_collect_section_meshes(section, meshes)
+	var combined := AABB()
+	var has_bounds := false
+	var structural: Array = []
+	var decorative: Array = []
+	for row in meshes:
+		var bounds_data: Array = row.get("mesh_aabb_world", [])
+		if bounds_data.size() == 2:
+			var bounds := AABB(Vector3(float(bounds_data[0][0]), float(bounds_data[0][1]), float(bounds_data[0][2])), Vector3(float(bounds_data[1][0]), float(bounds_data[1][1]), float(bounds_data[1][2])))
+			combined = bounds if not has_bounds else combined.merge(bounds)
+			has_bounds = true
+		var mesh_name := str(row.get("name", "")).to_lower()
+		if _looks_structural(mesh_name): structural.append(row)
+		else: decorative.append(row)
+	return {"name": str(section.name), "path": str(section.get_path()), "node_count": _count_descendants(section), "mesh_count": meshes.size(), "structural_name_candidates": structural, "decorative_or_unclassified_meshes": decorative, "world_bounds": _aabb_to_array(combined) if has_bounds else []}
+
+func _collect_section_meshes(node: Node, rows: Array) -> void:
+	if node is MeshInstance3D and (node as MeshInstance3D).mesh != null:
+		var mesh_node := node as MeshInstance3D
+		rows.append({"name": str(mesh_node.name), "path": str(mesh_node.get_path()), "mesh_aabb_world": _aabb_to_array(mesh_node.global_transform * mesh_node.get_aabb())})
+	for child in node.get_children(): _collect_section_meshes(child, rows)
+
+func _count_descendants(node: Node) -> int:
+	var total := 1
+	for child in node.get_children(): total += _count_descendants(child)
+	return total
+
+func _looks_structural(mesh_name: String) -> bool:
+	for token in ["wall", "roof", "column", "pillar", "foundation", "stair", "gate", "door", "arch", "beam", "bridge", "curb", "railing", "fence"]:
+		if mesh_name.contains(token): return true
+	return false
 func _collect_anchor_meshes(node: Node, rows: Array) -> void:
 	if node is MeshInstance3D and (node as MeshInstance3D).mesh != null:
 		var mesh_node := node as MeshInstance3D
