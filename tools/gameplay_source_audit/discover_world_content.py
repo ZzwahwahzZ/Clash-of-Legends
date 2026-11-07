@@ -24,12 +24,12 @@ def sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 def collect_sources(archive: Path) -> list[tuple[str, str, bytes]]:
-    sources = []
+    sources: list[tuple[str, str, bytes]] = []
     with zipfile.ZipFile(archive) as outer, tempfile.TemporaryDirectory(prefix="world-source-") as td:
         nested = []
         for name in outer.namelist():
             if VERSION in name and ROOT_MARKER in name:
-                rel = name.split(ROOT_MARKER, 1)[1].replace("\\", "/")
+                rel = name.split(ROOT_MARKER, 1)[1].replace("\\\\", "/")
                 if any(pattern.search(rel) for pattern in PATTERNS.values()):
                     sources.append((rel, name, outer.read(name)))
             elif VERSION in name and name.lower().endswith(".apk"):
@@ -41,12 +41,14 @@ def collect_sources(archive: Path) -> list[tuple[str, str, bytes]]:
                         dst.write(block)
                 nested.append((target, name))
         for target, outer_name in nested:
-            nested_zip = zipfile.ZipFile(target)
-            for name in nested_zip.namelist():
-                if name.startswith(ROOT_MARKER):
-                    rel = name.split(ROOT_MARKER, 1)[1].replace("\\", "/")
-                    sources.setdefault(rel, []).append((nested_zip, name, outer_name + "!" + name))
-        return sources
+            with zipfile.ZipFile(target) as nested_zip:
+                for name in nested_zip.namelist():
+                    if not name.startswith(ROOT_MARKER):
+                        continue
+                    rel = name.split(ROOT_MARKER, 1)[1].replace("\\\\", "/")
+                    if any(pattern.search(rel) for pattern in PATTERNS.values()):
+                        sources.append((rel, outer_name + "!" + name, nested_zip.read(name)))
+    return sources
 
 def inspect_member(data: bytes, display: str, rel: str) -> dict:
     ext = Path(rel).suffix.lower()
