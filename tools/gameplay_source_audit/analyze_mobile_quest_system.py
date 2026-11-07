@@ -142,15 +142,16 @@ def main():
     arq=root/"ini_ar/questinfo.ini"
     if arq.is_file():
         ar_names={s["fields"].get("MissionId",""):s["fields"].get("Name","") for s in sections(read_text(arq)) if s["section"].isdigit()}
-    by_id=defaultdict(list); prereq=[]; checks=[]; npc_refs=[]; map_refs=[]; mob_refs=[]; item_refs=[]
+    by_id=defaultdict(list); mission_records_all=[]; prereq=[]; checks=[]; npc_refs=[]; map_refs=[]; mob_refs=[]; item_refs=[]
     for s in q:
         f=s["fields"]; mid=f.get("MissionId","")
         if not mid:continue
-        row={"mission_id":mid,"name":f.get("Name",""),"name_ar":ar_names.get(mid,""),"type_id":f.get("TypeId",""),
+        row={"source_section":s["section"],"source_line":s["line"],"mission_id":mid,"name":f.get("Name",""),"name_ar":ar_names.get(mid,""),"type_id":f.get("TypeId",""),
              "big_type_id":f.get("BigTypeId",""),"type_name":task_type_names.get(f.get("TypeId",""),""),"level_min":int_or_none(f.get("Lv_min")),"level_max":int_or_none(f.get("Lv_max")),
              "activity_type":f.get("ActivityType",""),"repeat_or_abandon":f.get("IsCanAbondon",""),
              "map_field":f.get("Map","0"),"begin_raw":f.get("BeginNpcId",""),"finish_raw":f.get("FinishNpcId","")}
         by_id[mid].append(row)
+        mission_records_all.append(row)
         for p in f.get("Prequest","").split("|"):
             if p and p not in ("0","-1"):prereq.append((p,mid))
         for key,val in f.items():
@@ -164,6 +165,8 @@ def main():
                         map_refs.append({"mission_id":mid,"role":key,"map_id":parts[2],"x":int_or_none(parts[3]),"y":int_or_none(parts[4])})
                     elif h=="mob" and len(parts)>=4:
                         mob_refs.append({"mission_id":mid,"name":parts[0],"map_id":parts[1],"x":int_or_none(parts[2]),"y":int_or_none(parts[3])})
+                        map_refs.append({"mission_id":mid,"role":key,"map_id":parts[1],"x":int_or_none(parts[2]),"y":int_or_none(parts[3])})
+                    elif h=="map" and len(parts)>=4:
                         map_refs.append({"mission_id":mid,"role":key,"map_id":parts[1],"x":int_or_none(parts[2]),"y":int_or_none(parts[3])})
                     elif h=="item_t" and len(parts)>=4:
                         item_refs.append({"mission_id":mid,"name":parts[0],"map_id":parts[1],"x":int_or_none(parts[2]),"y":int_or_none(parts[3])})
@@ -297,7 +300,7 @@ def main():
       "monster_linkage":{"reference_count":len(mob_refs),"unique_names":len({r["name"] for r in mob_refs}),"matched_references":sum(bool(r["monster_type_ids"]) for r in mob_refs),"unmatched_names":sorted({r["name"] for r in mob_refs if not r["monster_type_ids"]})},
       "item_linkage":{"reference_count":len(item_refs),"unique_item_ids":len({r.get("item_id") for r in item_refs if r.get("item_id")}),"item_definitions_available":len(item_defs),"matched_item_ids":sum(bool(r.get("item_definition")) for r in item_refs if r.get("item_id")),"unmatched_item_ids":sorted({r["item_id"] for r in item_refs if r.get("item_id") and r["item_id"] not in item_defs},key=lambda x:int(x) if x.isdigit() else x),"matched_world_item_name_references":sum(bool(r.get("item_name_candidate_ids")) for r in item_refs)},
       "dialogue":{k:v for k,v in dialogue.items() if k not in ("flows","mission_flows")},"dialogue_npc_linkage":dialogue_npc_summary,
-      "missions": [rows[0] for _,rows in sorted(by_id.items(),key=lambda x:int(x[0]))],
+      "missions": [rows[0] for _,rows in sorted(by_id.items(),key=lambda x:int(x[0]))],"mission_source_records":mission_records_all,
       "npc_references":npc_refs,"dialogue_npc_references":dialogue_npc_refs,"mission_dialogue_npcs":[{"mission_id":k,"npc_references":v} for k,v in sorted(mission_dialogue_npcs.items(),key=lambda x:int(x[0]))],"map_references":map_refs,"mob_references":mob_refs,"item_references":item_refs,
       "dialogue_flows":dialogue["flows"],"mission_dialogue_flows":dialogue["mission_flows"]
     }
@@ -362,6 +365,8 @@ def main():
     exports=[
         write_csv("mission_catalog.csv",[mission_lookup[k] for k in sorted(mission_lookup,key=lambda x:int(x))],
             ["mission_id","name","name_ar","type_id","type_name","big_type_id","level_min","level_max","activity_type","repeat_or_abandon","map_field","begin_raw","finish_raw"]),
+        write_csv("mission_catalog_source_records.csv",mission_records_all,
+            ["source_section","source_line","mission_id","name","name_ar","type_id","type_name","big_type_id","level_min","level_max","activity_type","repeat_or_abandon","map_field","begin_raw","finish_raw"]),
         write_csv("mission_npc_map_links.csv",npc_export,
             ["mission_id","mission_name","mission_name_ar","mission_type_id","mission_type_name","role","npc_id","name","map_id","map_name","x","y","npc_type_name_candidates","npc_appearance_name_candidates","mapdestination_exact_coordinate_match","mapdestination_matches"]),
         write_csv("mission_dialogue_npc_links.csv",dialogue_npc_export,
