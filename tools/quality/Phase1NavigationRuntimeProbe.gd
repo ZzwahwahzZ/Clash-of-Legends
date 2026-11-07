@@ -192,6 +192,19 @@ func _run() -> void:
 	var bridge_cross_final_position: Vector3 = player.global_position
 	var bridge_cross_distance := Vector2(bridge_cross_final_position.x - bridge_cross_target.x, bridge_cross_final_position.z - bridge_cross_target.z).length()
 	var bridge_cross_floor_contact := player.is_on_floor()
+	var bridge_cross_waypoints: Array = []
+	for waypoint in bridge_cross_path:
+		bridge_cross_waypoints.append(_vec(waypoint))
+	var bridge_cross_slide_collisions: Array = []
+	for collision_index in range(player.get_slide_collision_count()):
+		var slide := player.get_slide_collision(collision_index)
+		var collider := slide.get_collider()
+		bridge_cross_slide_collisions.append({
+			"collider": str(collider.name) if collider else "null",
+			"position": _vec(slide.get_position()),
+			"normal": _vec(slide.get_normal())
+		})
+	var bridge_cross_next_path_position: Vector3 = navigation_agent.get_next_path_position()
 	var bridge_cross_passed := bridge_cross_path.size() >= 2 and bridge_cross_start_projection_distance <= 2.0 and bridge_cross_target_projection_distance <= 2.0 and bridge_cross_distance <= 1.5 and bridge_cross_floor_contact
 
 	var report := {
@@ -222,6 +235,11 @@ func _run() -> void:
 			"target_projected": _vec(bridge_cross_target),
 			"target_projection_distance": bridge_cross_target_projection_distance,
 			"path_waypoint_count": bridge_cross_path.size(),
+			"path_waypoints": bridge_cross_waypoints,
+			"next_path_position_at_finish": _vec(bridge_cross_next_path_position),
+			"player_velocity_at_finish": _vec(player.velocity),
+			"is_moving_to_target_at_finish": bool(player.get("is_moving_to_target")),
+			"slide_collisions_at_finish": bridge_cross_slide_collisions,
 			"final_position": _vec(bridge_cross_final_position),
 			"distance_to_target": bridge_cross_distance,
 			"floor_contact": bridge_cross_floor_contact,
