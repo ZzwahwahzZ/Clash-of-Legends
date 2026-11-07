@@ -331,14 +331,15 @@ func _physics_process(delta: float) -> void:
 			if not _navigation_target_submitted:
 				navigation_agent.target_position = target_nav_position
 				_navigation_target_submitted = true
-			var next_path_position := navigation_agent.get_next_path_position()
-			if navigation_agent.is_navigation_finished():
-				is_moving_to_target = false
 			else:
-				var diff := next_path_position - global_position
-				diff.y = 0.0
-				if diff.length() > 0.12:
-					move_vec = diff.normalized() * current_speed
+				if navigation_agent.is_navigation_finished():
+					is_moving_to_target = false
+				else:
+					var next_path_position := navigation_agent.get_next_path_position()
+					var diff := next_path_position - global_position
+					diff.y = 0.0
+					if diff.length() > 0.12:
+						move_vec = diff.normalized() * current_speed
 		else:
 			var direct_diff := target_nav_position - global_position
 			direct_diff.y = 0.0
