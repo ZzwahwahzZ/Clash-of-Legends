@@ -7,6 +7,42 @@ use std::collections::BTreeSet;
 use std::fs;
 use std::path::{Path, PathBuf};
 
+fn resolve_embedded_texture(document: &C3Document, pvr_root: &Path, model_path: &Path) -> Option<PathBuf> {
+    // PHY records carry their own texture filename. Resolve only an exact
+    // same-directory basename match; never guess across unrelated effects
+    // that commonly reuse generic names such as 1.tga or 5.tga.
+    let mut texture_stems = BTreeSet::new();
+    for mesh in &document.meshes {
+        let raw = mesh.texture_name.trim();
+        if raw.is_empty() || raw.eq_ignore_ascii_case("C3EXP_COLOR") {
+            continue;
+        }
+        let normalized = raw.replace('\\\\', "/");
+        let file_name = Path::new(&normalized).file_name()?.to_str()?.trim();
+        let stem = Path::new(file_name).file_stem()?.to_str()?.trim();
+        if !stem.is_empty() {
+            texture_stems.insert(stem.to_ascii_lowercase());
+        }
+    }
+    if texture_stems.is_empty() {
+        return None;
+    }
+    let parent = model_path.parent().unwrap_or(Path::new(""));
+    let mut resolved = BTreeSet::new();
+    for stem in texture_stems {
+        let candidate = pvr_root.join(parent).join(format!("{stem}.png"));
+        if !candidate.is_file() {
+            return None;
+        }
+        resolved.insert(candidate);
+    }
+    if resolved.len() == 1 {
+        resolved.into_iter().next()
+    } else {
+        None
+    }
+}
+
 fn collect_files(root: &Path, out: &mut Vec<PathBuf>) -> std::io::Result<()> {
     for entry in fs::read_dir(root)? {
         let entry = entry?;
@@ -211,7 +247,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     let has_unassigned_textures = document.meshes.iter().all(|mesh| mesh.texture_name.trim().is_empty());
                     let sibling_base_c3 = rel_path.parent().unwrap_or(Path::new("")).join("1.c3");
                     let sibling_base_png = pvr_root.join(rel_path.parent().unwrap_or(Path::new("")).join("1.png"));
-                    let (texture_path, texture_assignment) = if same_stem_texture.is_file() {
+                    let embedded_texture = resolve_embedded_texture(&document, &pvr_root, rel_path);
+                    let (texture_path, texture_assignment) = if let Some(path) = embedded_texture {
+                        (path, "embedded_texture_reference_unique_same_parent")
+                    } else if same_stem_texture.is_file() {
                         (same_stem_texture, "same_stem")
                     } else if has_unassigned_textures
                         && root.join(&sibling_base_c3).is_file()
