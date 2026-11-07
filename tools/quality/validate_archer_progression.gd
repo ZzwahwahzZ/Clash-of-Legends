@@ -1,4 +1,4 @@
-extends SceneTree
+extends Node
 
 func _initialize() -> void:
 	call_deferred("_run")
@@ -16,8 +16,8 @@ func _run() -> void:
 		_fail("Player scene did not instantiate a PlayerController.")
 		return
 	player.current_level = 40
-	root.add_child(player)
-	await process_frame
+	get_tree().root.add_child(player)
+	await get_tree().process_frame
 	var progression = ClassProgressionManager
 	if player.get_character_class() != "Archer":
 		_fail("The title-screen Archer selection did not reach the actual PlayerController.")
@@ -209,7 +209,7 @@ func _run() -> void:
 	print("ARCHER PROGRESSION PASSED: level gate, quest-gated unlock, one character identity, reversible forms, weapon loadouts, skill restrictions and save/load.")
 	player.queue_free()
 	GameManager.player_reference = null
-	quit(0)
+	get_tree().quit(0)
 
 func _find_item_index(inventory: PlayerInventory, item_id: String) -> int:
 	for index in range(inventory.slots.size()):
@@ -220,4 +220,4 @@ func _find_item_index(inventory: PlayerInventory, item_id: String) -> int:
 
 func _fail(message: String) -> void:
 	push_error("ARCHER PROGRESSION FAILED: " + message)
-	quit(1)
+	get_tree().quit(1)
