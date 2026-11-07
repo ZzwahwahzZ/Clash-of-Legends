@@ -262,7 +262,7 @@ jobs:
             echo 'Godot anchor surface audit reported an error'
             exit 1
           fi
-          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|Attempted to update a navigation region|PHASE1 NAVIGATION BAKE FAILED' reports/phase1_navigation_bake_audit.log; then
+          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|Attempted to update a navigation region|Condition "!is_inside_tree\(\)"|PHASE1 NAVIGATION BAKE FAILED' reports/phase1_navigation_bake_audit.log; then
             echo 'Godot navigation bake audit reported an error'
             exit 1
           fi
