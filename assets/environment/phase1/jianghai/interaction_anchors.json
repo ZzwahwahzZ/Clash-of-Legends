@@ -190,6 +190,28 @@
         -8
       ],
       "surface_validation_status": "central_avenue_walkable_edge_candidate_pending_nav_projection_and_clearance"
+    },
+    {
+      "id": "jianghai.west_market_entry",
+      "node_path": "JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/RiverWardStreet",
+      "kind": "market_entry",
+      "task_tags": [
+        "visit",
+        "reach",
+        "deliver",
+        "collect",
+        "escort"
+      ],
+      "requires_navmesh_projection": true,
+      "requires_runtime_trigger": true,
+      "interaction_enabled": false,
+      "npc_spawn_anchor": false,
+      "target_offset_local": [
+        -35,
+        0.15,
+        -164
+      ],
+      "surface_validation_status": "authored_RiverWardStreet_candidate; requires integrated physical route validation from CentralAvenue"
     }
   ]
 }
