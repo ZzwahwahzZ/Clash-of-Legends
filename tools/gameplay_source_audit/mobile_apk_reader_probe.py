@@ -20,7 +20,7 @@ TOKENS = (
     "questinfo.dat", "taskitem_info.dat", "clienttask", "juqing",
     "maintask", "taskid", "npcid", "mapid", "taskreward",
     "decrypt", "encrypt", "cipher", "rsa", "gzip", "inflater",
-    "zipinputstream", "343fd", "269ec3",
+    "zipinputstream", "343fd", "269ec3", "TaskAssemblyGfit_Find", "ClientTaskTemplate_QuestinfoFunc", "PlotEditorOnTaskPanelClick", "GuildPreheating_QuestinfoFunc", "NpcDialogueText_AR", "Dialog_Dialogue", "LuaSceneScript", "luascriptmgr", "npcdialogueinfo.dat", "npcdialoguetext_ar.dat", "questinfo.ini", "slotnpc.ini", "mapdestination.ini",
 )
 ASCII_RUN = re.compile(rb"[\x20-\x7e]{5,}")
 
