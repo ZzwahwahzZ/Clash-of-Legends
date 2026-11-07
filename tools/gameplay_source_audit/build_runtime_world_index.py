@@ -93,8 +93,9 @@ def main():
         if s["section"].isdigit(): map_meta[int(s["section"])] = s["fields"]
     for m in maps: m["map_meta"] = map_meta.get(m["map_id"], {}); m["name_en"] = m["map_meta"].get("Name", "")
     map_ids = {m["map_id"] for m in maps}
-    extra_maps = [{"map_id": mid, "name_en": f.get("Name", ""), "map_meta": f}
+    extra_maps = [{"map_id": mid, "name_en": f.get("Name", ""), "map_meta": f, "metadata_only": True}
                   for mid, f in sorted(map_meta.items()) if mid not in map_ids]
+    map_ids_without_metadata = sorted(map_id for map_id in map_ids if map_id not in map_meta)
 
     npc_sections, npc_enc = ini(root, "ini/npc.ini")
     npc_templates = [{"source_section": s["section"], "fields": s["fields"]} for s in npc_sections]
@@ -133,6 +134,10 @@ def main():
                 if ref["map_id"] not in map_ids: missing_npc_maps.add(ref["map_id"])
 
     duplicate_maps = sorted(mid for mid,n in Counter(m["map_id"] for m in maps).items() if n > 1)
+    negative_npc_sentinels = sum(1 for q in tasks for k in ("begin_npc", "finish_npc")
+                                 if q[k] and q[k].get("parse_status") == "parsed" and q[k].get("npc_id", 0) < 0)
+    npc_map_ids_with_metadata_only = sorted(mid for mid in missing_npc_maps if mid in map_meta)
+    npc_map_ids_without_any_catalog_metadata = sorted(mid for mid in missing_npc_maps if mid not in map_meta)
     duplicate_quests = sorted(mid for mid,n in Counter(q["mission_id"] for q in tasks if q["mission_id"] is not None).items() if n > 1)
     dialogues = []
     for rel in ["ini/luaui/publicfiles/otherconf/npcdialogueinfo.dat",
@@ -153,6 +158,10 @@ def main():
     report = {"schema_version":"1.0.0","source_version":index["source_version"],
         "map_binary_records":len(maps),"unique_map_ids":len(map_ids),"duplicate_map_ids_preserved":duplicate_maps,
         "map_metadata_sections":len(map_meta),"map_metadata_without_binary_path":len(extra_maps),
+        "map_binary_ids_without_metadata":map_ids_without_metadata,
+        "npc_map_ids_with_metadata_only":npc_map_ids_with_metadata_only,
+        "npc_map_ids_without_any_catalog_metadata":npc_map_ids_without_any_catalog_metadata,
+        "negative_npc_id_sentinel_references":negative_npc_sentinels,
         "npc_template_sections":len(npc_templates),"english_quest_rows":len(en_tasks),
         "arabic_quest_rows":len(ar_tasks),"runtime_quest_rows":len(tasks),
         "duplicate_mission_ids_preserved_by_source_section":duplicate_quests,
