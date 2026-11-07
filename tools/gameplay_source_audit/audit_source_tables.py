@@ -269,8 +269,9 @@ def main() -> None:
                                             "column_59_candidate": row.get("column_59_candidate"),
                                             "evidence_policy": "ID_AND_VISIBLE_NAME_ONLY; ALL_OTHER_POSITIONAL_FIELDS_OPAQUE"
                                         })
+                                compact_itemtype = {key: value for key, value in parsed_itemtype.items() if key != "records"}
                                 record = {"source_member": display, "relative_path": rel, "size_bytes": len(data),
-                                          "sha256": hashlib.sha256(data).hexdigest(), **parsed_itemtype}
+                                          "sha256": hashlib.sha256(data).hexdigest(), **compact_itemtype}
                                 entries.append(record)
                 results[category] = entries
             # Discover quest/promotion/NPC source members by exact APK path and safe raw-text hits.
