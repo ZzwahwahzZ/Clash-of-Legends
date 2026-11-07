@@ -51,6 +51,31 @@ func _run_validation() -> void:
 	if int(model_dialogue.get("dialogue_id", -1)) != 1060:
 		_fail("NPC model 5002 was not linked through its exact dialogue DlgShowInfo.id reference.")
 		return
+	var dialogue_scene: PackedScene = load("res://scenes/ui/DialogueUI.tscn")
+	if dialogue_scene == null:
+		_fail("Dialogue UI scene could not be loaded for source-flow validation.")
+		return
+	var dialogue_ui: Control = dialogue_scene.instantiate()
+	root.add_child(dialogue_ui)
+	await process_frame
+	if not dialogue_ui.show_source_dialogue(1060, "Wind Sage", "en"):
+		_fail("Dialogue UI rejected a verified source dialogue.")
+		return
+	var option_container: VBoxContainer = dialogue_ui.get_node("Panel/OptionsVBox")
+	if option_container.get_child_count() != 1:
+		_fail("First source dialogue step did not expose its Next action.")
+		return
+	option_container.get_child(0).emit_signal("pressed")
+	await process_frame
+	if option_container.get_child_count() != 2:
+		_fail("Second source dialogue step did not expose both localized source choices.")
+		return
+	option_container.get_child(1).emit_signal("pressed")
+	await process_frame
+	if not dialogue_ui.visible:
+		_fail("Selecting the source dialogue branch did not navigate to its linked follow-up.")
+		return
+	dialogue_ui.queue_free()
 	var first_talk: Dictionary = source_dialogue.get("talks", [])[0]
 	if str(first_talk.get("text_key", "")).is_empty():
 		_fail("NPC dialogue talk step has no source text key.")
