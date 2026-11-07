@@ -162,10 +162,10 @@ func _run() -> void:
 		if bool(movement_check["target_reached"]) and bool(movement_check["floor_contact"]):
 			runtime_route_movements_passed += 1
 
-	# Prove an actual west-to-east crossing of the market bridge deck and both ramps.
-	# The centerline keeps the player clear of the guardrails and market stalls.
-	var bridge_cross_start_requested := Vector3(-29.0, 2.0, -126.0)
-	var bridge_cross_target_requested := Vector3(29.0, 2.0, -126.0)
+	# Prove traversal across the authored bridge deck only.
+	# The decorative ramps are not walkable navigation surfaces or quest destinations.
+	var bridge_cross_start_requested := Vector3(-21.0, 4.45, -126.0)
+	var bridge_cross_target_requested := Vector3(21.0, 4.45, -126.0)
 	var bridge_cross_start := NavigationServer3D.map_get_closest_point(navigation_map, bridge_cross_start_requested)
 	var bridge_cross_target := NavigationServer3D.map_get_closest_point(navigation_map, bridge_cross_target_requested)
 	var bridge_cross_start_projection_distance := bridge_cross_start.distance_to(bridge_cross_start_requested)
