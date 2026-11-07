@@ -5287,309 +5287,3599 @@
     ]
   ],
   "pawnshop_parent_path": "/root/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop",
-  "street_network_nodes": [
+  "semantic_anchor_nodes": [
     {
-      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork",
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "id": "jianghai.central_avenue",
+      "mesh_aabb_local": [
+        [
+          -9.5,
+          -0.2499955445528,
+          -220
+        ],
+        [
+          19,
+          0.214991092681885,
+          320
+        ]
+      ],
+      "node_path": "JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/CentralAvenue",
+      "position_global": [
+        0,
+        0,
+        0
+      ],
+      "resolved": true,
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "id": "jianghai.pawnshop_approach",
+      "mesh_aabb_local": [
+        [
+          -96,
+          -0.13799999654293,
+          -117
+        ],
+        [
+          20,
+          0.119999997317791,
+          28
+        ]
+      ],
+      "node_path": "JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/PawnshopApproach",
+      "position_global": [
+        0,
+        0,
+        0
+      ],
+      "resolved": true,
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "id": "jianghai.pawnshop_courtyard",
+      "node_path": "JianghaiOldCityAuthoredScene/GuangchangPawnshop",
+      "position_global": [
+        0,
+        0,
+        0
+      ],
+      "resolved": true,
       "type": "Node3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "id": "jianghai.market_bridge",
+      "node_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
+      "position_global": [
+        0,
+        0,
+        0
+      ],
+      "resolved": true,
+      "type": "Node3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "id": "jianghai.factory_approach",
+      "mesh_aabb_local": [
+        [
+          74.5,
+          -0.13799999654293,
+          -23
+        ],
+        [
+          23,
+          0.119999997317791,
+          22
+        ]
+      ],
+      "node_path": "JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/FactoryApproach",
+      "position_global": [
+        0,
+        0,
+        0
+      ],
+      "resolved": true,
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          -1,
+          0,
+          -0.00000008742278
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0.0000000874227765734759,
+          0,
+          -1
+        ],
+        [
+          -11.6000003814697,
+          4.19999980926514,
+          -31.5
+        ]
+      ],
+      "id": "jianghai.hotel_frontage",
+      "mesh_aabb_local": [
+        [
+          -1,
+          -1.07500004768372,
+          -0.07000000029802
+        ],
+        [
+          2,
+          2.15000009536743,
+          0.140000000596046
+        ]
+      ],
+      "node_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict/AvenueHotelBladeBacking",
+      "position_global": [
+        -11.6000003814697,
+        4.19999980926514,
+        -31.5
+      ],
+      "resolved": true,
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          -1,
+          0,
+          -0.00000008742278
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0.0000000874227765734759,
+          0,
+          -1
+        ],
+        [
+          11.6000003814697,
+          4.30000019073486,
+          -45
+        ]
+      ],
+      "id": "jianghai.medicine_frontage",
+      "mesh_aabb_local": [
+        [
+          -1,
+          -1.07500004768372,
+          -0.07000000029802
+        ],
+        [
+          2,
+          2.15000009536743,
+          0.140000000596046
+        ]
+      ],
+      "node_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict/AvenueMedicineBladeBacking",
+      "position_global": [
+        11.6000003814697,
+        4.30000019073486,
+        -45
+      ],
+      "resolved": true,
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          -1,
+          0,
+          -0.00000008742278
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0.0000000874227765734759,
+          0,
+          -1
+        ],
+        [
+          11.6000003814697,
+          4.34999990463257,
+          -5
+        ]
+      ],
+      "id": "jianghai.tea_frontage",
+      "mesh_aabb_local": [
+        [
+          -1,
+          -1.07500004768372,
+          -0.07000000029802
+        ],
+        [
+          2,
+          2.15000009536743,
+          0.140000000596046
+        ]
+      ],
+      "node_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict/AvenueTeaBladeBacking",
+      "position_global": [
+        11.6000003814697,
+        4.34999990463257,
+        -5
+      ],
+      "resolved": true,
+      "type": "MeshInstance3D"
+    }
+  ],
+  "street_network_nodes": [
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork",
+      "position_global": [
+        0,
+        0,
+        0
+      ],
+      "type": "Node3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -9.5,
+          -0.2499955445528,
+          -220
+        ],
+        [
+          19,
+          0.214991092681885,
+          320
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/CentralAvenue",
+      "position_global": [
+        0,
+        0,
+        0
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          10.25,
+          0.0900000035762787,
+          -60
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.625,
+          -0.39996126294136,
+          -160
+        ],
+        [
+          1.25,
+          0.489922523498535,
+          320
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/CentralAvenueCurbE",
+      "position_global": [
+        10.25,
+        0.0900000035762787,
+        -60
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -10.25,
+          0.0900000035762787,
+          -60
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.625,
+          -0.39996126294136,
+          -160
+        ],
+        [
+          1.25,
+          0.489922523498535,
+          320
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/CentralAvenueCurbW",
+      "position_global": [
+        -10.25,
+        0.0900000035762787,
+        -60
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0.0799999982118607,
+          -106.300003051758
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -170,
+          -0.07999999821186,
+          -0.375
+        ],
+        [
+          340,
+          0.159999996423721,
+          0.75
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/CrossStreetCurb-106_3",
+      "position_global": [
+        0,
+        0.0799999982118607,
+        -106.300003051758
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0.0799999982118607,
+          -13.8000001907349
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -170,
+          -0.07999999821186,
+          -0.375
+        ],
+        [
+          340,
+          0.159999996423721,
+          0.75
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/CrossStreetCurb-13_8",
+      "position_global": [
+        0,
+        0.0799999982118607,
+        -13.8000001907349
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0.0799999982118607,
+          -29.3999996185303
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -170,
+          -0.07999999821186,
+          -0.375
+        ],
+        [
+          340,
+          0.159999996423721,
+          0.75
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/CrossStreetCurb-29_4",
+      "position_global": [
+        0,
+        0.0799999982118607,
+        -29.3999996185303
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0.0799999982118607,
+          -90.5
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -170,
+          -0.07999999821186,
+          -0.375
+        ],
+        [
+          340,
+          0.159999996423721,
+          0.75
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/CrossStreetCurb-90_5",
+      "position_global": [
+        0,
+        0.0799999982118607,
+        -90.5
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -6.05000019073486,
+          0.061999998986721,
+          -66.0500030517578
+        ],
+        [
+          12.1000003814697,
+          0.00000999999974737875,
+          12.1000022888184
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/ExtractionInnerRing",
+      "position_global": [
+        0,
+        0,
+        0
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -11.25,
+          0.0599999986588955,
+          -71.25
+        ],
+        [
+          22.5,
+          0.00000999999974737875,
+          22.5
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/ExtractionOuterRing",
+      "position_global": [
+        0,
+        0,
+        0
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -19,
+          -0.10499999672174,
+          -76.5
+        ],
+        [
+          38,
+          0.119999997317791,
+          33
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/ExtractionSquare",
+      "position_global": [
+        0,
+        0,
+        0
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          74.5,
+          -0.13799999654293,
+          -23
+        ],
+        [
+          23,
+          0.119999997317791,
+          22
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/FactoryApproach",
+      "position_global": [
+        0,
+        0,
+        0
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0.0450000017881393,
+          -115
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.07999999821186,
+          -0.00899999961257,
+          -3.09999990463257
+        ],
+        [
+          0.159999996423721,
+          0.0179999992251396,
+          6.19999980926514
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/LaneMark-115",
+      "position_global": [
+        0,
+        0.0450000017881393,
+        -115
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0.0450000017881393,
+          -133
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.07999999821186,
+          -0.00899999961257,
+          -3.09999990463257
+        ],
+        [
+          0.159999996423721,
+          0.0179999992251396,
+          6.19999980926514
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/LaneMark-133",
+      "position_global": [
+        0,
+        0.0450000017881393,
+        -133
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0.0450000017881393,
+          -151
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.07999999821186,
+          -0.00899999961257,
+          -3.09999990463257
+        ],
+        [
+          0.159999996423721,
+          0.0179999992251396,
+          6.19999980926514
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/LaneMark-151",
+      "position_global": [
+        0,
+        0.0450000017881393,
+        -151
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0.0450000017881393,
+          -169
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.07999999821186,
+          -0.00899999961257,
+          -3.09999990463257
+        ],
+        [
+          0.159999996423721,
+          0.0179999992251396,
+          6.19999980926514
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/LaneMark-169",
+      "position_global": [
+        0,
+        0.0450000017881393,
+        -169
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0.0450000017881393,
+          -187
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.07999999821186,
+          -0.00899999961257,
+          -3.09999990463257
+        ],
+        [
+          0.159999996423721,
+          0.0179999992251396,
+          6.19999980926514
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/LaneMark-187",
+      "position_global": [
+        0,
+        0.0450000017881393,
+        -187
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0.0450000017881393,
+          -205
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.07999999821186,
+          -0.00899999961257,
+          -3.09999990463257
+        ],
+        [
+          0.159999996423721,
+          0.0179999992251396,
+          6.19999980926514
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/LaneMark-205",
+      "position_global": [
+        0,
+        0.0450000017881393,
+        -205
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0.0450000017881393,
+          -25
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.07999999821186,
+          -0.00899999961257,
+          -3.09999990463257
+        ],
+        [
+          0.159999996423721,
+          0.0179999992251396,
+          6.19999980926514
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/LaneMark-25",
+      "position_global": [
+        0,
+        0.0450000017881393,
+        -25
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0.0450000017881393,
+          -43
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.07999999821186,
+          -0.00899999961257,
+          -3.09999990463257
+        ],
+        [
+          0.159999996423721,
+          0.0179999992251396,
+          6.19999980926514
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/LaneMark-43",
+      "position_global": [
+        0,
+        0.0450000017881393,
+        -43
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0.0450000017881393,
+          -7
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.07999999821186,
+          -0.00899999961257,
+          -3.09999990463257
+        ],
+        [
+          0.159999996423721,
+          0.0179999992251396,
+          6.19999980926514
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/LaneMark-7",
+      "position_global": [
+        0,
+        0.0450000017881393,
+        -7
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0.0450000017881393,
+          -79
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.07999999821186,
+          -0.00899999961257,
+          -3.09999990463257
+        ],
+        [
+          0.159999996423721,
+          0.0179999992251396,
+          6.19999980926514
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/LaneMark-79",
+      "position_global": [
+        0,
+        0.0450000017881393,
+        -79
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0.0450000017881393,
+          -97
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.07999999821186,
+          -0.00899999961257,
+          -3.09999990463257
+        ],
+        [
+          0.159999996423721,
+          0.0179999992251396,
+          6.19999980926514
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/LaneMark-97",
+      "position_global": [
+        0,
+        0.0450000017881393,
+        -97
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0.0450000017881393,
+          11
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.07999999821186,
+          -0.00899999961257,
+          -3.09999990463257
+        ],
+        [
+          0.159999996423721,
+          0.0179999992251396,
+          6.19999980926514
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/LaneMark11",
+      "position_global": [
+        0,
+        0.0450000017881393,
+        11
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0.0450000017881393,
+          29
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.07999999821186,
+          -0.00899999961257,
+          -3.09999990463257
+        ],
+        [
+          0.159999996423721,
+          0.0179999992251396,
+          6.19999980926514
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/LaneMark29",
+      "position_global": [
+        0,
+        0.0450000017881393,
+        29
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0.0450000017881393,
+          47
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.07999999821186,
+          -0.00899999961257,
+          -3.09999990463257
+        ],
+        [
+          0.159999996423721,
+          0.0179999992251396,
+          6.19999980926514
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/LaneMark47",
+      "position_global": [
+        0,
+        0.0450000017881393,
+        47
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0.0450000017881393,
+          65
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.07999999821186,
+          -0.00899999961257,
+          -3.09999990463257
+        ],
+        [
+          0.159999996423721,
+          0.0179999992251396,
+          6.19999980926514
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/LaneMark65",
+      "position_global": [
+        0,
+        0.0450000017881393,
+        65
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0.0450000017881393,
+          83
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.07999999821186,
+          -0.00899999961257,
+          -3.09999990463257
+        ],
+        [
+          0.159999996423721,
+          0.0179999992251396,
+          6.19999980926514
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/LaneMark83",
+      "position_global": [
+        0,
+        0.0450000017881393,
+        83
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -4.80000019073486,
+          0.0350000001490116,
+          12
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.55000001192093,
+          0,
+          -0.55000001192093
+        ],
+        [
+          1.10000002384186,
+          0.0450000017881393,
+          1.10000002384186
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/Manhole00",
+      "position_global": [
+        -4.80000019073486,
+        0.0350000001490116,
+        12
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          5,
+          0.0350000001490116,
+          -8
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.55000001192093,
+          0,
+          -0.55000001192093
+        ],
+        [
+          1.10000002384186,
+          0.0450000017881393,
+          1.10000002384186
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/Manhole01",
+      "position_global": [
+        5,
+        0.0350000001490116,
+        -8
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -5.19999980926514,
+          0.0350000001490116,
+          -82
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.55000001192093,
+          0,
+          -0.55000001192093
+        ],
+        [
+          1.10000002384186,
+          0.0450000017881393,
+          1.10000002384186
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/Manhole02",
+      "position_global": [
+        -5.19999980926514,
+        0.0350000001490116,
+        -82
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          4.69999980926514,
+          0.0350000001490116,
+          -145
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.55000001192093,
+          0,
+          -0.55000001192093
+        ],
+        [
+          1.10000002384186,
+          0.0450000017881393,
+          1.10000002384186
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/Manhole03",
+      "position_global": [
+        4.69999980926514,
+        0.0350000001490116,
+        -145
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -170,
+          -0.14800000190735,
+          -28.8500003814697
+        ],
+        [
+          340,
+          0.120000004768372,
+          14.5
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/NorthCrossStreet",
+      "position_global": [
+        0,
+        0,
+        0
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -96,
+          -0.13799999654293,
+          -117
+        ],
+        [
+          20,
+          0.119999997317791,
+          28
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/PawnshopApproach",
+      "position_global": [
+        0,
+        0,
+        0
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -5.5,
+          0.0540000014007092,
+          -50
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.70000004768372,
+          -0.00600000005215,
+          -0.55000001192093
+        ],
+        [
+          3.40000009536743,
+          0.0120000001043081,
+          1.10000002384186
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/RainPuddle00",
+      "position_global": [
+        -5.5,
+        0.0540000014007092,
+        -50
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          0.974370062351227,
+          0,
+          0.224951058626175
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          -0.22495105862617,
+          0,
+          0.974370062351227
+        ],
+        [
+          6,
+          0.0540000014007092,
+          -70
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -2.40000009536743,
+          -0.00600000005215,
+          -0.75
+        ],
+        [
+          4.80000019073486,
+          0.0120000001043081,
+          1.5
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/RainPuddle01",
+      "position_global": [
+        6,
+        0.0540000014007092,
+        -70
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          0.898794054985046,
+          0,
+          0.438371151685715
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          -0.43837115168571,
+          0,
+          0.898794054985046
+        ],
+        [
+          -2.5,
+          0.0540000014007092,
+          -31
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.10000002384186,
+          -0.00600000005215,
+          -0.40000000596046
+        ],
+        [
+          2.20000004768372,
+          0.0120000001043081,
+          0.800000011920929
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/RainPuddle02",
+      "position_global": [
+        -2.5,
+        0.0540000014007092,
+        -31
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          0.777145981788635,
+          0,
+          0.629320323467255
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          -0.62932032346725,
+          0,
+          0.777145981788635
+        ],
+        [
+          4,
+          0.0540000014007092,
+          -117
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -2,
+          -0.00600000005215,
+          -0.5
+        ],
+        [
+          4,
+          0.0120000001043081,
+          1
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/RainPuddle03",
+      "position_global": [
+        4,
+        0.0540000014007092,
+        -117
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          0.615661561489105,
+          0,
+          0.788010656833649
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          -0.78801065683365,
+          0,
+          0.615661561489105
+        ],
+        [
+          -7,
+          0.0540000014007092,
+          25
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.20000004768372,
+          -0.00600000005215,
+          -0.44999998807907
+        ],
+        [
+          2.40000009536743,
+          0.0120000001043081,
+          0.899999976158142
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/RainPuddle04",
+      "position_global": [
+        -7,
+        0.0540000014007092,
+        25
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          0.422618210315704,
+          0,
+          0.906307816505432
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          -0.90630781650543,
+          0,
+          0.422618210315704
+        ],
+        [
+          82,
+          0.0540000014007092,
+          -21
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -3,
+          -0.00600000005215,
+          -0.69999998807907
+        ],
+        [
+          6,
+          0.0120000001043081,
+          1.39999997615814
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/RainPuddle05",
+      "position_global": [
+        82,
+        0.0540000014007092,
+        -21
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          0.207911550998688,
+          0,
+          0.978147625923157
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          -0.97814762592316,
+          0,
+          0.207911550998688
+        ],
+        [
+          -88,
+          0.0540000014007092,
+          -101
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -2.29999995231628,
+          -0.00600000005215,
+          -0.55000001192093
+        ],
+        [
+          4.59999990463257,
+          0.0120000001043081,
+          1.10000002384186
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/RainPuddle06",
+      "position_global": [
+        -88,
+        0.0540000014007092,
+        -101
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -143,
+          -0.14000000059605,
+          -169.5
+        ],
+        [
+          286,
+          0.120000004768372,
+          11
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/RiverWardStreet",
+      "position_global": [
+        0,
+        0,
+        0
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -170,
+          -0.14499999582767,
+          -105.650001525879
+        ],
+        [
+          340,
+          0.119999997317791,
+          14.5
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/SouthCrossStreet",
+      "position_global": [
+        0,
+        0,
+        0
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -12.8500003814697,
+          4.30000019073486,
+          78
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.18999999761581,
+          0,
+          -0.18999999761581
+        ],
+        [
+          0.379999995231628,
+          0.25,
+          0.379999995231628
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp00Lens",
+      "position_global": [
+        -12.8500003814697,
+        4.30000019073486,
+        78
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -13.8916244506836,
+          0,
+          77.9150009155273
+        ],
+        [
+          1.09652900695801,
+          4.81488800048828,
+          0.169998168945312
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp00Post",
+      "position_global": [
+        0,
+        0,
+        0
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -12.8500003814697,
+          4.48000001907349,
+          78
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.30103087425232,
+          0,
+          -0.30103087425232
+        ],
+        [
+          0.602061748504639,
+          0.340000003576279,
+          0.602061748504639
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp00Shade",
+      "position_global": [
+        -12.8500003814697,
+        4.48000001907349,
+        78
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          14.1499996185303,
+          4.30000019073486,
+          52
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.18999999761581,
+          0,
+          -0.18999999761581
+        ],
+        [
+          0.379999995231628,
+          0.25,
+          0.379999995231628
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp01Lens",
+      "position_global": [
+        14.1499996185303,
+        4.30000019073486,
+        52
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          13.1083755493164,
+          0,
+          51.9150009155273
+        ],
+        [
+          1.09652900695801,
+          4.81488800048828,
+          0.169998168945312
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp01Post",
+      "position_global": [
+        0,
+        0,
+        0
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          14.1499996185303,
+          4.48000001907349,
+          52
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.30103087425232,
+          0,
+          -0.30103087425232
+        ],
+        [
+          0.602061748504639,
+          0.340000003576279,
+          0.602061748504639
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp01Shade",
+      "position_global": [
+        14.1499996185303,
+        4.48000001907349,
+        52
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -12.8500003814697,
+          4.30000019073486,
+          22
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.18999999761581,
+          0,
+          -0.18999999761581
+        ],
+        [
+          0.379999995231628,
+          0.25,
+          0.379999995231628
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp02Lens",
+      "position_global": [
+        -12.8500003814697,
+        4.30000019073486,
+        22
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -13.8916244506836,
+          0,
+          21.9150009155273
+        ],
+        [
+          1.09652900695801,
+          4.81488800048828,
+          0.169998168945312
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp02Post",
+      "position_global": [
+        0,
+        0,
+        0
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -12.8500003814697,
+          4.48000001907349,
+          22
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.30103087425232,
+          0,
+          -0.30103087425232
+        ],
+        [
+          0.602061748504639,
+          0.340000003576279,
+          0.602061748504639
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp02Shade",
+      "position_global": [
+        -12.8500003814697,
+        4.48000001907349,
+        22
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          14.1499996185303,
+          4.30000019073486,
+          -9
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.18999999761581,
+          0,
+          -0.18999999761581
+        ],
+        [
+          0.379999995231628,
+          0.25,
+          0.379999995231628
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp03Lens",
+      "position_global": [
+        14.1499996185303,
+        4.30000019073486,
+        -9
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          13.1083755493164,
+          0,
+          -9.08500003814697
+        ],
+        [
+          1.09652900695801,
+          4.81488800048828,
+          0.170000076293945
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp03Post",
+      "position_global": [
+        0,
+        0,
+        0
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          14.1499996185303,
+          4.48000001907349,
+          -9
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.30103087425232,
+          0,
+          -0.30103087425232
+        ],
+        [
+          0.602061748504639,
+          0.340000003576279,
+          0.602061748504639
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp03Shade",
+      "position_global": [
+        14.1499996185303,
+        4.48000001907349,
+        -9
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -14.3500003814697,
+          4.30000019073486,
+          -46
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.18999999761581,
+          0,
+          -0.18999999761581
+        ],
+        [
+          0.379999995231628,
+          0.25,
+          0.379999995231628
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp04Lens",
+      "position_global": [
+        -14.3500003814697,
+        4.30000019073486,
+        -46
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -15.3916244506836,
+          0,
+          -46.0849990844727
+        ],
+        [
+          1.09652900695801,
+          4.81488800048828,
+          0.169998168945312
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp04Post",
+      "position_global": [
+        0,
+        0,
+        0
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -14.3500003814697,
+          4.48000001907349,
+          -46
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.30103087425232,
+          0,
+          -0.30103087425232
+        ],
+        [
+          0.602061748504639,
+          0.340000003576279,
+          0.602061748504639
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp04Shade",
+      "position_global": [
+        -14.3500003814697,
+        4.48000001907349,
+        -46
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          15.6499996185303,
+          4.30000019073486,
+          -74
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.18999999761581,
+          0,
+          -0.18999999761581
+        ],
+        [
+          0.379999995231628,
+          0.25,
+          0.379999995231628
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp05Lens",
+      "position_global": [
+        15.6499996185303,
+        4.30000019073486,
+        -74
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          14.6083755493164,
+          0,
+          -74.0849990844727
+        ],
+        [
+          1.09652900695801,
+          4.81488800048828,
+          0.169998168945312
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp05Post",
+      "position_global": [
+        0,
+        0,
+        0
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          15.6499996185303,
+          4.48000001907349,
+          -74
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.30103087425232,
+          0,
+          -0.30103087425232
+        ],
+        [
+          0.602061748504639,
+          0.340000003576279,
+          0.602061748504639
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp05Shade",
+      "position_global": [
+        15.6499996185303,
+        4.48000001907349,
+        -74
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -12.8500003814697,
+          4.30000019073486,
+          -112
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.18999999761581,
+          0,
+          -0.18999999761581
+        ],
+        [
+          0.379999995231628,
+          0.25,
+          0.379999995231628
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp06Lens",
+      "position_global": [
+        -12.8500003814697,
+        4.30000019073486,
+        -112
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -13.8916244506836,
+          0,
+          -112.084999084473
+        ],
+        [
+          1.09652900695801,
+          4.81488800048828,
+          0.169998168945312
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp06Post",
+      "position_global": [
+        0,
+        0,
+        0
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -12.8500003814697,
+          4.48000001907349,
+          -112
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.30103087425232,
+          0,
+          -0.30103087425232
+        ],
+        [
+          0.602061748504639,
+          0.340000003576279,
+          0.602061748504639
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp06Shade",
+      "position_global": [
+        -12.8500003814697,
+        4.48000001907349,
+        -112
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          14.1499996185303,
+          4.30000019073486,
+          -151
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.18999999761581,
+          0,
+          -0.18999999761581
+        ],
+        [
+          0.379999995231628,
+          0.25,
+          0.379999995231628
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp07Lens",
+      "position_global": [
+        14.1499996185303,
+        4.30000019073486,
+        -151
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          13.1083755493164,
+          0,
+          -151.085006713867
+        ],
+        [
+          1.09652900695801,
+          4.81488800048828,
+          0.170013427734375
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp07Post",
+      "position_global": [
+        0,
+        0,
+        0
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          14.1499996185303,
+          4.48000001907349,
+          -151
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.30103087425232,
+          0,
+          -0.30103087425232
+        ],
+        [
+          0.602061748504639,
+          0.340000003576279,
+          0.602061748504639
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp07Shade",
+      "position_global": [
+        14.1499996185303,
+        4.48000001907349,
+        -151
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -12.8500003814697,
+          4.30000019073486,
+          -190
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.18999999761581,
+          0,
+          -0.18999999761581
+        ],
+        [
+          0.379999995231628,
+          0.25,
+          0.379999995231628
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp08Lens",
+      "position_global": [
+        -12.8500003814697,
+        4.30000019073486,
+        -190
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -13.8916244506836,
+          0,
+          -190.085006713867
+        ],
+        [
+          1.09652900695801,
+          4.81488800048828,
+          0.170013427734375
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp08Post",
+      "position_global": [
+        0,
+        0,
+        0
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -12.8500003814697,
+          4.48000001907349,
+          -190
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.30103087425232,
+          0,
+          -0.30103087425232
+        ],
+        [
+          0.602061748504639,
+          0.340000003576279,
+          0.602061748504639
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp08Shade",
+      "position_global": [
+        -12.8500003814697,
+        4.48000001907349,
+        -190
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -72.3499984741211,
+          4.30000019073486,
+          -99
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.18999999761581,
+          0,
+          -0.18999999761581
+        ],
+        [
+          0.379999995231628,
+          0.25,
+          0.379999995231628
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp09Lens",
+      "position_global": [
+        -72.3499984741211,
+        4.30000019073486,
+        -99
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -73.3916397094727,
+          0,
+          -99.0849990844727
+        ],
+        [
+          1.09654998779297,
+          4.81488800048828,
+          0.169998168945312
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp09Post",
+      "position_global": [
+        0,
+        0,
+        0
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -72.3499984741211,
+          4.48000001907349,
+          -99
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.30103087425232,
+          0,
+          -0.30103087425232
+        ],
+        [
+          0.602061748504639,
+          0.340000003576279,
+          0.602061748504639
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp09Shade",
+      "position_global": [
+        -72.3499984741211,
+        4.48000001907349,
+        -99
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          73.6500015258789,
+          4.30000019073486,
+          -20
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.18999999761581,
+          0,
+          -0.18999999761581
+        ],
+        [
+          0.379999995231628,
+          0.25,
+          0.379999995231628
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp10Lens",
+      "position_global": [
+        73.6500015258789,
+        4.30000019073486,
+        -20
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          72.6083602905273,
+          0,
+          -20.0849990844727
+        ],
+        [
+          1.09654998779297,
+          4.81488800048828,
+          0.169998168945312
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp10Post",
+      "position_global": [
+        0,
+        0,
+        0
+      ],
       "type": "MeshInstance3D"
     },
     {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          73.6500015258789,
+          4.48000001907349,
+          -20
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.30103087425232,
+          0,
+          -0.30103087425232
+        ],
+        [
+          0.602061748504639,
+          0.340000003576279,
+          0.602061748504639
+        ]
+      ],
       "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp10Shade",
+      "position_global": [
+        73.6500015258789,
+        4.48000001907349,
+        -20
+      ],
       "type": "MeshInstance3D"
     }
   ]
