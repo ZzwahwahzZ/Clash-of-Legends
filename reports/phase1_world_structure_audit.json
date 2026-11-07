@@ -1,0 +1,5596 @@
+{
+  "city_scene": "res://assets/environment/phase1/jianghai/full_city_preview.glb",
+  "counts": {
+    "collision_objects": 0,
+    "collision_shapes": 0,
+    "mesh_instances": 553,
+    "navigation_regions": 0,
+    "static_bodies": 0
+  },
+  "interpretation": "A NavigationRegion3D count of zero means no authored runtime navigation surface was found in the city GLB. A positive count still requires runtime map synchronization and route connectivity tests.",
+  "navigation_nodes": [],
+  "pawnshop_candidate_from_local_offset_0_0_4": [
+    0,
+    0,
+    4
+  ],
+  "pawnshop_hierarchy": [
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "mesh_aabb_local": [],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop",
+      "position_global": [
+        0,
+        0,
+        0
+      ],
+      "position_local": [
+        0,
+        0,
+        0
+      ],
+      "type": "Node3D"
+    },
+    {
+      "global_transform": [
+        [
+          1.58000004291534,
+          0,
+          0
+        ],
+        [
+          0,
+          1.58000004291534,
+          0
+        ],
+        [
+          0,
+          0,
+          1.58000004291534
+        ],
+        [
+          -86,
+          0.180000007152557,
+          -128
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -5.3416576385498,
+          -0.00000435752418,
+          -5.9677038192749
+        ],
+        [
+          10.7321195602417,
+          11.6719532012939,
+          11.167537689209
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/GuangchangClanHall",
+      "position_global": [
+        -86,
+        0.180000007152557,
+        -128
+      ],
+      "position_local": [
+        -86,
+        0.180000007152557,
+        -128
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1.45000004768372,
+          0,
+          0
+        ],
+        [
+          0,
+          -0.00000017285348,
+          1.45000004768372
+        ],
+        [
+          0,
+          -1.45000004768372,
+          -0.00000017285348
+        ],
+        [
+          -90.7200012207031,
+          2.20000004768372,
+          -111.699996948242
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.18610489368439,
+          -0.03700000047684,
+          -0.18302097916603
+        ],
+        [
+          0.37705597281456,
+          0.0740000009536743,
+          0.416265726089478
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/GuangchangPawnshopDangPlaqueText",
+      "position_global": [
+        -90.7200012207031,
+        2.20000004768372,
+        -111.699996948242
+      ],
+      "position_local": [
+        -90.7200012207031,
+        2.20000004768372,
+        -111.699996948242
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          2.20000004768372,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          2.20000004768372
+        ],
+        [
+          0,
+          -2.20000004768372,
+          0
+        ],
+        [
+          -86,
+          4.92000007629395,
+          -109.559997558594
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.67889606952667,
+          -0.03700000047684,
+          -0.14711721241474
+        ],
+        [
+          1.35062336921692,
+          0.0740000009536743,
+          0.330917119979858
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/GuangchangPawnshopSignText",
+      "position_global": [
+        -86,
+        4.92000007629395,
+        -109.559997558594
+      ],
+      "position_local": [
+        -86,
+        4.92000007629395,
+        -109.559997558594
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -86.0018920898438,
+          1.27877640724182,
+          -122.576271057129
+        ]
+      ],
+      "mesh_aabb_local": [],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/JianghaiClanHallDoubleGateAnchor",
+      "position_global": [
+        -86.0018920898438,
+        1.27877640724182,
+        -122.576271057129
+      ],
+      "position_local": [
+        -86.0018920898438,
+        1.27877640724182,
+        -122.576271057129
+      ],
+      "type": "Node3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -86,
+          0.0399999991059303,
+          -114.449996948242
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -4.52842426300049,
+          0.0397979132831097,
+          -2.65926432609558
+        ],
+        [
+          9.06794929504395,
+          0.018478337675333,
+          5.31852388381958
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/JianghaiCleared_PawnshopStorefront",
+      "position_global": [
+        -86,
+        0.0399999991059303,
+        -114.449996948242
+      ],
+      "position_local": [
+        -86,
+        0.0399999991059303,
+        -114.449996948242
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          0,
+          0,
+          -1.05999994277954
+        ],
+        [
+          0,
+          1.05999994277954,
+          0
+        ],
+        [
+          1.05999994277954,
+          0,
+          0
+        ],
+        [
+          -79.1999969482422,
+          0.0299999993294477,
+          -109.699996948242
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.25176423788071,
+          -0.00000000801923,
+          -0.2987077832222
+        ],
+        [
+          0.506405830383301,
+          0.630558490753174,
+          0.598973214626312
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/JianghaiExpansion_PawnshopStool00",
+      "position_global": [
+        -79.1999969482422,
+        0.0299999993294477,
+        -109.699996948242
+      ],
+      "position_local": [
+        -79.1999969482422,
+        0.0299999993294477,
+        -109.699996948242
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          0,
+          0,
+          1.05999994277954
+        ],
+        [
+          0,
+          1.05999994277954,
+          0
+        ],
+        [
+          -1.05999994277954,
+          0,
+          0
+        ],
+        [
+          -77.1999969482422,
+          0.0299999993294477,
+          -109.75
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.25176423788071,
+          -0.00000000801923,
+          -0.2987077832222
+        ],
+        [
+          0.506405830383301,
+          0.630558490753174,
+          0.598973214626312
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/JianghaiExpansion_PawnshopStool01",
+      "position_global": [
+        -77.1999969482422,
+        0.0299999993294477,
+        -109.75
+      ],
+      "position_local": [
+        -77.1999969482422,
+        0.0299999993294477,
+        -109.75
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          -1.05999994277954,
+          0,
+          0.0000000926681380519767
+        ],
+        [
+          0,
+          1.05999994277954,
+          0
+        ],
+        [
+          -0.00000009266814,
+          0,
+          -1.05999994277954
+        ],
+        [
+          -78.1999969482422,
+          0.0299999993294477,
+          -108.779998779297
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.25176423788071,
+          -0.00000000801923,
+          -0.2987077832222
+        ],
+        [
+          0.506405830383301,
+          0.630558490753174,
+          0.598973214626312
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/JianghaiExpansion_PawnshopStool02",
+      "position_global": [
+        -78.1999969482422,
+        0.0299999993294477,
+        -108.779998779297
+      ],
+      "position_local": [
+        -78.1999969482422,
+        0.0299999993294477,
+        -108.779998779297
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1.08929491043091,
+          0,
+          0.153090432286263
+        ],
+        [
+          0,
+          1.10000002384186,
+          0
+        ],
+        [
+          -0.15309043228626,
+          0,
+          1.08929491043091
+        ],
+        [
+          -78.1999969482422,
+          0.0299999993294477,
+          -109.75
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.42154774069786,
+          0,
+          -0.41843044757843
+        ],
+        [
+          0.841314911842346,
+          0.498641043901443,
+          0.835621953010559
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/JianghaiExpansion_PawnshopTeaTable",
+      "position_global": [
+        -78.1999969482422,
+        0.0299999993294477,
+        -109.75
+      ],
+      "position_local": [
+        -78.1999969482422,
+        0.0299999993294477,
+        -109.75
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "mesh_aabb_local": [],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopAuthoredPavilionGate",
+      "position_global": [
+        0,
+        0,
+        0
+      ],
+      "position_local": [
+        0,
+        0,
+        0
+      ],
+      "type": "Node3D"
+    },
+    {
+      "global_transform": [
+        [
+          0.00139377533923835,
+          -0.00069697119761,
+          0.00124373298604041
+        ],
+        [
+          -0.00139377568848,
+          -0.00030004989821,
+          0.00139377522282302
+        ],
+        [
+          -0.00033108014031,
+          -0.00203443993814,
+          -0.00076905149035
+        ],
+        [
+          -90.325813293457,
+          5.14988374710083,
+          -110.047492980957
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -73.2352294921875,
+          0.0000474591652164236,
+          -117.981651306152
+        ],
+        [
+          146.470458984375,
+          227.227874755859,
+          172.518997192383
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopAuthoredPavilionGate/PawnshopAuthoredCanopy_00",
+      "position_global": [
+        -90.325813293457,
+        5.14988374710083,
+        -110.047492980957
+      ],
+      "position_local": [
+        -90.325813293457,
+        5.14988374710083,
+        -110.047492980957
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          0.00139377533923835,
+          0.000696971197612584,
+          -0.00124373298604
+        ],
+        [
+          0.00139377568848431,
+          -0.00030004989821,
+          0.00139377522282302
+        ],
+        [
+          0.000331080140313134,
+          -0.00203443993814,
+          -0.00076905149035
+        ],
+        [
+          -81.6741790771484,
+          5.18461036682129,
+          -110.047492980957
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -73.2352294921875,
+          0.0000474591652164236,
+          -117.981651306152
+        ],
+        [
+          146.470458984375,
+          227.227874755859,
+          172.518997192383
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopAuthoredPavilionGate/PawnshopAuthoredCanopy_01",
+      "position_global": [
+        -81.6741790771484,
+        5.18461036682129,
+        -110.047492980957
+      ],
+      "position_local": [
+        -81.6741790771484,
+        5.18461036682129,
+        -110.047492980957
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          0.00257000001147389,
+          0,
+          0
+        ],
+        [
+          0,
+          0.000000000414848350116515,
+          0.00115999998524785
+        ],
+        [
+          0,
+          -0.00219999998808,
+          0.000000000786781362283051
+        ],
+        [
+          -86,
+          3.94545817375183,
+          -112
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1016.85296630859,
+          1071.27648925781,
+          -100
+        ],
+        [
+          2033.70593261719,
+          57.447021484375,
+          715.804748535156
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopAuthoredPavilionGate/PawnshopAuthoredCanopy_02",
+      "position_global": [
+        -86,
+        3.94545817375183,
+        -112
+      ],
+      "position_local": [
+        -86,
+        3.94545817375183,
+        -112
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          0.00257000001147389,
+          0,
+          0
+        ],
+        [
+          0,
+          0.000000000414848350116515,
+          0.00115999998524785
+        ],
+        [
+          0,
+          -0.00219999998808,
+          0.000000000786781362283051
+        ],
+        [
+          -81.9499969482422,
+          0,
+          -110.723999023438
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -142.638977050781,
+          -142.639083862305,
+          -2036.12194824219
+        ],
+        [
+          285.278198242188,
+          285.278167724609,
+          2036.12194824219
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopAuthoredPavilionGate/PawnshopAuthoredCanopy_03",
+      "position_global": [
+        -81.9499969482422,
+        0,
+        -110.723999023438
+      ],
+      "position_local": [
+        -81.9499969482422,
+        0,
+        -110.723999023438
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          0.00257000001147389,
+          0,
+          0
+        ],
+        [
+          0,
+          0.000000000414848350116515,
+          0.00115999998524785
+        ],
+        [
+          0,
+          -0.00219999998808,
+          0.000000000786781362283051
+        ],
+        [
+          -90.0500030517578,
+          0,
+          -110.723999023438
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -142.638977050781,
+          -142.639083862305,
+          -2036.12194824219
+        ],
+        [
+          285.278198242188,
+          285.278167724609,
+          2036.12194824219
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopAuthoredPavilionGate/PawnshopAuthoredCanopy_04",
+      "position_global": [
+        -90.0500030517578,
+        0,
+        -110.723999023438
+      ],
+      "position_local": [
+        -90.0500030517578,
+        0,
+        -110.723999023438
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          0.00257000001147389,
+          0,
+          0
+        ],
+        [
+          0,
+          0.000000000414848350116515,
+          0.00115999998524785
+        ],
+        [
+          0,
+          -0.00219999998808,
+          0.000000000786781362283051
+        ],
+        [
+          -86,
+          6.57448244094849,
+          -112
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1347.943359375,
+          408.567291259766,
+          296.514770507812
+        ],
+        [
+          2695.88720703125,
+          1103.37255859375,
+          528.472290039062
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopAuthoredPavilionGate/PawnshopAuthoredCanopy_05",
+      "position_global": [
+        -86,
+        6.57448244094849,
+        -112
+      ],
+      "position_local": [
+        -86,
+        6.57448244094849,
+        -112
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          0.00318680005148053,
+          0,
+          0
+        ],
+        [
+          0,
+          0.000000000414848350116515,
+          0.00115999998524785
+        ],
+        [
+          0,
+          -0.00219999998808,
+          0.000000000786781362283051
+        ],
+        [
+          -86,
+          4.89935302734375,
+          -110.723999023438
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1352.75024414062,
+          -78.6606521606445,
+          -77.4656219482422
+        ],
+        [
+          2705.50048828125,
+          157.321304321289,
+          268.322387695312
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopAuthoredPavilionGate/PawnshopAuthoredCanopy_06",
+      "position_global": [
+        -86,
+        4.89935302734375,
+        -110.723999023438
+      ],
+      "position_local": [
+        -86,
+        4.89935302734375,
+        -110.723999023438
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          0.00257000001147389,
+          0,
+          0
+        ],
+        [
+          0,
+          0.000000000414848350116515,
+          0.00115999998524785
+        ],
+        [
+          0,
+          -0.00219999998808,
+          0.000000000786781362283051
+        ],
+        [
+          -86,
+          6.57448244094849,
+          -112
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1624.62707519531,
+          94.3514862060547,
+          79.3830871582031
+        ],
+        [
+          3249.59912109375,
+          1668.73107910156,
+          737.125732421875
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopAuthoredPavilionGate/PawnshopAuthoredCanopy_07",
+      "position_global": [
+        -86,
+        6.57448244094849,
+        -112
+      ],
+      "position_local": [
+        -86,
+        6.57448244094849,
+        -112
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          0.00257000001147389,
+          0,
+          0
+        ],
+        [
+          0,
+          0.000000000414848350116515,
+          0.00115999998524785
+        ],
+        [
+          0,
+          -0.00219999998808,
+          0.000000000786781362283051
+        ],
+        [
+          -86,
+          6.57448244094849,
+          -112
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -383.9091796875,
+          49.9608573913574,
+          125.089668273926
+        ],
+        [
+          768.064331054688,
+          511.552703857422,
+          275.163543701172
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopAuthoredPavilionGate/PawnshopAuthoredCanopy_08",
+      "position_global": [
+        -86,
+        6.57448244094849,
+        -112
+      ],
+      "position_local": [
+        -86,
+        6.57448244094849,
+        -112
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          0.00257000001147389,
+          0,
+          0
+        ],
+        [
+          0,
+          0.000000000414848350116515,
+          0.00115999998524785
+        ],
+        [
+          0,
+          -0.00219999998808,
+          0.000000000786781362283051
+        ],
+        [
+          -86,
+          6.57448244094849,
+          -112
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1066.42956542969,
+          1054.97741699219,
+          626.875915527344
+        ],
+        [
+          2132.85913085938,
+          89.740234375,
+          72.0418090820312
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopAuthoredPavilionGate/PawnshopAuthoredCanopy_09",
+      "position_global": [
+        -86,
+        6.57448244094849,
+        -112
+      ],
+      "position_local": [
+        -86,
+        6.57448244094849,
+        -112
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          0.00139377533923835,
+          0.000696971197612584,
+          -0.00124373298604
+        ],
+        [
+          0.00139377568848431,
+          -0.00030004989821,
+          0.00139377522282302
+        ],
+        [
+          0.000331080140313134,
+          -0.00203443993814,
+          -0.00076905149035
+        ],
+        [
+          -88.8270034790039,
+          4.47946786880493,
+          -110.723999023438
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -223.358245849609,
+          -79.7720336914062,
+          -172.507827758789
+        ],
+        [
+          446.716491699219,
+          159.544067382812,
+          172.507553100586
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopAuthoredPavilionGate/PawnshopAuthoredCanopy_10",
+      "position_global": [
+        -88.8270034790039,
+        4.47946786880493,
+        -110.723999023438
+      ],
+      "position_local": [
+        -88.8270034790039,
+        4.47946786880493,
+        -110.723999023438
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          0.00139377533923835,
+          -0.00069697119761,
+          0.00124373298604041
+        ],
+        [
+          -0.00139377568848,
+          -0.00030004989821,
+          0.00139377522282302
+        ],
+        [
+          -0.00033108014031,
+          -0.00203443993814,
+          -0.00076905149035
+        ],
+        [
+          -83.1729965209961,
+          4.47946786880493,
+          -110.723999023438
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -223.358245849609,
+          -79.7720336914062,
+          -172.507827758789
+        ],
+        [
+          446.716491699219,
+          159.544067382812,
+          172.507553100586
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopAuthoredPavilionGate/PawnshopAuthoredCanopy_11",
+      "position_global": [
+        -83.1729965209961,
+        4.47946786880493,
+        -110.723999023438
+      ],
+      "position_local": [
+        -83.1729965209961,
+        4.47946786880493,
+        -110.723999023438
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          0.00257000001147389,
+          0,
+          0
+        ],
+        [
+          0,
+          0.000000000414848350116515,
+          0.00115999998524785
+        ],
+        [
+          0,
+          -0.00219999998808,
+          0.000000000786781362283051
+        ],
+        [
+          -86,
+          6.57448244094849,
+          -112
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -770.451721191406,
+          473.661285400391,
+          401.84375
+        ],
+        [
+          1540.90344238281,
+          114.771759033203,
+          204.647338867188
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopAuthoredPavilionGate/PawnshopAuthoredCanopy_12",
+      "position_global": [
+        -86,
+        6.57448244094849,
+        -112
+      ],
+      "position_local": [
+        -86,
+        6.57448244094849,
+        -112
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          0.00318680005148053,
+          0,
+          0
+        ],
+        [
+          0,
+          0.000000000414848350116515,
+          0.00115999998524785
+        ],
+        [
+          0,
+          -0.00219999998808,
+          0.000000000786781362283051
+        ],
+        [
+          -86,
+          4.25946807861328,
+          -110.723999023438
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1315.27331542969,
+          -55.5570945739746,
+          -100
+        ],
+        [
+          2630.54663085938,
+          111.114189147949,
+          142.72721862793
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopAuthoredPavilionGate/PawnshopAuthoredCanopy_13",
+      "position_global": [
+        -86,
+        4.25946807861328,
+        -110.723999023438
+      ],
+      "position_local": [
+        -86,
+        4.25946807861328,
+        -110.723999023438
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          0.00257000001147389,
+          0,
+          0
+        ],
+        [
+          0,
+          0.000000000414848350116515,
+          0.00115999998524785
+        ],
+        [
+          0,
+          -0.00219999998808,
+          0.000000000786781362283051
+        ],
+        [
+          -86,
+          6.57448244094849,
+          -112
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1503.81665039062,
+          1061.80090332031,
+          597.835571289062
+        ],
+        [
+          3007.63330078125,
+          642.425170898438,
+          238.028137207031
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopAuthoredPavilionGate/PawnshopAuthoredCanopy_14",
+      "position_global": [
+        -86,
+        6.57448244094849,
+        -112
+      ],
+      "position_local": [
+        -86,
+        6.57448244094849,
+        -112
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          0.96670001745224,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -79,
+          0.0299999993294477,
+          -111.860000610352
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.92000007629395,
+          0.453000009059906,
+          -0.21440011262894
+        ],
+        [
+          0.840000152587891,
+          1.68463826179504,
+          0.254874378442764
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopAuthoredWing_East_F0_C0_Insert",
+      "position_global": [
+        -79,
+        0.0299999993294477,
+        -111.860000610352
+      ],
+      "position_local": [
+        -79,
+        0.0299999993294477,
+        -111.860000610352
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          0.96670001745224,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -79,
+          0.0299999993294477,
+          -111.860000610352
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -3.00000047683716,
+          0,
+          -0.18000012636185
+        ],
+        [
+          3.00000047683716,
+          3.00000047683716,
+          0.180000126361847
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopAuthoredWing_East_F0_C0_Wall",
+      "position_global": [
+        -79,
+        0.0299999993294477,
+        -111.860000610352
+      ],
+      "position_local": [
+        -79,
+        0.0299999993294477,
+        -111.860000610352
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          0.96670001745224,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -76.0999984741211,
+          0.0299999993294477,
+          -111.860000610352
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -2.54000091552734,
+          0,
+          -0.24000000953674
+        ],
+        [
+          2.08000564575195,
+          2.80999970436096,
+          0.440000057220459
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopAuthoredWing_East_F0_C1_Insert",
+      "position_global": [
+        -76.0999984741211,
+        0.0299999993294477,
+        -111.860000610352
+      ],
+      "position_local": [
+        -76.0999984741211,
+        0.0299999993294477,
+        -111.860000610352
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          0.96670001745224,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -76.0999984741211,
+          0.0299999993294477,
+          -111.860000610352
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -3.00000047683716,
+          0,
+          -0.18000015616417
+        ],
+        [
+          3.00000047683716,
+          3.00000047683716,
+          0.180000156164169
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopAuthoredWing_East_F0_C1_Wall",
+      "position_global": [
+        -76.0999984741211,
+        0.0299999993294477,
+        -111.860000610352
+      ],
+      "position_local": [
+        -76.0999984741211,
+        0.0299999993294477,
+        -111.860000610352
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          0.96670001745224,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -73.1999969482422,
+          0.0299999993294477,
+          -111.860000610352
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.92000007629395,
+          0.453000009059906,
+          -0.21440011262894
+        ],
+        [
+          0.840000152587891,
+          1.68463826179504,
+          0.254874378442764
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopAuthoredWing_East_F0_C2_Insert",
+      "position_global": [
+        -73.1999969482422,
+        0.0299999993294477,
+        -111.860000610352
+      ],
+      "position_local": [
+        -73.1999969482422,
+        0.0299999993294477,
+        -111.860000610352
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          0.96670001745224,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -73.1999969482422,
+          0.0299999993294477,
+          -111.860000610352
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -3.00000047683716,
+          0,
+          -0.18000012636185
+        ],
+        [
+          3.00000047683716,
+          3.00000047683716,
+          0.180000126361847
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopAuthoredWing_East_F0_C2_Wall",
+      "position_global": [
+        -73.1999969482422,
+        0.0299999993294477,
+        -111.860000610352
+      ],
+      "position_local": [
+        -73.1999969482422,
+        0.0299999993294477,
+        -111.860000610352
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          0,
+          0,
+          0.96670001745224
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          -1,
+          0,
+          0
+        ],
+        [
+          -73.1999969482422,
+          0.0299999993294477,
+          -111.860000610352
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.92000007629395,
+          0.453000009059906,
+          -0.21440011262894
+        ],
+        [
+          0.840000152587891,
+          1.68463826179504,
+          0.254874378442764
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopAuthoredWing_EastReturn_F0_Insert",
+      "position_global": [
+        -73.1999969482422,
+        0.0299999993294477,
+        -111.860000610352
+      ],
+      "position_local": [
+        -73.1999969482422,
+        0.0299999993294477,
+        -111.860000610352
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          0,
+          0,
+          0.96670001745224
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          -1,
+          0,
+          0
+        ],
+        [
+          -73.1999969482422,
+          0.0299999993294477,
+          -111.860000610352
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -3.00000047683716,
+          0,
+          -0.18000012636185
+        ],
+        [
+          3.00000047683716,
+          3.00000047683716,
+          0.180000126361847
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopAuthoredWing_EastReturn_F0_Wall",
+      "position_global": [
+        -73.1999969482422,
+        0.0299999993294477,
+        -111.860000610352
+      ],
+      "position_local": [
+        -73.1999969482422,
+        0.0299999993294477,
+        -111.860000610352
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          -0.96670001745224,
+          0,
+          0.0000000845115977199384
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          -0.00000008742278,
+          0,
+          -1
+        ],
+        [
+          -93,
+          0.0299999993294477,
+          -111.860000610352
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.92000007629395,
+          0.453000009059906,
+          -0.21440011262894
+        ],
+        [
+          0.840000152587891,
+          1.68463826179504,
+          0.254874378442764
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopAuthoredWing_West_F0_C0_Insert",
+      "position_global": [
+        -93,
+        0.0299999993294477,
+        -111.860000610352
+      ],
+      "position_local": [
+        -93,
+        0.0299999993294477,
+        -111.860000610352
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          -0.96670001745224,
+          0,
+          0.0000000845115977199384
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          -0.00000008742278,
+          0,
+          -1
+        ],
+        [
+          -93,
+          0.0299999993294477,
+          -111.860000610352
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -3.00000047683716,
+          0,
+          -0.18000012636185
+        ],
+        [
+          3.00000047683716,
+          3.00000047683716,
+          0.180000126361847
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopAuthoredWing_West_F0_C0_Wall",
+      "position_global": [
+        -93,
+        0.0299999993294477,
+        -111.860000610352
+      ],
+      "position_local": [
+        -93,
+        0.0299999993294477,
+        -111.860000610352
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          -0.96670001745224,
+          0,
+          0.0000000845115977199384
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          -0.00000008742278,
+          0,
+          -1
+        ],
+        [
+          -95.9000015258789,
+          0.0299999993294477,
+          -111.860000610352
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -2.54000091552734,
+          0,
+          -0.24000000953674
+        ],
+        [
+          2.08000564575195,
+          2.80999970436096,
+          0.440000057220459
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopAuthoredWing_West_F0_C1_Insert",
+      "position_global": [
+        -95.9000015258789,
+        0.0299999993294477,
+        -111.860000610352
+      ],
+      "position_local": [
+        -95.9000015258789,
+        0.0299999993294477,
+        -111.860000610352
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          -0.96670001745224,
+          0,
+          0.0000000845115977199384
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          -0.00000008742278,
+          0,
+          -1
+        ],
+        [
+          -95.9000015258789,
+          0.0299999993294477,
+          -111.860000610352
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -3.00000047683716,
+          0,
+          -0.18000015616417
+        ],
+        [
+          3.00000047683716,
+          3.00000047683716,
+          0.180000156164169
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopAuthoredWing_West_F0_C1_Wall",
+      "position_global": [
+        -95.9000015258789,
+        0.0299999993294477,
+        -111.860000610352
+      ],
+      "position_local": [
+        -95.9000015258789,
+        0.0299999993294477,
+        -111.860000610352
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          -0.96670001745224,
+          0,
+          0.0000000845115977199384
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          -0.00000008742278,
+          0,
+          -1
+        ],
+        [
+          -98.8000030517578,
+          0.0299999993294477,
+          -111.860000610352
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.92000007629395,
+          0.453000009059906,
+          -0.21440011262894
+        ],
+        [
+          0.840000152587891,
+          1.68463826179504,
+          0.254874378442764
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopAuthoredWing_West_F0_C2_Insert",
+      "position_global": [
+        -98.8000030517578,
+        0.0299999993294477,
+        -111.860000610352
+      ],
+      "position_local": [
+        -98.8000030517578,
+        0.0299999993294477,
+        -111.860000610352
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          -0.96670001745224,
+          0,
+          0.0000000845115977199384
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          -0.00000008742278,
+          0,
+          -1
+        ],
+        [
+          -98.8000030517578,
+          0.0299999993294477,
+          -111.860000610352
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -3.00000047683716,
+          0,
+          -0.18000012636185
+        ],
+        [
+          3.00000047683716,
+          3.00000047683716,
+          0.180000126361847
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopAuthoredWing_West_F0_C2_Wall",
+      "position_global": [
+        -98.8000030517578,
+        0.0299999993294477,
+        -111.860000610352
+      ],
+      "position_local": [
+        -98.8000030517578,
+        0.0299999993294477,
+        -111.860000610352
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          0,
+          0,
+          0.96670001745224
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          -1,
+          0,
+          0
+        ],
+        [
+          -98.8000030517578,
+          0.0299999993294477,
+          -111.860000610352
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.92000007629395,
+          0.453000009059906,
+          -0.21440011262894
+        ],
+        [
+          0.840000152587891,
+          1.68463826179504,
+          0.254874378442764
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopAuthoredWing_WestReturn_F0_Insert",
+      "position_global": [
+        -98.8000030517578,
+        0.0299999993294477,
+        -111.860000610352
+      ],
+      "position_local": [
+        -98.8000030517578,
+        0.0299999993294477,
+        -111.860000610352
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          0,
+          0,
+          0.96670001745224
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          -1,
+          0,
+          0
+        ],
+        [
+          -98.8000030517578,
+          0.0299999993294477,
+          -111.860000610352
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -3.00000047683716,
+          0,
+          -0.18000012636185
+        ],
+        [
+          3.00000047683716,
+          3.00000047683716,
+          0.180000126361847
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopAuthoredWing_WestReturn_F0_Wall",
+      "position_global": [
+        -98.8000030517578,
+        0.0299999993294477,
+        -111.860000610352
+      ],
+      "position_local": [
+        -98.8000030517578,
+        0.0299999993294477,
+        -111.860000610352
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -99.5,
+          -0.08500000089407,
+          -137.5
+        ],
+        [
+          27,
+          0.120000004768372,
+          27
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopCourtyardStone",
+      "position_global": [
+        0,
+        0,
+        0
+      ],
+      "position_local": [
+        0,
+        0,
+        0
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.680000007152557,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -74,
+          0,
+          -134.5
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.5,
+          0,
+          -0
+        ],
+        [
+          3,
+          3,
+          0.00000999999974737875
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopEastWall_00",
+      "position_global": [
+        -74,
+        0,
+        -134.5
+      ],
+      "position_local": [
+        -74,
+        0,
+        -134.5
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.680000007152557,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -74,
+          0,
+          -131.5
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.5,
+          0,
+          -0
+        ],
+        [
+          3,
+          3,
+          0.00000999999974737875
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopEastWall_01",
+      "position_global": [
+        -74,
+        0,
+        -131.5
+      ],
+      "position_local": [
+        -74,
+        0,
+        -131.5
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.680000007152557,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -74,
+          0,
+          -128.5
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.5,
+          0,
+          -0
+        ],
+        [
+          3,
+          3,
+          0.00000999999974737875
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopEastWall_02",
+      "position_global": [
+        -74,
+        0,
+        -128.5
+      ],
+      "position_local": [
+        -74,
+        0,
+        -128.5
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.680000007152557,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -74,
+          0,
+          -125.5
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.5,
+          0,
+          -0
+        ],
+        [
+          3,
+          3,
+          0.00000999999974737875
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopEastWall_03",
+      "position_global": [
+        -74,
+        0,
+        -125.5
+      ],
+      "position_local": [
+        -74,
+        0,
+        -125.5
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.680000007152557,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -74,
+          0,
+          -122.5
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.5,
+          0,
+          -0
+        ],
+        [
+          3,
+          3,
+          0.00000999999974737875
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopEastWall_04",
+      "position_global": [
+        -74,
+        0,
+        -122.5
+      ],
+      "position_local": [
+        -74,
+        0,
+        -122.5
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.680000007152557,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -74,
+          0,
+          -119.5
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.5,
+          0,
+          -0
+        ],
+        [
+          3,
+          3,
+          0.00000999999974737875
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopEastWall_05",
+      "position_global": [
+        -74,
+        0,
+        -119.5
+      ],
+      "position_local": [
+        -74,
+        0,
+        -119.5
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.680000007152557,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -74,
+          0,
+          -116.5
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.5,
+          0,
+          -0
+        ],
+        [
+          3,
+          3,
+          0.00000999999974737875
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopEastWall_06",
+      "position_global": [
+        -74,
+        0,
+        -116.5
+      ],
+      "position_local": [
+        -74,
+        0,
+        -116.5
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.680000007152557,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -74,
+          0,
+          -113.5
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.5,
+          0,
+          -0
+        ],
+        [
+          3,
+          3,
+          0.00000999999974737875
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopEastWall_07",
+      "position_global": [
+        -74,
+        0,
+        -113.5
+      ],
+      "position_local": [
+        -74,
+        0,
+        -113.5
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -74,
+          2.04999995231628,
+          -134.5
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.49999833106995,
+          0,
+          -0.08812478929758
+        ],
+        [
+          2.99999666213989,
+          0.12469270080328,
+          0.176249578595161
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopEastWallCap_00",
+      "position_global": [
+        -74,
+        2.04999995231628,
+        -134.5
+      ],
+      "position_local": [
+        -74,
+        2.04999995231628,
+        -134.5
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -74,
+          2.04999995231628,
+          -131.5
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.49999833106995,
+          0,
+          -0.08812478929758
+        ],
+        [
+          2.99999666213989,
+          0.12469270080328,
+          0.176249578595161
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopEastWallCap_01",
+      "position_global": [
+        -74,
+        2.04999995231628,
+        -131.5
+      ],
+      "position_local": [
+        -74,
+        2.04999995231628,
+        -131.5
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -74,
+          2.04999995231628,
+          -128.5
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.49999833106995,
+          0,
+          -0.08812478929758
+        ],
+        [
+          2.99999666213989,
+          0.12469270080328,
+          0.176249578595161
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopEastWallCap_02",
+      "position_global": [
+        -74,
+        2.04999995231628,
+        -128.5
+      ],
+      "position_local": [
+        -74,
+        2.04999995231628,
+        -128.5
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -74,
+          2.04999995231628,
+          -125.5
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.49999833106995,
+          0,
+          -0.08812478929758
+        ],
+        [
+          2.99999666213989,
+          0.12469270080328,
+          0.176249578595161
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopEastWallCap_03",
+      "position_global": [
+        -74,
+        2.04999995231628,
+        -125.5
+      ],
+      "position_local": [
+        -74,
+        2.04999995231628,
+        -125.5
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -74,
+          2.04999995231628,
+          -122.5
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.49999833106995,
+          0,
+          -0.08812478929758
+        ],
+        [
+          2.99999666213989,
+          0.12469270080328,
+          0.176249578595161
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopEastWallCap_04",
+      "position_global": [
+        -74,
+        2.04999995231628,
+        -122.5
+      ],
+      "position_local": [
+        -74,
+        2.04999995231628,
+        -122.5
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -74,
+          2.04999995231628,
+          -119.5
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.49999833106995,
+          0,
+          -0.08812478929758
+        ],
+        [
+          2.99999666213989,
+          0.12469270080328,
+          0.176249578595161
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopEastWallCap_05",
+      "position_global": [
+        -74,
+        2.04999995231628,
+        -119.5
+      ],
+      "position_local": [
+        -74,
+        2.04999995231628,
+        -119.5
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -74,
+          2.04999995231628,
+          -116.5
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.49999833106995,
+          0,
+          -0.08812478929758
+        ],
+        [
+          2.99999666213989,
+          0.12469270080328,
+          0.176249578595161
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopEastWallCap_06",
+      "position_global": [
+        -74,
+        2.04999995231628,
+        -116.5
+      ],
+      "position_local": [
+        -74,
+        2.04999995231628,
+        -116.5
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -74,
+          2.04999995231628,
+          -113.5
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.49999833106995,
+          0,
+          -0.08812478929758
+        ],
+        [
+          2.99999666213989,
+          0.12469270080328,
+          0.176249578595161
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopEastWallCap_07",
+      "position_global": [
+        -74,
+        2.04999995231628,
+        -113.5
+      ],
+      "position_local": [
+        -74,
+        2.04999995231628,
+        -113.5
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -86,
+          0,
+          -111.985000610352
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1,
+          0,
+          -0.22558006644249
+        ],
+        [
+          2,
+          3.00000047683716,
+          0.22558020055294
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopEntryFacade_DoorFrame",
+      "position_global": [
+        -86,
+        0,
+        -111.985000610352
+      ],
+      "position_local": [
+        -86,
+        0,
+        -111.985000610352
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1.60000002384186,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -83.4000015258789,
+          0,
+          -112
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1,
+          0,
+          -0.2000000923872
+        ],
+        [
+          2,
+          1.00000011920929,
+          0.20001009106636
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopEntryFacade_Wall_East_00",
+      "position_global": [
+        -83.4000015258789,
+        0,
+        -112
+      ],
+      "position_local": [
+        -83.4000015258789,
+        0,
+        -112
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1.60000002384186,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -83.4000015258789,
+          1,
+          -112
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1,
+          0,
+          -0.2000000923872
+        ],
+        [
+          2,
+          1.00000011920929,
+          0.20001009106636
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopEntryFacade_Wall_East_01",
+      "position_global": [
+        -83.4000015258789,
+        1,
+        -112
+      ],
+      "position_local": [
+        -83.4000015258789,
+        1,
+        -112
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1.60000002384186,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -83.4000015258789,
+          2,
+          -112
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1,
+          0,
+          -0.2000000923872
+        ],
+        [
+          2,
+          1.00000011920929,
+          0.20001009106636
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopEntryFacade_Wall_East_02",
+      "position_global": [
+        -83.4000015258789,
+        2,
+        -112
+      ],
+      "position_local": [
+        -83.4000015258789,
+        2,
+        -112
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1.60000002384186,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -83.4000015258789,
+          3,
+          -112
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1,
+          0,
+          -0.2000000923872
+        ],
+        [
+          2,
+          1.00000011920929,
+          0.20001009106636
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopEntryFacade_Wall_East_03",
+      "position_global": [
+        -83.4000015258789,
+        3,
+        -112
+      ],
+      "position_local": [
+        -83.4000015258789,
+        3,
+        -112
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -86,
+          3,
+          -112
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1,
+          0,
+          -0.2000000923872
+        ],
+        [
+          2,
+          1.00000011920929,
+          0.20001009106636
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopEntryFacade_Wall_Lintel",
+      "position_global": [
+        -86,
+        3,
+        -112
+      ],
+      "position_local": [
+        -86,
+        3,
+        -112
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1.60000002384186,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -88.5999984741211,
+          0,
+          -112
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1,
+          0,
+          -0.2000000923872
+        ],
+        [
+          2,
+          1.00000011920929,
+          0.20001009106636
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopEntryFacade_Wall_West_00",
+      "position_global": [
+        -88.5999984741211,
+        0,
+        -112
+      ],
+      "position_local": [
+        -88.5999984741211,
+        0,
+        -112
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1.60000002384186,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -88.5999984741211,
+          1,
+          -112
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1,
+          0,
+          -0.2000000923872
+        ],
+        [
+          2,
+          1.00000011920929,
+          0.20001009106636
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopEntryFacade_Wall_West_01",
+      "position_global": [
+        -88.5999984741211,
+        1,
+        -112
+      ],
+      "position_local": [
+        -88.5999984741211,
+        1,
+        -112
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1.60000002384186,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -88.5999984741211,
+          2,
+          -112
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1,
+          0,
+          -0.2000000923872
+        ],
+        [
+          2,
+          1.00000011920929,
+          0.20001009106636
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopEntryFacade_Wall_West_02",
+      "position_global": [
+        -88.5999984741211,
+        2,
+        -112
+      ],
+      "position_local": [
+        -88.5999984741211,
+        2,
+        -112
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1.60000002384186,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -88.5999984741211,
+          3,
+          -112
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1,
+          0,
+          -0.2000000923872
+        ],
+        [
+          2,
+          1.00000011920929,
+          0.20001009106636
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopEntryFacade_Wall_West_03",
+      "position_global": [
+        -88.5999984741211,
+        3,
+        -112
+      ],
+      "position_local": [
+        -88.5999984741211,
+        3,
+        -112
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          4.65000009536743,
+          0,
+          0
+        ],
+        [
+          0,
+          4.65000009536743,
+          0
+        ],
+        [
+          0,
+          0,
+          4.65000009536743
+        ],
+        [
+          -81.4499969482422,
+          0.0599999986588955,
+          -109.699996948242
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.1081026121974,
+          0.0000870512958499603,
+          -0.12821972370148
+        ],
+        [
+          0.216893196105957,
+          0.32750216126442,
+          0.256504416465759
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopGuardianLionEast",
+      "position_global": [
+        -81.4499969482422,
+        0.0599999986588955,
+        -109.699996948242
+      ],
+      "position_local": [
+        -81.4499969482422,
+        0.0599999986588955,
+        -109.699996948242
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          4.65000009536743,
+          0,
+          0
+        ],
+        [
+          0,
+          4.65000009536743,
+          0
+        ],
+        [
+          0,
+          0,
+          4.65000009536743
+        ],
+        [
+          -90.5500030517578,
+          0.0599999986588955,
+          -109.699996948242
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.1081026121974,
+          0.0000870512958499603,
+          -0.12821972370148
+        ],
+        [
+          0.216893196105957,
+          0.32750216126442,
+          0.256504416465759
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopGuardianLionWest",
+      "position_global": [
+        -90.5500030517578,
+        0.0599999986588955,
+        -109.699996948242
+      ],
+      "position_local": [
+        -90.5500030517578,
+        0.0599999986588955,
+        -109.699996948242
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          2.65000009536743,
+          0,
+          0
+        ],
+        [
+          0,
+          2.65000009536743,
+          0
+        ],
+        [
+          0,
+          0,
+          2.65000009536743
+        ],
+        [
+          -90.120002746582,
+          4.57999992370605,
+          -110.480003356934
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.12504599988461,
+          -0.00482084229589,
+          -0.12504586577415
+        ],
+        [
+          0.250099003314972,
+          0.349963426589966,
+          0.250099003314972
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopLantern00",
+      "position_global": [
+        -90.120002746582,
+        4.57999992370605,
+        -110.480003356934
+      ],
+      "position_local": [
+        -90.120002746582,
+        4.57999992370605,
+        -110.480003356934
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          2.65000009536743,
+          0,
+          0
+        ],
+        [
+          0,
+          2.65000009536743,
+          0
+        ],
+        [
+          0,
+          0,
+          2.65000009536743
+        ],
+        [
+          -81.879997253418,
+          4.57999992370605,
+          -110.480003356934
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.12504599988461,
+          -0.00482084229589,
+          -0.12504586577415
+        ],
+        [
+          0.250099003314972,
+          0.349963426589966,
+          0.250099003314972
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopLantern01",
+      "position_global": [
+        -81.879997253418,
+        4.57999992370605,
+        -110.480003356934
+      ],
+      "position_local": [
+        -81.879997253418,
+        4.57999992370605,
+        -110.480003356934
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          3,
+          0,
+          0
+        ],
+        [
+          0,
+          3,
+          0
+        ],
+        [
+          0,
+          0,
+          3
+        ],
+        [
+          -96,
+          4.19999980926514,
+          -129
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.12504599988461,
+          -0.00482084229589,
+          -0.12504586577415
+        ],
+        [
+          0.250099003314972,
+          0.349963426589966,
+          0.250099003314972
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopLantern02",
+      "position_global": [
+        -96,
+        4.19999980926514,
+        -129
+      ],
+      "position_local": [
+        -96,
+        4.19999980926514,
+        -129
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          3,
+          0,
+          0
+        ],
+        [
+          0,
+          3,
+          0
+        ],
+        [
+          0,
+          0,
+          3
+        ],
+        [
+          -76,
+          4.19999980926514,
+          -129
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.12504599988461,
+          -0.00482084229589,
+          -0.12504586577415
+        ],
+        [
+          0.250099003314972,
+          0.349963426589966,
+          0.250099003314972
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopLantern03",
+      "position_global": [
+        -76,
+        4.19999980926514,
+        -129
+      ],
+      "position_local": [
+        -76,
+        4.19999980926514,
+        -129
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          3,
+          0,
+          0
+        ],
+        [
+          0,
+          3,
+          0
+        ],
+        [
+          0,
+          0,
+          3
+        ],
+        [
+          -92,
+          4.5,
+          -120
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.12504599988461,
+          -0.00482084229589,
+          -0.12504586577415
+        ],
+        [
+          0.250099003314972,
+          0.349963426589966,
+          0.250099003314972
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopLantern04",
+      "position_global": [
+        -92,
+        4.5,
+        -120
+      ],
+      "position_local": [
+        -92,
+        4.5,
+        -120
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          3,
+          0,
+          0
+        ],
+        [
+          0,
+          3,
+          0
+        ],
+        [
+          0,
+          0,
+          3
+        ],
+        [
+          -80,
+          4.5,
+          -120
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -0.12504599988461,
+          -0.00482084229589,
+          -0.12504586577415
+        ],
+        [
+          0.250099003314972,
+          0.349963426589966,
+          0.250099003314972
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopLantern05",
+      "position_global": [
+        -80,
+        4.5,
+        -120
+      ],
+      "position_local": [
+        -80,
+        4.5,
+        -120
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.680000007152557,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -96.5,
+          0,
+          -136
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.5,
+          0,
+          -0
+        ],
+        [
+          3,
+          3,
+          0.00000999999974737875
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopNorthWall_00",
+      "position_global": [
+        -96.5,
+        0,
+        -136
+      ],
+      "position_local": [
+        -96.5,
+        0,
+        -136
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.680000007152557,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -93.5,
+          0,
+          -136
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.5,
+          0,
+          -0
+        ],
+        [
+          3,
+          3,
+          0.00000999999974737875
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopNorthWall_01",
+      "position_global": [
+        -93.5,
+        0,
+        -136
+      ],
+      "position_local": [
+        -93.5,
+        0,
+        -136
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.680000007152557,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -90.5,
+          0,
+          -136
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.5,
+          0,
+          -0
+        ],
+        [
+          3,
+          3,
+          0.00000999999974737875
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopNorthWall_02",
+      "position_global": [
+        -90.5,
+        0,
+        -136
+      ],
+      "position_local": [
+        -90.5,
+        0,
+        -136
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.680000007152557,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -87.5,
+          0,
+          -136
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.5,
+          0,
+          -0
+        ],
+        [
+          3,
+          3,
+          0.00000999999974737875
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopNorthWall_03",
+      "position_global": [
+        -87.5,
+        0,
+        -136
+      ],
+      "position_local": [
+        -87.5,
+        0,
+        -136
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.680000007152557,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -84.5,
+          0,
+          -136
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.5,
+          0,
+          -0
+        ],
+        [
+          3,
+          3,
+          0.00000999999974737875
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopNorthWall_04",
+      "position_global": [
+        -84.5,
+        0,
+        -136
+      ],
+      "position_local": [
+        -84.5,
+        0,
+        -136
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.680000007152557,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -81.5,
+          0,
+          -136
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.5,
+          0,
+          -0
+        ],
+        [
+          3,
+          3,
+          0.00000999999974737875
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopNorthWall_05",
+      "position_global": [
+        -81.5,
+        0,
+        -136
+      ],
+      "position_local": [
+        -81.5,
+        0,
+        -136
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.680000007152557,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -78.5,
+          0,
+          -136
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.5,
+          0,
+          -0
+        ],
+        [
+          3,
+          3,
+          0.00000999999974737875
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopNorthWall_06",
+      "position_global": [
+        -78.5,
+        0,
+        -136
+      ],
+      "position_local": [
+        -78.5,
+        0,
+        -136
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.680000007152557,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -75.5,
+          0,
+          -136
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.5,
+          0,
+          -0
+        ],
+        [
+          3,
+          3,
+          0.00000999999974737875
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopNorthWall_07",
+      "position_global": [
+        -75.5,
+        0,
+        -136
+      ],
+      "position_local": [
+        -75.5,
+        0,
+        -136
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -96.5,
+          2.04999995231628,
+          -136
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.49999833106995,
+          0,
+          -0.08812478929758
+        ],
+        [
+          2.99999666213989,
+          0.12469270080328,
+          0.176249578595161
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopNorthWallCap_00",
+      "position_global": [
+        -96.5,
+        2.04999995231628,
+        -136
+      ],
+      "position_local": [
+        -96.5,
+        2.04999995231628,
+        -136
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -93.5,
+          2.04999995231628,
+          -136
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.49999833106995,
+          0,
+          -0.08812478929758
+        ],
+        [
+          2.99999666213989,
+          0.12469270080328,
+          0.176249578595161
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopNorthWallCap_01",
+      "position_global": [
+        -93.5,
+        2.04999995231628,
+        -136
+      ],
+      "position_local": [
+        -93.5,
+        2.04999995231628,
+        -136
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -90.5,
+          2.04999995231628,
+          -136
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.49999833106995,
+          0,
+          -0.08812478929758
+        ],
+        [
+          2.99999666213989,
+          0.12469270080328,
+          0.176249578595161
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopNorthWallCap_02",
+      "position_global": [
+        -90.5,
+        2.04999995231628,
+        -136
+      ],
+      "position_local": [
+        -90.5,
+        2.04999995231628,
+        -136
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -87.5,
+          2.04999995231628,
+          -136
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.49999833106995,
+          0,
+          -0.08812478929758
+        ],
+        [
+          2.99999666213989,
+          0.12469270080328,
+          0.176249578595161
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopNorthWallCap_03",
+      "position_global": [
+        -87.5,
+        2.04999995231628,
+        -136
+      ],
+      "position_local": [
+        -87.5,
+        2.04999995231628,
+        -136
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -84.5,
+          2.04999995231628,
+          -136
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.49999833106995,
+          0,
+          -0.08812478929758
+        ],
+        [
+          2.99999666213989,
+          0.12469270080328,
+          0.176249578595161
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopNorthWallCap_04",
+      "position_global": [
+        -84.5,
+        2.04999995231628,
+        -136
+      ],
+      "position_local": [
+        -84.5,
+        2.04999995231628,
+        -136
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -81.5,
+          2.04999995231628,
+          -136
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.49999833106995,
+          0,
+          -0.08812478929758
+        ],
+        [
+          2.99999666213989,
+          0.12469270080328,
+          0.176249578595161
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopNorthWallCap_05",
+      "position_global": [
+        -81.5,
+        2.04999995231628,
+        -136
+      ],
+      "position_local": [
+        -81.5,
+        2.04999995231628,
+        -136
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -78.5,
+          2.04999995231628,
+          -136
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.49999833106995,
+          0,
+          -0.08812478929758
+        ],
+        [
+          2.99999666213989,
+          0.12469270080328,
+          0.176249578595161
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopNorthWallCap_06",
+      "position_global": [
+        -78.5,
+        2.04999995231628,
+        -136
+      ],
+      "position_local": [
+        -78.5,
+        2.04999995231628,
+        -136
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -75.5,
+          2.04999995231628,
+          -136
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.49999833106995,
+          0,
+          -0.08812478929758
+        ],
+        [
+          2.99999666213989,
+          0.12469270080328,
+          0.176249578595161
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopNorthWallCap_07",
+      "position_global": [
+        -75.5,
+        2.04999995231628,
+        -136
+      ],
+      "position_local": [
+        -75.5,
+        2.04999995231628,
+        -136
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -97.0086135864258,
+          5.46522998809814,
+          -114.034317016602
+        ],
+        [
+          11.0154647827148,
+          1.56934690475464,
+          2.06884002685547
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopPowerDrop",
+      "position_global": [
+        0,
+        0,
+        0
+      ],
+      "position_local": [
+        0,
+        0,
+        0
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.680000007152557,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -98,
+          0,
+          -134.5
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.5,
+          0,
+          -0
+        ],
+        [
+          3,
+          3,
+          0.00000999999974737875
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopWestWall_00",
+      "position_global": [
+        -98,
+        0,
+        -134.5
+      ],
+      "position_local": [
+        -98,
+        0,
+        -134.5
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.680000007152557,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -98,
+          0,
+          -131.5
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.5,
+          0,
+          -0
+        ],
+        [
+          3,
+          3,
+          0.00000999999974737875
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopWestWall_01",
+      "position_global": [
+        -98,
+        0,
+        -131.5
+      ],
+      "position_local": [
+        -98,
+        0,
+        -131.5
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.680000007152557,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -98,
+          0,
+          -128.5
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.5,
+          0,
+          -0
+        ],
+        [
+          3,
+          3,
+          0.00000999999974737875
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopWestWall_02",
+      "position_global": [
+        -98,
+        0,
+        -128.5
+      ],
+      "position_local": [
+        -98,
+        0,
+        -128.5
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.680000007152557,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -98,
+          0,
+          -125.5
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.5,
+          0,
+          -0
+        ],
+        [
+          3,
+          3,
+          0.00000999999974737875
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopWestWall_03",
+      "position_global": [
+        -98,
+        0,
+        -125.5
+      ],
+      "position_local": [
+        -98,
+        0,
+        -125.5
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.680000007152557,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -98,
+          0,
+          -122.5
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.5,
+          0,
+          -0
+        ],
+        [
+          3,
+          3,
+          0.00000999999974737875
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopWestWall_04",
+      "position_global": [
+        -98,
+        0,
+        -122.5
+      ],
+      "position_local": [
+        -98,
+        0,
+        -122.5
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.680000007152557,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -98,
+          0,
+          -119.5
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.5,
+          0,
+          -0
+        ],
+        [
+          3,
+          3,
+          0.00000999999974737875
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopWestWall_05",
+      "position_global": [
+        -98,
+        0,
+        -119.5
+      ],
+      "position_local": [
+        -98,
+        0,
+        -119.5
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.680000007152557,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -98,
+          0,
+          -116.5
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.5,
+          0,
+          -0
+        ],
+        [
+          3,
+          3,
+          0.00000999999974737875
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopWestWall_06",
+      "position_global": [
+        -98,
+        0,
+        -116.5
+      ],
+      "position_local": [
+        -98,
+        0,
+        -116.5
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.680000007152557,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -98,
+          0,
+          -113.5
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.5,
+          0,
+          -0
+        ],
+        [
+          3,
+          3,
+          0.00000999999974737875
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopWestWall_07",
+      "position_global": [
+        -98,
+        0,
+        -113.5
+      ],
+      "position_local": [
+        -98,
+        0,
+        -113.5
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -98,
+          2.04999995231628,
+          -134.5
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.49999833106995,
+          0,
+          -0.08812478929758
+        ],
+        [
+          2.99999666213989,
+          0.12469270080328,
+          0.176249578595161
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopWestWallCap_00",
+      "position_global": [
+        -98,
+        2.04999995231628,
+        -134.5
+      ],
+      "position_local": [
+        -98,
+        2.04999995231628,
+        -134.5
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -98,
+          2.04999995231628,
+          -131.5
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.49999833106995,
+          0,
+          -0.08812478929758
+        ],
+        [
+          2.99999666213989,
+          0.12469270080328,
+          0.176249578595161
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopWestWallCap_01",
+      "position_global": [
+        -98,
+        2.04999995231628,
+        -131.5
+      ],
+      "position_local": [
+        -98,
+        2.04999995231628,
+        -131.5
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -98,
+          2.04999995231628,
+          -128.5
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.49999833106995,
+          0,
+          -0.08812478929758
+        ],
+        [
+          2.99999666213989,
+          0.12469270080328,
+          0.176249578595161
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopWestWallCap_02",
+      "position_global": [
+        -98,
+        2.04999995231628,
+        -128.5
+      ],
+      "position_local": [
+        -98,
+        2.04999995231628,
+        -128.5
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -98,
+          2.04999995231628,
+          -125.5
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.49999833106995,
+          0,
+          -0.08812478929758
+        ],
+        [
+          2.99999666213989,
+          0.12469270080328,
+          0.176249578595161
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopWestWallCap_03",
+      "position_global": [
+        -98,
+        2.04999995231628,
+        -125.5
+      ],
+      "position_local": [
+        -98,
+        2.04999995231628,
+        -125.5
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -98,
+          2.04999995231628,
+          -122.5
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.49999833106995,
+          0,
+          -0.08812478929758
+        ],
+        [
+          2.99999666213989,
+          0.12469270080328,
+          0.176249578595161
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopWestWallCap_04",
+      "position_global": [
+        -98,
+        2.04999995231628,
+        -122.5
+      ],
+      "position_local": [
+        -98,
+        2.04999995231628,
+        -122.5
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -98,
+          2.04999995231628,
+          -119.5
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.49999833106995,
+          0,
+          -0.08812478929758
+        ],
+        [
+          2.99999666213989,
+          0.12469270080328,
+          0.176249578595161
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopWestWallCap_05",
+      "position_global": [
+        -98,
+        2.04999995231628,
+        -119.5
+      ],
+      "position_local": [
+        -98,
+        2.04999995231628,
+        -119.5
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -98,
+          2.04999995231628,
+          -116.5
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.49999833106995,
+          0,
+          -0.08812478929758
+        ],
+        [
+          2.99999666213989,
+          0.12469270080328,
+          0.176249578595161
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopWestWallCap_06",
+      "position_global": [
+        -98,
+        2.04999995231628,
+        -116.5
+      ],
+      "position_local": [
+        -98,
+        2.04999995231628,
+        -116.5
+      ],
+      "type": "MeshInstance3D"
+    },
+    {
+      "global_transform": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          -98,
+          2.04999995231628,
+          -113.5
+        ]
+      ],
+      "mesh_aabb_local": [
+        [
+          -1.49999833106995,
+          0,
+          -0.08812478929758
+        ],
+        [
+          2.99999666213989,
+          0.12469270080328,
+          0.176249578595161
+        ]
+      ],
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop/PawnshopWestWallCap_07",
+      "position_global": [
+        -98,
+        2.04999995231628,
+        -113.5
+      ],
+      "position_local": [
+        -98,
+        2.04999995231628,
+        -113.5
+      ],
+      "type": "MeshInstance3D"
+    }
+  ],
+  "pawnshop_parent_found": true,
+  "pawnshop_parent_global_transform": [
+    [
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0
+    ]
+  ],
+  "pawnshop_parent_path": "/root/full_city_preview/JianghaiOldCityAuthoredScene/GuangchangPawnshop",
+  "street_network_nodes": [
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork",
+      "type": "Node3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/CentralAvenue",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/CentralAvenueCurbE",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/CentralAvenueCurbW",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/CrossStreetCurb-106_3",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/CrossStreetCurb-13_8",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/CrossStreetCurb-29_4",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/CrossStreetCurb-90_5",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/ExtractionInnerRing",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/ExtractionOuterRing",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/ExtractionSquare",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/FactoryApproach",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/LaneMark-115",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/LaneMark-133",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/LaneMark-151",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/LaneMark-169",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/LaneMark-187",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/LaneMark-205",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/LaneMark-25",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/LaneMark-43",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/LaneMark-7",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/LaneMark-79",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/LaneMark-97",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/LaneMark11",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/LaneMark29",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/LaneMark47",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/LaneMark65",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/LaneMark83",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/Manhole00",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/Manhole01",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/Manhole02",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/Manhole03",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/NorthCrossStreet",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/PawnshopApproach",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/RainPuddle00",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/RainPuddle01",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/RainPuddle02",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/RainPuddle03",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/RainPuddle04",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/RainPuddle05",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/RainPuddle06",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/RiverWardStreet",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/SouthCrossStreet",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp00Lens",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp00Post",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp00Shade",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp01Lens",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp01Post",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp01Shade",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp02Lens",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp02Post",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp02Shade",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp03Lens",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp03Post",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp03Shade",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp04Lens",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp04Post",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp04Shade",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp05Lens",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp05Post",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp05Shade",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp06Lens",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp06Post",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp06Shade",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp07Lens",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp07Post",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp07Shade",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp08Lens",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp08Post",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp08Shade",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp09Lens",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp09Post",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp09Shade",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp10Lens",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp10Post",
+      "type": "MeshInstance3D"
+    },
+    {
+      "path": "/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/StreetLamp10Shade",
+      "type": "MeshInstance3D"
+    }
+  ]
+}
