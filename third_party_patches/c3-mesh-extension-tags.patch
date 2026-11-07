@@ -1,8 +1,7 @@
 diff --git a/crates/sandbox-data/src/c3/mesh.rs b/crates/sandbox-data/src/c3/mesh.rs
-index 0000000..0000000 100644
 --- a/crates/sandbox-data/src/c3/mesh.rs
 +++ b/crates/sandbox-data/src/c3/mesh.rs
-@@
+@@ -122,13 +122,34 @@
 -        if reader.remaining() >= 4 && reader.peek_exact(4)? == b"STEP" {
 -            reader.skip(12)?;
 -        }
@@ -53,7 +52,7 @@ index 0000000..0000000 100644
          if reader.remaining() != 0 {
              return Err(invalid(format!(
                  "mesh {name} has {} unparsed bytes",
-@@
+@@ -260,6 +281,50 @@
  mod tests {
      use super::*;
      use crate::c3::{C3Motion, MotionKey};
