@@ -185,7 +185,9 @@ func _save_world_scene() -> int:
 		static_body.owner = root
 		collision_shape.owner = root
 		_walkable_collision_count += 1
+	_add_approved_urban_infill(city_instance)
 	_add_building_obstacle_collisions(city_instance, root)
+	_add_infill_obstacle_collisions(city_instance, root)
 	_add_market_bridge_rail_collisions(city_instance, root)
 	var navigation_region := NavigationRegion3D.new()
 	navigation_region.name = "CuratedNavigationRegion"
@@ -200,6 +202,83 @@ func _save_world_scene() -> int:
 	var save_error := ResourceSaver.save(packed_world, WORLD_SCENE_PATH)
 	root.free()
 	return save_error
+
+func _add_approved_urban_infill(city_instance: Node3D) -> void:
+	# Four candidates passed the transformed-AABB audit: no authored-building
+	# or street-network overlap. Reuse the exact source meshes/materials.
+	var district := city_instance.get_node_or_null("JianghaiOldCityAuthoredScene/JianghaiTenementDistrict") as Node3D
+	if district == null:
+		push_error("Urban infill rejected: JianghaiTenementDistrict is missing.")
+		return
+	var placements := [
+		{"name": "Integrated_WestMidShop", "template": "JianghaiDensity_EastInfill02", "x": -70.0, "z": -62.0, "scale": 0.92},
+		{"name": "Integrated_EastMidShop", "template": "JianghaiDensity_WestInfill02", "x": 70.0, "z": -62.0, "scale": 0.92},
+		{"name": "Integrated_EastSouthArcade", "template": "JianghaiDensity_EastInfill03", "x": 52.0, "z": -145.0, "scale": 1.05},
+		{"name": "Integrated_EastSouthHall", "template": "JianghaiDensity_WestInfill04", "x": 70.0, "z": -145.0, "scale": 0.88}
+	]
+	var added := 0
+	for placement in placements:
+		var template := city_instance.find_child(str(placement["template"]), true, false) as Node3D
+		if template == null:
+			push_error("Urban infill source template missing: " + str(placement["template"]))
+			continue
+		var clone := template.duplicate() as Node3D
+		if clone == null:
+			push_error("Urban infill clone failed: " + str(placement["name"]))
+			continue
+		clone.name = str(placement["name"])
+		district.add_child(clone)
+		clone.transform = template.transform
+		clone.position = Vector3(float(placement["x"]), template.position.y, float(placement["z"]))
+		clone.scale = template.scale * float(placement["scale"])
+		clone.owner = city_instance
+		for child in clone.get_children():
+			if child is Node:
+				child.owner = city_instance
+		added += 1
+	print("PHASE1 APPROVED URBAN INFILL: integrated ", added, "/", placements.size(), " source-matched buildings")
+	if added != placements.size():
+		push_error("Urban infill integration incomplete: expected four approved placements.")
+
+func _add_infill_obstacle_collisions(city_instance: Node3D, scene_root: Node3D) -> void:
+	var infill_names := ["Integrated_WestMidShop", "Integrated_EastMidShop", "Integrated_EastSouthArcade", "Integrated_EastSouthHall"]
+	var total_shapes := 0
+	for building_name in infill_names:
+		var building := city_instance.find_child(building_name, true, false) as Node3D
+		if building == null:
+			push_error("Missing integrated infill building for collision: " + building_name)
+			continue
+		var body := StaticBody3D.new()
+		body.name = building_name + "_Collision"
+		body.collision_layer = 1
+		body.collision_mask = 0
+		body.transform = _transform_relative_to(city_instance, building)
+		scene_root.add_child(body)
+		body.owner = scene_root
+		var building_shapes := 0
+		for mesh_node in building.find_children("*", "MeshInstance3D", true, false):
+			var mesh_instance := mesh_node as MeshInstance3D
+			if mesh_instance == null or mesh_instance.mesh == null:
+				continue
+			var mesh_name := str(mesh_instance.name)
+			if not mesh_name.to_lower().contains("wall"):
+				continue
+			if mesh_name.contains("Cap") or mesh_name.contains("DoorFrame") or mesh_name.contains("Lintel"):
+				continue
+			var shape := mesh_instance.mesh.create_trimesh_shape()
+			if shape == null:
+				continue
+			var collision := CollisionShape3D.new()
+			collision.name = mesh_name + "_Collision"
+			collision.shape = shape
+			collision.transform = _transform_relative_to(building, mesh_instance)
+			body.add_child(collision)
+			collision.owner = scene_root
+			building_shapes += 1
+		total_shapes += building_shapes
+		if building_shapes == 0:
+			push_warning("No named wall meshes found for infill collision: " + building_name)
+	print("PHASE1 URBAN INFILL COLLISION SHAPES: ", total_shapes)
 
 func _add_building_obstacle_collisions(city_instance: Node3D, scene_root: Node3D) -> void:
 	# Keep each building's collision in a single StaticBody with per-wall
