@@ -12,16 +12,50 @@ from pathlib import Path
 def load(path: Path):
     return json.loads(path.read_text(encoding="utf-8"))
 
+def parse_ini_records(path: Path):
+    records, current = {}, None
+    if not path.is_file():
+        raise SystemExit(f"Arabic quest source is missing: {path}")
+    for line in path.read_text(encoding="utf-8-sig", errors="replace").splitlines():
+        value = line.strip()
+        if not value or value.startswith((";", "#", "//")):
+            continue
+        if value.startswith("[") and "]" in value:
+            current = {}
+            records[value[1:value.index("]")].strip()] = current
+        elif current is not None and "=" in value:
+            key, raw = value.split("=", 1)
+            current[key.strip()] = raw.strip()
+    by_id = {}
+    for row in records.values():
+        mission_id = str(row.get("MissionId", "")).strip()
+        if mission_id:
+            by_id.setdefault(mission_id, row)
+    return by_id
+
+def parse_localized_endpoint(raw: str):
+    parts = str(raw or "").split(",", 5)
+    if len(parts) != 6:
+        return {"raw": str(raw or ""), "status": "UNPARSED"}
+    return {
+        "npc_id": parts[0].strip(), "map_id": parts[1].strip(),
+        "x_raw": parts[2].strip(), "y_raw": parts[3].strip(),
+        "npc_name_ar": parts[4].strip(), "map_name_ar": parts[5].strip(),
+        "raw": str(raw), "status": "SOURCE_LOCALIZED_TEXT",
+    }
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--catalog", type=Path, required=True)
     ap.add_argument("--analysis", type=Path, required=True)
     ap.add_argument("--world-links", type=Path, required=True)
+    ap.add_argument("--arabic-questinfo", type=Path, required=True)
     ap.add_argument("--output", type=Path, required=True)
     a = ap.parse_args()
     src = load(a.catalog)
     analysis = load(a.analysis)
     world_links = load(a.world_links)
+    arabic_records = parse_ini_records(a.arabic_questinfo)
     ar_names = {str(x.get("mission_id")): x.get("name_ar", "") for x in analysis.get("missions", [])}
     rows, duplicates = {}, []
     for raw in src.get("mission_catalog", []):
@@ -34,10 +68,17 @@ def main():
         begin = raw.get("begin_npc") or {}
         finish = raw.get("finish_npc") or {}
         intentions = raw.get("intentions") or []
+        ar = arabic_records.get(mid, {})
         rows[mid] = {
             "id": mid,
             "name": str(raw.get("name", "")),
-            "name_ar": str(ar_names.get(mid, "")),
+            "name_ar": str(ar.get("Name", ar_names.get(mid, ""))),
+            "intention_description_ar": str(ar.get("IntentionDesp", "")),
+            "content_ar": str(ar.get("Content", "")),
+            "prize_raw_ar": str(ar.get("Prize", "")),
+            "begin_npc_ar": parse_localized_endpoint(ar.get("BeginNpcId", "")),
+            "finish_npc_ar": parse_localized_endpoint(ar.get("FinishNpcId", "")),
+            "intentions_ar": [str(value) for key, value in ar.items() if key.startswith("Intention")],
             "type_id": str(raw.get("type_id", "")),
             "big_type_id": str(raw.get("big_type_id", "")),
             "level_min": raw.get("level_min"),
@@ -173,6 +214,8 @@ def main():
     a.output.write_text(json.dumps(output, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
     assert len(rows) == 2509, f"Expected 2509 unique source missions, got {len(rows)}"
     assert len(output["maps"]) == 413, f"Expected 413 map index records, got {len(output['maps'])}"
+    assert rows["650"]["name_ar"] == "تاجر الملابس الحربية", "Arabic mission 650 localization was not imported"
+    assert rows["650"]["finish_npc_ar"]["npc_name_ar"] == "تاجر الملابس الحربية"
     assert len(source_city_hubs) == 6 and len(npc_placements) == 881, "Source city/NPC placement evidence count mismatch"
     assert len(output["duplicate_mission_ids"]) == 1 and output["duplicate_mission_ids"][0] == "3938"
     print(f"Imported {len(rows)} unique missions, {len(output['maps'])} map IDs; duplicate IDs: {output['duplicate_mission_ids']}; bytes={a.output.stat().st_size}")
