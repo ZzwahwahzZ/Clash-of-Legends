@@ -235,7 +235,7 @@ def main():
         if not any(mark in decoded_script for mark in ("local function","function ","SCRIPT_DIALOG_TEXT","LuaScriptMgr_")):continue
         script_source_count+=1
         rel=str(script_path.relative_to(root))
-        function_names=set(re.findall(r"(?:local\\s+)?function\\s+([A-Za-z_][A-Za-z0-9_:]*)",decoded_script))
+        function_names=set(re.findall(r"(?:local\s+)?function\s+([A-Za-z_][A-Za-z0-9_:]*)",decoded_script))
         for function_name in function_names:script_function_index[function_name].append(rel)
     for ref in lua_refs:
         function_name=ref.get("script_function","")
