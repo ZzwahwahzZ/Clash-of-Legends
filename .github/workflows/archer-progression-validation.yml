@@ -1,0 +1,43 @@
+name: Archer Promotion and Dual-Form Regression
+
+on:
+  push:
+    branches:
+      - stage/phase1-world-assets
+    paths:
+      - "scripts/progression/ClassProgressionManager.gd"
+      - "tools/quality/validate_archer_progression.gd"
+      - ".github/workflows/archer-progression-validation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  archer-progression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Godot 4.3
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.3.0
+          use-dotnet: false
+          include-templates: false
+      - name: Import project and detect script errors
+        run: |
+          set -o pipefail
+          godot --headless --editor --path . --quit 2>&1 | tee import.log
+          if grep -Eq "SCRIPT ERROR:|Parse Error:|Compile Error:|ERROR: Failed to load script|ERROR: Failed to create an autoload" import.log; then
+            echo "Project import emitted script or autoload errors"
+            exit 1
+          fi
+      - name: Validate Archer promotion gate, form switching and save/load
+        run: |
+          set -o pipefail
+          godot --headless --path . --script tools/quality/validate_archer_progression.gd --quit-after 5 2>&1 | tee archer-progression.log
+          grep -q "ARCHER PROGRESSION PASSED" archer-progression.log
+          if grep -Eq "SCRIPT ERROR:|Parse Error:|Compile Error:|ARCHER PROGRESSION FAILED" archer-progression.log; then
+            echo "Archer progression regression test failed"
+            exit 1
+          fi
