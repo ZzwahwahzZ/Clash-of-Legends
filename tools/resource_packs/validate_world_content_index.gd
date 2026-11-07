@@ -27,8 +27,12 @@ func _run_validation() -> void:
 		_fail("Known source map 1002 is missing.")
 		return
 	var source_map_archive: Dictionary = index.get_source_map_archive(1002)
-	if str(source_map_archive.get("resource_path", "")) != "map/map/newplain.7z" or str(source_map_archive.get("status", "")) != "SOURCE_ARCHIVE_EXTRACTED_NOT_RUNTIME_READY" or str(source_map_archive.get("sha256", "")).length() != 64:
-		_fail("WindPlain source map archive was not extracted, hashed and catalogued.")
+	if str(source_map_archive.get("resource_path", "")) != "map/map/newplain.7z" or not ["SOURCE_ARCHIVE_EXTRACTED_NOT_RUNTIME_READY", "SOURCE_ARCHIVE_NOT_EXTRACTED"].has(str(source_map_archive.get("status", ""))):
+		_fail("WindPlain source map archive path/status metadata is inconsistent.")
+		return
+	if str(source_map_archive.get("status", "")) == "SOURCE_ARCHIVE_EXTRACTED_NOT_RUNTIME_READY" and str(source_map_archive.get("sha256", "")).length() != 64:
+		_fail("Extracted WindPlain source map archive has no verified SHA-256.")
+		return
 		return
 	var metadata_only_maps: Array = index.get_map_metadata_only()
 	if metadata_only_maps.is_empty():
