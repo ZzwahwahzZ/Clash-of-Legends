@@ -73,9 +73,13 @@ func _run() -> void:
 	for route_id in runtime_route_targets:
 		var route_target: Vector3 = runtime_route_targets[route_id]
 		navigation_agent.target_position = NavigationServer3D.map_get_closest_point(navigation_map, route_target)
-		for _sync_frame in range(3):
+		var runtime_path: PackedVector3Array = PackedVector3Array()
+		for _sync_frame in range(5):
 			await physics_frame
-		var runtime_path := navigation_agent.get_current_navigation_path()
+			# NavigationAgent3D advances its path cache when this is queried
+			# during physics processing; waiting alone leaves the path empty.
+			navigation_agent.get_next_path_position()
+			runtime_path = navigation_agent.get_current_navigation_path()
 		runtime_route_checks.append({
 			"route": route_id,
 			"waypoint_count": runtime_path.size(),
