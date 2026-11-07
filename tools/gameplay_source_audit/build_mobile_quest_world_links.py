@@ -129,6 +129,9 @@ def main():
         for s in sections(read_text(npcx_path)):
             if s["fields"].get("Name"):npcx_names[s["fields"]["Name"].casefold()].append(s["section"])
 
+    slotnpc_path=root/"ini/slotnpc.ini"
+    slotnpc_sections=sections(read_text(slotnpc_path)) if slotnpc_path.is_file() else []
+    slotnpc_field_names=sorted({k for s in slotnpc_sections for k in s["fields"]})
     mapdest_path=root/"ini/mapdestination.ini"
     mapdest=defaultdict(list); mapdest_ids=set()
     if mapdest_path.is_file():
@@ -308,6 +311,7 @@ def main():
             "mapdestination_same_npc_map_matches":same_npc_map,"mapdestination_exact_coordinate_matches":exact_matches,
             "mapdestination_coordinate_conflicts":same_npc_map-exact_matches},
         "map_linkage":map_summary,
+        "slotnpc_metadata":{"record_count":len(slotnpc_sections),"field_names":slotnpc_field_names,"contains_world_coordinates":any(k.lower() in ("mapid","map_id","posx","posy","x","y") for k in slotnpc_field_names)},
         "dialogue_linkage":{"dialogue_flow_count":len(dialogue_blocks),"arabic_dialogue_text_key_count":len(ar_text),
             "mission_ids_with_dialogue_flows":len(mission_dialogue),
             "matched_dialogue_flow_count":sum(len(x["dialogues"]) for x in mission_dialogue),
@@ -316,7 +320,7 @@ def main():
             "client_realm_task_decoded_script_count":len(scene_scripts),"scripts":scene_scripts},
         "mob_reference_count":len(mob_refs),"item_requirement_reference_count":len(item_refs),"lua_script_reference_count":len(lua_refs),"lua_script_source_files_parsed":script_source_count,"lua_script_function_match_references":sum(bool(r.get("script_function_matches")) for r in lua_refs),"lua_npc_name_match_references":sum(bool(r.get("npc_type_name_matches") or r.get("npcx_name_matches")) for r in lua_refs),
         "source_hashes":[{"path":str(p.relative_to(root)),"size_bytes":p.stat().st_size,"sha256":hashlib.sha256(p.read_bytes()).hexdigest()}
-            for p in [qpath,npc_type_path,npcx_path,mapdest_path,root/"ini/gamemap.dat",gmex_path,dlg_path,text_path,registry_path] if p.is_file()],
+            for p in [qpath,npc_type_path,npcx_path,mapdest_path,root/"ini/gamemap.dat",gmex_path,slotnpc_path,dlg_path,text_path,registry_path] if p.is_file()],
         "npc_placements":npc_placements,"location_only_references":location_only_references,"prerequisite_references":prereq_refs,"npc_references":npc_refs,"map_references":map_refs,"mob_references":mob_refs,"item_references":item_refs,"lua_script_references":lua_refs,
         "gamemap_catalog":gamemap,
     }
