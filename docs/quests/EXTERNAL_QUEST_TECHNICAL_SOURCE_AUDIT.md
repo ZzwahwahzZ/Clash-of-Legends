@@ -66,3 +66,51 @@ These are official Mobile event-guide pages, distinct from the permanent Quests 
 - Search only legally accessible client resources and public source packages; verify package identity, version/build, hashes and provenance before decoding.
 - Compare any recovered Mobile evidence with the same activity in current Mobile guides and observed client behavior.
 - Keep PC/classic sources as corroborating technical analogues unless the Mobile build itself confirms compatibility.
+
+
+## C. Direct Mobile quest catalogue evidence — base APK, build 1.1.2.3
+
+The Run 57 artifact contains an Apktool-decoded copy of the exact base APK resource:
+`assets/ConquerRes/ini/questinfo.ini`, with parallel locale files under `ini_ar/` and `ini_sp/`. This is direct client data, not a PC guide or a web-derived quest list.
+
+### C.1 Structural counts (catalogue records, not verified playable quest count)
+
+| Locale | Declared total | Numeric sections | Unique MissionId values | Duplicate-ID collisions |
+|---|---:|---:|---:|---:|
+| English | 2,510 | 2,510 | 2,509 | 1 |
+| Arabic | 2,480 | 2,480 | 2,479 | 1 |
+| Spanish | 2,531 | 2,531 | 2,456 | 75 |
+
+Source SHA-256:
+- English: `adb61b7175830e1b3ec29cce413f71cdedbbcb24f2fcdec36496291c2dd539b1`
+- Arabic: `d60c1e2e982012b099b1ba3877084b89b0046ef869d716fc4b7a555b49f39c07`
+- Spanish: `d96af837d64e6cb5b34ac0960eb28df9ddea13a141b471a65d13bc5b6dfac203`
+
+English category distribution by `TypeId`: Main Quests 505; Important Quests 71; Daily Quests 869; Adventure 797; Class Quests 18; Festival (TypeId 8) 155; Festival (TypeId 9) 93; unlabelled TypeId 99: 2. The header defines 11 TypeIds, but Types 4, 7, 10 and 11 have no English records in this file. Arabic and Spanish record counts differ and must not be silently padded or merged.
+
+### C.2 Fields and what the file actually establishes
+
+Every English record has `MissionId`, `Name`, `TypeId`, `Prequest`, `Map`, `IntentAmount`, `Content` and `Prize` keys; values may still be empty. `BeginNpcId` exists in 2,476 records and `FinishNpcId` in 2,475. `Intention1` is present in 2,506 records; later intention fields are progressively sparse (Intention2: 187; Intention3: 91; Intention4: 32; Intention5: 9; Intention6: 5; Intention7: 4; Intention8–10: 2 each). `Prize` has a non-empty value in 673 records and `IntentionDesp` in 812. `AutoLuaCmd` occurs in 388 records.
+
+The English `Map` field is `0` in 2,469 records, `1002` in 40, and `1036` in 1. Therefore Map=0 is not a usable destination and must not be interpreted as Twin City or as a valid route. NPC endpoint strings are composite values (for example, ID/map/coordinates/name/region fields); parse them only after their component order and coordinate semantics are independently validated.
+
+### C.3 Data-integrity findings
+
+- English and Arabic each contain one repeated MissionId: `3938`, appearing in numeric sections 357 and 473 (both titled “Conquest of Nether” in English). Preserve both source rows until client selection semantics are known.
+- Spanish has 75 additional duplicate-ID collisions, mostly festival records repeated at separate section positions. It also has a distinct MissionId set from English and Arabic.
+- English vs Arabic: 2,473 shared IDs; 36 English-only and 6 Arabic-only.
+- English vs Spanish: 2,449 shared IDs; 60 English-only and 7 Spanish-only.
+- The same TypeId labels are not semantically stable across locales: for example, English TypeId 4 is “Equipment Bonus” while Arabic TypeId 4 is labelled “عيد الأضحى”; English TypeId 6 is “Class Quests” while Arabic labels it “عداء”. Treat this as a localization/data-version defect candidate, not as permission to rewrite the client taxonomy.
+
+### C.4 Admission gate
+
+This INI is now a high-value source for the quest catalogue and gives direct evidence for IDs, names, type IDs, level bounds, prerequisite expressions, endpoint declarations, objective text, and some reward strings. It does **not** by itself establish that every row is a currently playable quest, how the client evaluates every field, the full NPC dialogue tree, the meaning of every composite NPC field, or the runtime effects of Lua commands.
+
+No runtime quest definitions are approved from this file alone. Keep all rows research-only until:
+1. the base APK and all three split APK components have been audited;
+2. duplicate and cross-locale mismatches have been resolved against client behavior;
+3. encrypted `luacfg/questinfo.dat`, `taskitem_info.dat`, NPC dialogue tables and task scripts have been decoded with a Mobile-specific verified method;
+4. NPC/map IDs and coordinates have been cross-checked against the same build's map and NPC source tables;
+5. objectives, state transitions and rewards have been corroborated against client code/data.
+
+The repeatable aggregate parser is `tools/gameplay_source_audit/parse_questinfo_catalogues.py`. It emits hashes, structural counts, field-presence counts and locale ID-set differences only; it does not commit the quest text or full proprietary records.
