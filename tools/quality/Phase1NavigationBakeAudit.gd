@@ -18,7 +18,13 @@ const WALKABLE_PATHS := [
 	"JianghaiOldCityAuthoredScene/OldCityMarketBridge/MarketEastRamp",
 	"JianghaiOldCityAuthoredScene/OldCityMarketBridge/MarketWestRamp"
 ]
-const ANCHORS := {
+const NPC_SPAWN_CANDIDATES := {
+	"npc_jianghai_pawnshop": Vector3(-86.0, -0.078, -101.0),
+	"npc_jianghai_innkeeper": Vector3(-8.7, -0.14, -34.5),
+	"npc_jianghai_apothecary": Vector3(13.0, -0.045, -48.0),
+	"npc_jianghai_tea_merchant": Vector3(8.7, -0.14, -8.0)
+}
+const ANCHORS :=
 	"jianghai.central_avenue": Vector3(0.0, -0.14, -60.0),
 	"jianghai.pawnshop_approach": Vector3(-86.0, -0.078, -106.0),
 	"jianghai.factory_approach": Vector3(86.0, -0.078, -12.0),
@@ -123,6 +129,24 @@ func _validate_navigation_after_sync() -> void:
 			"projection_valid": projection_distance <= 6.0
 		})
 
+	var spawn_rows: Array[Dictionary] = []
+	var spawn_projection_pass_count := 0
+	for npc_id in NPC_SPAWN_CANDIDATES:
+		var spawn_source: Vector3 = NPC_SPAWN_CANDIDATES[npc_id]
+		var spawn_projected := NavigationServer3D.map_get_closest_point(navigation_map, spawn_source)
+		var spawn_distance := spawn_projected.distance_to(spawn_source)
+		var spawn_valid := spawn_distance <= 1.0
+		if spawn_valid:
+			spawn_projection_pass_count += 1
+		spawn_rows.append({
+			"npc_id": npc_id,
+			"source_position": _vec(spawn_source),
+			"projected_position": _vec(spawn_projected),
+			"projection_distance": spawn_distance,
+			"projection_valid": spawn_valid,
+			"collision_clearance_validated": false
+		})
+
 	var route_pairs := [
 		["jianghai.central_avenue", "jianghai.pawnshop_approach"],
 		["jianghai.central_avenue", "jianghai.factory_approach"],
@@ -176,6 +200,8 @@ func _validate_navigation_after_sync() -> void:
 		"vertex_count": _navigation_mesh.get_vertices().size(),
 		"navigation_map_valid": navigation_map.is_valid(),
 		"anchor_projections": anchor_rows,
+		"npc_spawn_projections": spawn_rows,
+		"npc_spawn_projection_pass_count": spawn_projection_pass_count,
 		"route_connectivity": route_rows,
 		"projection_pass_count": valid_projections,
 		"route_connectivity_pass_count": connected_routes,
@@ -193,6 +219,8 @@ func _validate_navigation_after_sync() -> void:
 	if valid_projections != ANCHORS.size():
 		_fail("One or more task anchors are too far from the curated walkable surfaces.")
 		return
+	if spawn_projection_pass_count != NPC_SPAWN_CANDIDATES.size():
+		push_warning("One or more deferred NPC spawn points are outside the curated walkable surfaces.")
 	if connected_routes != route_pairs.size():
 		push_warning("Navigation bake completed, but route connectivity has gaps. Keep NPC spawning disabled until routes are repaired.")
 	else:
