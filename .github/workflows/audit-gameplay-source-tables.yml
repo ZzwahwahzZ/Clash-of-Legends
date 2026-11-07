@@ -16,6 +16,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
+
       - name: Download and verify the exact mobile source archive
         run: |
           set -euo pipefail
@@ -24,6 +25,7 @@ jobs:
             "https://github.com/ZzwahwahzZ/Conquer-Mobile-Assets./releases/download/mobile-extracted-assets/extracted-assets-001.zip" \
             -o build/source/extracted-assets-001.zip
           echo "0d21a110c09b762ed5f1a5f4da022857b0534e489eb85052d15da460cb229d2a  build/source/extracted-assets-001.zip" | sha256sum -c -
+
       - name: Install specialized Android and binary analysis tools
         run: |
           set -euo pipefail
@@ -44,22 +46,35 @@ jobs:
           apktool --version
           jadx --version
           androguard --version || true
-          python3 -m py_compile tools/gameplay_source_audit/comprehensive_asset_inventory.py tools/gameplay_source_audit/audit_source_tables.py tools/gameplay_source_audit/quest_source_extractor.py tools/gameplay_source_audit/androguard_deep_analysis.py tools/gameplay_source_audit/parse_questinfo_ini.py
+          python3 -m py_compile \
+            tools/gameplay_source_audit/comprehensive_asset_inventory.py \
+            tools/gameplay_source_audit/audit_source_tables.py \
+            tools/gameplay_source_audit/quest_source_extractor.py \
+            tools/gameplay_source_audit/parse_questinfo_ini.py \
+            tools/gameplay_source_audit/parse_questinfo_catalogues.py \
+            tools/gameplay_source_audit/androguard_deep_analysis.py
+
       - name: Recursively inventory every archive member by content
         run: |
+          set -euo pipefail
           python3 tools/gameplay_source_audit/comprehensive_asset_inventory.py \
             build/source/extracted-assets-001.zip \
             --output reports/comprehensive-asset-inventory.json \
             --polyfile-report reports/polyfile-mobile.sbud.json
           python3 -m json.tool reports/comprehensive-asset-inventory.json > /dev/null
+
       - name: Inventory and parse safe source fields
         run: |
+          set -euo pipefail
           python3 tools/gameplay_source_audit/audit_source_tables.py \
             build/source/extracted-assets-001.zip \
             --lookup-item-ids 500239 \
             --output reports/gameplay-source-table-audit.json
+          python3 -m json.tool reports/gameplay-source-table-audit.json > /dev/null
+
       - name: Extract all Mobile quest, task, NPC, dialogue and action candidates
         run: |
+          set -euo pipefail
           python3 tools/gameplay_source_audit/quest_source_extractor.py \
             build/source/extracted-assets-001.zip \
             --output-dir reports/quest-source-extraction \
@@ -70,6 +85,7 @@ jobs:
             --output reports/quest-source-extraction/questinfo-structural-audit.json \
             --include-record-index
           test -s reports/quest-source-extraction/questinfo-structural-audit.json
+
       - name: Analyze all four exact APK components with Androguard, Apktool and JADX
         run: |
           set -euo pipefail
@@ -131,104 +147,9 @@ jobs:
               echo "NO_STANDARD_DEX_ENTRIES" > "reports/android-analysis/$base.jadx.log"
             fi
           done
-          python3 tools/gameplay_source_audit/parse_questinfo_catalogues.py --conquerres-root reports/android-analysis/00-ConquerOnline-1.1.2.3.apktool/assets/ConquerRes --output reports/android-analysis/questinfo-catalogue-audit.json
-          python3 tools/gameplay_source_audit/androguard_deep_analysis.py --apk-dir build/apks --output-dir reports/android-analysis
-          python3 - <<'PY'
-          import json
-          from pathlib import Path
-          root=Path("reports/android-analysis")
-          out={"tools":{"androguard":"4.1.4","apktool":True,"jadx":True},"apk_components":[]}
-          for p in sorted(Path("build/apks").glob("*.apk")):
-            base=p.stem
-            dec=root/(base+".jadx")
-            resources=root/(base+".apktool")
-            out["apk_components"].append({
-              "apk":p.name,"size_bytes":p.stat().st_size,
-              "androguard_report":(root/(base+".androguard.txt")).exists(),
-              "apktool_decoded":resources.exists(),
-              "jadx_decompiled":dec.exists(),
-              "java_source_files":sum(1 for _ in dec.rglob("*.java")) if dec.exists() else 0,
-              "native_libraries":[str(x.relative_to(resources)) for x in resources.rglob("*.so")] if resources.exists() else []
-            })
-          (root/"android-analysis-summary.json").write_text(json.dumps(out,indent=2)+"\n")
-          print(json.dumps(out,indent=2),flush=True)
-          PY
-      - name: Validate reports and print concise inventory
-        run: |
-          python3 - <<'PY'
-          import json
-          from pathlib import Path
-          q=json.loads(Path("reports/quest-source-extraction.json").read_text(encoding="utf-8"))
-          data=json.loads(Path("reports/gameplay-source-table-audit.json").read_text(encoding="utf-8"))
-          inventory=json.loads(Path("reports/comprehensive-asset-inventory.json").read_text(encoding="utf-8"))
-          android=json.loads(Path("reports/android-analysis/android-analysis-summary.json").read_text(encoding="utf-8"))
-          deep=json.loads(Path("reports/android-analysis/androguard-deep-analysis.json").read_text(encoding="utf-8"))
-          quests=json.loads(Path("reports/android-analysis/questinfo-catalogue-audit.json").read_text(encoding="utf-8"))
-          print("QUEST SOURCE EXTRACTOR:", q["source_version"])
-          print("Expected APKs:", json.dumps(q.get("expected_apk_paths", []), ensure_ascii=False))
-          print("Found APKs:", json.dumps(q.get("mobile_apk_candidates", []), ensure_ascii=False))
-          print("Missing APKs:", json.dumps(q.get("missing_expected_apks", []), ensure_ascii=False))
-          print("APK member counts:", json.dumps(q.get("apk_member_counts", []), ensure_ascii=False))
-          print("Candidate files:", q["candidate_count"])
-          print("Filename matches:", q["filename_match_count"])
-          print("Content/code matches:", q["content_match_count"])
-          print("Extracted files:", q["extracted_file_count"])
-          print("Bundle bytes:", q["output_bundle_size_bytes"])
-          print("Oversize skipped:", len(q["oversize_skipped"]))
-          print("Read errors:", len(q["read_errors"]))
-          print("Version-matched members:", data["version_matched_member_count"])
-          print("Total inventory records:", inventory["total_inventory_records"])
-          print("Android specialized analysis:", json.dumps(android, ensure_ascii=False))
-          print("Androguard deep DEX/XREF summary:", json.dumps({"apk_count":deep["apk_count"],"success_count":len(deep["results"]),"error_count":len(deep["errors"]),"task_string_hits":sum(len(x["quest_task_string_hits"]) for x in deep["results"])}, ensure_ascii=False))
-          print("Questinfo locale catalogue summary:", json.dumps({k:{"declared":v["declared_total"],"records":v["numeric_record_sections"],"unique_ids":v["unique_mission_ids"],"duplicate_ids":len(v["duplicate_mission_ids"])} for k,v in quests["locales"].items()}, ensure_ascii=False))
-          print("Itemtype files/records:", data["itemtype_catalog"]["file_count"], data["itemtype_catalog"]["record_count"])
-          print("Unlabelled column-59 candidates:", data["itemtype_catalog"].get("column_59_candidate_count", 0))
-          for category, value in data["categories"].items():
-              print(category, value["file_count"])
-          candidates = data.get("quest_promotion_candidate_inventory", {})
-          print("Quest/promotion candidate paths:", candidates.get("file_count", 0))
-          print("Archer/promotion text hits:", json.dumps(candidates.get("text_hits", []), ensure_ascii=False))
-          reader = data.get("android_reader_candidate_inventory", {})
-          print("Android DEX/SO/JAR candidates:", reader.get("file_count", 0))
-          print("Android reader string hits:", json.dumps(reader.get("raw_string_hits", []), ensure_ascii=False))
-          PY
-      - name: Upload source table and Android analysis reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: Gameplay-Source-Table-Audit
-          path: |
-            reports/gameplay-source-table-audit.json
-            reports/comprehensive-asset-inventory.json
-            reports/polyfile-mobile-*.json
-            reports/quest-source-extraction.json
-            reports/quest-source-extraction/quest-source-candidates.zip
-            reports/android-analysis/
-          if-no-files-found: error
-          retention-days: 30
- || true)
-            dex_files=()
-            for entry in "${dex_entries[@]}"; do
-              out="$dexdir/$(basename "$entry")"
-              unzip -p "$apk" "$entry" > "$out"
-              if [ -s "$out" ]; then dex_files+=("$out"); fi
-            done
-            printf 'STANDARD_DEX_COUNT=%s\\n' "${#dex_files[@]}" > "reports/android-analysis/$base.dex-inventory.txt"
-            printf '%s\\n' "${dex_entries[@]}" >> "reports/android-analysis/$base.dex-inventory.txt"
-            echo "=== JADX STANDARD DEX DECOMPILE: $base ==="
-            if [ "${#dex_files[@]}" -gt 0 ]; then
-              if jadx --no-res --show-bad-code -d "reports/android-analysis/$base.jadx" "${dex_files[@]}" > "reports/android-analysis/$base.jadx.log" 2>&1; then
-                echo "JADX_OK $base"
-              else
-                rc=$?
-                echo "JADX_EXIT_CODE=$rc (partial sources may still be available)" >> "reports/android-analysis/$base.jadx.log"
-                echo "JADX_PARTIAL_BUT_CONTINUING $base"
-              fi
-            else
-              echo "NO_STANDARD_DEX_ENTRIES" > "reports/android-analysis/$base.jadx.log"
-            fi
-            find "reports/android-analysis/$base.jadx" -type f \( -name '*.java' -o -name '*.kt' \) 2>/dev/null | wc -l
-          done
+          python3 tools/gameplay_source_audit/parse_questinfo_catalogues.py \
+            --conquerres-root reports/android-analysis/00-ConquerOnline-1.1.2.3.apktool/assets/ConquerRes \
+            --output reports/android-analysis/questinfo-catalogue-audit.json
           python3 tools/gameplay_source_audit/androguard_deep_analysis.py \
             --apk-dir build/apks \
             --output-dir reports/android-analysis
@@ -249,45 +170,38 @@ jobs:
               "java_source_files":sum(1 for _ in dec.rglob("*.java")) if dec.exists() else 0,
               "native_libraries":[str(x.relative_to(resources)) for x in resources.rglob("*.so")] if resources.exists() else []
             })
-          (root/"android-analysis-summary.json").write_text(json.dumps(out,indent=2)+"\n")
-          print(json.dumps(out,indent=2))
+          (root/"android-analysis-summary.json").write_text(json.dumps(out,indent=2)+"\\n")
+          print(json.dumps(out,indent=2),flush=True)
           PY
+
       - name: Validate reports and print concise inventory
         run: |
+          set -euo pipefail
           python3 - <<'PY'
           import json
           from pathlib import Path
           q=json.loads(Path("reports/quest-source-extraction.json").read_text(encoding="utf-8"))
           data=json.loads(Path("reports/gameplay-source-table-audit.json").read_text(encoding="utf-8"))
           inventory=json.loads(Path("reports/comprehensive-asset-inventory.json").read_text(encoding="utf-8"))
-          android=json.loads(Path("reports/android-analysis/android-analysis-summary.json").read_text(encoding="utf-8"))\n          deep=json.loads(Path("reports/android-analysis/androguard-deep-analysis.json").read_text(encoding="utf-8"))
+          android=json.loads(Path("reports/android-analysis/android-analysis-summary.json").read_text(encoding="utf-8"))
+          deep=json.loads(Path("reports/android-analysis/androguard-deep-analysis.json").read_text(encoding="utf-8"))
+          quests=json.loads(Path("reports/android-analysis/questinfo-catalogue-audit.json").read_text(encoding="utf-8"))
           print("QUEST SOURCE EXTRACTOR:", q["source_version"])
           print("Expected APKs:", json.dumps(q.get("expected_apk_paths", []), ensure_ascii=False))
-          print("Found APKs:", json.dumps(q.get("mobile_apk_candidates", []), ensure_ascii=False))
           print("Missing APKs:", json.dumps(q.get("missing_expected_apks", []), ensure_ascii=False))
-          print("APK member counts:", json.dumps(q.get("apk_member_counts", []), ensure_ascii=False))
           print("Candidate files:", q["candidate_count"])
           print("Filename matches:", q["filename_match_count"])
           print("Content/code matches:", q["content_match_count"])
-          print("Extracted files:", q["extracted_file_count"])
-          print("Bundle bytes:", q["output_bundle_size_bytes"])
-          print("Oversize skipped:", len(q["oversize_skipped"]))
-          print("Read errors:", len(q["read_errors"]))
           print("Version-matched members:", data["version_matched_member_count"])
           print("Total inventory records:", inventory["total_inventory_records"])
-          print("Android specialized analysis:", json.dumps(android, ensure_ascii=False))
-          print("Androguard deep DEX/XREF summary:", json.dumps({"apk_count":deep["apk_count"],"success_count":len(deep["results"]),"error_count":len(deep["errors"]),"task_string_hits":sum(len(x["quest_task_string_hits"]) for x in deep["results"])}, ensure_ascii=False))
-          print("Itemtype files/records:", data["itemtype_catalog"]["file_count"], data["itemtype_catalog"]["record_count"])
-          print("Unlabelled column-59 candidates:", data["itemtype_catalog"].get("column_59_candidate_count", 0))
-          for category, value in data["categories"].items():
-              print(category, value["file_count"])
-          candidates = data.get("quest_promotion_candidate_inventory", {})
-          print("Quest/promotion candidate paths:", candidates.get("file_count", 0))
-          print("Archer/promotion text hits:", json.dumps(candidates.get("text_hits", []), ensure_ascii=False))
-          reader = data.get("android_reader_candidate_inventory", {})
-          print("Android DEX/SO/JAR candidates:", reader.get("file_count", 0))
-          print("Android reader string hits:", json.dumps(reader.get("raw_string_hits", []), ensure_ascii=False))
+          print("Android APK components:", json.dumps(android["apk_components"], ensure_ascii=False))
+          print("Androguard DEX/XREF:", json.dumps({"apk_count":deep["apk_count"],"success_count":len(deep["results"]),"error_count":len(deep["errors"]),"task_string_hits":sum(len(x["quest_task_string_hits"]) for x in deep["results"])}, ensure_ascii=False))
+          print("Questinfo locales:", json.dumps({k:{"declared":v["declared_total"],"records":v["numeric_record_sections"],"unique_ids":v["unique_mission_ids"],"duplicate_ids":len(v["duplicate_mission_ids"])} for k,v in quests["locales"].items()}, ensure_ascii=False))
           PY
+          python3 -m json.tool reports/android-analysis/android-analysis-summary.json > /dev/null
+          python3 -m json.tool reports/android-analysis/androguard-deep-analysis.json > /dev/null
+          python3 -m json.tool reports/android-analysis/questinfo-catalogue-audit.json > /dev/null
+
       - name: Upload source table and Android analysis reports
         if: always()
         uses: actions/upload-artifact@v4
