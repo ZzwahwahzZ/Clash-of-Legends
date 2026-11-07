@@ -1,7 +1,7 @@
 diff --git a/crates/sandbox-data/src/c3/mesh.rs b/crates/sandbox-data/src/c3/mesh.rs
 --- a/crates/sandbox-data/src/c3/mesh.rs
 +++ b/crates/sandbox-data/src/c3/mesh.rs
-@@ -122,13 +122,34 @@
+@@ -122,16 +122,37 @@
 -        if reader.remaining() >= 4 && reader.peek_exact(4)? == b"STEP" {
 -            reader.skip(12)?;
 -        }
