@@ -327,3 +327,19 @@ A quest cannot be APPROVED if:
 **Internal project gates**
 - `ASSET_REFERENCE_LIBRARY/QUEST_EXTERNAL_EVIDENCE_2026-11-07.md`
 - `ASSET_REFERENCE_LIBRARY/QUEST_SYSTEM_FIDELITY_GATE.md`
+
+
+## 9. Primary playable character — Archer / Oriental Assassin
+
+The player's intended main character is the Archer. Its class progression and all Archer-specific quests are a protected priority, including the level-40 unlock of the reversible Oriental Assassin form. These are two forms of one character, not separate characters or a permanent class replacement. Preserve Archer identity, level, inventory, quest history and learned skills.
+
+Mobile-official references establish:
+- `Path of Shadow` toggles the character into Oriental Assassin form and toggles back to normal Archer form.
+- Assassin form uses the equipped Throwing Knife and cannot use skills that require a Bow.
+- Archer `Fly` and `Scatter` require a Bow.
+- Oriental Assassin skills include Mortal Wound, Kinetic Spark, Blistering Wave, Spirit Focus, Dagger Storm and the Blade Flurry XP skill.
+- The equipment guide lists Bow as a two-handed weapon, Throwing Knife as a one-handed weapon, and Archer-specific headgear/armor.
+
+**Full level-40 promotion quest script, exact NPC/quest/item IDs, dialogue branches and reward payload are not yet verified from the pinned Android client. Do not invent them or claim the questline is complete.**
+
+Detailed preservation, form/equipment compatibility, progression, data-model and acceptance requirements are recorded in [ARCHER_ORIENTAL_ASSASSIN_PROGRESSION_CONTRACT.md](ARCHER_ORIENTAL_ASSASSIN_PROGRESSION_CONTRACT.md).
