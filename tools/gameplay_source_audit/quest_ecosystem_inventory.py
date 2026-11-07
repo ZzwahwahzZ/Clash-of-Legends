@@ -197,7 +197,7 @@ def main() -> int:
         "source_version": VERSION,
         "archive_name": args.archive.name,
         "archive_size_bytes": args.archive.stat().st_size,
-        "archive_sha256": digest(args.archive.read_bytes()),
+        "archive_sha256": digest_file(args.archive),
         "apk_members": apk_members,
         "files_found": len(records),
         "category_file_counts": dict(sorted(by_category.items())),
