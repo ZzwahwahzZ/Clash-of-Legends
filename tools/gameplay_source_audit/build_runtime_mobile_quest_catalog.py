@@ -16,10 +16,12 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--catalog", type=Path, required=True)
     ap.add_argument("--analysis", type=Path, required=True)
+    ap.add_argument("--world-links", type=Path, required=True)
     ap.add_argument("--output", type=Path, required=True)
     a = ap.parse_args()
     src = load(a.catalog)
     analysis = load(a.analysis)
+    world_links = load(a.world_links)
     ar_names = {str(x.get("mission_id")): x.get("name_ar", "") for x in analysis.get("missions", [])}
     rows, duplicates = {}, []
     for raw in src.get("mission_catalog", []):
@@ -118,6 +120,38 @@ def main():
     for hub in city_hubs:
         if not any(str(row.get("map_id")) == hub["map_id"] for row in maps):
             hub["status"] = "SOURCE_CITY_NAME_FOUND_BUT_MAP_RESOURCE_INDEX_MISSING"
+    world_map_names = world_links.get("map_linkage", {}).get("map_id_names", [])
+    map_directory = [{
+        "map_id": str(row.get("map_id", "")),
+        "gamemapex_name": row.get("gamemapex_name"),
+        "resource_path": row.get("gamemap_resource"),
+        "quest_source_names": row.get("quest_source_names", []),
+        "mapdestination_section_count": row.get("mapdestination_section_count", 0),
+        "status": "MAP_RESOURCE_INDEXED" if row.get("gamemap_resource") else "MAP_RESOURCE_MISSING_FROM_INDEX",
+    } for row in world_map_names]
+    npc_placements = world_links.get("npc_placements", [])
+    dialogue_links = world_links.get("dialogue_linkage", {}).get("mission_dialogue_links", [])
+    city_definitions = {
+        "1002": ("TwinCity", "مدينة التوأم", "main"),
+        "1000": ("DesertCity", "مدينة الصحراء", "minor"),
+        "1010": ("BirthVillage", "قرية الميلاد", "minor"),
+        "1011": ("PhoenixCastle", "قلعة العنقاء", "minor"),
+        "1015": ("BirdIsland", "جزيرة الطيور", "minor"),
+        "1020": ("ApeCity", "مدينة القرود", "minor"),
+    }
+    source_city_hubs = []
+    map_by_id = {row["map_id"]: row for row in map_directory}
+    for map_id, (source_name, name_ar, kind) in city_definitions.items():
+        map_row = map_by_id.get(map_id, {})
+        names = map_row.get("quest_source_names", [])
+        source_city_hubs.append({
+            "map_id": map_id, "source_name": source_name, "name_ar": name_ar,
+            "name_en": source_name, "kind": kind,
+            "resource_path": map_row.get("resource_path"),
+            "mapdestination_section_count": map_row.get("mapdestination_section_count", 0),
+            "status": "SOURCE_CITY_AND_MAP_RESOURCE_INDEXED" if map_row.get("resource_path") else "SOURCE_CITY_NAME_FOUND_BUT_MAP_RESOURCE_INDEX_MISSING",
+            "name_evidence": source_name in names,
+        })
     output = {
         "schema_version": "1.0.0",
         "source_version": src.get("source_version", ""),
@@ -129,13 +163,17 @@ def main():
         "map_catalog_status": src.get("gamemap_catalog", {}).get("status", ""),
         "maps": maps,
         "map_names": map_names,
-        "city_hubs": city_hubs,
+        "map_directory": map_directory,
+        "city_hubs": source_city_hubs,
+        "npc_placements": npc_placements,
+        "dialogue_links": dialogue_links,
         "missions": list(rows.values()),
     }
     a.output.parent.mkdir(parents=True, exist_ok=True)
     a.output.write_text(json.dumps(output, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
     assert len(rows) == 2509, f"Expected 2509 unique source missions, got {len(rows)}"
     assert len(output["maps"]) == 413, f"Expected 413 map index records, got {len(output['maps'])}"
+    assert len(source_city_hubs) == 6 and len(npc_placements) == 881, "Source city/NPC placement evidence count mismatch"
     assert len(output["duplicate_mission_ids"]) == 1 and output["duplicate_mission_ids"][0] == "3938"
     print(f"Imported {len(rows)} unique missions, {len(output['maps'])} map IDs; duplicate IDs: {output['duplicate_mission_ids']}; bytes={a.output.stat().st_size}")
 
