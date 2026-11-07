@@ -162,6 +162,38 @@ func _run() -> void:
 		if bool(movement_check["target_reached"]) and bool(movement_check["floor_contact"]):
 			runtime_route_movements_passed += 1
 
+	# Prove an actual west-to-east crossing of the market bridge deck and both ramps.
+	# The centerline keeps the player clear of the guardrails and market stalls.
+	var bridge_cross_start_requested := Vector3(-29.0, 2.0, -126.0)
+	var bridge_cross_target_requested := Vector3(29.0, 2.0, -126.0)
+	var bridge_cross_start := NavigationServer3D.map_get_closest_point(navigation_map, bridge_cross_start_requested)
+	var bridge_cross_target := NavigationServer3D.map_get_closest_point(navigation_map, bridge_cross_target_requested)
+	var bridge_cross_start_projection_distance := bridge_cross_start.distance_to(bridge_cross_start_requested)
+	var bridge_cross_target_projection_distance := bridge_cross_target.distance_to(bridge_cross_target_requested)
+	player.call("clear_movement_target")
+	player.velocity = Vector3.ZERO
+	player.global_position = bridge_cross_start
+	for _reset_frame in range(8):
+		await physics_frame
+	navigation_agent.target_position = bridge_cross_target
+	var bridge_cross_path := PackedVector3Array()
+	for _sync_frame in range(5):
+		await physics_frame
+		navigation_agent.get_next_path_position()
+		bridge_cross_path = navigation_agent.get_current_navigation_path()
+	player.call("move_towards_target_position", bridge_cross_target, 1.0 / 60.0)
+	var bridge_cross_frames := 0
+	for bridge_frame in range(2400):
+		await physics_frame
+		bridge_cross_frames = bridge_frame + 1
+		var bridge_distance := Vector2(player.global_position.x - bridge_cross_target.x, player.global_position.z - bridge_cross_target.z).length()
+		if bridge_distance <= 1.5 or not bool(player.get("is_moving_to_target")):
+			break
+	var bridge_cross_final_position: Vector3 = player.global_position
+	var bridge_cross_distance := Vector2(bridge_cross_final_position.x - bridge_cross_target.x, bridge_cross_final_position.z - bridge_cross_target.z).length()
+	var bridge_cross_floor_contact := player.is_on_floor()
+	var bridge_cross_passed := bridge_cross_path.size() >= 2 and bridge_cross_start_projection_distance <= 2.0 and bridge_cross_target_projection_distance <= 2.0 and bridge_cross_distance <= 1.5 and bridge_cross_floor_contact
+
 	var report := {
 		"world_scene_loaded": true,
 		"pawnshop_doorway_clear": pawnshop_doorway_clear,
@@ -182,6 +214,20 @@ func _run() -> void:
 		"runtime_routes_passed": runtime_routes_passed,
 		"runtime_route_movement_checks": runtime_route_movement_checks,
 		"runtime_route_movements_passed": runtime_route_movements_passed,
+		"market_bridge_crossing": {
+			"start_requested": _vec(bridge_cross_start_requested),
+			"start_projected": _vec(bridge_cross_start),
+			"start_projection_distance": bridge_cross_start_projection_distance,
+			"target_requested": _vec(bridge_cross_target_requested),
+			"target_projected": _vec(bridge_cross_target),
+			"target_projection_distance": bridge_cross_target_projection_distance,
+			"path_waypoint_count": bridge_cross_path.size(),
+			"final_position": _vec(bridge_cross_final_position),
+			"distance_to_target": bridge_cross_distance,
+			"floor_contact": bridge_cross_floor_contact,
+			"frames_used": bridge_cross_frames,
+			"passed": bridge_cross_passed
+		},
 		"start_position": _vec(start_after_settle),
 		"requested_target_position": _vec(TARGET_POSITION),
 		"projected_target_position": _vec(projected_target),
@@ -225,6 +271,16 @@ func _run() -> void:
 		return
 	if runtime_route_movements_passed != runtime_route_targets.size():
 		_fail("Player did not physically reach every tested city landmark: " + JSON.stringify(runtime_route_movement_checks))
+		return
+	if not bridge_cross_passed:
+		_fail("Player could not physically cross the market bridge from west ramp to east ramp: " + JSON.stringify({
+			"path_waypoint_count": bridge_cross_path.size(),
+			"start_projection_distance": bridge_cross_start_projection_distance,
+			"target_projection_distance": bridge_cross_target_projection_distance,
+			"distance_to_target": bridge_cross_distance,
+			"floor_contact": bridge_cross_floor_contact,
+			"final_position": _vec(bridge_cross_final_position)
+		}))
 		return
 	if horizontal_displacement < 8.0 or not target_reached:
 		_fail("Player did not follow the baked navigation path to the hotel frontage.")
