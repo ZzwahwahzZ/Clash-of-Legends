@@ -30,6 +30,7 @@ var attack_anim_timer: float = 0.0
 var input_direction: Vector2 = Vector2.ZERO
 var target_nav_position: Vector3 = Vector3.ZERO
 var is_moving_to_target: bool = false
+var _navigation_target_submitted: bool = false
 var imported_model_animation: AnimationPlayer = null
 var imported_animation_name: String = ""
 var _c3_vat_active: bool = false
@@ -41,6 +42,7 @@ var footstep_timer: float = 0.0
 @onready var camera_pivot: Node3D = $CameraPivot
 @onready var free_camera: FreeCamera3D = $CameraPivot/FreeCamera3D
 @onready var inventory: PlayerInventory = $PlayerInventory
+@onready var navigation_agent: NavigationAgent3D = get_node_or_null("NavigationAgent3D")
 
 # Visual Limb Nodes
 @onready var visual_root: Node3D = get_node_or_null("VisualRoot")
@@ -55,6 +57,12 @@ var footstep_timer: float = 0.0
 @onready var c3_vat_animator: C3VatCharacterAnimator = get_node_or_null("C3VatAnimator")
 
 func _ready() -> void:
+	if navigation_agent:
+		navigation_agent.radius = 0.5
+		navigation_agent.height = 1.8
+		navigation_agent.path_desired_distance = 0.35
+		navigation_agent.target_desired_distance = 0.6
+		navigation_agent.path_max_distance = 2.0
 	if GameManager:
 		GameManager.register_player(self)
 	if ClassProgressionManager:
@@ -317,13 +325,27 @@ func _physics_process(delta: float) -> void:
 		var dir = (right * input_direction.x + forward * -input_direction.y).normalized()
 		move_vec = dir * current_speed
 		is_moving_to_target = false
+		_navigation_target_submitted = false
 	elif is_moving_to_target:
-		var diff = target_nav_position - global_position
-		diff.y = 0.0
-		if diff.length() > 0.6:
-			move_vec = diff.normalized() * current_speed
+		if _has_active_navigation_map():
+			if not _navigation_target_submitted:
+				navigation_agent.target_position = target_nav_position
+				_navigation_target_submitted = true
+			var next_path_position := navigation_agent.get_next_path_position()
+			if navigation_agent.is_navigation_finished():
+				is_moving_to_target = false
+			else:
+				var diff := next_path_position - global_position
+				diff.y = 0.0
+				if diff.length() > 0.12:
+					move_vec = diff.normalized() * current_speed
 		else:
-			is_moving_to_target = false
+			var direct_diff := target_nav_position - global_position
+			direct_diff.y = 0.0
+			if direct_diff.length() > 0.6:
+				move_vec = direct_diff.normalized() * current_speed
+			else:
+				is_moving_to_target = false
 
 	velocity.x = move_vec.x
 	velocity.z = move_vec.z
@@ -377,16 +399,24 @@ func _set_imported_animation_state(state: String) -> void:
 		imported_animation_name = selected
 		imported_model_animation.play(selected)
 
+func _has_active_navigation_map() -> bool:
+	if navigation_agent == null:
+		return false
+	var navigation_map := navigation_agent.get_navigation_map()
+	return navigation_map.is_valid() and NavigationServer3D.map_get_iteration_id(navigation_map) > 0 and not NavigationServer3D.map_get_regions(navigation_map).is_empty()
+
 func set_joystick_input(vec: Vector2) -> void:
 	input_direction = vec
 
 func move_towards_target_position(pos: Vector3, _delta: float) -> void:
 	target_nav_position = pos
 	is_moving_to_target = true
+	_navigation_target_submitted = false
 
 func clear_movement_target() -> void:
 	is_moving_to_target = false
 	target_nav_position = global_position
+	_navigation_target_submitted = false
 	input_direction = Vector2.ZERO
 
 func perform_jump() -> void:
