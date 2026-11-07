@@ -290,11 +290,28 @@ pub fn export_document(document: &C3Document, texture_png: &[u8], source: &str, 
     }
     nodes[0]["children"] = json!(children);
 
-    let image_view = builder.add_view(texture_png, None);
-    let materials = vec![
-        json!({"name":"C3 opaque texture","pbrMetallicRoughness":{"baseColorFactor":[1.0,1.0,1.0,1.0],"baseColorTexture":{"index":0},"metallicFactor":0.0,"roughnessFactor":1.0},"doubleSided":true}),
-        json!({"name":"C3 alpha texture","pbrMetallicRoughness":{"baseColorFactor":[1.0,1.0,1.0,1.0],"baseColorTexture":{"index":0},"metallicFactor":0.0,"roughnessFactor":1.0},"alphaMode":"BLEND","doubleSided":true})
-    ];
+    let (materials, samplers, textures, images) = if texture_png.is_empty() {
+        (
+            vec![
+                json!({"name":"C3 opaque color-only","pbrMetallicRoughness":{"baseColorFactor":[1.0,1.0,1.0,1.0],"metallicFactor":0.0,"roughnessFactor":1.0},"doubleSided":true}),
+                json!({"name":"C3 alpha color-only","pbrMetallicRoughness":{"baseColorFactor":[1.0,1.0,1.0,1.0],"metallicFactor":0.0,"roughnessFactor":1.0},"alphaMode":"BLEND","doubleSided":true})
+            ],
+            Vec::<Value>::new(),
+            Vec::<Value>::new(),
+            Vec::<Value>::new()
+        )
+    } else {
+        let image_view = builder.add_view(texture_png, None);
+        (
+            vec![
+                json!({"name":"C3 opaque texture","pbrMetallicRoughness":{"baseColorFactor":[1.0,1.0,1.0,1.0],"baseColorTexture":{"index":0},"metallicFactor":0.0,"roughnessFactor":1.0},"doubleSided":true}),
+                json!({"name":"C3 alpha texture","pbrMetallicRoughness":{"baseColorFactor":[1.0,1.0,1.0,1.0],"baseColorTexture":{"index":0},"metallicFactor":0.0,"roughnessFactor":1.0},"alphaMode":"BLEND","doubleSided":true})
+            ],
+            vec![json!({"magFilter":9729,"minFilter":9987,"wrapS":10497,"wrapT":10497})],
+            vec![json!({"sampler":0,"source":0})],
+            vec![json!({"bufferView":image_view,"mimeType":"image/png"})]
+        )
+    };
     let animations = if animation_channels.is_empty() {
         Vec::new()
     } else {
@@ -311,9 +328,9 @@ pub fn export_document(document: &C3Document, texture_png: &[u8], source: &str, 
         "nodes":nodes,
         "meshes":gltf_meshes,
         "materials":materials,
-        "samplers":[{"magFilter":9729,"minFilter":9987,"wrapS":10497,"wrapT":10497}],
-        "textures":[{"sampler":0,"source":0}],
-        "images":[{"bufferView":image_view,"mimeType":"image/png"}],
+        "samplers":samplers,
+        "textures":textures,
+        "images":images,
         "bufferViews":builder.views,
         "accessors":builder.accessors,
         "buffers":[{"byteLength":bin_length}],
@@ -386,6 +403,25 @@ mod tests {
             MotionKey { frame: *frame, bone_matrices: vec![matrix] }
         }).collect();
         C3Motion { bone_count: 1, frame_count, keys, morph_count: 0, morph_values: Vec::new() }
+    }
+
+    #[test]
+    fn color_only_glb_has_no_external_image_dependency() {
+        let document = C3Document {
+            version: "test".to_owned(),
+            meshes: vec![mesh("color_only")],
+            motions: Vec::new(),
+            unknown_chunks: Vec::new(),
+        };
+        let output = std::env::temp_dir().join(format!("c3-color-only-{}.glb", std::process::id()));
+        let _ = export_document(&document, &[], "color-only.c3", &output).unwrap();
+        let bytes = fs::read(&output).unwrap();
+        let json_length = u32::from_le_bytes(bytes[12..16].try_into().unwrap()) as usize;
+        let gltf: Value = serde_json::from_slice(&bytes[20..20 + json_length]).unwrap();
+        assert!(gltf["images"].as_array().unwrap().is_empty());
+        assert!(gltf["textures"].as_array().unwrap().is_empty());
+        assert!(gltf["materials"][0]["pbrMetallicRoughness"].get("baseColorTexture").is_none());
+        fs::remove_file(output).unwrap();
     }
 
     #[test]

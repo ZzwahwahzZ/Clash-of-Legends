@@ -247,8 +247,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     let has_unassigned_textures = document.meshes.iter().all(|mesh| mesh.texture_name.trim().is_empty());
                     let sibling_base_c3 = rel_path.parent().unwrap_or(Path::new("")).join("1.c3");
                     let sibling_base_png = pvr_root.join(rel_path.parent().unwrap_or(Path::new("")).join("1.png"));
+                    let has_color_only_marker = document.meshes.iter()
+                        .any(|mesh| mesh.texture_name.trim().eq_ignore_ascii_case("C3EXP_COLOR"));
+                    let has_real_texture_reference = document.meshes.iter().any(|mesh| {
+                        let name = mesh.texture_name.trim();
+                        !name.is_empty() && !name.eq_ignore_ascii_case("C3EXP_COLOR")
+                    });
+                    let source_color_only = has_color_only_marker && !has_real_texture_reference;
+                    let mixed_color_and_textured = has_color_only_marker && has_real_texture_reference;
                     let embedded_texture = resolve_embedded_texture(&document, &pvr_root, rel_path);
-                    let (texture_path, texture_assignment) = if let Some(path) = embedded_texture {
+                    let (texture_path, texture_assignment) = if mixed_color_and_textured {
+                        (PathBuf::new(), "mixed_color_and_textured_meshes_require_per_mesh_materials")
+                    } else if source_color_only {
+                        (PathBuf::new(), "source_declares_color_only")
+                    } else if let Some(path) = embedded_texture {
                         (path, "embedded_texture_reference_unique_same_parent")
                     } else if same_stem_texture.is_file() {
                         (same_stem_texture, "same_stem")
@@ -260,11 +272,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     } else {
                         (same_stem_texture, "unresolved")
                     };
+                    let texture_bytes = if source_color_only {
+                        Some(Vec::new())
+                    } else if texture_path.is_file() {
+                        Some(fs::read(&texture_path)?)
+                    } else {
+                        None
+                    };
                     let renderable_meshes: Vec<_> = document.meshes.iter()
                         .filter(|mesh| !mesh.vertices.is_empty() && (!mesh.opaque_indices.is_empty() || !mesh.alpha_indices.is_empty()))
                         .collect();
                     if document.meshes.is_empty() {
-                        skipped.push(json!({"source":relative,"reason":"C3 document has no PHY mesh chunks","texture_expected":texture_path.to_string_lossy()}));
+                        skipped.push(json!({"source":relative,"reason":"C3 document has no PHY mesh chunks"}));
                     } else if renderable_meshes.is_empty() {
                         skipped.push(json!({
                             "source":relative,
@@ -273,20 +292,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             "mesh_details":document.meshes.iter().map(|mesh| json!({
                                 "name":mesh.name,"vertices":mesh.vertices.len(),
                                 "opaque_indices":mesh.opaque_indices.len(),"alpha_indices":mesh.alpha_indices.len()
-                            })).collect::<Vec<_>>(),
+                            })).collect::<Vec<_>(),
                             "texture_expected":texture_path.to_string_lossy()
                         }));
-                    } else if !texture_path.is_file() {
+                    } else if mixed_color_and_textured {
                         skipped.push(json!({
                             "source":relative,
-                            "reason":"matching same-stem decoded PVR texture is missing",
-                            "texture_expected":texture_path.to_string_lossy(),
+                            "reason":"mixed color-only and textured PHY meshes require per-mesh material binding",
                             "texture_assignment":texture_assignment,
                             "source_texture_names":document.meshes.iter().map(|mesh| mesh.texture_name.clone())
                                 .filter(|name| !name.is_empty()).collect::<std::collections::BTreeSet<_>>()
                         }));
-                    } else {
-                        let texture_bytes = fs::read(&texture_path)?;
+                    } else if let Some(texture_bytes) = texture_bytes {
                         let output_relative = Path::new(category).join("c3").join(inner.with_extension("glb"));
                         let output_path = glb_root.join(&output_relative);
                         match glb::export_document(&document, &texture_bytes, &relative, &output_path) {
@@ -295,7 +312,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 converted.push(json!({
                                     "source":relative,
                                     "output":output_relative.to_string_lossy().replace('\\',"/"),
-                                    "texture":texture_path.to_string_lossy(),
+                                    "texture":if source_color_only { Value::Null } else { json!(texture_path.to_string_lossy()) },
                                     "texture_assignment":texture_assignment,
                                     "glb_bytes":glb_bytes,
                                     "mesh_count":mesh_count,
@@ -303,8 +320,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                     "animated_mesh_count":animated_mesh_count
                                 }));
                             },
-                            Err(error) => skipped.push(json!({"source":relative,"reason":error.to_string(),"texture":texture_path.to_string_lossy()})),
+                            Err(error) => skipped.push(json!({"source":relative,"reason":error.to_string(),"texture":if source_color_only { Value::Null } else { json!(texture_path.to_string_lossy()) }})),
                         }
+                    } else {
+                        skipped.push(json!({
+                            "source":relative,
+                            "reason":"matching same-stem decoded PVR texture is missing",
+                            "texture_expected":texture_path.to_string_lossy(),
+                            "texture_assignment":texture_assignment,
+                            "source_texture_names":document.meshes.iter().map(|mesh| mesh.texture_name.clone())
+                                .filter(|name| !name.is_empty()).collect::<std::collections::BTreeSet<_>>()
+                        }));
                     }
                 }
             }
