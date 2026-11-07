@@ -130,15 +130,25 @@ def path_discovery_reason(path: str) -> str | None:
     return None
 
 
+def has_quest_content_signature(data: bytes) -> bool:
+    sample = data[:2 * 1024 * 1024].lower()
+    # Discovery only; a signature does not establish a decoded schema.
+    return any(marker.lower() in sample for marker in QUEST_CONTENT_MARKERS)
+
+
 def is_interesting(path: str, data: bytes | None = None) -> bool:
     reason = path_discovery_reason(path)
     if reason == "PATH_KEYWORD":
         return True
     if reason != "CONTENT_SIGNATURE_CHECK_REQUIRED" or data is None:
         return False
-    sample = data[:2 * 1024 * 1024].lower()
-    # This is a discovery signature only; it does not establish a decoded schema.
-    return any(marker.lower() in sample for marker in QUEST_CONTENT_MARKERS)
+    if has_quest_content_signature(data):
+        return True
+    # Generic filenames may hide TQ-encrypted Lua/config tables. Probe the two
+    # documented seeds only as discovery hints; never accept a candidate here.
+    if Path(path).suffix.lower() == ".dat":
+        return any(has_quest_content_signature(decrypt_tq(data, seed)) for seed in SEEDS)
+    return False
 
 
 def inspect_apk(apk_bytes_path: Path, apk_member: str, out_dir: Path) -> list[dict]:
@@ -154,7 +164,11 @@ def inspect_apk(apk_bytes_path: Path, apk_member: str, out_dir: Path) -> list[di
             if not is_interesting(info.filename, raw):
                 continue
             if discovery_reason == "CONTENT_SIGNATURE_CHECK_REQUIRED":
-                discovery_reason = "CONTENT_SIGNATURE_IN_MOBILE_SCRIPT_CONFIG_DIRECTORY"
+                discovery_reason = (
+                    "CONTENT_SIGNATURE_IN_MOBILE_SCRIPT_CONFIG_DIRECTORY"
+                    if has_quest_content_signature(raw)
+                    else "CONTENT_SIGNATURE_AFTER_TQ_CIPHER_DISCOVERY_PROBE"
+                )
             rel = info.filename[len(ROOT):] if info.filename.startswith(ROOT) else info.filename
             row = {
                 "discovery_reason": discovery_reason,
