@@ -93,6 +93,8 @@ func get_navigation_path(anchor_id: String, from_world_position: Vector3, naviga
 	var target := get_anchor_target(anchor_id)
 	if not bool(target.get("ok", false)):
 		return {"ok": false, "reason": "anchor_unresolved", "anchor_id": anchor_id}
+	if not bool(target.get("requires_navmesh_projection", true)):
+		return {"ok": false, "reason": "anchor_is_landmark_not_navigation_target", "anchor_id": anchor_id}
 	var projected_start := NavigationServer3D.map_get_closest_point(navigation_map, from_world_position)
 	var projected_target := NavigationServer3D.map_get_closest_point(navigation_map, target["reference_position"])
 	if projected_start.distance_to(from_world_position) > max_projection_distance:
