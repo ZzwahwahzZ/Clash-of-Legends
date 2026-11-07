@@ -67,7 +67,18 @@ func load_index() -> bool:
 			if not _quests_by_mission_id.has(mission_id):
 				_quests_by_mission_id[mission_id] = []
 			_quests_by_mission_id[mission_id].append(quest)
-		_index_quest_map(quest, int(quest.get("map_id", 0)))
+		var quest_map_ids: Array[int] = []
+		var direct_map_id := int(quest.get("map_id", 0))
+		if direct_map_id > 0:
+			quest_map_ids.append(direct_map_id)
+		for npc_key in ["begin_npc", "finish_npc"]:
+			var npc_ref: Variant = quest.get(npc_key, null)
+			if npc_ref is Dictionary and str(npc_ref.get("parse_status", "")) == "parsed":
+				var npc_map_id := int(npc_ref.get("map_id", 0))
+				if npc_map_id > 0 and not quest_map_ids.has(npc_map_id):
+					quest_map_ids.append(npc_map_id)
+		for source_map_id in quest_map_ids:
+			_index_quest_map(quest, source_map_id)
 		_index_quest_npc(quest, quest.get("begin_npc", null), "begin")
 		_index_quest_npc(quest, quest.get("finish_npc", null), "finish")
 	index_ready = true
@@ -78,7 +89,8 @@ func _index_quest_map(quest: Dictionary, map_id: int) -> void:
 		return
 	if not _quests_by_map_id.has(map_id):
 		_quests_by_map_id[map_id] = []
-	_quests_by_map_id[map_id].append(quest)
+	if not _quests_by_map_id[map_id].has(quest):
+		_quests_by_map_id[map_id].append(quest)
 
 func _index_quest_npc(quest: Dictionary, npc_ref: Variant, role: String) -> void:
 	if not npc_ref is Dictionary or str(npc_ref.get("parse_status", "")) != "parsed":
