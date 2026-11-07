@@ -3,7 +3,7 @@
   "catalogue_id": "mobile_official_guide_research",
   "target_client": "Conquer Online Mobile Android 1.1.2.3",
   "target_client_verification": "NOT_CROSS_VERIFIED",
-  "status": "PARTIAL_NON_EXHAUSTIVE_RESEARCH_ONLY",
+  "status": "EXPANDED_BUT_STILL_PARTIAL_NON_EXHAUSTIVE_RESEARCH_ONLY",
   "runtime_activation_allowed": false,
   "id_policy": "project_record_id is an internal key only; source quest IDs are not known and must not be fabricated.",
   "coordinate_policy": "Published guide coordinates are evidence notes, not runtime scene coordinates until coordinate-space and map identity are cross-validated.",
@@ -151,6 +151,106 @@
       "verified_guide_mechanics": "Defeat four waves of Bushfire Beasts; Lich Kings appear after all waves; defeat Lich Kings to obtain Yellow Rune Essences.",
       "source_quest_id": null,
       "admission_state": "RESEARCH_ONLY_NOT_RUNTIME_APPROVED"
+    },
+    {
+      "project_record_id": "mobile_event.love_cycles_2026_09",
+      "source_title": "Love Cycles",
+      "category": "event",
+      "source_uri": "https://comobile.99.com/guide/2026-09-03/love_cycles_is_now_live_from_sept__8th_to_sept__21st_.shtml",
+      "source_type": "official_mobile_event_guide",
+      "published_window": "2026-09-08 through 2026-09-21 (expired)",
+      "published_gate": "Level 80",
+      "published_npc": "Suyi (Twin City 455,366)",
+      "published_map_references": "Twin City; event interface",
+      "verified_guide_mechanics": "Seven daily Beast Lineage Awakening quests unlocked at 00:00; reincarnation-interface reward; daily 300 Active Points claim; Magpie Bridge repair, 99 Worldly Points per feather, 21 rewards per round, stage rewards and ranking.",
+      "source_quest_id": null,
+      "admission_state": "RESEARCH_ONLY_NOT_RUNTIME_APPROVED",
+      "unresolved_fields": [
+        "exact seven quest steps/dialogues/targets/IDs",
+        "event interface state machine",
+        "source-side reset and claim identifiers"
+      ]
+    },
+    {
+      "project_record_id": "mobile_event.forbidden_area_2026_09",
+      "source_title": "Forbidden Area",
+      "category": "event_activity",
+      "source_uri": "https://comobile.99.com/guide/2026-09-11/passing_the_forbidden_area_to_win_inner_power_books_from_sept__15th_to_sept__28th.shtml",
+      "source_type": "official_mobile_event_guide",
+      "published_window": "2026-09-15 through 2026-09-28 (expired)",
+      "published_gate": "Level 30+ of second rebirth",
+      "published_npc": "Prof. Allen (Twin City 452,365)",
+      "published_map_references": "Forbidden Maze; Forbidden Tricks; Forbidden Pond",
+      "verified_guide_mechanics": "Three timed challenges: three-room monster/portal maze; instruction then Trick Ogre encounter with water-fire-wood counter rules; purification array trapping Evil Creatures followed by Evil Ruler boss.",
+      "source_quest_id": null,
+      "admission_state": "RESEARCH_ONLY_NOT_RUNTIME_APPROVED",
+      "unresolved_fields": [
+        "room/portal map topology and IDs",
+        "exact timer limits",
+        "enemy IDs and counts",
+        "challenge completion and retry rules",
+        "event-specific state and reward claims"
+      ]
+    },
+    {
+      "project_record_id": "mobile_event.frostland_park_2026_10",
+      "source_title": "Frostland Park Guild and Hero Challenge",
+      "category": "event_activity",
+      "source_uri": "https://comobile.99.com/guide/2026-10-16/take_challenges_to_compete_for_high_ranking_and_huge_prizes_in_the_frostland_park.shtml",
+      "source_type": "official_mobile_event_guide",
+      "published_window": "2026-10-20 through 2026-11-02 (expired)",
+      "published_gate": "Second rebirth level 15",
+      "published_npc": "Lunadella (Twin City 450,341); Luther (Frostland Park 78,38)",
+      "published_map_references": "Frostland Park",
+      "verified_guide_mechanics": "Guild-leader/deputy registration; 20-minute contest; points from Apollo boss every five minutes, Wishing Pool occupation, Vermins, Dragonflies and hero defeats; guild and hero rankings.",
+      "source_quest_id": null,
+      "admission_state": "RESEARCH_ONLY_NOT_RUNTIME_APPROVED",
+      "unresolved_fields": [
+        "registration UI and eligibility checks",
+        "exact spawn/interaction coordinates and target IDs",
+        "event lifecycle and scoring event handling",
+        "ranking persistence and reward distribution"
+      ]
+    },
+    {
+      "project_record_id": "mobile_event.into_wilds_2026_09",
+      "source_title": "Into Wilds",
+      "category": "event_activity",
+      "source_uri": "https://comobile.99.com/guide/2026-09-24/join_into_wilds_now_for_generous_rewards_from_sept__29th_to_oct__12th_.shtml",
+      "source_type": "official_mobile_event_guide",
+      "published_window": "2026-09-29 through 2026-10-12 (expired)",
+      "published_gate": "Level 80",
+      "published_npc": "Eloise (Wind Plain 453,379)",
+      "published_map_references": "Wind Plain; exploration areas New Hand, Swordpeak Summit, Thunder Hall, Dragon Pavilion, Armory Vale, Frostbite Abyss, Skyreach Tower, Pathseeker Assembly",
+      "verified_guide_mechanics": "Exploration uses Beginner Manuals and Exploration Stamina; success advances one step and failure leaves position unchanged; area-specific rewards, daily Area Ruler competition, cumulative end-reach milestones and local ranking.",
+      "source_quest_id": null,
+      "admission_state": "RESEARCH_ONLY_NOT_RUNTIME_APPROVED",
+      "unresolved_fields": [
+        "exact area/map IDs and transition graph",
+        "random resolution algorithm",
+        "stamina costs and consumption rules",
+        "exploration result IDs and reward probability tables"
+      ]
+    },
+    {
+      "project_record_id": "mobile_event.trial_of_legends_2026_04",
+      "source_title": "Trial of Legends",
+      "category": "event_activity",
+      "source_uri": "https://comobile.99.com/guide/2026-03-20/defeat_devils_to_get_combat_badges_in_exchange_for_rewards_from_apr__14th_to_apr__27th.shtml",
+      "source_type": "official_mobile_event_guide",
+      "published_window": "2026-04-14 through 2026-04-27 (expired)",
+      "published_gate": "Level 1 of second rebirth",
+      "published_npc": "Lady East (Twin City 467,367); exchange NPC at Twin City 311,492",
+      "published_map_references": "Twin City (444,511); Twin City (463,511); Wind Plain (478,507)",
+      "verified_guide_mechanics": "Three scheduled boss spawns at 12:30 and 19:30; defeating bosses grants rewards and Combat Badges; badges exchange for listed items.",
+      "source_quest_id": null,
+      "admission_state": "RESEARCH_ONLY_NOT_RUNTIME_APPROVED",
+      "unresolved_fields": [
+        "boss identities and exact spawn schedules by location",
+        "boss HP/combat parameters",
+        "badge drop amounts and per-player limits",
+        "exchange transaction IDs and claim semantics"
+      ]
     }
   ],
   "official_mobile_map_names": [
@@ -178,5 +278,6 @@
     },
     "note": "The official Mobile guide navigation places Welfare and Trials under Quests. Trials are catalogued as gameplay activities, not assumed narrative NPC quests. Welfare is tracked separately pending deeper mechanics review."
   },
-  "source_comparison_policy": "External PC Conquer lists and development references are discovery/architecture leads only. A record is admitted to Mobile catalogue only with Mobile-specific evidence."
+  "source_comparison_policy": "External PC Conquer lists and development references are discovery/architecture leads only. A record is admitted to Mobile catalogue only with Mobile-specific evidence.",
+  "external_research_note": "Separate official Mobile event guides have revealed additional limited-time quest/activity content not represented in the main Quests navigation. Expired events remain catalogued for historical mechanics research and are not active by default."
 }
