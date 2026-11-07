@@ -247,6 +247,14 @@
   "runtime_android_performance_validated": false,
   "saved_navigation_mesh": "res://assets/environment/phase1/jianghai/jianghai_city_navmesh.tres",
   "saved_runtime_world_scene": "res://scenes/world/JianghaiOldCity.tscn",
+  "saved_scene_validation": {
+    "collision_bodies": 10,
+    "collision_shape_identity_transform_count": 10,
+    "collision_shape_transform_checks": 10,
+    "collision_shapes": 10,
+    "navigation_regions": 1,
+    "valid": true
+  },
   "selected_walkable_sources": [
     "JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/CentralAvenue",
     "JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/RiverWardStreet",
