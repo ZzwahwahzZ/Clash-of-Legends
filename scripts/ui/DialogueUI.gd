@@ -34,7 +34,7 @@ func show_dialogue(speaker: String, text: String, options: Array = []) -> void:
 			btn.pressed.connect(_on_option_clicked.bind(i))
 			options_vbox.add_child(btn)
 
-func show_source_quest_offers(speaker: String, intro: String, offers: Array, active_mission_id: String = "") -> void:
+func show_source_quest_offers(speaker: String, intro: String, offers: Array, active_mission_id: String = "", service_id: String = "") -> void:
 	FeatureGuidanceManager.show_feature_intro("dialogue")
 	visible = true
 	if speaker_label:
@@ -57,6 +57,12 @@ func show_source_quest_offers(speaker: String, intro: String, offers: Array, act
 			button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			button.pressed.connect(_on_source_quest_clicked.bind(mission_id))
 			options_vbox.add_child(button)
+		if not service_id.is_empty():
+			var service_button := Button.new()
+			service_button.text = "فتح ورشة الحدادة" if service_id == "blacksmith" else "Open Blacksmith"
+			service_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			service_button.pressed.connect(_on_source_quest_clicked.bind("service:" + service_id))
+			options_vbox.add_child(service_button)
 
 func _on_source_quest_clicked(mission_id: String) -> void:
 	source_quest_selected.emit(mission_id)
