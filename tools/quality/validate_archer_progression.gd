@@ -4,7 +4,9 @@ func _initialize() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
-	GameManager.selected_class = "Archer"
+	if GameManager.selected_class != "Archer":
+		_fail("Archer must be the default selected main character.")
+		return
 	var player_scene := load("res://scenes/characters/Player.tscn") as PackedScene
 	if player_scene == null:
 		_fail("Could not load the real Player scene for class-selection validation.")
