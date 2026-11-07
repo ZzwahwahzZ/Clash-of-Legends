@@ -67,6 +67,21 @@ jobs:
             echo "Runtime world index failed its Godot audit."
             exit 1
           fi
+      - name: Mark generated report with successful Godot runtime validation
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path("reports/world-content-index-validation.json")
+          report = json.loads(path.read_text(encoding="utf-8"))
+          report["validation"] = "GODOT_RUNTIME_AUDIT_PASSED"
+          report["godot_runtime_validation"] = {
+              "engine": "Godot 4.3",
+              "status": "PASSED",
+              "log": "ci-logs/world-index.log"
+          }
+          path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+          PY
       - name: Commit generated runtime index to this feature branch
         run: |
           set -euo pipefail
