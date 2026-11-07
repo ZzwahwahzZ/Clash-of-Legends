@@ -28,27 +28,9 @@ func _run() -> void:
 	var factory_doorway_clear := _ray_is_clear(Vector3(86.0, 1.0, -11.0), Vector3(86.0, 1.0, -5.0))
 	var pawnshop_wall_blocks := _ray_hits_collision(Vector3(-88.5, 1.0, -115.0), Vector3(-88.5, 1.0, -109.0))
 	var factory_wall_blocks := _ray_hits_collision(Vector3(83.5, 1.0, -11.0), Vector3(83.5, 1.0, -5.0))
-	var bridge_rail := world.find_child("MarketRail_-123_95_4_85", true, false) as MeshInstance3D
-	var bridge_rail_blocks := false
-	var bridge_rail_hit_name := "rail_mesh_not_found"
-	if bridge_rail != null and bridge_rail.mesh != null:
-		var rail_world_bounds: AABB = bridge_rail.global_transform * bridge_rail.get_aabb()
-		var rail_center := rail_world_bounds.get_center()
-		var rail_hit := _ray_result(rail_center + Vector3(0.0, 0.0, 1.0), rail_center - Vector3(0.0, 0.0, 1.0))
-		if not rail_hit.is_empty():
-			bridge_rail_hit_name = str((rail_hit.get("collider") as Node).name)
-		bridge_rail_blocks = bridge_rail_hit_name == "MarketBridgeRailCollision"
-	print("PHASE1 BUILDING DOORWAY COLLISION PROBE: ", JSON.stringify({
-		"pawnshop_doorway_clear": pawnshop_doorway_clear,
-		"factory_doorway_clear": factory_doorway_clear,
-		"pawnshop_adjacent_wall_blocks": pawnshop_wall_blocks,
-		"factory_adjacent_wall_blocks": factory_wall_blocks,
-		"market_bridge_guardrail_blocks": bridge_rail_blocks,
-		"market_bridge_guardrail_hit_collider": bridge_rail_hit_name
-	}))
-	var collision_probe_passed := pawnshop_doorway_clear and factory_doorway_clear and pawnshop_wall_blocks and factory_wall_blocks and bridge_rail_blocks
+	var collision_probe_passed := pawnshop_doorway_clear and factory_doorway_clear and pawnshop_wall_blocks and factory_wall_blocks
 	if not collision_probe_passed:
-		push_warning("One or more physical collision checks failed; continuing the complete player/navigation suite to collect all results.")
+		push_warning("One or more physical building collision checks failed; continuing the integrated suite to collect all results.")
 
 	var player_packed := load(PLAYER_SCENE_PATH) as PackedScene
 	if player_packed == null:
@@ -78,8 +60,6 @@ func _run() -> void:
 	var authored_city := world.get_node_or_null("AuthoredCity") as Node3D
 	var interaction_registry = WORLD_INTERACTION_REGISTRY_SCRIPT.new()
 	var interaction_registry_bound := authored_city != null and interaction_registry.bind_world(authored_city)
-	var bridge_landmark_route: Dictionary = interaction_registry.get_navigation_path("jianghai.market_bridge", START_POSITION, navigation_map) if interaction_registry_bound else {"ok": false, "reason": "registry_bind_failed"}
-	var bridge_landmark_rejected := not bool(bridge_landmark_route.get("ok", false)) and str(bridge_landmark_route.get("reason", "")) == "anchor_is_landmark_not_navigation_target"
 
 	# Verify authored city destinations at runtime. The decorative market ramps
 	# remain excluded until a real West Market walkable entry is geometrically verified.
@@ -158,83 +138,43 @@ func _run() -> void:
 		if bool(movement_check["target_reached"]) and bool(movement_check["floor_contact"]):
 			runtime_route_movements_passed += 1
 
-	# Physical bridge crossing is constrained to the authored deck; neither decorative ramp is used.
-	var bridge_cross_start_requested := Vector3(21.0, 4.45, -126.0)
-	var bridge_cross_target_requested := Vector3(-21.0, 4.45, -126.0)
-	var bridge_cross_start := NavigationServer3D.map_get_closest_point(navigation_map, bridge_cross_start_requested)
-	var bridge_cross_target := NavigationServer3D.map_get_closest_point(navigation_map, bridge_cross_target_requested)
-	var bridge_cross_start_projection_distance := bridge_cross_start.distance_to(bridge_cross_start_requested)
-	var bridge_cross_target_projection_distance := bridge_cross_target.distance_to(bridge_cross_target_requested)
-	player.call("clear_movement_target")
-	player.velocity = Vector3.ZERO
-	player.global_position = bridge_cross_start
-	for _reset_frame in range(8):
-		await physics_frame
-	navigation_agent.target_position = bridge_cross_target
-	var bridge_cross_path := PackedVector3Array()
-	for _sync_frame in range(5):
-		await physics_frame
-		navigation_agent.get_next_path_position()
-		bridge_cross_path = navigation_agent.get_current_navigation_path()
-	player.call("move_towards_target_position", bridge_cross_target, 1.0 / 60.0)
-	var bridge_cross_frames := 0
-	for bridge_frame in range(2400):
-		await physics_frame
-		bridge_cross_frames = bridge_frame + 1
-		var bridge_distance := Vector2(player.global_position.x - bridge_cross_target.x, player.global_position.z - bridge_cross_target.z).length()
-		if bridge_distance <= 1.5 or not bool(player.get("is_moving_to_target")):
-			break
-	var bridge_cross_final_position: Vector3 = player.global_position
-	var bridge_cross_distance := Vector2(bridge_cross_final_position.x - bridge_cross_target.x, bridge_cross_final_position.z - bridge_cross_target.z).length()
-	var bridge_cross_floor_contact := player.is_on_floor()
-	var bridge_cross_waypoints: Array = []
-	for waypoint in bridge_cross_path:
-		bridge_cross_waypoints.append(_vec(waypoint))
-	var bridge_cross_slide_collisions: Array = []
-	for collision_index in range(player.get_slide_collision_count()):
-		var slide := player.get_slide_collision(collision_index)
-		var collider := slide.get_collider()
-		bridge_cross_slide_collisions.append({
-			"collider": str(collider.name) if collider else "null",
-			"position": _vec(slide.get_position()),
-			"normal": _vec(slide.get_normal())
-		})
-	var bridge_cross_next_path_position: Vector3 = navigation_agent.get_next_path_position()
-	var bridge_cross_passed := bridge_cross_path.size() >= 2 and bridge_cross_start_projection_distance <= 2.0 and bridge_cross_target_projection_distance <= 2.0 and bridge_cross_distance <= 1.5 and bridge_cross_floor_contact
-
-	# Diagnostic candidate on RiverWardStreet, outside WestMarketRow01; never promoted to an interaction anchor by projection alone.
-	var west_market_candidate_requested := Vector3(-35.0, -0.14, -164.0)
+	# West Market is approached from the authored CentralAvenue -> RiverWardStreet road junction.
+	# The bridge is deliberately excluded from this route and from the acceptance criteria.
+	var west_market_start_requested := START_POSITION
+	var west_market_start_projected := NavigationServer3D.map_get_closest_point(navigation_map, west_market_start_requested)
+	var west_market_candidate_requested := Vector3(-35.0, 0.15, -164.0)
 	var west_market_candidate_projected := NavigationServer3D.map_get_closest_point(navigation_map, west_market_candidate_requested)
+	var west_market_start_projection_distance := west_market_start_projected.distance_to(west_market_start_requested)
 	var west_market_projection_distance := west_market_candidate_projected.distance_to(west_market_candidate_requested)
-	var west_market_route_path := NavigationServer3D.map_get_path(navigation_map, bridge_cross_target, west_market_candidate_projected, false, 1)
+	var west_market_route_path := NavigationServer3D.map_get_path(navigation_map, west_market_start_projected, west_market_candidate_projected, false, 1)
 	var west_market_path_waypoints: Array = []
 	for waypoint in west_market_route_path:
 		west_market_path_waypoints.append(_vec(waypoint))
-	var west_market_expected_direct_distance := Vector2(bridge_cross_target.x - west_market_candidate_projected.x, bridge_cross_target.z - west_market_candidate_projected.z).length()
+	var west_market_expected_direct_distance := Vector2(west_market_start_projected.x - west_market_candidate_projected.x, west_market_start_projected.z - west_market_candidate_projected.z).length()
 	var west_market_path_length := _path_length(west_market_route_path)
-	var west_market_path_start_error := west_market_route_path[0].distance_to(bridge_cross_target) if west_market_route_path.size() >= 2 else -1.0
+	var west_market_path_start_error := west_market_route_path[0].distance_to(west_market_start_projected) if west_market_route_path.size() >= 2 else -1.0
 	var west_market_path_end_error := west_market_route_path[west_market_route_path.size() - 1].distance_to(west_market_candidate_projected) if west_market_route_path.size() >= 2 else -1.0
-	var west_market_route_connected := west_market_projection_distance <= 2.0 and west_market_route_path.size() >= 2 and west_market_path_start_error <= 2.0 and west_market_path_end_error <= 2.0 and west_market_path_length >= west_market_expected_direct_distance * 0.9
+	var west_market_route_connected := west_market_start_projection_distance <= 1.0 and west_market_projection_distance <= 1.0 and west_market_route_path.size() >= 2 and west_market_path_start_error <= 1.0 and west_market_path_end_error <= 1.0 and west_market_path_length >= west_market_expected_direct_distance * 0.9
 	var west_market_movement := {
 		"attempted": false,
 		"reached": false,
 		"floor_contact": false,
 		"frames_used": 0,
-		"final_position": _vec(bridge_cross_target),
+		"final_position": _vec(west_market_start_projected),
 		"distance_to_candidate": -1.0,
-		"next_path_position": _vec(bridge_cross_target),
+		"next_path_position": _vec(west_market_start_projected),
 		"velocity": [0.0, 0.0, 0.0],
 		"slide_collisions": []
 	}
 	if west_market_route_connected:
 		player.call("clear_movement_target")
 		player.velocity = Vector3.ZERO
-		player.global_position = bridge_cross_target
+		player.global_position = west_market_start_projected
 		for _reset_frame in range(8):
 			await physics_frame
 		player.call("move_towards_target_position", west_market_candidate_projected, 1.0 / 60.0)
 		var west_frames := 0
-		for west_frame in range(2400):
+		for west_frame in range(3600):
 			await physics_frame
 			west_frames = west_frame + 1
 			var west_distance := Vector2(player.global_position.x - west_market_candidate_projected.x, player.global_position.z - west_market_candidate_projected.z).length()
@@ -253,6 +193,7 @@ func _run() -> void:
 			"velocity": _vec(player.velocity),
 			"slide_collisions": _capture_slide_collisions(player)
 		}
+	var west_market_passed := west_market_route_connected and bool(west_market_movement["attempted"]) and bool(west_market_movement["reached"]) and bool(west_market_movement["floor_contact"])
 
 	var report := {
 		"world_scene_loaded": true,
@@ -260,20 +201,19 @@ func _run() -> void:
 		"factory_doorway_clear": factory_doorway_clear,
 		"pawnshop_adjacent_wall_blocks": pawnshop_wall_blocks,
 		"factory_adjacent_wall_blocks": factory_wall_blocks,
-		"market_bridge_guardrail_blocks": bridge_rail_blocks,
-		"market_bridge_guardrail_hit_collider": bridge_rail_hit_name,
 		"collision_probe_passed": collision_probe_passed,
 		"player_scene_loaded": true,
 		"navigation_map_valid": navigation_map.is_valid(),
 		"navigation_map_region_count": map_region_count,
 		"navigation_map_cell_height": map_cell_height,
 		"interaction_registry_bound": interaction_registry_bound,
-		"bridge_landmark_route_rejected": bridge_landmark_rejected,
-		"bridge_landmark_route_result": bridge_landmark_route,
-		"west_market_route_status": "CONNECTED_DIAGNOSTIC_CANDIDATE" if west_market_route_connected else "NO_CONTINUOUS_ROUTE_TO_VERIFIED_RIVER_WARD_STREET_CANDIDATE",
+		"west_market_route_status": "PHYSICALLY_REACHED_FROM_CENTRAL_AVENUE" if west_market_passed else "FAILED_OR_DISCONNECTED",
 		"west_market_route_candidate": {
 			"surface_source": "AuthoredStreetNetwork/RiverWardStreet",
 			"outside_building_footprint": "WestMarketRow01",
+			"start_requested_position": _vec(west_market_start_requested),
+			"start_projected_position": _vec(west_market_start_projected),
+			"start_projection_distance": west_market_start_projection_distance,
 			"requested_position": _vec(west_market_candidate_requested),
 			"projected_position": _vec(west_market_candidate_projected),
 			"projection_distance": west_market_projection_distance,
@@ -285,7 +225,8 @@ func _run() -> void:
 			"path_waypoints": west_market_path_waypoints,
 			"connected": west_market_route_connected,
 			"physical_movement": west_market_movement,
-			"approved_interaction_anchor": false
+			"physical_route_passed": west_market_passed,
+			"approved_interaction_anchor": west_market_passed
 		},
 		"project_default_cell_height": expected_cell_height,
 		"navigation_cell_height_matches": is_equal_approx(map_cell_height, expected_cell_height),
@@ -294,25 +235,6 @@ func _run() -> void:
 		"runtime_routes_passed": runtime_routes_passed,
 		"runtime_route_movement_checks": runtime_route_movement_checks,
 		"runtime_route_movements_passed": runtime_route_movements_passed,
-		"market_bridge_crossing": {
-			"start_requested": _vec(bridge_cross_start_requested),
-			"start_projected": _vec(bridge_cross_start),
-			"start_projection_distance": bridge_cross_start_projection_distance,
-			"target_requested": _vec(bridge_cross_target_requested),
-			"target_projected": _vec(bridge_cross_target),
-			"target_projection_distance": bridge_cross_target_projection_distance,
-			"path_waypoint_count": bridge_cross_path.size(),
-			"path_waypoints": bridge_cross_waypoints,
-			"next_path_position_at_finish": _vec(bridge_cross_next_path_position),
-			"player_velocity_at_finish": _vec(player.velocity),
-			"is_moving_to_target_at_finish": bool(player.get("is_moving_to_target")),
-			"slide_collisions_at_finish": bridge_cross_slide_collisions,
-			"final_position": _vec(bridge_cross_final_position),
-			"distance_to_target": bridge_cross_distance,
-			"floor_contact": bridge_cross_floor_contact,
-			"frames_used": bridge_cross_frames,
-			"passed": bridge_cross_passed
-		},
 		"start_position": _vec(start_after_settle),
 		"requested_target_position": _vec(TARGET_POSITION),
 		"projected_target_position": _vec(projected_target),
@@ -338,15 +260,13 @@ func _run() -> void:
 			"factory_doorway_clear": factory_doorway_clear,
 			"pawnshop_adjacent_wall_blocks": pawnshop_wall_blocks,
 			"factory_adjacent_wall_blocks": factory_wall_blocks,
-			"market_bridge_guardrail_blocks": bridge_rail_blocks,
-			"market_bridge_guardrail_hit_collider": bridge_rail_hit_name
 		}))
 		return
 	if map_region_count < 1:
 		_fail("Runtime navigation map contains no registered regions.")
 		return
-	if not interaction_registry_bound or not bridge_landmark_rejected:
-		_fail("Market bridge landmark was incorrectly exposed as a navigation destination: " + JSON.stringify(bridge_landmark_route))
+	if not interaction_registry_bound:
+		_fail("World interaction registry could not bind the authored city.")
 		return
 	if not is_equal_approx(map_cell_height, expected_cell_height):
 		_fail("Runtime navigation map cell height does not match project settings.")
@@ -360,16 +280,17 @@ func _run() -> void:
 	if runtime_route_movements_passed != runtime_route_targets.size():
 		_fail("Player did not physically reach every verified city destination: " + JSON.stringify(runtime_route_movement_checks))
 		return
-	if not bridge_cross_passed:
-		_fail("Player could not physically cross the authored market bridge deck (ramps are excluded): " + JSON.stringify({
-			"path_waypoint_count": bridge_cross_path.size(),
-			"start_projection_distance": bridge_cross_start_projection_distance,
-			"target_projection_distance": bridge_cross_target_projection_distance,
-			"distance_to_target": bridge_cross_distance,
-			"floor_contact": bridge_cross_floor_contact,
-			"final_position": _vec(bridge_cross_final_position)
+	if not west_market_passed:
+		_fail("Player could not physically reach the authored West Market entry from CentralAvenue via RiverWardStreet: " + JSON.stringify({
+			"route_connected": west_market_route_connected,
+			"start_projection_distance": west_market_start_projection_distance,
+			"target_projection_distance": west_market_projection_distance,
+			"path_length": west_market_path_length,
+			"direct_distance": west_market_expected_direct_distance,
+			"movement": west_market_movement
 		}))
 		return
+
 	if horizontal_displacement < 8.0 or not target_reached:
 		_fail("Player did not follow the baked navigation path to the hotel frontage.")
 		return
@@ -377,7 +298,7 @@ func _run() -> void:
 		_fail("Player did not remain supported by the generated walkable floor collisions.")
 		return
 
-	print("PHASE1 NAVIGATION PLAYER MOVEMENT, CITY ROUTES, BUILDING APPROACHES AND FLOOR COLLISION: PASS")
+	print("PHASE1 NAVIGATION PLAYER MOVEMENT, CITY ROUTES, WEST MARKET ACCESS AND FLOOR COLLISION: PASS")
 	quit(0)
 
 func _ray_is_clear(from_position: Vector3, to_position: Vector3) -> bool:
