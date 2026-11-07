@@ -161,9 +161,30 @@ def main():
         dialogue_payload = json.loads(dialogue_output.read_text(encoding="utf-8"))
         dialogue_report = json.loads(dialogue_report_path.read_text(encoding="utf-8"))
 
+    selected_map_archive_paths = {
+        "map/map/newplain.7z", "map/map/desert.7z", "map/map/woods.7z",
+        "map/map/dragon.7z", "map/map/street.7z"
+    }
+    source_map_archives = []
+    for map_row in maps:
+        resource_path = str(map_row.get("resource_path", "")).replace("\\\\", "/")
+        if resource_path not in selected_map_archive_paths:
+            continue
+        archive_bytes = read(root, resource_path)
+        source_map_archives.append({
+            "map_id": int(map_row["map_id"]),
+            "name_en": str(map_row.get("name_en", "")),
+            "resource_path": resource_path,
+            "flags": int(map_row.get("flags", 0)),
+            "size_bytes": len(archive_bytes) if archive_bytes is not None else 0,
+            "sha256": hashlib.sha256(archive_bytes).hexdigest() if archive_bytes is not None else "",
+            "status": "SOURCE_ARCHIVE_EXTRACTED_NOT_RUNTIME_READY" if archive_bytes is not None else "SOURCE_ARCHIVE_NOT_EXTRACTED"
+        })
+
     index = {"schema_version":"1.0.0", "source_version":"ConquerOnline-1.1.2.3",
         "source_policy":"Exact-version derived index. Encrypted dialogue files are admitted only after TQ cipher signature and Lua assignment validation.",
         "maps":maps, "map_metadata_without_binary_path":extra_maps,
+        "source_map_archives":source_map_archives,
         "npc_templates":npc_templates, "npc_model_templates":npc_model_templates,
         "class_selection":class_selection, "quests":tasks,
         "npc_dialogues":dialogue_payload["npc_dialogues"],
@@ -175,6 +196,7 @@ def main():
     report = {"schema_version":"1.0.0","source_version":index["source_version"],
         "map_binary_records":len(maps),"unique_map_ids":len(map_ids),"duplicate_map_ids_preserved":duplicate_maps,
         "map_metadata_sections":len(map_meta),"map_metadata_without_binary_path":len(extra_maps),
+        "source_map_archives":source_map_archives,
         "map_binary_ids_without_metadata":map_ids_without_metadata,
         "npc_map_ids_with_metadata_only":npc_map_ids_with_metadata_only,
         "npc_map_ids_without_any_catalog_metadata":npc_map_ids_without_any_catalog_metadata,
