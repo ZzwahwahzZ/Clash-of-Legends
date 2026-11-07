@@ -161,25 +161,31 @@ func is_available_for_class(mission_id: String, completed_ids: Array, player_lev
 	var profession_code: String = GameContentDatabase.get_source_profession_id(class_id) if GameContentDatabase != null else ""
 	return is_available(mission_id, completed_ids, player_level, profession_code)
 
-func get_available_at_npc_for_class(npc_id: String, completed_ids: Array, player_level: int, class_id: String) -> Array[Dictionary]:
+func get_available_at_npc_for_class(npc_id: String, completed_ids: Array, player_level: int, class_id: String, map_id: String = "") -> Array[Dictionary]:
 	var profession_code := GameContentDatabase.get_source_profession_id(class_id) if GameContentDatabase else ""
-	return get_available_at_npc(npc_id, completed_ids, player_level, profession_code)
+	return get_available_at_npc(npc_id, completed_ids, player_level, profession_code, map_id)
 
-func get_available_at_npc(npc_id: String, completed_ids: Array = [], player_level: int = 0, profession_code: String = "") -> Array[Dictionary]:
+func get_available_at_npc(npc_id: String, completed_ids: Array = [], player_level: int = 0, profession_code: String = "", map_id: String = "") -> Array[Dictionary]:
 	# Only start-NPC offers are returned here. Turn-ins must be checked against
 	# the player's active mission by QuestNavigationAgent.
 	var key := npc_id.lstrip("0")
 	var result: Array[Dictionary] = []
 	for id in npc_starts.get(key, []):
+		var mission: Dictionary = missions.get(str(id), {})
+		var endpoint: Dictionary = mission.get("begin_npc", {})
+		if not map_id.is_empty() and str(endpoint.get("map_id", "")) != map_id:
+			continue
 		if is_available(str(id), completed_ids, player_level, profession_code):
 			result.append(get_mission(str(id)))
 	return result
 
-func is_turnin_npc(mission_id: String, npc_id: String) -> bool:
+func is_turnin_npc(mission_id: String, npc_id: String, map_id: String = "") -> bool:
 	if not missions.has(mission_id):
 		return false
 	var endpoint: Dictionary = missions[mission_id].get("finish_npc", {})
-	return str(endpoint.get("npc_id", "")).lstrip("0") == npc_id.lstrip("0") and npc_id.lstrip("0") != "0"
+	var same_npc := str(endpoint.get("npc_id", "")).lstrip("0") == npc_id.lstrip("0") and npc_id.lstrip("0") != "0"
+	var same_map := map_id.is_empty() or str(endpoint.get("map_id", "")) == map_id
+	return same_npc and same_map
 
 func get_city_hubs() -> Array[Dictionary]:
 	return city_hubs.duplicate(true)
