@@ -8,6 +8,7 @@ import argparse, hashlib, json, re, struct, tempfile, zipfile
 from pathlib import Path, PurePosixPath
 
 VERSION = "ConquerOnline-1.1.2.3"
+TARGET_APKS = {"ConquerOnline/ConquerOnline-1.1.2.3.apk", "ConquerOnline/config.arm64_v8a.apk", "ConquerOnline/config.xxhdpi.apk", "ConquerOnline/install_time_1001.apk"}
 ROOT_MARKER = "assets/ConquerRes/"
 NAME_RE = re.compile(r"(quest|task|mission|npc|dialog|conversation|talk|objective|reward|script|action|story|event|guide|promotion|job)", re.I)
 TEXT_EXTS = {".ini",".dat",".txt",".cfg",".xml",".json",".lua",".csv",".yaml",".yml",".properties",".bytes",".db",".sql"}
@@ -121,8 +122,11 @@ def main():
             "outer_member_count":0,"mobile_apk_candidates":[],"candidates":[],"oversize_skipped":[],"read_errors":[],"extracted_file_count":0}
     with zipfile.ZipFile(args.archive) as outer:
         report["outer_member_count"]=len(outer.infolist())
-        apk_names=[n for n in outer.namelist() if VERSION in n and n.lower().endswith(".apk")]
+        report["expected_apk_paths"]=sorted(TARGET_APKS)
+        outer_names=set(outer.namelist())
+        apk_names=sorted(TARGET_APKS & outer_names)
         report["mobile_apk_candidates"]=[{"path":n,"size_bytes":outer.getinfo(n).file_size} for n in apk_names]
+        report["missing_expected_apks"]=sorted(TARGET_APKS-outer_names)
         with zipfile.ZipFile(bundle,"w",compression=zipfile.ZIP_DEFLATED,compresslevel=6) as output:
             # Search already-extracted, version-matched source members first.
             scan_archive(outer,"outer",output,report,only_mobile_root=False)
