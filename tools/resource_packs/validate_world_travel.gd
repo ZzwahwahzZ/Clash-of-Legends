@@ -123,15 +123,18 @@ func _run_travel_test() -> void:
 	get_root().add_child(source_agent)
 	await process_frame
 	source_agent.completed_source_mission_ids.append("608")
-	if not source_agent.select_source_mission_at_npc("650", "2001", 8, "Monk"):
+	if source_agent.select_source_mission_at_npc("650", "2001", 8, "Monk", "1000"):
+		_fail("Source quest 650 incorrectly accepted its start NPC on the wrong city map.")
+		return
+	if not source_agent.select_source_mission_at_npc("650", "2001", 8, "Monk", "1002"):
 		_fail("Source quest 650 could not be accepted at its exact start NPC for an eligible class.")
 		return
-	source_agent.on_source_npc_talked("0004")
+	source_agent.on_source_npc_talked("0004", "1002")
 	var source_active_state: Dictionary = source_agent.get_source_active_state()
 	if not bool(source_active_state.get("ready_to_turn_in", false)):
 		_fail("Source NPC objective did not move mission 650 to ready-to-turn-in.")
 		return
-	if not source_agent.select_source_mission_at_npc("650", "0004", 8, "Monk"):
+	if not source_agent.select_source_mission_at_npc("650", "0004", 8, "Monk", "1002"):
 		_fail("Source quest 650 could not be turned in at its exact Armorer NPC.")
 		return
 	if not source_agent.completed_source_mission_ids.has("650"):
