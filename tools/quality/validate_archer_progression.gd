@@ -217,8 +217,8 @@ func _run() -> void:
 		return
 
 	print("ARCHER PROGRESSION PASSED: level gate, quest-gated unlock, one character identity, reversible forms, weapon loadouts, skill restrictions and save/load.")
-	player.queue_free()
 	GameManager.player_reference = null
+	player.free()
 	get_tree().quit(0)
 
 func _find_item_index(inventory: PlayerInventory, item_id: String) -> int:
