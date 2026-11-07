@@ -7,7 +7,9 @@ slot, or visual approval. Converted GLBs are merged later as explicit candidates
 from __future__ import annotations
 
 import csv
+import hashlib
 import json
+import shutil
 from pathlib import Path, PurePosixPath
 
 ROOT = Path.cwd()
@@ -63,6 +65,34 @@ def main() -> None:
             assets[category].append(entry)
     if not any(assets.values()):
         raise SystemExit("Runtime catalog would be empty.")
+    # The project already contains a verified 298-file offline OGG library.
+    # Stage it into the audio PCK instead of leaving playback dependent on loose
+    # project files that the category pack builder cannot see.
+    audio_source_root = ROOT / "assets" / "audio" / "extracted"
+    staged_audio_root = STAGE / "audio" / "extracted"
+    staged_audio_root.mkdir(parents=True, exist_ok=True)
+    for source_path in sorted(audio_source_root.iterdir()) if audio_source_root.is_dir() else []:
+        if not source_path.is_file() or source_path.suffix.lower() not in {".ogg", ".wav", ".mp3", ".flac", ".opus", ".aac", ".m4a"}:
+            continue
+        staged_path = staged_audio_root / source_path.name
+        shutil.copyfile(source_path, staged_path)
+        digest = hashlib.sha256()
+        with source_path.open("rb") as audio_stream:
+            for chunk in iter(lambda: audio_stream.read(1024 * 1024), b""):
+                digest.update(chunk)
+        staged_rel = staged_path.relative_to(ROOT).as_posix()
+        if staged_rel not in seen:
+            assets["audio"].append({
+                "path": staged_rel,
+                "source": "project-owned extracted audio asset: " + source_path.relative_to(ROOT).as_posix(),
+                "extension": source_path.suffix.lower(),
+                "size_bytes": source_path.stat().st_size,
+                "sha256": digest.hexdigest(),
+                "mapping_status": "verified_file_hash",
+                "asset_role": "audio_cue_unclassified",
+            })
+            seen.add(staged_rel)
+
     for category in assets:
         assets[category].sort(key=lambda item: item["path"])
     playable_audio = [
