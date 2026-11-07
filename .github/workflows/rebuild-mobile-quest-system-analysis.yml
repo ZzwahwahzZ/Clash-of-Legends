@@ -52,6 +52,10 @@ jobs:
           mn={x["mission_id"]:x["npc_references"] for x in p["mission_dialogue_npcs"]}
           assert "Whorf" in str(mn["5455"])
           assert "David" in str(mn["5456"]) and "Jack" in str(mn["5456"])
+          assert p["dialogue_npc_linkage"]["speaker_refs_with_quest_location_candidates"] >= 1100
+          whorf=next(x for x in mn["5455"] if x["npc_type_name"] == "Whorf")
+          assert whorf["simple_object_id"] == "186"
+          assert all(x["simple_object_id"] in ("214","8") for x in mn["5456"] if x["npc_type_name"] in ("David","Jack"))
           print("Quest-system analysis acceptance checks passed")
           PY
       - name: Upload rebuilt quest-system report
