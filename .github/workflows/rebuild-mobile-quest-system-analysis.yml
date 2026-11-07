@@ -67,7 +67,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Mobile-Quest-System-Analysis-v2
-          path: |\n            reports/mobile-quest-system-analysis.json\n            reports/quest_exports/
+          path: |
+            reports/mobile-quest-system-analysis.json
+            reports/quest_exports/
           if-no-files-found: error
           retention-days: 30
           compression-level: 6
