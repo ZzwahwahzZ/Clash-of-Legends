@@ -1,7 +1,8 @@
 name: Audit mobile gameplay source tables
 on:
   workflow_dispatch:
-  push:
+  pull_request:
+    branches: [main]
     paths:
       - ".github/workflows/audit-gameplay-source-tables.yml"
       - "tools/gameplay_source_audit/**"
