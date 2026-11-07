@@ -86,13 +86,13 @@ def main():
                 map_name_votes.setdefault(map_id, {})
                 map_name_votes[map_id][map_name] = map_name_votes[map_id].get(map_name, 0) + 1
     city_aliases = {
-        "TwinCity": ("مدينة التوأم", "main"),
-        "DesertCity": ("مدينة الصحراء", "minor"),
-        "BirdIsland": ("جزيرة الطيور", "minor"),
-        "ApeCity": ("مدينة القرود", "minor"),
-        "PhoenixCastle": ("قلعة العنقاء", "minor"),
-        "PhoenixCastal": ("قلعة العنقاء", "minor"),
-        "BirthVillage": ("قرية الميلاد", "minor"),
+        ("1002", "TwinCity"): ("مدينة التوأم", "main"),
+        ("1000", "DesertCity"): ("مدينة الصحراء", "minor"),
+        ("1015", "BirdIsland"): ("جزيرة الطيور", "minor"),
+        ("1020", "ApeCity"): ("مدينة القرود", "minor"),
+        ("1011", "PhoenixCastle"): ("قلعة العنقاء", "minor"),
+        ("1011", "PhoenixCastal"): ("قلعة العنقاء", "minor"),
+        ("1010", "BirthVillage"): ("قرية الميلاد", "minor"),
     }
     map_names = []
     city_hubs = []
@@ -101,8 +101,8 @@ def main():
         primary = aliases[0]["name"] if aliases else ""
         map_names.append({"map_id": map_id, "primary_name": primary, "aliases": aliases})
         for alias in aliases:
-            if alias["name"] in city_aliases:
-                name_ar, city_kind = city_aliases[alias["name"]]
+            if (map_id, alias["name"]) in city_aliases:
+                name_ar, city_kind = city_aliases[(map_id, alias["name"])]
                 city_hubs.append({
                     "map_id": map_id, "source_name": alias["name"],
                     "name_ar": name_ar, "name_en": alias["name"],
