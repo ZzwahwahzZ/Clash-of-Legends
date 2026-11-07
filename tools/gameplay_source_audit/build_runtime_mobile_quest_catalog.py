@@ -95,7 +95,7 @@ def main():
         ("1010", "BirthVillage"): ("قرية الميلاد", "minor"),
     }
     map_names = []
-    city_hubs = []
+    city_hubs_by_id = {}
     for map_id, votes in sorted(map_name_votes.items(), key=lambda x: int(x[0]) if x[0].isdigit() else 0):
         aliases = [{"name": name, "occurrences": count} for name, count in sorted(votes.items(), key=lambda x: (-x[1], x[0]))]
         primary = aliases[0]["name"] if aliases else ""
@@ -103,12 +103,21 @@ def main():
         for alias in aliases:
             if (map_id, alias["name"]) in city_aliases:
                 name_ar, city_kind = city_aliases[(map_id, alias["name"])]
-                city_hubs.append({
-                    "map_id": map_id, "source_name": alias["name"],
-                    "name_ar": name_ar, "name_en": alias["name"],
-                    "kind": city_kind, "evidence_occurrences": alias["occurrences"],
-                    "status": "SOURCE_NAME_MATCH_CANDIDATE_REQUIRES_MAP_RESOURCE_CONFIRMATION",
-                })
+                if map_id not in city_hubs_by_id:
+                    city_hubs_by_id[map_id] = {
+                        "map_id": map_id, "source_aliases": [],
+                        "name_ar": name_ar, "name_en": alias["name"],
+                        "kind": city_kind, "evidence_occurrences": 0,
+                        "status": "SOURCE_NAME_MATCH_CANDIDATE_REQUIRES_MAP_RESOURCE_CONFIRMATION",
+                    }
+                city_hubs_by_id[map_id]["source_aliases"].append(alias["name"])
+                city_hubs_by_id[map_id]["evidence_occurrences"] += alias["occurrences"]
+                if alias["name"] == "PhoenixCastle":
+                    city_hubs_by_id[map_id]["name_en"] = alias["name"]
+    city_hubs = list(city_hubs_by_id.values())
+    for hub in city_hubs:
+        if not any(str(row.get("map_id")) == hub["map_id"] for row in maps):
+            hub["status"] = "SOURCE_CITY_NAME_FOUND_BUT_MAP_RESOURCE_INDEX_MISSING"
     output = {
         "schema_version": "1.0.0",
         "source_version": src.get("source_version", ""),
