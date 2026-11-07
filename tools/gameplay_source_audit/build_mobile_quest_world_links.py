@@ -45,8 +45,8 @@ def parse_loc(raw):
     else:npcid,mapid,x,y,mapname=p;name=""
     try:xv=int(x);yv=int(y)
     except ValueError:xv=yv=None
-    return {"status":"LOCATION_ONLY" if npcid=="-1" else "NPC_REFERENCE",
-            "npc_id":None if npcid in ("-1","0") else npcid.zfill(4),
+    return {"status":"LOCATION_ONLY" if npcid in ("-1","0","0000") else "NPC_REFERENCE",
+            "npc_id":None if npcid in ("-1","0","0000") else npcid.zfill(4),
             "raw_npc_id":npcid,"map_id":mapid,"x":xv,"y":yv,
             "name":name,"map_name":mapname,"raw":raw}
 
@@ -136,7 +136,7 @@ def main():
                 except ValueError:x=y=None
                 mapdest[(mid,f["npcid"].zfill(4))].append({"section":s["section"],"title":f.get("title",""),"x":x,"y":y,"radius":f.get("radius","")})
 
-    npc_refs=[]; map_refs=[]; mob_refs=[]; item_refs=[]; prereq_refs=[]
+    npc_refs=[]; map_refs=[]; mob_refs=[]; item_refs=[]; prereq_refs=[]; lua_refs=[]
     for s in quests:
         f=s["fields"];mid=f.get("MissionId","")
         for role,key in [("begin","BeginNpcId"),("finish","FinishNpcId")]:
@@ -157,17 +157,26 @@ def main():
                 for token in re.findall(r"\[([^\]]+)\]",val):
                     head,_,payload=token.partition(" ");p=[x.strip() for x in payload.split(",")] if payload else []
                     if head=="npc" and len(p)>=5:
-                        loc={"npc_id":p[1].zfill(4),"map_id":p[2],"x":int(p[3]) if p[3].isdigit() else None,"y":int(p[4]) if p[4].isdigit() else None,"name":p[0]}
-                        matches=mapdest.get((loc["map_id"],loc["npc_id"]),[])
+                        raw_npc_id=p[1].strip()
+                        npc_id=raw_npc_id.zfill(4) if raw_npc_id not in ("-1","0","0000") else None
+                        loc={"npc_id":npc_id,"map_id":p[2],"x":int(p[3]) if p[3].isdigit() else None,"y":int(p[4]) if p[4].isdigit() else None,"name":p[0]}
+                        matches=mapdest.get((loc["map_id"],loc["npc_id"]),[]) if npc_id else []
                         exact=[m for m in matches if m["x"]==loc["x"] and m["y"]==loc["y"]]
-                        npc_refs.append({"mission_id":mid,"role":key,"status":"NPC_REFERENCE",**loc,
-                            "npc_type_name_matches":[k for k,v in npc_types.items() if v.casefold()==p[0].casefold()],
-                            "npcx_name_matches":npcx_names.get(p[0].casefold(),[]),
+                        npc_refs.append({"mission_id":mid,"role":key,"status":"NPC_REFERENCE" if npc_id else "LOCATION_ONLY",**loc,
+                            "npc_type_name_matches":[k for k,v in npc_types.items() if v.casefold()==p[0].casefold()] if npc_id else [],
+                            "npcx_name_matches":npcx_names.get(p[0].casefold(),[]) if npc_id else [],
                             "map_destination_matches":matches,"map_destination_exact_match":bool(exact)})
                         map_refs.append({"mission_id":mid,"role":key,"map_id":loc["map_id"],"x":loc["x"],"y":loc["y"]})
                     elif head=="mob" and len(p)>=4:
                         mob_refs.append({"mission_id":mid,"name":p[0],"map_id":p[1],"x":int(p[2]) if p[2].isdigit() else None,"y":int(p[3]) if p[3].isdigit() else None})
                         map_refs.append({"mission_id":mid,"role":key,"map_id":p[1],"x":int(p[2]) if p[2].isdigit() else None,"y":int(p[3]) if p[3].isdigit() else None})
+                    elif head=="item_t" and len(p)>=4:
+                        item_refs.append({"mission_id":mid,"kind":"world_item","name":p[0],"map_id":p[1],"x":int(p[2]) if p[2].isdigit() else None,"y":int(p[3]) if p[3].isdigit() else None})
+                        map_refs.append({"mission_id":mid,"role":key,"map_id":p[1],"x":int(p[2]) if p[2].isdigit() else None,"y":int(p[3]) if p[3].isdigit() else None})
+                    elif head=="map" and len(p)>=4:
+                        map_refs.append({"mission_id":mid,"role":key,"map_id":p[1],"x":int(p[2]) if p[2].isdigit() else None,"y":int(p[3]) if p[3].isdigit() else None})
+                    elif head=="lua" and p:
+                        lua_refs.append({"mission_id":mid,"field":key,"script_function":p[0],"raw":token})
                     elif head=="chk_item" and len(p)>=2:item_refs.append({"mission_id":mid,"item_id":p[0],"quantity":p[1]})
                     elif head=="chk_quest" and p:prereq_refs.append({"mission_id":mid,"required_mission_id":p[0]})
         for p in f.get("Prequest","").split("|"):
@@ -233,8 +242,8 @@ def main():
 
     duplicate=sorted(k for k,v in Counter(q["fields"].get("MissionId","") for q in quests).items() if k and v>1)
     missing_prereqs=sorted({r["required_mission_id"] for r in prereq_refs if r["required_mission_id"] not in all_ids})
-    exact_matches=sum(bool(r.get("map_destination_exact_match")) for r in npc_refs)
-    same_npc_map=sum(bool(r.get("map_destination_matches")) for r in npc_refs)
+    positive_npc_refs=[r for r in npc_refs if r.get("npc_id") not in (None,"","0000","-1")]\n    exact_matches=sum(bool(r.get("map_destination_exact_match")) for r in positive_npc_refs)
+    same_npc_map=sum(bool(r.get("map_destination_matches")) for r in positive_npc_refs)
     report={
         "schema_version":"1.0.0","source_version":"Conquer Online Mobile 1.1.2.3",
         "status":"SOURCE_LINKAGE_EVIDENCE_NOT_RUNTIME_APPROVED",
@@ -246,9 +255,9 @@ def main():
             "begin_location_only":sum(parse_loc(q["fields"].get("BeginNpcId",""))["status"]=="LOCATION_ONLY" for q in quests),
             "finish_location_only":sum(parse_loc(q["fields"].get("FinishNpcId",""))["status"]=="LOCATION_ONLY" for q in quests)},
         "prerequisites":{"reference_count":len(prereq_refs),"unresolved_ids_across_locales":missing_prereqs},
-        "npc_linkage":{"reference_count":len(npc_refs),"unique_positive_npc_ids":len({r.get("npc_id") for r in npc_refs if r.get("npc_id")}),
-            "npc_type_name_match_references":sum(bool(r.get("npc_type_name_matches")) for r in npc_refs),
-            "npcx_name_match_references":sum(bool(r.get("npcx_name_matches")) for r in npc_refs),
+        "npc_linkage":{"reference_count":len(npc_refs),"unique_positive_npc_ids":len({r.get("npc_id") for r in positive_npc_refs}),
+            "npc_type_name_match_references":sum(bool(r.get("npc_type_name_matches")) for r in positive_npc_refs),
+            "npcx_name_match_references":sum(bool(r.get("npcx_name_matches")) for r in positive_npc_refs),
             "mapdestination_same_npc_map_matches":same_npc_map,"mapdestination_exact_coordinate_matches":exact_matches,
             "mapdestination_coordinate_conflicts":same_npc_map-exact_matches},
         "map_linkage":map_summary,
@@ -258,10 +267,10 @@ def main():
             "mission_dialogue_links":mission_dialogue},
         "story_scene_linkage":{"lua_script_registry_count":len(script_registry),"client_realm_task_registry_count":sum("client_realm_task/juqing" in x["file"].lower() for x in script_registry),
             "client_realm_task_decoded_script_count":len(scene_scripts),"scripts":scene_scripts},
-        "mob_reference_count":len(mob_refs),"item_requirement_reference_count":len(item_refs),
+        "mob_reference_count":len(mob_refs),"item_requirement_reference_count":len(item_refs),"lua_script_reference_count":len(lua_refs),
         "source_hashes":[{"path":str(p.relative_to(root)),"size_bytes":p.stat().st_size,"sha256":hashlib.sha256(p.read_bytes()).hexdigest()}
             for p in [qpath,npc_type_path,npcx_path,mapdest_path,root/"ini/gamemap.dat",gmex_path,dlg_path,text_path,registry_path] if p.is_file()],
-        "npc_references":npc_refs,"map_references":map_refs,"mob_references":mob_refs,"item_references":item_refs,
+        "npc_references":npc_refs,"map_references":map_refs,"mob_references":mob_refs,"item_references":item_refs,"lua_script_references":lua_refs,
         "gamemap_catalog":gamemap,
     }
     args.output.parent.mkdir(parents=True,exist_ok=True)
