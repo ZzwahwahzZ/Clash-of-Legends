@@ -117,11 +117,11 @@ QUEST_CONTENT_MARKERS = (
 
 
 def path_discovery_reason(path: str) -> str | None:
-    low = path.lower().replace("\\\\", "/")
+    low = path.lower().replace("\\", "/")
     if not low.startswith(ROOT.lower()):
         return None
     base = low.rsplit("/", 1)[-1]
-    if any(token in low for token in TOKENS) or re.fullmatch(r"(clienttask\\d+|juqing\\d+)\\.dat", base):
+    if any(token in low for token in TOKENS) or re.fullmatch(r"(clienttask\d+|juqing\d+)\.dat", base):
         return "PATH_KEYWORD"
     if Path(low).suffix.lower() in (".dat", ".lua", ".txt", ".ini") and any(
         directory in low for directory in DISCOVERY_DIRS
