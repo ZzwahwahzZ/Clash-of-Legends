@@ -2,6 +2,7 @@
 """Synthetic regression tests for screenshot-driven Android smoke-test helpers."""
 from pathlib import Path
 import os
+import importlib.util
 import subprocess
 import sys
 import tempfile
@@ -11,7 +12,23 @@ ROOT = Path(__file__).resolve().parent
 ASSERT = ROOT / "assert_world_transition.py"
 TAP = ROOT / "tap_start_button.py"
 TAP_INTRO = ROOT / "tap_intro_skip.py"
+PREPARE_INTRO = ROOT / "prepare_emulator_intro.py"
+PREPARE_SPEC = importlib.util.spec_from_file_location("prepare_emulator_intro", PREPARE_INTRO)
+PREPARE_MODULE = importlib.util.module_from_spec(PREPARE_SPEC)
+PREPARE_SPEC.loader.exec_module(PREPARE_MODULE)
+
+notice_xml = """<hierarchy>
+  <node text="Got it" clickable="false" bounds="[1090,730][1270,810]" />
+  <node text="Got it" clickable="true" bounds="[1080,720][1290,820]" />
+</hierarchy>"""
+assert PREPARE_MODULE.find_notice_bounds(notice_xml, 2400, 1080) == (1185, 770, (1080, 720, 1290, 820))
+assert PREPARE_MODULE.find_notice_bounds('<hierarchy><node text="Cancel" bounds="[0,0][10,10]" /></hierarchy>', 2400, 1080) is None
+assert PREPARE_MODULE.find_notice_bounds('<hierarchy><node text="Got it" bounds="[2390,0][2410,10]" /></hierarchy>', 2400, 1080) is None
 SIZE = (2400, 1080)
+notice_panel = Image.new("RGB", SIZE, (8, 13, 32))
+ImageDraw.Draw(notice_panel).rectangle((730, 0, 1670, 615), fill=(73, 93, 146))
+assert PREPARE_MODULE.fullscreen_notice_panel_pixels(notice_panel) >= 50000
+assert PREPARE_MODULE.fullscreen_notice_panel_pixels(Image.new("RGB", SIZE, (8, 13, 32))) == 0
 
 with tempfile.TemporaryDirectory(prefix="clash-emulator-helper-test-") as temp:
     temp_path = Path(temp)
@@ -78,4 +95,4 @@ with tempfile.TemporaryDirectory(prefix="clash-emulator-helper-test-") as temp:
     no_screen = subprocess.run([sys.executable, str(TAP_INTRO), str(black_path)], env=env, capture_output=True, text=True)
     assert no_screen.returncode != 0 and "no tap issued" in no_screen.stderr, no_screen.stdout + no_screen.stderr
 
-print("ANDROID EMULATOR HELPER TESTS PASSED: RTL progress detection, pending-state rejection, world-transition acceptance, screenshot-derived intro skip, auto-dismiss recognition, black-frame rejection and screenshot-derived start-button tap.")
+print("ANDROID EMULATOR HELPER TESTS PASSED: RTL progress detection, pending-state rejection, world-transition acceptance, UIAutomator-bounded Android notice handling, notice-panel visual guard, screenshot-derived intro skip, auto-dismiss recognition, black-frame rejection and screenshot-derived start-button tap.")
