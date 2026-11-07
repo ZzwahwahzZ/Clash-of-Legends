@@ -6,6 +6,11 @@ class_name NPCBase
 @export var npc_id: String = "npc_sage"
 @export var role: String = "sage" # "sage", "blacksmith", "merchant", "warden"
 @export var required_level: int = 1
+@export var source_npc_id: String = ""
+@export var source_map_id: String = "1002"
+
+var _source_quest_agent: Node
+var _source_quest_callback: Callable
 
 var dialogue_lines_ar: Array[String] = [
 	"مرحباً بك يا بطل في مدينة التوأم. أرض الأساطير بانتظار شجاعتك!",
@@ -56,6 +61,10 @@ func interact(player: CharacterBody3D) -> void:
 	for agent in get_tree().get_nodes_in_group("quest_agents"):
 		if agent.has_method("on_npc_talked"):
 			agent.on_npc_talked(npc_id)
+		if not source_npc_id.is_empty() and agent.has_method("on_source_npc_talked"):
+			agent.on_source_npc_talked(source_npc_id)
+	if not source_npc_id.is_empty() and _open_source_quest_dialogue(player):
+		return
 	match role:
 		"sage":
 			_open_dialogue()
@@ -63,8 +72,56 @@ func interact(player: CharacterBody3D) -> void:
 			_open_blacksmith()
 		"merchant":
 			_open_merchant()
-		"warden":
+		"warden", "armorer":
 			_open_dialogue()
+
+func _open_source_quest_dialogue(player: CharacterBody3D) -> bool:
+	var tree := get_tree()
+	if tree == null:
+		return false
+	var dlg := tree.get_first_node_in_group("dialogue_ui")
+	if dlg == null or not dlg.has_method("show_source_quest_offers"):
+		return false
+	for agent in tree.get_nodes_in_group("quest_agents"):
+		if not agent.has_method("get_source_missions_for_npc_interaction"):
+			continue
+		var class_id := str(player.call("get_character_class")) if player.has_method("get_character_class") else ""
+		var offers: Array = agent.get_source_missions_for_npc_interaction(source_npc_id, player.current_level, class_id)
+		if offers.is_empty():
+			continue
+		if not _source_quest_callback.is_null() and dlg.source_quest_selected.is_connected(_source_quest_callback):
+			dlg.source_quest_selected.disconnect(_source_quest_callback)
+		_source_quest_agent = agent
+		_source_quest_callback = Callable(self, "_on_source_quest_selected").bind(agent, source_npc_id, player)
+		if not dlg.source_quest_selected.is_connected(_source_quest_callback):
+			dlg.source_quest_selected.connect(_source_quest_callback)
+		var intro := "المهام المتاحة هنا مرتبطة بسجلات العالم ومتطلبات شخصيتك." if GameManager.current_language == "ar" else "Available quests are checked against the world source and your character requirements."
+		dlg.show_source_quest_offers(npc_name_ar if GameManager.current_language == "ar" else npc_name_en, intro, offers, str(agent.active_source_mission_id))
+		return true
+	return false
+
+func _on_source_quest_selected(mission_id: String, agent: Node, selected_npc_id: String, player: CharacterBody3D) -> void:
+	var dlg := get_tree().get_first_node_in_group("dialogue_ui")
+	if dlg and not _source_quest_callback.is_null() and dlg.source_quest_selected.is_connected(_source_quest_callback):
+		dlg.source_quest_selected.disconnect(_source_quest_callback)
+	_source_quest_callback = Callable()
+	if not is_instance_valid(agent) or not is_instance_valid(player):
+		return
+	var class_id := str(player.call("get_character_class")) if player.has_method("get_character_class") else ""
+	var success := bool(agent.call("select_source_mission_at_npc", mission_id, selected_npc_id, player.current_level, class_id))
+	if not success:
+		if GameManager:
+			GameManager.post_notification("المهمة غير متاحة بعد أو لم يكتمل هدفها." if GameManager.current_language == "ar" else "This quest is locked or its objectives are not complete.", true)
+		return
+	var mission: Dictionary = agent.call("get_source_mission", mission_id)
+	var is_completed := agent.completed_source_mission_ids.has(mission_id)
+	var message := str(mission.get("content_ar", mission.get("intention_description_ar", mission.get("name_ar", "تم تحديث المهمة."))))
+	if is_completed:
+		message = "تم تسليم المهمة: " + str(mission.get("name_ar", mission_id))
+	elif message.is_empty():
+		message = "تم قبول المهمة: " + str(mission.get("name_ar", mission_id))
+	if GameManager:
+		GameManager.post_notification(message, false)
 
 func _open_dialogue() -> void:
 	var tree = get_tree()
