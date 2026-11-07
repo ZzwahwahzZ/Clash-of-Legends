@@ -98,8 +98,21 @@ jobs:
           unzip -q /tmp/jadx.zip -d /tmp/jadx
           chmod +x /tmp/jadx/bin/jadx
           /tmp/jadx/bin/jadx --version
+          # The APK also carries non-standard encrypted DEX payloads under assets/*.dex.
+          # Keep them intact as evidence, but exclude them from the standard DEX decompiler pass.
+          python3 - <<'PY'
+          import zipfile
+          src="build/apk-reader/ConquerOnline-1.1.2.3.apk"
+          dst="build/apk-reader/ConquerOnline-1.1.2.3-standard-dex-only.apk"
+          with zipfile.ZipFile(src) as zin, zipfile.ZipFile(dst,"w",zipfile.ZIP_DEFLATED) as zout:
+              for info in zin.infolist():
+                  if info.filename.lower().startswith("assets/") and info.filename.lower().endswith(".dex"):
+                      continue
+                  zout.writestr(info,zin.read(info))
+          print("Standard APK copy prepared; non-standard assets/*.dex retained separately in original APK.")
+          PY
           /tmp/jadx/bin/jadx --no-res --no-imports --show-bad-code \
-            -d build/apk-reader/decompiled build/apk-reader/ConquerOnline-1.1.2.3.apk
+            -d build/apk-reader/decompiled build/apk-reader/ConquerOnline-1.1.2.3-standard-dex-only.apk
           python3 - <<'PY'
           import json,re
           from pathlib import Path
