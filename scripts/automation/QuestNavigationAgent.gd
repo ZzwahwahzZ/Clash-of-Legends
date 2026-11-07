@@ -11,9 +11,39 @@ var quest_progress: int = 0
 var is_quest_completed: bool = false
 var completed_quest_ids: Array[String] = []
 var source_catalog := QuestSourceCatalog.new()
+var source_graph := QuestRuntimeGraph.new()
+var active_source_mission_id := ""
+var completed_source_mission_ids: Array[String] = []
 
 func get_source_catalog_status() -> Dictionary:
 	return source_catalog.get_counts()
+
+func get_source_graph_summary() -> Dictionary:
+	return source_graph.get_world_summary()
+
+func get_source_missions_available_at_npc(npc_id: String, player_level: int = 0, profession_code: String = "") -> Array[Dictionary]:
+	return source_graph.get_available_at_npc(npc_id, completed_source_mission_ids, player_level, profession_code)
+
+func get_source_mission_route(mission_id: String, turn_in: bool = false) -> Dictionary:
+	return source_graph.get_route(mission_id, turn_in)
+
+func activate_source_mission(mission_id: String, player_level: int, profession_code: String = "") -> bool:
+	if not source_graph.is_available(mission_id, completed_source_mission_ids, player_level, profession_code):
+		return false
+	active_source_mission_id = mission_id
+	emit_signal("quest_state_changed", mission_id, "source_active_candidate")
+	return true
+
+func complete_source_mission_turnin(mission_id: String) -> bool:
+	if mission_id != active_source_mission_id or completed_source_mission_ids.has(mission_id):
+		return false
+	var mission := source_graph.get_mission(mission_id)
+	if mission.is_empty():
+		return false
+	completed_source_mission_ids.append(mission_id)
+	active_source_mission_id = ""
+	emit_signal("quest_state_changed", mission_id, "source_completed_candidate")
+	return true
 
 func get_source_mission(mission_id: String) -> Dictionary:
 	return source_catalog.get_mission(mission_id)
@@ -131,6 +161,7 @@ var quest_database: Dictionary = {
 
 func _ready() -> void:
 	source_catalog.load_catalog()
+	source_graph.load_graph()
 	_validate_quest_database()
 	_notify_game_manager()
 
