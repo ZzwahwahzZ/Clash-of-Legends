@@ -96,7 +96,7 @@ func _open_source_quest_dialogue(player: CharacterBody3D) -> bool:
 		if not dlg.source_quest_selected.is_connected(_source_quest_callback):
 			dlg.source_quest_selected.connect(_source_quest_callback)
 		var intro := "المهام المتاحة هنا مرتبطة بسجلات العالم ومتطلبات شخصيتك." if GameManager.current_language == "ar" else "Available quests are checked against the world source and your character requirements."
-		dlg.show_source_quest_offers(npc_name_ar if GameManager.current_language == "ar" else npc_name_en, intro, offers, str(agent.active_source_mission_id))
+		dlg.show_source_quest_offers(npc_name_ar if GameManager.current_language == "ar" else npc_name_en, intro, offers, str(agent.active_source_mission_id), "blacksmith" if role == "blacksmith" else "")
 		return true
 	return false
 
@@ -105,6 +105,10 @@ func _on_source_quest_selected(mission_id: String, agent: Node, selected_npc_id:
 	if dlg and not _source_quest_callback.is_null() and dlg.source_quest_selected.is_connected(_source_quest_callback):
 		dlg.source_quest_selected.disconnect(_source_quest_callback)
 	_source_quest_callback = Callable()
+	if mission_id.begins_with("service:"):
+		if mission_id == "service:blacksmith":
+			_open_blacksmith()
+		return
 	if not is_instance_valid(agent) or not is_instance_valid(player):
 		return
 	var class_id := str(player.call("get_character_class")) if player.has_method("get_character_class") else ""
