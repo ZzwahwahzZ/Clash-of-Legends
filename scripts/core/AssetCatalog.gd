@@ -222,7 +222,7 @@ func instantiate_fitted_weapon_model(item_id: String, parent: Node3D, target_hei
 		if mesh_instance == null or mesh_instance.mesh == null:
 			continue
 		var relative_transform := _relative_transform_to_root(root, mesh_instance)
-		var mesh_bounds := _transform_aabb(mesh_instance.get_aabb(), relative_transform)
+		var mesh_bounds := _transform_aabb(mesh_instance.mesh.get_aabb(), relative_transform)
 		combined_bounds = mesh_bounds if not has_bounds else combined_bounds.merge(mesh_bounds)
 		has_bounds = true
 	if not has_bounds or combined_bounds.size.y <= 0.001:
