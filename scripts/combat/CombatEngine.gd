@@ -56,6 +56,17 @@ func execute_skill(skill_id: String, caster: CharacterBody3D, target: Node3D) ->
 	if not can_cast_skill(skill_id, caster):
 		return false
 	var def = skill_database[skill_id]
+	if def.get("effect", "") == "form_toggle":
+		if not ClassProgressionManager:
+			return false
+		var target_style := "throwing_knives" if ClassProgressionManager.selected_weapon_style == "bow" else "bow"
+		if not ClassProgressionManager.select_weapon_style(target_style):
+			if GameManager:
+				GameManager.post_notification("تحتاج إلى تجهيز سلاح الخناجر الرامية أولاً" if GameManager.current_language == "ar" else "Equip a Throwing Knife in the Assassin loadout first", true)
+			return false
+		cooldown_trackers[skill_id] = 0.0
+		emit_signal("skill_executed", skill_id, caster, caster, 0, false)
+		return true
 	cooldown_trackers[skill_id] = def["cooldown"]
 	if caster.has_method("consume_mp"):
 		caster.consume_mp(def["mp_cost"])
@@ -101,6 +112,14 @@ func execute_skill(skill_id: String, caster: CharacterBody3D, target: Node3D) ->
 func get_class_skills(target_class: String) -> Array[String]:
 	var result: Array[String] = []
 	for skill_id in skill_database.keys():
-		if skill_database[skill_id]["class_req"] == target_class:
-			result.append(skill_id)
+		var definition: Dictionary = skill_database[skill_id]
+		if str(definition.get("class_req", "")) != target_class:
+			continue
+		if ClassProgressionManager and not ClassProgressionManager.is_skill_compatible(definition):
+			continue
+		result.append(str(skill_id))
+	# Path of Shadow must remain reachable in both forms after promotion.
+	if result.has("archer_path_of_shadow"):
+		result.erase("archer_path_of_shadow")
+		result.push_front("archer_path_of_shadow")
 	return result
