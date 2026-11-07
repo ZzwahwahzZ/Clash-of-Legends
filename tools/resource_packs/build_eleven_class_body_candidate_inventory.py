@@ -184,19 +184,22 @@ def main():
             status = "NO_DIRECT_SOURCE_IDENTITY_EVIDENCE_FOUND"
         if name in ("Water Taoist", "Fire Taoist") and selection and not records:
             status = "TAOIST_BASE_CLASS_LABEL_FOUND_SPECIALIZATION_NOT_DISTINGUISHED_IN_CHARACTER_SELECTION"
+        selection_tokens = sorted({r["normalized_source_token"] for r in selection if r["normalized_source_token"]})
+        if selection and not records and name not in ("Water Taoist", "Fire Taoist"):
+            status = "CHARACTER_SELECTION_LABEL_FOUND_BODY_AND_SIMPLE_ROLE_JOIN_UNRESOLVED"
         matrix.append({
             "game_class": name,
-            "source_identity_tokens": [name] if records else (["Taoist"] if selection and name in ("Water Taoist", "Fire Taoist") else []),
+            "source_identity_tokens": sorted(set(([name] if records else []) + selection_tokens)),
             "source_identity_records": records,
             "simple_role_join_records": joined,
             "character_selection_label_records": selection,
             "body_model_candidates": [],
-            "status": status if records or not selection else "CHARACTER_SELECTION_LABEL_FOUND_BODY_AND_SIMPLE_ROLE_JOIN_UNRESOLVED",
+            "status": status,
         })
 
     unresolved_tokens = []
     for token in sorted((set(identity) | {r["normalized_source_token"] for r in selection_labels if r["normalized_source_token"]}) - set(CLASSES)):
-        records = unique_records(identity[token])
+        records = unique_records(identity.get(token, []))
         unresolved_tokens.append({
             "source_identity_token": token,
             "source_identity_records": records,
@@ -227,9 +230,31 @@ def main():
         "unresolved_source_identity_tokens": unresolved_tokens,
         "body_model_candidates": sorted(bodies.values(), key=lambda x: x["model_id"]),
         "class_matrix": matrix,
+        "class_progressions": [
+            {
+                "base_class": "Archer",
+                "promotion_class": "Oriental Assassin",
+                "promotion_level": 40,
+                "promotion_trigger": "User-confirmed level-40 class progression; source selection description additionally ties the transformation to equipping Throwing Knives.",
+                "source_description_english": "Once equipped with the agile Throwing Knives, the Archer can transform into an Oriental Assassin.",
+                "source_description_arabic": "عندما يمسك الرامي بسكين الرمي يتحول إلى سفاح شرقي وتظهر مواهبه الخفية بالسرعة والهجمات القوية.",
+                "source_file": "selectcharacter.ini / ini_ar/selectcharacter.ini",
+                "identity_rule": "Promotion state of Archer, not a twelfth base character-selection class. Reuse the Archer base identity unless an exact separate promoted body/rig/texture source mapping is proven.",
+                "asset_mapping_status": "PROMOTION_IDENTITY_CONFIRMED_BODY_VARIANT_UNRESOLVED",
+            },
+            {
+                "base_class": "Taoist",
+                "promotion_classes": ["Water Taoist", "Fire Taoist"],
+                "promotion_level": 40,
+                "source_description_english": "Taoists can choose the path of Water or Fire at Level 40.",
+                "identity_rule": "Two specialization paths from one Taoist base selection; do not count as two independent base character models without separate asset evidence.",
+                "asset_mapping_status": "SPECIALIZATION_CONFIRMED_BODY_VARIANT_UNRESOLVED",
+            },
+        ],
         "normalization_notes": {
             "Taoist": "The original character-selection description explicitly says Taoists choose Water or Fire at Level 40. Both game subclasses therefore inherit the generic Taoist base-selection evidence; neither subclass has a separate body-model mapping yet.",
             "Thunderstriker": "No direct Thunderstriker selection label was found. Windwalker's source description mentions thundercloud summoning, which is not sufficient evidence to equate the two classes.",
+            "Oriental Assassin": "This is the Archer's level-40 promotion/progression state, not a separate base selection slot. Preserve as an Archer progression identity and resolve any promoted visual variant only from exact source assets.",
             "Saint": "Saint appears as a separate source selection slot beside Monk. It is retained as an unnormalized source identity rather than silently merged into Monk.",
             "Dragon Warrior": "No direct source token found; do not infer from generic Warrior.",
             "Ninja": "Source role labels exist, but no matching simple-role records were joined.",
