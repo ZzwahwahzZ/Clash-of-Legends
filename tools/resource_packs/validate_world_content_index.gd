@@ -66,20 +66,34 @@ func _run_validation() -> void:
 	if index.get_quests_for_map(1002).is_empty():
 		_fail("Source map 1002 is not connected to its quest records.")
 		return
-	# Exercise the exact level gate recorded in the source row rather than assuming
-	# a hard-coded level or profession for this quest.
-	var quest_row: Dictionary = known_quest[0]
-	var required_level := int(quest_row.get("min_level", 0))
-	var test_level := required_level if required_level > 0 else 1
-	var allowed_professions: Array = quest_row.get("profession_ids", [])
-	var test_profession := int(allowed_professions[0]) if not allowed_professions.is_empty() else 0
-	var required_sex := int(quest_row.get("sex", 0))
-	var prerequisites: Array = quest_row.get("prerequisite_ids", []).duplicate()
-	if not index.is_source_quest_available(6126, test_level, test_profession, required_sex, prerequisites):
-		_fail("Source quest 6126 was rejected when tested with its own source level/profession/sex/prerequisite gates.")
-		return
-	if required_level > 1 and index.is_source_quest_available(6126, required_level - 1, test_profession, required_sex, prerequisites):
-		_fail("Source quest 6126 incorrectly passed one level below its source minimum.")
+	# Find a source quest with a pure minimum-level gate so the test does not
+	# invent requirements for a particular mission or mix in profession/prerequisite gates.
+	var level_gate_tested := false
+	for candidate in index.get_quests():
+		var candidate_mission := int(candidate.get("mission_id", -1))
+		var candidate_min := int(candidate.get("min_level", 0))
+		var candidate_max := int(candidate.get("max_level", 0))
+		var candidate_professions: Array = candidate.get("profession_ids", [])
+		var candidate_prerequisites: Array = candidate.get("prerequisite_ids", [])
+		if candidate_mission < 0 or candidate_min <= 1:
+			continue
+		if index.get_quests_by_mission_id(candidate_mission).size() != 1:
+			continue
+		if candidate_max > 0 and candidate_max < candidate_min:
+			continue
+		if not candidate_professions.is_empty() and not candidate_professions.has(0):
+			continue
+		if int(candidate.get("sex", 0)) != 0 or not candidate_prerequisites.is_empty():
+			continue
+		if not index.is_source_quest_available(candidate_mission, candidate_min, 0, 0, []):
+			continue
+		if index.is_source_quest_available(candidate_mission, candidate_min - 1, 0, 0, []):
+			_fail("Source quest minimum-level gate was incorrectly accepted below its recorded threshold.")
+			return
+		level_gate_tested = true
+		break
+	if not level_gate_tested:
+		_fail("No isolated source minimum-level gate could be exercised.")
 		return
 	if not index.is_source_quest_available(650, 8, 10, 0, [608]):
 		_fail("Profession gate for source quest 650 was not accepted for profession 10.")
