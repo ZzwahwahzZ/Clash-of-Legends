@@ -111,8 +111,12 @@ jobs:
                   zout.writestr(info,zin.read(info))
           print("Standard APK copy prepared; non-standard assets/*.dex retained separately in original APK.")
           PY
+          JADX_STATUS=0
           /tmp/jadx/bin/jadx --no-res --no-imports --show-bad-code \
-            -d build/apk-reader/decompiled build/apk-reader/ConquerOnline-1.1.2.3-standard-dex-only.apk
+            -d build/apk-reader/decompiled build/apk-reader/ConquerOnline-1.1.2.3-standard-dex-only.apk \
+            2>&1 | tee reports/jadx-standard-dex.log || JADX_STATUS=$?
+          printf '%s\n' "$JADX_STATUS" > reports/jadx-standard-dex-exit-code.txt
+          echo "JADX finished with exit code $JADX_STATUS; preserving partial decompilation and continuing evidence scan."
           python3 - <<'PY'
           import json,re
           from pathlib import Path
