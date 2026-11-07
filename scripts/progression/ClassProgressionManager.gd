@@ -54,18 +54,15 @@ func configure_for_character(class_id: String) -> void:
 	refresh_level_unlocks(_get_player_level())
 
 func refresh_level_unlocks(level: int) -> bool:
+	# Archer promotion is quest-gated. Reaching level 40 alone must never
+	# replace the active Archer form or grant the Assassin weapon path.
+	if progression_family == ARCHER_FAMILY:
+		return false
 	if level < ARCHER_UNLOCK_LEVEL:
 		return false
 	var unlocked_any := false
 	var messages_ar: Array[String] = []
 	var messages_en: Array[String] = []
-	if progression_family == ARCHER_FAMILY and not unlocked_weapon_styles.has(STYLE_THROWING_KNIVES):
-		unlocked_weapon_styles.append(STYLE_THROWING_KNIVES)
-		combat_form = "OrientalAssassin"
-		progression_unlocked.emit(STYLE_THROWING_KNIVES)
-		messages_ar.append("فُتح مسار الرامي الشرقي: الخناجر الرامية")
-		messages_en.append("Oriental Assassin path unlocked: Throwing Knives")
-		unlocked_any = true
 	if progression_family == TAOIST_FAMILY:
 		var added_taoist_branch := false
 		for branch_id in TAOIST_BRANCHES:
@@ -114,8 +111,31 @@ func select_weapon_style(style_id: String) -> bool:
 	if normalized_style != STYLE_BOW and normalized_style != STYLE_THROWING_KNIVES:
 		return false
 	selected_weapon_style = normalized_style
-	combat_form = "OrientalAssassin" if unlocked_weapon_styles.has(STYLE_THROWING_KNIVES) else ARCHER_FAMILY
+	combat_form = "OrientalAssassin" if normalized_style == STYLE_THROWING_KNIVES else ARCHER_FAMILY
 	weapon_style_changed.emit(normalized_style)
+	return true
+
+func apply_archer_promotion_result(result: Dictionary, character_level: int) -> bool:
+	# Called only after the original, source-verified level-40 promotion quest
+	# has been completed and its reward has actually been claimed.
+	if progression_family != ARCHER_FAMILY or character_level < ARCHER_UNLOCK_LEVEL:
+		return false
+	if not bool(result.get("quest_completed", false)):
+		return false
+	if not bool(result.get("promotion_reward_claimed", false)):
+		return false
+	if not bool(result.get("promotion_source_verified", false)):
+		return false
+	if str(result.get("promotion_quest_id", "")).strip_edges().is_empty():
+		return false
+	if unlocked_weapon_styles.has(STYLE_THROWING_KNIVES):
+		return false
+	unlocked_weapon_styles.append(STYLE_THROWING_KNIVES)
+	# Preserve the active Bow form. Unlocking a path is not an automatic form switch.
+	combat_form = ARCHER_FAMILY if selected_weapon_style == STYLE_BOW else "OrientalAssassin"
+	progression_unlocked.emit(STYLE_THROWING_KNIVES)
+	last_unlock_message_ar = "اكتملت ترقية رامي السهام وفُتح التحول إلى السفّاح الشرقي"
+	last_unlock_message_en = "Archer promotion completed; Oriental Assassin form unlocked"
 	return true
 
 func select_branch(branch_id: String) -> bool:
@@ -216,8 +236,11 @@ func deserialize(data: Dictionary) -> void:
 		selected_branch = saved_branch
 	if not selected_branch.is_empty():
 		combat_form = selected_branch
-	elif progression_family == ARCHER_FAMILY and unlocked_weapon_styles.has(STYLE_THROWING_KNIVES):
-		combat_form = "OrientalAssassin"
+	elif progression_family == ARCHER_FAMILY:
+		# Older saves may contain the unlock but no reliable form field.
+		# Reconstruct the form from the saved active weapon style, never from
+		# the mere presence of the Assassin unlock.
+		combat_form = "OrientalAssassin" if selected_weapon_style == STYLE_THROWING_KNIVES and unlocked_weapon_styles.has(STYLE_THROWING_KNIVES) else ARCHER_FAMILY
 	refresh_level_unlocks(_get_player_level())
 
 func _normalize_style_id(style_id: String) -> String:
