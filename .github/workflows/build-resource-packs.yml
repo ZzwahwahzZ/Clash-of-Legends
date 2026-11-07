@@ -135,8 +135,6 @@ jobs:
           git -C build/preservation diff --check
       - name: Test C3 parser and per-mesh GLB animation exporter
         run: cargo test --manifest-path tools/c3_audit/Cargo.toml --release
-      - name: Inventory converted original C3 body candidates against all eleven classes
-        run: python3 tools/resource_packs/build_eleven_class_body_candidate_inventory.py
       - name: Convert original C3 models and validate Godot imports
         run: |
           cargo run --manifest-path tools/c3_audit/Cargo.toml --release --bin clash-c3-audit -- build/c3-source build/pvr-png build/c3-glb reports/c3-model-audit.json
@@ -146,6 +144,8 @@ jobs:
           python3 tools/c3_audit/merge_c3_glb_assets.py
           python3 tools/resource_packs/build_equipment_visual_candidates.py
           python3 tools/resource_packs/validate_motion_c3_conversion.py
+      - name: Inventory converted original C3 body candidates against all eleven classes
+        run: python3 tools/resource_packs/build_eleven_class_body_candidate_inventory.py
       - name: Import merged C3 VAT runtime resources
         run: godot --headless --editor --path . --import --quit
       - name: Validate runtime C3 VAT idle, walk and run switching
