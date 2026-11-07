@@ -21,6 +21,11 @@ EXACT = {
     "ini_ar/questinfo.ini", "ini_ar/npc.ini", "ini_ar/npcx.ini", "ini_ar/terrainnpc.ini",
     "ini_sp/questinfo.ini", "ini_sp/npc.ini", "ini_sp/npcx.ini", "ini_sp/terrainnpc.ini",
     "ini/monster.dat", "ini/itemcfg.dat", "ini/copydrop.dat",
+    # Real map archives referenced by the exact gamemap.dat catalog for the
+    # current prototype's verified WindPlain, Desert, MapleForest, DragonPool,
+    # and Market source-map entries.
+    "map/map/newplain.7z", "map/map/desert.7z", "map/map/woods.7z",
+    "map/map/dragon.7z", "map/map/street.7z",
     "script/dialogtext/scriptdialoguetext_ar.dat", "script/dialogtext/scriptdialoguetext_en.dat",
     "ini/luaui/publicfiles/otherconf/npcdialogueinfo.dat",
     "ini/luaui/publicfiles/wordfiles/npcdialoguetext.dat",
