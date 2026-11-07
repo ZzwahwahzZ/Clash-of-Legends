@@ -165,6 +165,7 @@ def main():
                     "source": talk
                 })
         npc_dialogues.append({"dialogue_id": int(dialogue_id) if str(dialogue_id).isdigit() else str(dialogue_id),
+                              "model_template_ids": sorted(model_template_ids),
                               "data": data, "talks": resolved_talks})
 
     sources = [
