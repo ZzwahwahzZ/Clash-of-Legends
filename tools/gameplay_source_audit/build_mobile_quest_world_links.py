@@ -185,12 +185,16 @@ def main():
                         map_refs.append({"mission_id":mid,"role":key,"map_id":p[1],"x":int(p[2]) if p[2].isdigit() else None,"y":int(p[3]) if p[3].isdigit() else None})
                     elif head=="lua" and p:
                         raw_handler=p[1] if len(p)>1 else ""
-                        marker_match=re.search(r"</([A-Z]+)>(.*)$",raw_handler)
-                        if raw_handler.startswith("</") and marker_match:
-                            handler_marker=marker_match.group(1);function_name=marker_match.group(2);handler_data=""
-                        elif marker_match:
-                            handler_marker=marker_match.group(1);function_name=raw_handler[:marker_match.start()];handler_data=marker_match.group(2)
-                        else:handler_marker="";function_name=raw_handler;handler_data=""
+                        marker_match=re.match(r"^</([A-Z]+)>",raw_handler)
+                        if marker_match:
+                            handler_marker=marker_match.group(1);rest=raw_handler[marker_match.end():]
+                            function_name=rest.split("</",1)[0]
+                            handler_data="|".join(k+":"+v for k,v in re.findall(r"</([A-Z]+)>([^<]*)",rest))
+                        else:
+                            trailing=re.search(r"</([A-Z]+)>(.*)$",raw_handler)
+                            handler_marker=trailing.group(1) if trailing else ""
+                            function_name=raw_handler[:trailing.start()] if trailing else raw_handler
+                            handler_data=(trailing.group(1)+":"+trailing.group(2)) if trailing else ""
                         lua_refs.append({"mission_id":mid,"field":key,"npc_name":p[0],"script_function":function_name,"handler_marker":handler_marker,"handler_data":handler_data,"raw":token})
                     elif head=="chk_item" and len(p)>=2:item_refs.append({"mission_id":mid,"item_id":p[0],"quantity":p[1]})
                     elif head=="chk_quest" and p:quest_condition_refs.append({"mission_id":mid,"condition_quest_id":p[0],"condition_args":p[1:]})
