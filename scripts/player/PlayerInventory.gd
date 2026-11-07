@@ -215,11 +215,25 @@ func equip_item_from_slot(index: int) -> bool:
 	var item: Dictionary = slots[index]
 	if item.get("type") != "equipment" or not item.has("slot"):
 		return false
+	var target_slot := str(item["slot"])
+	var item_style := str(item.get("weapon_style", ""))
+	if target_slot == "weapon" and item_style in weapon_loadouts and item_style != _active_weapon_style:
+		if not _is_item_class_compatible(item):
+			return false
+		if ClassProgressionManager and not ClassProgressionManager.unlocked_weapon_styles.has(item_style):
+			if GameManager:
+				GameManager.post_notification("لا يمكن تجهيز هذا السلاح قبل فتح مساره" if GameManager.current_language == "ar" else "Unlock this weapon path before equipping its weapon", true)
+			return false
+		var previous_style_weapon: Variant = weapon_loadouts.get(item_style, null)
+		weapon_loadouts[item_style] = item.duplicate(true)
+		slots[index] = previous_style_weapon
+		emit_signal("equipment_updated")
+		emit_signal("inventory_updated")
+		return true
 	if not _is_item_compatible(item):
 		if GameManager:
 			GameManager.post_notification("هذا العتاد غير متوافق مع فئة البطل أو أسلوب سلاحه" if GameManager.current_language == "ar" else "This gear is incompatible with the hero class or weapon style", true)
 		return false
-	var target_slot := str(item["slot"])
 	if not equipment.has(target_slot):
 		return false
 	var old_eq = equipment.get(target_slot, null)
@@ -244,12 +258,29 @@ func equip_item(item: Dictionary) -> bool:
 		return true
 	return false
 
-func _is_item_compatible(item: Dictionary) -> bool:
+func _is_item_class_compatible(item: Dictionary) -> bool:
 	var player := get_parent()
 	var required_class := str(item.get("class_req", ""))
 	if not required_class.is_empty() and player and player.has_method("get_character_class"):
 		if str(player.get_character_class()) != required_class:
 			return false
+	if not required_class.is_empty() and ClassProgressionManager:
+		if not ClassProgressionManager.is_class_compatible(required_class):
+			return false
+	return true
+
+func has_weapon_for_style(style_id: String) -> bool:
+	if not weapon_loadouts.has(style_id):
+		return false
+	var active_weapon: Variant = equipment.get("weapon", null)
+	if active_weapon is Dictionary and str(active_weapon.get("weapon_style", "")) == style_id:
+		return true
+	var stored_weapon: Variant = weapon_loadouts.get(style_id, null)
+	return stored_weapon is Dictionary and _is_item_class_compatible(stored_weapon)
+
+func _is_item_compatible(item: Dictionary) -> bool:
+	if not _is_item_class_compatible(item):
+		return false
 	var required_style := str(item.get("weapon_style", ""))
 	if not required_style.is_empty() and ClassProgressionManager:
 		if str(ClassProgressionManager.selected_weapon_style) != required_style:
