@@ -26,6 +26,15 @@ func _run_validation() -> void:
 	if map_data.is_empty():
 		_fail("Known source map 1002 is missing.")
 		return
+	var metadata_only_maps: Array = index.get_map_metadata_only()
+	if metadata_only_maps.is_empty():
+		_fail("Metadata-only map catalog was not preserved.")
+		return
+	var metadata_only_id := int(metadata_only_maps[0].get("map_id", -1))
+	var metadata_only_entry: Dictionary = index.get_map_by_id(metadata_only_id)
+	if metadata_only_entry.is_empty() or not bool(metadata_only_entry.get("metadata_only", false)):
+		_fail("Metadata-only map lookup incorrectly claims an archive exists.")
+		return
 	var known_quest: Array = index.get_quests_by_mission_id(6126)
 	if known_quest.is_empty():
 		_fail("Known source quest 6126 is missing.")
