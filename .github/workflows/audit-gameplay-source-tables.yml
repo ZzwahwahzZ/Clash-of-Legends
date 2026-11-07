@@ -29,7 +29,7 @@ jobs:
           python3 -m venv .venv
           .venv/bin/pip install --disable-pip-version-check polyfile
           echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
-          python3 -m py_compile tools/gameplay_source_audit/comprehensive_asset_inventory.py tools/gameplay_source_audit/audit_source_tables.py
+          python3 -m py_compile tools/gameplay_source_audit/comprehensive_asset_inventory.py tools/gameplay_source_audit/audit_source_tables.py tools/gameplay_source_audit/quest_source_extractor.py
       - name: Recursively inventory every archive member by content
         run: |
           python3 tools/gameplay_source_audit/comprehensive_asset_inventory.py \
@@ -45,20 +45,24 @@ jobs:
             --output reports/gameplay-source-table-audit.json
       - name: Extract all Mobile quest, task, NPC, dialogue and action candidates
         run: |
-          python3 -m py_compile tools/gameplay_source_audit/quest_source_extractor.py
           python3 tools/gameplay_source_audit/quest_source_extractor.py \
             build/source/extracted-assets-001.zip \
             --output-dir reports/quest-source-extraction \
             --report reports/quest-source-extraction.json
           python3 -m json.tool reports/quest-source-extraction.json > /dev/null
-      - name: Validate report JSON and print concise inventory
+      - name: Validate reports and print concise inventory
         run: |
-          python3 -m json.tool reports/gameplay-source-table-audit.json > /dev/null
           python3 - <<'PY'
           import json
           from pathlib import Path
           q=json.loads(Path("reports/quest-source-extraction.json").read_text(encoding="utf-8"))
+          data=json.loads(Path("reports/gameplay-source-table-audit.json").read_text(encoding="utf-8"))
+          json.loads(Path("reports/comprehensive-asset-inventory.json").read_text(encoding="utf-8"))
           print("QUEST SOURCE EXTRACTOR:", q["source_version"])
+          print("Expected APKs:", json.dumps(q.get("expected_apk_paths", []), ensure_ascii=False))
+          print("Found APKs:", json.dumps(q.get("mobile_apk_candidates", []), ensure_ascii=False))
+          print("Missing APKs:", json.dumps(q.get("missing_expected_apks", []), ensure_ascii=False))
+          print("APK member counts:", json.dumps(q.get("apk_member_counts", []), ensure_ascii=False))
           print("Candidate files:", q["candidate_count"])
           print("Filename matches:", q["filename_match_count"])
           print("Content/code matches:", q["content_match_count"])
@@ -66,10 +70,6 @@ jobs:
           print("Bundle bytes:", q["output_bundle_size_bytes"])
           print("Oversize skipped:", len(q["oversize_skipped"]))
           print("Read errors:", len(q["read_errors"]))
-          python3 - <<'PY'
-          import json
-          from pathlib import Path
-          data=json.loads(Path("reports/gameplay-source-table-audit.json").read_text(encoding="utf-8"))
           print("Version-matched members:", data["version_matched_member_count"])
           print("Itemtype files/records:", data["itemtype_catalog"]["file_count"], data["itemtype_catalog"]["record_count"])
           print("Unlabelled column-59 candidates:", data["itemtype_catalog"].get("column_59_candidate_count", 0))
