@@ -30,7 +30,7 @@ EXACT = {
     "ini/luaui/dialog/dlgnpcdialogue/dlgmaintaskbook.dat",
     "ini/luaui/dialog/dlgnpcdialogue/dlgmaintaskletter.dat",
 }
-PATTERN = re.compile(r"(^|/)(client_realm_task/|clienttask[^/]*|[^/]*(quest|task|dialog|npc|juqing|gamemap)[^/]*\\.(dat|ini)$)", re.I)
+PATTERN = re.compile(r"(^|/)(client_realm_task/|clienttask[^/]*|[^/]*(quest|task|dialog|npc|juqing|gamemap)[^/]*\.(dat|ini)$)", re.I)
 TEXT_EXTS = {".ini", ".txt", ".lua", ".json", ".xml", ".csv", ".dat"}
 
 def digest(data: bytes) -> str:
