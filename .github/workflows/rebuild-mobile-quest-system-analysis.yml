@@ -48,6 +48,12 @@ jobs:
           assert p["monster_linkage"]["reference_count"] == 364
           assert p["item_linkage"]["item_definitions_available"] > 50000
           assert p["item_linkage"]["matched_item_ids"] > 1000
+          assert len(p["map_linkage"]["map_id_details"]) == 92
+          twin=next(x for x in p["map_linkage"]["map_id_details"] if x["map_id"] == "1002")
+          assert twin["resource_path"] == "map/map/newplain.7z"
+          assert "TwinCity" in twin["quest_source_names"]
+          assert p["progress_conditions"]["self_reference_count"] > 2000
+          assert p["progress_conditions"]["cross_mission_reference_count"] == 24
           assert p["dialogue_npc_linkage"]["mission_ids_with_dialogue_npcs"] >= 190
           mn={x["mission_id"]:x["npc_references"] for x in p["mission_dialogue_npcs"]}
           assert "Whorf" in str(mn["5455"])
