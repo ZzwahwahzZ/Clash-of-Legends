@@ -4,6 +4,29 @@ func _initialize() -> void:
 	call_deferred("_run_travel_test")
 
 func _run_travel_test() -> void:
+	var source_catalog := QuestSourceCatalog.new()
+	if not source_catalog.load_catalog():
+		_fail("Source-backed Mobile quest catalog could not be loaded: " + source_catalog.status)
+		return
+	var source_counts: Dictionary = source_catalog.get_counts()
+	if int(source_counts.get("missions", 0)) != 2509:
+		_fail("Expected 2509 unique source missions, got %s." % str(source_counts.get("missions", 0)))
+		return
+	if int(source_counts.get("maps", 0)) != 413:
+		_fail("Expected 413 source map records, got %s." % str(source_counts.get("maps", 0)))
+		return
+	var source_mission := source_catalog.get_mission("650")
+	if source_mission.is_empty() or str(source_mission.get("finish_npc", {}).get("npc_id", "")) != "0004":
+		_fail("Source mission 650 did not preserve its Armorer turn-in NPC reference.")
+		return
+	if source_catalog.get_map("1002").is_empty():
+		_fail("Twin City source map ID 1002 is missing from the imported map catalog.")
+		return
+	if source_catalog.get_missions_for_npc("4", "finish_npc").is_empty():
+		_fail("Exact source NPC lookup did not resolve the Armorer mission.")
+		return
+	print("QUEST SOURCE CATALOG AUDIT PASSED: ", source_counts)
+
 	var player := CharacterBody3D.new()
 	player.name = "TravelTestPlayer"
 	get_root().add_child(player)
