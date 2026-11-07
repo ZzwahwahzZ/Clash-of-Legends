@@ -16,10 +16,11 @@ def sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 def key_for(seed: int) -> bytes:
-    state = seed & 0x7fffffff
+    # Match the documented Microsoft rand() state width used by TQ File Cipher.
+    state = seed & 0xFFFFFFFF
     key = bytearray()
     for _ in range(128):
-        state = (state * 214013 + 2531011) & 0x7fffffff
+        state = (state * 0x343FD + 0x269EC3) & 0xFFFFFFFF
         key.append(((state >> 16) & 0x7fff) & 0xff)
     return bytes(key)
 
