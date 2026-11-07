@@ -1,133 +1,24 @@
 {
-  "manifest_version": "2.2.0",
-  "release_tag": "resource-packs-v4",
+  "manifest_version": "1.0.0",
+  "release_tag": "owned-resource-packs-v1",
   "app_version": "1.0.3",
   "package_id": "com.zwahwahzz.clashoflegends",
   "status": "PUBLISHED",
   "distribution_allowed": true,
-  "distribution_policy": "Published from the user's confirmed project resource build.",
+  "distribution_policy": "Only the explicit project-owned allowlist is published. Extracted Conquer source assets and converted derivatives are excluded.",
   "resource_packages": [
     {
-      "package_id": "animations",
-      "file_name": "animations.pck",
-      "display_name_ar": "الحركات والأنيميشن",
-      "display_name_en": "Animations",
-      "size_bytes": 15014032,
-      "sha256": "acb1c55d4f863fdab06016c31b0055a08c683013338ba006ac0b918a743b0e72",
-      "download_url": "https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/resource-packs-v4/animations.pck",
-      "godot_version": "4.3",
-      "platform": "all"
-    },
-    {
-      "package_id": "audio",
-      "file_name": "audio.pck",
-      "display_name_ar": "الأصوات والموسيقى",
-      "display_name_en": "Audio and Music",
-      "size_bytes": 13261264,
-      "sha256": "b3219d86943f47e2a39640087ac0dbbf1aaad5a1f54c7955f3c658b02d48e752",
-      "download_url": "https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/resource-packs-v4/audio.pck",
-      "godot_version": "4.3",
-      "platform": "all"
-    },
-    {
-      "package_id": "characters",
-      "file_name": "characters.pck",
-      "display_name_ar": "الشخصيات والفئات",
-      "display_name_en": "Characters and Classes",
-      "size_bytes": 101262032,
-      "sha256": "f06d0ea2ebae5124321e8a3e377dc62ebbc802581a2fe9c8fd096105fcd96a7b",
-      "download_url": "https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/resource-packs-v4/characters.pck",
-      "godot_version": "4.3",
-      "platform": "all"
-    },
-    {
-      "package_id": "effects",
-      "file_name": "effects.pck",
-      "display_name_ar": "المهارات والمؤثرات",
-      "display_name_en": "Skills and Effects",
-      "size_bytes": 6575632,
-      "sha256": "656b1c6ef952e3c91f73238700b59aa26d44b9afdbbe844411ca8dbcc3a537d6",
-      "download_url": "https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/resource-packs-v4/effects.pck",
-      "godot_version": "4.3",
-      "platform": "all"
-    },
-    {
-      "package_id": "equipment",
-      "file_name": "equipment.pck",
-      "display_name_ar": "الأسلحة والمعدات",
-      "display_name_en": "Weapons and Equipment",
-      "size_bytes": 10681936,
-      "sha256": "5a37c9f6d78b7821ff752afffc5589099bddde6c70af79cde41f9bc9fe1096ae",
-      "download_url": "https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/resource-packs-v4/equipment.pck",
-      "godot_version": "4.3",
-      "platform": "all"
-    },
-    {
-      "package_id": "interface",
-      "file_name": "interface.pck",
-      "display_name_ar": "موارد الواجهة",
-      "display_name_en": "Interface Resources",
-      "size_bytes": 53241248,
-      "sha256": "2a250f2a074fe3db679eb71803de9502ae6855138759c77e9db6bd48498b49c6",
-      "download_url": "https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/resource-packs-v4/interface.pck",
-      "godot_version": "4.3",
-      "platform": "all"
-    },
-    {
-      "package_id": "maps",
-      "file_name": "maps.pck",
-      "display_name_ar": "الخرائط والمناطق",
-      "display_name_en": "Maps and Regions",
-      "size_bytes": 360305264,
-      "sha256": "1a7eab38ba1807b0cd0987a8e1f1567216a1afca8f2e865aa6821fee225c16c0",
-      "download_url": "https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/resource-packs-v4/maps.pck",
-      "godot_version": "4.3",
-      "platform": "all"
-    },
-    {
-      "package_id": "models",
-      "file_name": "models.pck",
-      "display_name_ar": "النماذج ثلاثية الأبعاد",
-      "display_name_en": "3D Models",
-      "size_bytes": 277661104,
-      "sha256": "830a6289feac8a802473e8d95ebe118b67f4cd878b496ab60f6e77b6f1b26a7f",
-      "download_url": "https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/resource-packs-v4/models.pck",
-      "godot_version": "4.3",
-      "platform": "all"
-    },
-    {
-      "package_id": "monsters",
-      "file_name": "monsters.pck",
-      "display_name_ar": "الوحوش والأعداء",
-      "display_name_en": "Monsters and Enemies",
-      "size_bytes": 66345440,
-      "sha256": "c6f7eda4b640413ffbc7217a0b92935fd32354cb4544032c700d8343b8acad10",
-      "download_url": "https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/resource-packs-v4/monsters.pck",
-      "godot_version": "4.3",
-      "platform": "all"
-    },
-    {
-      "package_id": "mounts",
-      "file_name": "mounts.pck",
-      "display_name_ar": "المطايا والمرافقون",
-      "display_name_en": "Mounts and Companions",
-      "size_bytes": 33953520,
-      "sha256": "1d16c0e8be3dcff32e9089bd1fb27e3882290ec5887e91494c79d3b19601ec78",
-      "download_url": "https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/resource-packs-v4/mounts.pck",
-      "godot_version": "4.3",
-      "platform": "all"
-    },
-    {
-      "package_id": "world",
-      "file_name": "world.pck",
-      "display_name_ar": "العالم والموارد الأساسية",
-      "display_name_en": "World and Core Resources",
-      "size_bytes": 189284656,
-      "sha256": "73960a7d435e89417ba1dd52c1dee442372377db39e4a7e61fe874a9e42ef419",
-      "download_url": "https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/resource-packs-v4/world.pck",
+      "package_id": "owned-core",
+      "file_name": "owned-core.pck",
+      "display_name_ar": "موارد اللعبة الأصلية",
+      "display_name_en": "Project-owned Core Resources",
+      "size_bytes": 643136,
+      "sha256": "dc2f299e203a18fd243ded5f162d5fa7e8b9a01ef9f2cb6f48a39bb36b9659ee",
+      "download_url": "https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/owned-resource-packs-v1/owned-core.pck",
       "godot_version": "4.3",
       "platform": "all"
     }
   ],
-  "build_note": "11 Godot 4.3 PCK files from the verified resource-packs-v4 GitHub release. Size and SHA-256 are taken from the release assets."
+  "allowlist_file": "distribution/OWNED_ASSETS_ALLOWLIST.json",
+  "build_note": "Only assets explicitly listed in the project-owned allowlist are included."
 }
