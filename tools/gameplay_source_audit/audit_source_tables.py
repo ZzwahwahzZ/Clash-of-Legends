@@ -221,6 +221,7 @@ def main() -> None:
     with zipfile.ZipFile(args.archive) as outer:
         results = {}
         itemtype_id_lookups = []
+        column_59_candidate_count = 0
         quest_promotion_candidates = []
         promotion_text_hits = []
         with tempfile.TemporaryDirectory(prefix="co-source-audit-") as temp_dir:
@@ -261,6 +262,8 @@ def main() -> None:
                                 data = source_zip.read(member)
                                 parsed_itemtype = parse_itemtype(data, include_column_59_candidate=rel.lower().endswith("itemtype13.ini"))
                                 for row in parsed_itemtype.get("records", []):
+                                    if "column_59_candidate" in row:
+                                        column_59_candidate_count += 1
                                     if row.get("record_id") in lookup_ids:
                                         itemtype_id_lookups.append({
                                             "source_member": display, "relative_path": rel,
@@ -468,7 +471,7 @@ def main() -> None:
                     "file_count": len(itemtypes),
                     "record_count": sum(int(e.get("record_count", 0)) for e in itemtypes),
                     "malformed_or_duplicate_lines": sum(int(e.get("malformed_or_duplicate_lines", 0)) for e in itemtypes),
-                    "column_59_candidate_count": sum(1 for e in itemtypes for row in e.get("records", []) if "column_59_candidate" in row),
+                    "column_59_candidate_count": column_59_candidate_count,
                     "schema_policy": "Only numeric record ID and visible name are parsed; every remaining positional field remains opaque."
                 },
                 "acceptance": "SOURCE_INVENTORY_ONLY_NOT_RUNTIME_APPROVED",
