@@ -47,8 +47,8 @@ func _run_validation() -> void:
 	if str(first_talk.get("text_key", "")).is_empty():
 		_fail("NPC dialogue talk step has no source text key.")
 		return
-	var ar_text := index.get_dialogue_text(str(first_talk.get("text_key", "")), "ar")
-	var en_text := index.get_dialogue_text(str(first_talk.get("text_key", "")), "en")
+	var ar_text: String = index.get_dialogue_text(str(first_talk.get("text_key", "")), "ar")
+	var en_text: String = index.get_dialogue_text(str(first_talk.get("text_key", "")), "en")
 	if ar_text.is_empty() and en_text.is_empty():
 		_fail("NPC dialogue text key could not be resolved in Arabic or English.")
 		return
