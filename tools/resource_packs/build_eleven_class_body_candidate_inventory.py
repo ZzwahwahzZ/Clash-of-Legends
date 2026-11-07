@@ -7,6 +7,7 @@ ROOT = Path.cwd()
 REPORTS = ROOT / "reports"
 ROLE = ROOT / "resource_stage/world/resource_mappings/role_model_candidate_catalog.json"
 AUDIT = REPORTS / "c3-model-audit.json"
+MESH_CATALOG = ROOT / "resource_stage/world/resource_mappings/mesh_equipment_catalog.json"
 OUT = REPORTS / "eleven-class-body-candidate-inventory.json"
 CLASSES = [
     "Trojan", "Warrior", "Archer", "Ninja", "Monk", "Pirate",
@@ -14,9 +15,18 @@ CLASSES = [
 ]
 
 
+def unique_records(records):
+    unique = {}
+    for record in records:
+        key = (record["gender"], record["slot"], record["profession_index"], record["simple_object_id"])
+        unique[key] = record
+    return list(unique.values())
+
+
 def main():
     roles = json.loads(ROLE.read_text(encoding="utf-8"))
     audit = json.loads(AUDIT.read_text(encoding="utf-8"))
+    mesh_catalog = json.loads(MESH_CATALOG.read_text(encoding="utf-8"))
 
     bodies = {}
     for row in audit.get("converted", []):
@@ -34,6 +44,35 @@ def main():
             "source_rows": 0,
         })
         item["source_rows"] += 1
+
+    # Exact body-file-to-armor.dbc part-path join. This proves source usage,
+    # not class identity or final visual correctness.
+    armor_records = mesh_catalog.get("tables", {}).get("ini/armor.dbc", {}).get("records", [])
+    for model, item in bodies.items():
+        expected = f"c3/body/{model}.c3".lower()
+        matches = []
+        for record in armor_records:
+            for part in record.get("parts", []):
+                mesh_path = str(part.get("mesh_path") or "").replace("\\", "/").lower().lstrip("/")
+                if mesh_path == expected or mesh_path.endswith("/" + expected):
+                    matches.append({
+                        "armor_record_id": record.get("unique_id"),
+                        "part_index": part.get("part_index"),
+                        "mesh_id": part.get("mesh_id"),
+                        "mesh_path": part.get("mesh_path"),
+                        "texture_id": part.get("texture_id"),
+                        "texture_path": part.get("texture_path"),
+                        "mesh_path_resolved": part.get("mesh_path_resolved"),
+                        "texture_path_resolved": part.get("texture_path_resolved"),
+                    })
+        item["armor_db_mesh_reference_count"] = len(matches)
+        item["armor_db_record_ids"] = sorted({x["armor_record_id"] for x in matches if x["armor_record_id"] is not None})
+        item["armor_db_texture_paths"] = sorted({x["texture_path"] for x in matches if x["texture_path"]})[:30]
+        item["armor_db_mesh_reference_samples"] = matches[:30]
+        item["armor_db_usage_status"] = (
+            "REFERENCED_BY_ARMOR_DBC_WITH_SOURCE_TEXTURE_PATHS"
+            if matches else "NO_ARMOR_DBC_PART_PATH_REFERENCE_FOUND"
+        )
 
     identity = {}
     for row in roles.get("selection_ui_roles_unjoined", []):
@@ -60,13 +99,6 @@ def main():
                 "evidence_source": "rolechoose_js.ini",
                 "identity_status": row.get("mapping_status"),
             })
-
-    def unique_records(records):
-        unique = {}
-        for record in records:
-            key = (record["gender"], record["slot"], record["profession_index"], record["simple_object_id"])
-            unique[key] = record
-        return list(unique.values())
 
     matrix = []
     for name in CLASSES:
@@ -97,10 +129,14 @@ def main():
             "normalization_status": "SOURCE_TOKEN_NOT_NORMALIZED_TO_A_GAME_CLASS",
         })
 
+    referenced = sum(bool(x["armor_db_mesh_reference_count"]) for x in bodies.values())
     result = {
-        "schema_version": "1.2.0",
-        "source": "Conquer Online Mobile 1.1.2.3 C3 conversion audit",
+        "schema_version": "1.3.0",
+        "source": "Conquer Online Mobile 1.1.2.3 C3 conversion audit + WDB armor.dbc",
         "converted_unique_body_models": len(bodies),
+        "armor_db_record_count": len(armor_records),
+        "body_candidates_with_armor_db_mesh_references": referenced,
+        "body_candidates_without_armor_db_mesh_references": len(bodies) - referenced,
         "source_identity_token_count": len(identity),
         "game_classes_with_source_label_match": sum(bool(x["source_identity_records"]) for x in matrix),
         "game_classes_with_simple_role_index_joins": sum(bool(x["simple_role_join_records"]) for x in matrix),
@@ -115,22 +151,22 @@ def main():
             "Pirate": "Source role labels exist, but no matching simple-role records were joined.",
         },
         "policy": (
-            "All body models remain an unassigned candidate pool. Source labels and simple-role "
-            "index joins are evidence only, not approved body-model mappings. No class assignment "
-            "is approved by numeric similarity, filename order, or visual guess. Approval requires "
-            "an exact source asset join, resolved compatible texture, rig/motion validation, and "
-            "visual/runtime review."
+            "Armor.dbc part-path references prove that a C3 body source is used by one or more armor records; "
+            "they do not prove a character-selection class/gender mapping. All body models remain unassigned. "
+            "Approval requires an exact source identity join, compatible texture, rig/motion validation, "
+            "and visual/runtime review."
         ),
     }
     REPORTS.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({
         "converted_unique_body_models": len(bodies),
-        "game_classes": len(CLASSES),
+        "armor_db_record_count": len(armor_records),
+        "body_candidates_with_armor_db_mesh_references": referenced,
+        "body_candidates_without_armor_db_mesh_references": len(bodies) - referenced,
         "source_identity_tokens": len(identity),
         "game_classes_with_source_labels": result["game_classes_with_source_label_match"],
         "game_classes_with_simple_role_joins": result["game_classes_with_simple_role_index_joins"],
-        "unresolved_source_tokens": len(unresolved_tokens),
     }, ensure_ascii=False))
 
 
