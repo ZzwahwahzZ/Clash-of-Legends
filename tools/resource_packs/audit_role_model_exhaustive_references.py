@@ -49,23 +49,25 @@ def main():
             raw=p.read_bytes()
         except OSError:continue
         text,enc=decode(raw)
-        printable=sum(1 for ch in text if ch.isprintable() or ch in "\\t\\r\\n")/max(1,len(text)) if text is not None else 0
-        if text is None or "\\x00" in text or printable<0.82:
+        printable=sum(1 for ch in text if ch.isprintable() or ch in "\t\r\n")/max(1,len(text)) if text is not None else 0
+        if text is None or "\x00" in text or printable<0.82:
             undecodable.append(rel)
             if is_registry: registry_sources.append({"path":rel,"parse_status":"NOT_PLAINTEXT_OR_UNDECODABLE","size_bytes":len(raw),"sha256":hashlib.sha256(raw).hexdigest()})
             continue
         scanned+=1
         registry_lines=[]
+        registry_hit_count=0
         for line_no,line in enumerate(text.splitlines(),1):
             matched=[t for t in TOKENS if re.search(rf"(?<![0-9]){re.escape(t)}(?![0-9])",line)]
             if matched:
                 hits.append({"path":rel,"line":line_no,"encoding":enc,"tokens":matched,"context":line.strip()[:700]})
             if is_registry and any(term.lower() in line.lower() for term in CLASS_TERMS):
+                registry_hit_count+=1
                 entry={"path":rel,"line":line_no,"encoding":enc,"tokens":[],"context":line.strip()[:700],"kind":"role_registry_class_line"}
                 hits.append(entry)
                 if len(registry_lines)<200: registry_lines.append({"line":line_no,"text":line.strip()[:700]})
         if is_registry:
-            registry_sources.append({"path":rel,"parse_status":"PLAINTEXT_SCANNED","size_bytes":len(raw),"sha256":hashlib.sha256(raw).hexdigest(),"encoding":enc,"class_term_hit_count":len(registry_lines),"class_term_hits":registry_lines})
+            registry_sources.append({"path":rel,"parse_status":"PLAINTEXT_SCANNED","size_bytes":len(raw),"sha256":hashlib.sha256(raw).hexdigest(),"encoding":enc,"class_term_hit_count":registry_hit_count,"class_term_hits":registry_lines})
     # Exact source identity joins are preserved as evidence, never upgraded to a verified visual mapping.
     js=cat.get("rolechoose_js_source_role_joins",[])
     out={
