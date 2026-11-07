@@ -323,6 +323,23 @@ func _ready() -> void:
 	source_graph.load_graph()
 	_validate_quest_database()
 	_notify_game_manager()
+	call_deferred("_connect_source_world_travel")
+
+func _connect_source_world_travel() -> void:
+	var manager := get_tree().get_first_node_in_group("world_travel_manager")
+	if manager and manager.has_signal("travel_completed") and not manager.travel_completed.is_connected(_on_source_world_travel_completed):
+		manager.travel_completed.connect(_on_source_world_travel_completed)
+	if manager and manager.has_method("get_current_source_map_id"):
+		var current_map := str(manager.get_current_source_map_id())
+		if not current_map.is_empty():
+			on_source_map_entered(current_map)
+
+func _on_source_world_travel_completed(_destination_id: String, _world_position: Vector3) -> void:
+	var manager := get_tree().get_first_node_in_group("world_travel_manager")
+	if manager and manager.has_method("get_current_source_map_id"):
+		var current_map := str(manager.get_current_source_map_id())
+		if not current_map.is_empty():
+			on_source_map_entered(current_map)
 
 func _validate_quest_database() -> bool:
 	for quest_id in quest_database:
@@ -473,6 +490,54 @@ func _get_navigation_target() -> Dictionary:
 		"turn_in": is_quest_completed,
 		"turn_in_npc_id": turn_in_npc
 	}
+
+func navigate_to_active_source_mission() -> bool:
+	if active_source_mission_id.is_empty():
+		return false
+	var mission := source_graph.get_mission(active_source_mission_id)
+	var objectives := source_graph.get_objective_routes(active_source_mission_id)
+	var progress: Array = source_objective_progress.get(active_source_mission_id, [])
+	var player := GameManager.player_reference if GameManager else null
+	if player == null or not is_instance_valid(player):
+		return false
+	for index in range(objectives.size()):
+		if index < progress.size() and bool(progress[index]):
+			continue
+		var objective: Dictionary = objectives[index]
+		var map_id := str(objective.get("map_id", ""))
+		var manager := get_tree().get_first_node_in_group("world_travel_manager")
+		var current_map := str(manager.get_current_source_map_id()) if manager and manager.has_method("get_current_source_map_id") else ""
+		if not map_id.is_empty() and not current_map.is_empty() and map_id != current_map:
+			if manager and manager.has_method("travel_to"):
+				return bool(manager.travel_to("city_" + map_id, "quest"))
+			return false
+		if str(objective.get("kind", "")) == "npc":
+			var wanted_npc := str(objective.get("npc_id", "")).lstrip("0")
+			for npc in get_tree().get_nodes_in_group("source_quest_npcs"):
+				if str(npc.get("source_npc_id")).lstrip("0") == wanted_npc and str(npc.get("source_map_id")) == map_id:
+					if player.has_method("move_towards_target_position"):
+						player.move_towards_target_position(npc.global_position, 0.0)
+					return true
+			_notify_source_navigation_gap("لم يتم إدماج شخصية المهمة المطلوبة في هذه الخريطة بعد: " + str(objective.get("npc_name", wanted_npc)))
+			return false
+		if str(objective.get("kind", "")) == "mob":
+			_notify_source_navigation_gap("هدف المهمة: " + str(objective.get("monster_name", "وحش غير محدد")) + " — لم يُربط نموذج هذا الوحش بالخريطة بعد.")
+			return false
+		if str(objective.get("kind", "")) in ["item_t", "chk_item"]:
+			_notify_source_navigation_gap("هدف المهمة يتطلب العنصر: " + str(objective.get("item_name", objective.get("item_id", ""))) + " — ربط مصدر العنصر قيد الاستكمال.")
+			return false
+		_notify_source_navigation_gap("شرط المهمة يحتاج إلى ربط مصدر إضافي: " + str(objective.get("kind", "")))
+		return false
+	if source_ready_to_turn_in_ids.has(active_source_mission_id):
+		var turnin := source_graph.get_route(active_source_mission_id, true)
+		_notify_source_navigation_gap("اكتمل الهدف. ارجع إلى " + str(turnin.get("npc_name", "صاحب المهمة")) + " لاستلام المكافأة.")
+		return true
+	_notify_source_navigation_gap("لا توجد أهداف قابلة للملاحة في بيانات المهمة الحالية.")
+	return false
+
+func _notify_source_navigation_gap(message: String) -> void:
+	if GameManager:
+		GameManager.post_notification(message, true)
 
 func navigate_to_quest_target() -> void:
 	if not GameManager or not is_instance_valid(GameManager.player_reference):
