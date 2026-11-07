@@ -1,0 +1,159 @@
+extends Node
+## Read-only runtime access to the verified Mobile 1.1.2.3-derived world catalog.
+## Source coordinates remain source metadata until the map tile/world transform is validated.
+
+const INDEX_PATH := "res://data/world_content_index.json"
+
+var index_ready := false
+var index_error := ""
+var _index: Dictionary = {}
+var _maps_by_id: Dictionary = {}
+var _quests_by_section: Dictionary = {}
+var _quests_by_mission_id: Dictionary = {}
+var _quests_by_npc_id: Dictionary = {}
+var _quests_by_map_id: Dictionary = {}
+
+func _ready() -> void:
+	load_index()
+
+func load_index() -> bool:
+	index_ready = false
+	index_error = ""
+	_index.clear()
+	_maps_by_id.clear()
+	_quests_by_section.clear()
+	_quests_by_mission_id.clear()
+	_quests_by_npc_id.clear()
+	_quests_by_map_id.clear()
+	if not FileAccess.file_exists(INDEX_PATH):
+		index_error = "Runtime source index is missing: " + INDEX_PATH
+		push_warning(index_error)
+		return false
+	var file := FileAccess.open(INDEX_PATH, FileAccess.READ)
+	if file == null:
+		index_error = "Could not open runtime source index."
+		push_error(index_error)
+		return false
+	var parsed: Variant = JSON.parse_string(file.get_as_text())
+	if not parsed is Dictionary:
+		index_error = "Runtime source index is not a JSON object."
+		push_error(index_error)
+		return false
+	_index = parsed
+	if str(_index.get("source_version", "")) != "ConquerOnline-1.1.2.3":
+		index_error = "Runtime source index version does not match the audited Mobile source."
+		push_error(index_error)
+		_index.clear()
+		return false
+	for map_data in _index.get("maps", []):
+		if not map_data is Dictionary:
+			continue
+		var map_id := int(map_data.get("map_id", -1))
+		if map_id >= 0:
+			if not _maps_by_id.has(map_id):
+				_maps_by_id[map_id] = map_data
+			else:
+				var existing: Array = _maps_by_id[map_id].get("_duplicate_source_records", [])
+				existing.append(map_data)
+				_maps_by_id[map_id]["_duplicate_source_records"] = existing
+	for quest in _index.get("quests", []):
+		if not quest is Dictionary:
+			continue
+		var section_id := str(quest.get("source_section", ""))
+		if not section_id.is_empty():
+			_quests_by_section[section_id] = quest
+		var mission_id := int(quest.get("mission_id", -1))
+		if mission_id >= 0:
+			if not _quests_by_mission_id.has(mission_id):
+				_quests_by_mission_id[mission_id] = []
+			_quests_by_mission_id[mission_id].append(quest)
+		_index_quest_map(quest, int(quest.get("map_id", 0)))
+		_index_quest_npc(quest, quest.get("begin_npc", null), "begin")
+		_index_quest_npc(quest, quest.get("finish_npc", null), "finish")
+	index_ready = true
+	return true
+
+func _index_quest_map(quest: Dictionary, map_id: int) -> void:
+	if map_id <= 0:
+		return
+	if not _quests_by_map_id.has(map_id):
+		_quests_by_map_id[map_id] = []
+	_quests_by_map_id[map_id].append(quest)
+
+func _index_quest_npc(quest: Dictionary, npc_ref: Variant, role: String) -> void:
+	if not npc_ref is Dictionary or str(npc_ref.get("parse_status", "")) != "parsed":
+		return
+	var npc_id := int(npc_ref.get("npc_id", -1))
+	if npc_id < 0:
+		return
+	if not _quests_by_npc_id.has(npc_id):
+		_quests_by_npc_id[npc_id] = []
+	_quests_by_npc_id[npc_id].append({
+		"role": role,
+		"quest": quest,
+		"npc": npc_ref
+	})
+
+func get_index_status() -> Dictionary:
+	return {
+		"ready": index_ready,
+		"error": index_error,
+		"source_version": str(_index.get("source_version", "")),
+		"map_records": _index.get("maps", []).size(),
+		"unique_maps": _maps_by_id.size(),
+		"npc_templates": _index.get("npc_templates", []).size(),
+		"quests": _index.get("quests", []).size(),
+		"dialogue_sources": _index.get("dialogue_sources", []).size()
+	}
+
+func get_maps() -> Array:
+	return _index.get("maps", []).duplicate(true)
+
+func get_map_by_id(map_id: int) -> Dictionary:
+	return _maps_by_id.get(map_id, {}).duplicate(true)
+
+func get_map_metadata_only() -> Array:
+	return _index.get("map_metadata_without_binary_path", []).duplicate(true)
+
+func get_npc_templates() -> Array:
+	return _index.get("npc_templates", []).duplicate(true)
+
+func get_npc_template_by_source_section(section_id: String) -> Dictionary:
+	for entry in _index.get("npc_templates", []):
+		if str(entry.get("source_section", "")) == section_id:
+			return entry.duplicate(true)
+	return {}
+
+func get_quests() -> Array:
+	return _index.get("quests", []).duplicate(true)
+
+func get_quest_by_source_section(section_id: String) -> Dictionary:
+	return _quests_by_section.get(section_id, {}).duplicate(true)
+
+func get_quests_by_mission_id(mission_id: int) -> Array:
+	return _quests_by_mission_id.get(mission_id, []).duplicate(true)
+
+func get_quests_for_map(map_id: int) -> Array:
+	return _quests_by_map_id.get(map_id, []).duplicate(true)
+
+func get_quests_for_npc(npc_id: int) -> Array:
+	return _quests_by_npc_id.get(npc_id, []).duplicate(true)
+
+func get_quest_npc_target(mission_id: int, for_finish: bool = false) -> Dictionary:
+	var candidates: Array = get_quests_by_mission_id(mission_id)
+	if candidates.is_empty():
+		return {}
+	var role := "finish_npc" if for_finish else "begin_npc"
+	for quest in candidates:
+		var npc_ref: Variant = quest.get(role, null)
+		if npc_ref is Dictionary and str(npc_ref.get("parse_status", "")) == "parsed":
+			var result: Dictionary = npc_ref.duplicate(true)
+			result["mission_id"] = mission_id
+			result["source_section"] = str(quest.get("source_section", ""))
+			result["quest_name_ar"] = str(quest.get("name_ar", ""))
+			result["quest_name_en"] = str(quest.get("name", ""))
+			return result
+	return {}
+
+func get_dialogue_source_status() -> Array:
+	return _index.get("dialogue_sources", []).duplicate(true)
