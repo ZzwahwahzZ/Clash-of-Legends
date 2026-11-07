@@ -175,7 +175,7 @@ jobs:
           # Use baksmali as an independent parser on embedded payloads and integrity-repaired copies.
           # Use the official fat release jar (the Maven baksmali artifact is a thin jar without a Main-Class).
           curl --fail --location --retry 3 "https://github.com/baksmali/smali/releases/download/v3.0.10/baksmali-3.0.10-fat-release.jar" -o /tmp/baksmali-fat.jar
-          jar tf /tmp/baksmali-fat.jar | grep -q 'org/jf/baksmali/Baksmali.class'
+          unzip -p /tmp/baksmali-fat.jar META-INF/MANIFEST.MF | grep -E '^Main-Class:'
           java -jar /tmp/baksmali-fat.jar --version
           mkdir -p build/apk-reader/baksmali
           # Parse all six standard DEX files independently, then the suspicious embedded payload.
