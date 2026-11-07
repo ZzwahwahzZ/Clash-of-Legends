@@ -32,7 +32,7 @@ func _run() -> void:
 		for row in _floor_meshes:
 			var bounds: AABB = row["bounds"]
 			var probe := Vector3(target.x, bounds.get_center().y, target.z)
-			var closest := bounds.get_closest_point(probe)
+			var closest := Vector3(clampf(probe.x, bounds.position.x, bounds.end.x), probe.y, clampf(probe.z, bounds.position.z, bounds.end.z))
 			var horizontal_distance := Vector2(closest.x, closest.z).distance_to(Vector2(target.x, target.z))
 			var vertical_distance := absf(bounds.get_center().y - target.y)
 			var score := horizontal_distance + vertical_distance * 0.75
