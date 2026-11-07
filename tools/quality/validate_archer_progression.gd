@@ -80,6 +80,10 @@ func _run() -> void:
 	if not starter_weapon is Dictionary or str(starter_weapon.get("id", "")) != "500239" or str(starter_weapon.get("weapon_style", "")) != "bow":
 		_fail("Archer character creation did not equip the pinned Mobile source weapon ID 500239 as a Bow.")
 		return
+	var starter_armor: Variant = inventory.equipment.get("armor", null)
+	if not starter_armor is Dictionary or str(starter_armor.get("id", "")) != "133080":
+		_fail("Archer character creation did not equip the pinned Mobile source armor ID 133080.")
+		return
 	# Reset starter state before the isolated two-loadout switching fixture.
 	inventory.equipment["weapon"] = null
 	inventory.weapon_loadouts["bow"] = null
