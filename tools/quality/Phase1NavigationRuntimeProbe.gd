@@ -114,6 +114,39 @@ func _run() -> void:
 	).length()
 	var final_floor_contact := player.is_on_floor()
 	var target_reached := horizontal_distance_to_target <= 1.5
+	# Path resolution alone is not enough: drive the actual CharacterBody3D
+	# independently from the central avenue to both building approaches.
+	var runtime_route_movement_checks: Array[Dictionary] = []
+	for route_id in runtime_route_targets:
+		player.call("clear_movement_target")
+		player.velocity = Vector3.ZERO
+		player.global_position = START_POSITION
+		for _reset_frame in range(8):
+			await physics_frame
+		var route_target: Vector3 = NavigationServer3D.map_get_closest_point(navigation_map, runtime_route_targets[route_id])
+		player.call("move_towards_target_position", route_target, 1.0 / 60.0)
+		var route_frames_used := 0
+		for route_frame in range(1800):
+			await physics_frame
+			route_frames_used = route_frame + 1
+			var route_distance := Vector2(player.global_position.x - route_target.x, player.global_position.z - route_target.z).length()
+			if route_distance <= 1.5 or not bool(player.get("is_moving_to_target")):
+				break
+		var route_final_position: Vector3 = player.global_position
+		var route_final_distance := Vector2(route_final_position.x - route_target.x, route_final_position.z - route_target.z).length()
+		runtime_route_movement_checks.append({
+			"route": route_id,
+			"target_reached": route_final_distance <= 1.5,
+			"horizontal_distance_to_target": route_final_distance,
+			"horizontal_displacement": Vector2(route_final_position.x - START_POSITION.x, route_final_position.z - START_POSITION.z).length(),
+			"floor_contact": player.is_on_floor(),
+			"frames_used": route_frames_used
+		})
+	var runtime_route_movements_passed := 0
+	for movement_check in runtime_route_movement_checks:
+		if bool(movement_check["target_reached"]) and bool(movement_check["floor_contact"]):
+			runtime_route_movements_passed += 1
+
 	var report := {
 		"world_scene_loaded": true,
 		"pawnshop_doorway_clear": pawnshop_doorway_clear,
@@ -129,6 +162,8 @@ func _run() -> void:
 		"path_waypoint_count": path_waypoint_count,
 		"runtime_route_checks": runtime_route_checks,
 		"runtime_routes_passed": runtime_routes_passed,
+		"runtime_route_movement_checks": runtime_route_movement_checks,
+		"runtime_route_movements_passed": runtime_route_movements_passed,
 		"start_position": _vec(start_after_settle),
 		"requested_target_position": _vec(TARGET_POSITION),
 		"projected_target_position": _vec(projected_target),
@@ -160,6 +195,9 @@ func _run() -> void:
 	if runtime_routes_passed != runtime_route_targets.size():
 		_fail("Player NavigationAgent3D could not resolve both pawnshop and factory approach routes: " + JSON.stringify(runtime_route_checks))
 		return
+	if runtime_route_movements_passed != runtime_route_targets.size():
+		_fail("Player did not physically reach both pawnshop and factory approach targets: " + JSON.stringify(runtime_route_movement_checks))
+		return
 	if horizontal_displacement < 8.0 or not target_reached:
 		_fail("Player did not follow the baked navigation path to the hotel frontage.")
 		return
@@ -167,7 +205,7 @@ func _run() -> void:
 		_fail("Player did not remain supported by the generated walkable floor collisions.")
 		return
 
-	print("PHASE1 NAVIGATION PLAYER MOVEMENT, CITY ROUTES AND FLOOR COLLISION: PASS")
+	print("PHASE1 NAVIGATION PLAYER MOVEMENT, CITY ROUTES, BUILDING APPROACHES AND FLOOR COLLISION: PASS")
 	quit(0)
 
 func _ray_is_clear(from_position: Vector3, to_position: Vector3) -> bool:
