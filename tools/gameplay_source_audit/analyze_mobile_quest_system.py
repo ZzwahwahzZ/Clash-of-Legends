@@ -153,6 +153,7 @@ def main():
                 for tok in re.findall(r"\[([^\]]+)\]",val):
                     h,_,payload=tok.partition(" ");parts=[x.strip() for x in payload.split(",")] if payload else []
                     if h=="chk_quest" and parts:checks.append({"mission_id":mid,"condition_quest_id":parts[0],"args":parts[1:],"field":key})
+                    elif h=="chk_item" and len(parts)>=2:item_refs.append({"mission_id":mid,"kind":"requirement","item_id":parts[0],"quantity":int_or_none(parts[1])})
                     elif h=="npc" and len(parts)>=5:
                         npc_refs.append({"mission_id":mid,"role":key,"name":parts[0],"npc_id":parts[1],"map_id":parts[2],"x":int_or_none(parts[3]),"y":int_or_none(parts[4]),"source":"intention"})
                         map_refs.append({"mission_id":mid,"role":key,"map_id":parts[2],"x":int_or_none(parts[3]),"y":int_or_none(parts[4])})
