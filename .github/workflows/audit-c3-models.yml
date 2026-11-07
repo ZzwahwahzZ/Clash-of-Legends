@@ -82,7 +82,7 @@ jobs:
                   "parser_error": row.get("error", "")
               })
           Path("reports/c3-failed-sample-manifest.json").write_text(
-              json.dumps({"count": len(manifest), "samples": manifest}, indent=2) + "\\n"
+              json.dumps({"count": len(manifest), "samples": manifest}, indent=2)
           )
           print("PRESERVED_FAILED_C3_SAMPLES", len(manifest))
           PY
