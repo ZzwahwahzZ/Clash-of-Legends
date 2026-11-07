@@ -33,6 +33,22 @@ func show_dialogue(speaker: String, text: String, options: Array = []) -> void:
 			btn.pressed.connect(_on_option_clicked.bind(i))
 			options_vbox.add_child(btn)
 
+func show_source_dialogue(dialogue_id: int, speaker: String, locale: String = "ar") -> bool:
+	if not is_instance_valid(WorldContentIndex) or not WorldContentIndex.index_ready:
+		return false
+	var entry: Dictionary = WorldContentIndex.get_npc_dialogue(dialogue_id)
+	var talks: Array = entry.get("talks", [])
+	if talks.is_empty():
+		return false
+	var first_talk: Dictionary = talks[0]
+	var text_value := str(first_talk.get("text_ar" if locale == "ar" else "text_en", ""))
+	if text_value.is_empty():
+		text_value = WorldContentIndex.get_dialogue_text(str(first_talk.get("text_key", "")), locale)
+	if text_value.is_empty():
+		return false
+	show_dialogue(speaker, text_value, [])
+	return true
+
 func _on_option_clicked(index: int) -> void:
 	emit_signal("option_selected", index)
 	close_dialogue()
