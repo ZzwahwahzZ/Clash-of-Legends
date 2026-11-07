@@ -35,6 +35,8 @@ jobs:
           version: 4.3.0
           use-dotnet: false
           include-templates: false
+      - name: Test resource manifest release compatibility
+        run: godot --headless --path . --script tools/resource_packs/test_resource_manifest_compatibility.gd
       - name: Rehydrate and verify all source assets from resource PCKs
         run: |
           rm -rf resource_stage
