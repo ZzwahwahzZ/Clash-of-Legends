@@ -276,7 +276,7 @@ func has_weapon_for_style(style_id: String) -> bool:
 	if active_weapon is Dictionary and str(active_weapon.get("weapon_style", "")) == style_id:
 		return true
 	var stored_weapon: Variant = weapon_loadouts.get(style_id, null)
-	return stored_weapon is Dictionary and _is_item_class_compatible(stored_weapon)
+	return stored_weapon is Dictionary and str(stored_weapon.get("weapon_style", "")) == style_id and _is_item_class_compatible(stored_weapon)
 
 func _is_item_compatible(item: Dictionary) -> bool:
 	if not _is_item_class_compatible(item):
