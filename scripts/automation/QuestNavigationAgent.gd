@@ -4,117 +4,16 @@ class_name QuestNavigationAgent
 signal quest_state_changed(quest_id: String, state: String)
 signal quest_started(quest_id: String)
 
-const DEFAULT_QUEST_ID := "quest_wolves"
+const DEFAULT_QUEST_ID := ""
 
-var active_quest_id: String = DEFAULT_QUEST_ID
+var active_quest_id: String = ""
 var quest_progress: int = 0
 var is_quest_completed: bool = false
 var completed_quest_ids: Array[String] = []
 
-# This is an offline starter chain. Content can be expanded without changing
-# the progression API or requiring a server.
-var quest_database: Dictionary = {
-	"quest_wolves": {
-		"turn_in_npc_id": "npc_sage",
-		"title_ar": "تهديد الذئاب البرية",
-		"title_en": "Wild Wolf Threat",
-		"desc_ar": "اقضِ على 5 ذئاب برية في سهل التوأم لحماية القوافل.",
-		"desc_en": "Defeat 5 wild wolves in Twin Plains to protect the caravans.",
-		"target_enemy_type": "wolf",
-		"required_kills": 5,
-		"reward_gold": 500,
-		"reward_xp": 800,
-		"next_quest": "quest_wolf_alpha"
-	},
-	"quest_wolf_alpha": {
-		"turn_in_npc_id": "npc_sage",
-		"title_ar": "زعيم القطيع",
-		"title_en": "Pack Leader",
-		"desc_ar": "اهزم 8 ذئاب أخرى لتجبر زعيم القطيع على الظهور.",
-		"desc_en": "Defeat 8 more wolves to draw out the pack leader.",
-		"target_enemy_type": "wolf",
-		"required_kills": 8,
-		"reward_gold": 850,
-		"reward_xp": 1200,
-		"next_quest": "quest_meteor_gather"
-	},
-	"quest_dragon": {
-		"turn_in_npc_id": "npc_sage",
-		"title_ar": "تحدي تنين اللهب",
-		"title_en": "Flame Dragon Challenge",
-		"desc_ar": "اهزم تنين اللهب في قمة الجبل.",
-		"desc_en": "Defeat the Flame Dragon at the mountain summit.",
-		"target_enemy_type": "boss",
-		"required_kills": 1,
-		"reward_gold": 2500,
-		"reward_xp": 3500,
-		"next_quest": "quest_final_sage"
-	},
-	"quest_guardian": {
-		"turn_in_npc_id": "npc_sage",
-		"title_ar": "حارس الأطلال",
-		"title_en": "Ruins Guardian",
-		"desc_ar": "اقضِ على 10 وحوش في رحلة تطهير أطراف المدينة.",
-		"desc_en": "Defeat 10 enemies while cleansing the outskirts of the city.",
-		"target_enemy_type": "any",
-		"required_kills": 10,
-		"reward_gold": 1200,
-		"reward_xp": 1800,
-		"next_quest": "quest_level_10"
-	},
-	"quest_meteor_gather": {
-		"turn_in_npc_id": "npc_sage",
-		"title_ar":"أحجار من السماء",
-		"title_en":"Stones from the Sky",
-		"desc_ar":"اجمع 3 أحجار نيزك من الوحوش وأسقطها في الحقيبة.",
-		"desc_en":"Collect 3 Meteor Stones from monsters.",
-		"objective_type":"collect",
-		"objective_target":"meteor_stone",
-		"required_kills":3,
-		"reward_gold":700,
-		"reward_xp":900,
-		"next_quest":"quest_blacksmith_visit"
-	},
-	"quest_blacksmith_visit": {
-		"turn_in_npc_id": "npc_blacksmith",
-		"title_ar":"سر الحداد",
-		"title_en":"The Blacksmith's Secret",
-		"desc_ar":"تحدث إلى حداد الأساطير وتعرف على صقل العتاد.",
-		"desc_en":"Speak to the Master Blacksmith and learn equipment refinement.",
-		"objective_type":"talk",
-		"objective_target":"npc_blacksmith",
-		"required_kills":1,
-		"reward_gold":400,
-		"reward_xp":500,
-		"next_quest":"quest_guardian"
-	},
-	"quest_level_10": {
-		"turn_in_npc_id": "npc_sage",
-		"title_ar":"اختبار البطل",
-		"title_en":"Hero's Trial",
-		"desc_ar":"واصل التدريب حتى تصل إلى المستوى 10.",
-		"desc_en":"Keep training until you reach level 10.",
-		"objective_type":"reach_level",
-		"objective_target":"10",
-		"required_kills":1,
-		"reward_gold":1000,
-		"reward_xp":1500,
-		"next_quest":"quest_dragon"
-	},
-	"quest_final_sage": {
-		"turn_in_npc_id": "npc_sage",
-		"title_ar":"عودة إلى الحكيم",
-		"title_en":"Return to the Sage",
-		"desc_ar":"عد إلى حكيم التوأم وأبلغه بانتصارك على التنين.",
-		"desc_en":"Return to the Twin Sage and report the dragon's defeat.",
-		"objective_type":"talk",
-		"objective_target":"npc_sage",
-		"required_kills":1,
-		"reward_gold":3000,
-		"reward_xp":4500,
-		"next_quest":""
-	}
-}
+# Gameplay content is intentionally empty until source-verified Mobile quest records
+# and matching world/NPC/map IDs are imported. Never ship invented starter quests.
+var quest_database: Dictionary = {}
 
 func _ready() -> void:
 	_validate_quest_database()
@@ -367,8 +266,13 @@ func serialize() -> Dictionary:
 	}
 
 func deserialize(data: Dictionary) -> void:
-	var requested_id := str(data.get("active_quest_id", DEFAULT_QUEST_ID))
+	var requested_id := str(data.get("active_quest_id", ""))
 	completed_quest_ids.clear()
+	if quest_database.is_empty():
+		active_quest_id = ""
+		quest_progress = 0
+		is_quest_completed = false
+		return
 	for value in data.get("completed_quest_ids", []):
 		var quest_id := str(value)
 		if quest_database.has(quest_id) and not completed_quest_ids.has(quest_id):
