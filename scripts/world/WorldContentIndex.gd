@@ -219,3 +219,8 @@ func get_quest_npc_target(mission_id: int, for_finish: bool = false) -> Dictiona
 
 func get_dialogue_source_status() -> Array:
 	return _index.get("dialogue_sources", []).duplicate(true)
+
+
+func get_class_selection_source(locale: String = "en") -> Array:
+	var selection: Dictionary = _index.get("class_selection", {})
+	return selection.get(locale, []).duplicate(true)
