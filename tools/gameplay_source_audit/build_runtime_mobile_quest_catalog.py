@@ -71,6 +71,44 @@ def main():
             "provenance": "SOURCE_READABLE_SCHEMA_SEMANTICS_PARTIALLY_UNVERIFIED",
         }
     maps = src.get("gamemap_catalog", {}).get("records", [])
+    map_name_votes = {}
+    for row in rows.values():
+        for endpoint in ("begin_npc", "finish_npc"):
+            npc = row.get(endpoint) or {}
+            map_id, map_name = str(npc.get("map_id", "")).strip(), str(npc.get("map_name", "")).strip()
+            if map_id and map_name:
+                map_name_votes.setdefault(map_id, {})
+                map_name_votes[map_id][map_name] = map_name_votes[map_id].get(map_name, 0) + 1
+        for intention in row.get("intentions", []):
+            map_id = str(intention.get("map_id", "")).strip()
+            map_name = str(intention.get("map_name", "")).strip()
+            if map_id and map_name:
+                map_name_votes.setdefault(map_id, {})
+                map_name_votes[map_id][map_name] = map_name_votes[map_id].get(map_name, 0) + 1
+    city_aliases = {
+        "TwinCity": ("مدينة التوأم", "main"),
+        "DesertCity": ("مدينة الصحراء", "minor"),
+        "BirdIsland": ("جزيرة الطيور", "minor"),
+        "ApeCity": ("مدينة القرود", "minor"),
+        "PhoenixCastle": ("قلعة العنقاء", "minor"),
+        "PhoenixCastal": ("قلعة العنقاء", "minor"),
+        "BirthVillage": ("قرية الميلاد", "minor"),
+    }
+    map_names = []
+    city_hubs = []
+    for map_id, votes in sorted(map_name_votes.items(), key=lambda x: int(x[0]) if x[0].isdigit() else 0):
+        aliases = [{"name": name, "occurrences": count} for name, count in sorted(votes.items(), key=lambda x: (-x[1], x[0]))]
+        primary = aliases[0]["name"] if aliases else ""
+        map_names.append({"map_id": map_id, "primary_name": primary, "aliases": aliases})
+        for alias in aliases:
+            if alias["name"] in city_aliases:
+                name_ar, city_kind = city_aliases[alias["name"]]
+                city_hubs.append({
+                    "map_id": map_id, "source_name": alias["name"],
+                    "name_ar": name_ar, "name_en": alias["name"],
+                    "kind": city_kind, "evidence_occurrences": alias["occurrences"],
+                    "status": "SOURCE_NAME_MATCH_CANDIDATE_REQUIRES_MAP_RESOURCE_CONFIRMATION",
+                })
     output = {
         "schema_version": "1.0.0",
         "source_version": src.get("source_version", ""),
@@ -81,6 +119,8 @@ def main():
         "source_hashes": src.get("source_files", []),
         "map_catalog_status": src.get("gamemap_catalog", {}).get("status", ""),
         "maps": maps,
+        "map_names": map_names,
+        "city_hubs": city_hubs,
         "missions": list(rows.values()),
     }
     a.output.parent.mkdir(parents=True, exist_ok=True)
