@@ -17,7 +17,7 @@ fn resolve_embedded_texture(document: &C3Document, pvr_root: &Path, model_path: 
         if raw.is_empty() || raw.eq_ignore_ascii_case("C3EXP_COLOR") {
             continue;
         }
-        let normalized = raw.replace('\\\\', "/");
+        let normalized = raw.replace('\\', "/");
         let file_name = Path::new(&normalized).file_name()?.to_str()?.trim();
         let stem = Path::new(file_name).file_stem()?.to_str()?.trim();
         if !stem.is_empty() {
