@@ -32,9 +32,10 @@ jobs:
           python3 -m venv .venv
           .venv/bin/pip install --disable-pip-version-check polyfile
           echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
-          python3 -m py_compile tools/gameplay_source_audit/comprehensive_asset_inventory.py tools/gameplay_source_audit/audit_source_tables.py tools/gameplay_source_audit/mobile_quest_source_decoder.py tools/gameplay_source_audit/quest_ecosystem_inventory.py tools/resource_packs/decode_mobile_quest_dat.py tests/test_mobile_quest_dat_cipher.py tests/test_quest_ecosystem_inventory.py
+          python3 -m py_compile tools/gameplay_source_audit/comprehensive_asset_inventory.py tools/gameplay_source_audit/audit_source_tables.py tools/gameplay_source_audit/mobile_quest_source_decoder.py tools/gameplay_source_audit/quest_ecosystem_inventory.py tools/gameplay_source_audit/mobile_apk_reader_probe.py tools/resource_packs/decode_mobile_quest_dat.py tests/test_mobile_quest_dat_cipher.py tests/test_quest_ecosystem_inventory.py tests/test_mobile_apk_reader_probe.py
           python3 -m unittest discover -s tests -p 'test_mobile_quest_dat_cipher.py' -v
           python3 -m unittest discover -s tests -p 'test_quest_ecosystem_inventory.py' -v
+          python3 -m unittest discover -s tests -p 'test_mobile_apk_reader_probe.py' -v
       - name: Recursively inventory every archive member by content
         run: |
           python3 tools/gameplay_source_audit/comprehensive_asset_inventory.py \
@@ -55,6 +56,12 @@ jobs:
             --output reports/mobile-quest-source-audit.json \
             --decoded-dir build/mobile_quest_candidates
           python3 -m json.tool reports/mobile-quest-source-audit.json > /dev/null
+      - name: Probe exact Mobile APK DEX and native resource-reader hints
+        run: |
+          python3 tools/gameplay_source_audit/mobile_apk_reader_probe.py \
+            build/source/extracted-assets-001.zip \
+            --output reports/mobile-apk-reader-probe.json
+          python3 -m json.tool reports/mobile-apk-reader-probe.json > /dev/null
       - name: Inventory quest, NPC, map, item, reward and dialogue source candidates
         run: |
           python3 tools/gameplay_source_audit/quest_ecosystem_inventory.py \
@@ -72,6 +79,8 @@ jobs:
           print("Itemtype files/records:", data["itemtype_catalog"]["file_count"], data["itemtype_catalog"]["record_count"])
           for category, value in data["categories"].items():
               print(category, value["file_count"])
+          reader=json.loads(Path("reports/mobile-apk-reader-probe.json").read_text(encoding="utf-8"))
+          print("APK reader hint binaries:", reader["reader_hint_count"])
           quest=json.loads(Path("reports/quest-ecosystem-inventory.json").read_text(encoding="utf-8"))
           print("Quest ecosystem files:", quest["files_found"])
           print("Quest ecosystem categories:", quest["category_file_counts"])
@@ -88,6 +97,7 @@ jobs:
             reports/comprehensive-asset-inventory.json
             reports/polyfile-mobile-*.json
             reports/mobile-quest-source-audit.json
+            reports/mobile-apk-reader-probe.json
             reports/quest-ecosystem-inventory.json
             build/mobile_quest_candidates/**/*.lua
             build/quest-ecosystem/decoded_candidates/**/*.candidate
