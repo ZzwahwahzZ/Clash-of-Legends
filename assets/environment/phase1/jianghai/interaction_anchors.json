@@ -15,7 +15,12 @@
       "requires_navmesh_projection": true,
       "requires_runtime_trigger": true,
       "interaction_enabled": false,
-      "npc_spawn_anchor": false
+      "npc_spawn_anchor": false,
+      "target_offset_local": [
+        0,
+        0,
+        -60
+      ]
     },
     {
       "id": "jianghai.pawnshop_approach",
@@ -29,11 +34,16 @@
       "requires_navmesh_projection": true,
       "requires_runtime_trigger": true,
       "interaction_enabled": false,
-      "npc_spawn_anchor": false
+      "npc_spawn_anchor": false,
+      "target_offset_local": [
+        -86,
+        0,
+        -106
+      ]
     },
     {
       "id": "jianghai.pawnshop_courtyard",
-      "node_path": "JianghaiOldCityAuthoredScene/GuangchangPawnshop",
+      "node_path": "JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/PawnshopApproach",
       "kind": "service_landmark",
       "task_tags": [
         "visit",
@@ -47,12 +57,17 @@
       "npc_id": "npc_jianghai_pawnshop",
       "role": "merchant",
       "spawn_offset_local": [
+        -86,
         0,
-        0,
-        4
+        -101
       ],
       "spawn_enabled": false,
-      "requires_clearance_validation": true
+      "requires_clearance_validation": true,
+      "target_offset_local": [
+        -86,
+        0,
+        -106
+      ]
     },
     {
       "id": "jianghai.market_bridge",
@@ -80,7 +95,12 @@
       "requires_navmesh_projection": true,
       "requires_runtime_trigger": true,
       "interaction_enabled": false,
-      "npc_spawn_anchor": false
+      "npc_spawn_anchor": false,
+      "target_offset_local": [
+        86,
+        0,
+        -12
+      ]
     },
     {
       "id": "jianghai.hotel_frontage",
@@ -103,7 +123,12 @@
         3
       ],
       "spawn_enabled": false,
-      "requires_clearance_validation": true
+      "requires_clearance_validation": true,
+      "target_offset_local": [
+        0,
+        -4.2,
+        3
+      ]
     },
     {
       "id": "jianghai.medicine_frontage",
@@ -127,7 +152,12 @@
         3
       ],
       "spawn_enabled": false,
-      "requires_clearance_validation": true
+      "requires_clearance_validation": true,
+      "target_offset_local": [
+        0,
+        -4.3,
+        3
+      ]
     },
     {
       "id": "jianghai.tea_frontage",
@@ -151,7 +181,12 @@
         3
       ],
       "spawn_enabled": false,
-      "requires_clearance_validation": true
+      "requires_clearance_validation": true,
+      "target_offset_local": [
+        0,
+        -4.35,
+        3
+      ]
     }
   ]
 }
