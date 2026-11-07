@@ -120,11 +120,19 @@ def inspect_apk(apk_bytes_path: Path, apk_member: str, out_dir: Path) -> list[di
     rows = []
     with zipfile.ZipFile(apk_bytes_path) as apk:
         for info in apk.infolist():
-            if info.is_dir() or not is_interesting(info.filename):
+            if info.is_dir():
                 continue
             raw = apk.read(info)
+            if not is_interesting(info.filename, raw):
+                continue
             rel = info.filename[len(ROOT):] if info.filename.startswith(ROOT) else info.filename
+            low_path = info.filename.lower()
+            discovery_reason = (
+                "PATH_KEYWORD" if any(token in low_path for token in TOKENS)
+                else "CONTENT_SIGNATURE_IN_MOBILE_SCRIPT_CONFIG_DIRECTORY"
+            )
             row = {
+                "discovery_reason": discovery_reason,
                 "apk_member": apk_member + "!" + info.filename,
                 "relative_path": rel,
                 "categories": category(rel),
