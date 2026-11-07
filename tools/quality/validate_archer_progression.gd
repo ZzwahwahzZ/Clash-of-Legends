@@ -1,10 +1,19 @@
 extends SceneTree
 
+class TestArcherPlayer extends CharacterBody3D:
+	var current_level: int = 40
+	func get_character_class() -> String:
+		return "Archer"
+
 func _initialize() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
 	var progression = ClassProgressionManager
+	var player := TestArcherPlayer.new()
+	player.name = "TestArcherPlayer"
+	root.add_child(player)
+	GameManager.player_reference = player
 	progression.configure_for_character("Archer")
 
 	if progression.selected_weapon_style != "bow" or progression.get_form_id() != "Archer":
@@ -47,7 +56,8 @@ func _run() -> void:
 		return
 
 	var inventory := PlayerInventory.new()
-	root.add_child(inventory)
+	inventory.name = "PlayerInventory"
+	player.add_child(inventory)
 	await process_frame
 	# The starter prototype weapon is not part of this focused fixture.
 	inventory.equipment["weapon"] = null
@@ -78,18 +88,24 @@ func _run() -> void:
 		_fail("Archer form skill compatibility is incorrect.")
 		return
 
+	var knife_index := _find_item_index(inventory, "test_oriental_throwing_knife")
+	if knife_index < 0 or not inventory.equip_item_from_slot(knife_index):
+		_fail("Could not equip the inactive Oriental Assassin weapon loadout.")
+		return
+	if str(inventory.equipment.get("weapon", {}).get("id", "")) != "test_archer_bow":
+		_fail("Pre-equipping the Throwing Knife changed the active Archer weapon.")
+		return
+	if str(inventory.weapon_loadouts["throwing_knives"].get("id", "")) != "test_oriental_throwing_knife":
+		_fail("The Throwing Knife was not stored in its separate loadout.")
+		return
 	if not progression.select_weapon_style("throwing_knives"):
 		_fail("Could not switch to the unlocked Throwing Knives form.")
 		return
-	if inventory.equipment.get("weapon", null) != null:
-		_fail("Switching form did not safely clear the incompatible active Bow.")
+	if str(inventory.equipment.get("weapon", {}).get("id", "")) != "test_oriental_throwing_knife":
+		_fail("Switching form did not equip the stored Throwing Knife.")
 		return
 	if str(inventory.weapon_loadouts["bow"].get("id", "")) != "test_archer_bow":
 		_fail("Switching form did not preserve the Bow in its own loadout.")
-		return
-	var knife_index := _find_item_index(inventory, "test_oriental_throwing_knife")
-	if knife_index < 0 or not inventory.equip_item_from_slot(knife_index):
-		_fail("Could not equip the Oriental Assassin Throwing Knife fixture.")
 		return
 	if progression.get_form_id() != "OrientalAssassin":
 		_fail("Throwing Knives selection did not activate Oriental Assassin form.")
@@ -137,7 +153,8 @@ func _run() -> void:
 		return
 
 	print("ARCHER PROGRESSION PASSED: level gate, quest-gated unlock, one character identity, reversible forms, weapon loadouts, skill restrictions and save/load.")
-	inventory.queue_free()
+	player.queue_free()
+	GameManager.player_reference = null
 	quit(0)
 
 func _find_item_index(inventory: PlayerInventory, item_id: String) -> int:
