@@ -151,6 +151,46 @@ func get_quests_for_map(map_id: int) -> Array:
 func get_quests_for_npc(npc_id: int) -> Array:
 	return _quests_by_npc_id.get(npc_id, []).duplicate(true)
 
+
+func get_quests_for_profession(profession_id: int) -> Array:
+	var result: Array = []
+	for quest in _index.get("quests", []):
+		var allowed: Array = quest.get("profession_ids", [])
+		if allowed.is_empty() or allowed.has(0) or allowed.has(profession_id):
+			result.append(quest)
+	return result.duplicate(true)
+
+func get_available_quests_for_character(level: int, profession_id: int, sex: int = 0, completed_mission_ids: Array = []) -> Array:
+	var result: Array = []
+	for quest in _index.get("quests", []):
+		if _is_quest_available(quest, level, profession_id, sex, completed_mission_ids):
+			result.append(quest)
+	return result.duplicate(true)
+
+func is_source_quest_available(mission_id: int, level: int, profession_id: int, sex: int = 0, completed_mission_ids: Array = []) -> bool:
+	for quest in _quests_by_mission_id.get(mission_id, []):
+		if _is_quest_available(quest, level, profession_id, sex, completed_mission_ids):
+			return true
+	return false
+
+func _is_quest_available(quest: Dictionary, level: int, profession_id: int, sex: int, completed_mission_ids: Array) -> bool:
+	var min_level := int(quest.get("min_level", 0))
+	var max_level := int(quest.get("max_level", 0))
+	if min_level > 0 and level < min_level:
+		return false
+	if max_level > 0 and level > max_level:
+		return false
+	var allowed_professions: Array = quest.get("profession_ids", [])
+	if not allowed_professions.is_empty() and not allowed_professions.has(0) and not allowed_professions.has(profession_id):
+		return false
+	var required_sex := int(quest.get("sex", 0))
+	if required_sex != 0 and sex != 0 and required_sex != sex:
+		return false
+	for prerequisite in quest.get("prerequisite_ids", []):
+		if int(prerequisite) > 0 and not completed_mission_ids.has(int(prerequisite)):
+			return false
+	return true
+
 func get_quest_npc_target(mission_id: int, for_finish: bool = false) -> Dictionary:
 	var candidates: Array = get_quests_by_mission_id(mission_id)
 	if candidates.is_empty():
