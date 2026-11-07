@@ -1,0 +1,107 @@
+diff --git a/crates/sandbox-data/src/c3/mesh.rs b/crates/sandbox-data/src/c3/mesh.rs
+index 0000000..0000000 100644
+--- a/crates/sandbox-data/src/c3/mesh.rs
++++ b/crates/sandbox-data/src/c3/mesh.rs
+@@
+-        if reader.remaining() >= 4 && reader.peek_exact(4)? == b"STEP" {
+-            reader.skip(12)?;
+-        }
+-        let extension_tag = if reader.remaining() == 4 && reader.peek_exact(4)? == b"2SID" {
+-            Some(
+-                reader
+-                    .read_exact(4)?
+-                    .try_into()
+-                    .expect("extension tag length was checked"),
+-            )
+-        } else {
+-            None
+-        };
++        // C3 PHY chunks can carry several optional trailing markers. STEP1
++        // and STEP2 are five-byte tags followed by two floats; check them
++        // before STEP because they share its four-byte prefix.
++        let mut extension_tag = None;
++        loop {
++            if reader.remaining() >= 5 {
++                let tag = reader.peek_exact(5)?;
++                if tag == b"STEP1" || tag == b"STEP2" {
++                    reader.skip(13)?;
++                    continue;
++                }
++            }
++            if reader.remaining() >= 4 && reader.peek_exact(4)? == b"STEP" {
++                reader.skip(12)?;
++                continue;
++            }
++            if reader.remaining() < 4 {
++                break;
++            }
++            let tag = reader.peek_exact(4)?;
++            if tag == b"2SID" {
++                extension_tag = Some(*b"2SID");
++                reader.skip(4)?;
++                continue;
++            }
++            // These opaque four-byte markers occur in the supplied C3
++            // corpus after 2SID or on their own. They carry no payload in
++            // the observed files; retain strict rejection of unknown tags.
++            if tag == b"BILB" || tag == b"BIB2" || tag == b"BIB3" || tag == b"BIB4" {
++                reader.skip(4)?;
++                continue;
++            }
++            break;
++        }
+         if reader.remaining() != 0 {
+             return Err(invalid(format!(
+                 "mesh {name} has {} unparsed bytes",
+@@
+ mod tests {
+     use super::*;
+     use crate::c3::{C3Motion, MotionKey};
++
++    fn minimal_phy4_with_tail(tail: &[u8]) -> Vec<u8> {
++        fn push_u32(bytes: &mut Vec<u8>, value: u32) {
++            bytes.extend_from_slice(&value.to_le_bytes());
++        }
++        let mut bytes = Vec::new();
++        push_u32(&mut bytes, 4);
++        bytes.extend_from_slice(b"test");
++        for value in [0, 0, 0, 0, 0, 0] {
++            push_u32(&mut bytes, value);
++        }
++        bytes.extend_from_slice(&[0u8; 24]); // bounds
++        bytes.extend_from_slice(&[0u8; 64]); // initial matrix
++        push_u32(&mut bytes, 1); // texture rows
++        push_u32(&mut bytes, 0); // transparency keys
++        push_u32(&mut bytes, 0); // draw keys
++        push_u32(&mut bytes, 0); // texture keys
++        bytes.extend_from_slice(tail);
++        bytes
++    }
++
++    #[test]
++    fn accepts_observed_c3_mesh_extension_markers() {
++        for marker in [b"BILB", b"BIB2", b"BIB3", b"BIB4"] {
++            let mut tail = b"STEP".to_vec();
++            tail.extend_from_slice(&[0u8; 8]);
++            tail.extend_from_slice(marker);
++            assert!(C3Mesh::parse(*b"PHY4", &minimal_phy4_with_tail(&tail)).is_ok());
++        }
++
++        let mut tail = b"STEP".to_vec();
++        tail.extend_from_slice(&[0u8; 8]);
++        tail.extend_from_slice(b"2SIDBILB");
++        let mesh = C3Mesh::parse(*b"PHY4", &minimal_phy4_with_tail(&tail)).unwrap();
++        assert_eq!(mesh.extension_tag, Some(*b"2SID"));
++    }
++
++    #[test]
++    fn accepts_step1_and_step2_uv_extensions() {
++        let mut tail = b"STEP1".to_vec();
++        tail.extend_from_slice(&[0u8; 8]);
++        tail.extend_from_slice(b"STEP2");
++        tail.extend_from_slice(&[0u8; 8]);
++        assert!(C3Mesh::parse(*b"PHY4", &minimal_phy4_with_tail(&tail)).is_ok());
++    }
+ 
+     #[test]
+     fn transformed_vertex_keeps_the_stock_first_positive_influence_rule() {
