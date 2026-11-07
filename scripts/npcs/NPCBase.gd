@@ -5,6 +5,7 @@ class_name NPCBase
 @export var npc_name_en: String = "Ancient Sage"
 @export var npc_id: String = "npc_sage"
 @export var source_dialogue_id: int = 0
+@export var source_model_id: int = 0
 @export var role: String = "sage" # "sage", "blacksmith", "merchant", "warden"
 @export var required_level: int = 1
 
@@ -76,8 +77,12 @@ func _open_dialogue() -> void:
 		var is_ar := GameManager and GameManager.current_language == "ar"
 		var name_str = npc_name_ar if is_ar else npc_name_en
 		var locale := "ar" if is_ar else "en"
-		if source_dialogue_id > 0 and dlg.has_method("show_source_dialogue"):
-			if dlg.show_source_dialogue(source_dialogue_id, name_str, locale):
+		var resolved_dialogue_id := source_dialogue_id
+		if resolved_dialogue_id <= 0 and source_model_id > 0 and is_instance_valid(WorldContentIndex) and WorldContentIndex.index_ready:
+			var source_dialogue: Dictionary = WorldContentIndex.get_npc_dialogue_for_model_id(source_model_id)
+			resolved_dialogue_id = int(source_dialogue.get("dialogue_id", 0))
+		if resolved_dialogue_id > 0 and dlg.has_method("show_source_dialogue"):
+			if dlg.show_source_dialogue(resolved_dialogue_id, name_str, locale):
 				return
 		var lines = dialogue_lines_ar if is_ar else dialogue_lines_en
 		dlg.show_dialogue(name_str, lines[0], ["حسناً، فهمت", "سأبذل جهدي"])
