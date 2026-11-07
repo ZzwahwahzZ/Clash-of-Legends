@@ -211,6 +211,7 @@ func serialize() -> Dictionary:
 	}
 
 func deserialize(data: Dictionary) -> void:
+	var previous_weapon_style := selected_weapon_style
 	var saved_class := str(data.get("character_class_id", data.get("progression_family", "")))
 	configure_for_character(saved_class)
 	var saved_styles: Array = data.get("unlocked_weapon_styles", [])
@@ -241,6 +242,8 @@ func deserialize(data: Dictionary) -> void:
 		# Reconstruct the form from the saved active weapon style, never from
 		# the mere presence of the Assassin unlock.
 		combat_form = "OrientalAssassin" if selected_weapon_style == STYLE_THROWING_KNIVES and unlocked_weapon_styles.has(STYLE_THROWING_KNIVES) else ARCHER_FAMILY
+	if progression_family == ARCHER_FAMILY and previous_weapon_style != selected_weapon_style:
+		weapon_style_changed.emit(selected_weapon_style)
 	refresh_level_unlocks(_get_player_level())
 
 func _normalize_style_id(style_id: String) -> String:
