@@ -166,19 +166,45 @@ func get_available_at_npc_for_class(npc_id: String, completed_ids: Array, player
 	return get_available_at_npc(npc_id, completed_ids, player_level, profession_code)
 
 func get_available_at_npc(npc_id: String, completed_ids: Array = [], player_level: int = 0, profession_code: String = "") -> Array[Dictionary]:
+	# Only start-NPC offers are returned here. Turn-ins must be checked against
+	# the player's active mission by QuestNavigationAgent.
 	var key := npc_id.lstrip("0")
 	var result: Array[Dictionary] = []
 	for id in npc_starts.get(key, []):
 		if is_available(str(id), completed_ids, player_level, profession_code):
 			result.append(get_mission(str(id)))
-	for id in npc_turnins.get(key, []):
-		var already_added := false
-		for existing in result:
-			if str(existing.get("id", "")) == str(id):
-				already_added = true
+	return result
+
+func is_turnin_npc(mission_id: String, npc_id: String) -> bool:
+	if not missions.has(mission_id):
+		return false
+	var endpoint: Dictionary = missions[mission_id].get("finish_npc", {})
+	return str(endpoint.get("npc_id", "")).lstrip("0") == npc_id.lstrip("0") and npc_id.lstrip("0") != "0"
+
+func get_city_hubs() -> Array[Dictionary]:
+	return city_hubs.duplicate(true)
+
+func get_city_hub(map_id: String) -> Dictionary:
+	for hub in city_hubs:
+		if str(hub.get("map_id", "")) == map_id:
+			return hub.duplicate(true)
+	return {}
+
+func get_map_directory_entry(map_id: String) -> Dictionary:
+	for row in maps.values():
+		if str(row.get("map_id", "")) == map_id:
+			return row.duplicate(true)
+	return {}
+
+func get_dialogues_for_npc(npc_id: String) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for link in dialogue_links:
+		if not link is Dictionary:
+			continue
+		for match_row in link.get("source_npc_matches", []):
+			if str(match_row.get("npc_id", "")).lstrip("0") == npc_id.lstrip("0"):
+				result.append(link.duplicate(true))
 				break
-		if not already_added:
-			result.append(get_mission(str(id)))
 	return result
 
 func get_route(mission_id: String, turn_in: bool = false) -> Dictionary:
