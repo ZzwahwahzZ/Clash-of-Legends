@@ -10,6 +10,13 @@ const MAX_SLOTS: int = 40
 const MAX_REFINE_LEVEL: int = 12
 
 var slots: Array = []
+# The inactive Archer weapon is stored here rather than being discarded or
+# duplicated in the bag when the player switches combat form.
+var weapon_loadouts: Dictionary = {
+	"bow": null,
+	"throwing_knives": null
+}
+var _active_weapon_style: String = ""
 var equipment: Dictionary = {
 	"head": null,
 	"armor": null,
@@ -29,6 +36,48 @@ func _ready() -> void:
 	for i in range(MAX_SLOTS):
 		slots[i] = null
 	_initialize_starter_items()
+	if ClassProgressionManager and not ClassProgressionManager.weapon_style_changed.is_connected(_on_weapon_style_changed):
+		ClassProgressionManager.weapon_style_changed.connect(_on_weapon_style_changed)
+	# Parent PlayerController configures the selected class in its _ready().
+	call_deferred("_sync_active_weapon_style")
+
+func _sync_active_weapon_style() -> void:
+	if ClassProgressionManager:
+		_active_weapon_style = str(ClassProgressionManager.selected_weapon_style)
+		_store_active_weapon_loadout()
+
+func _on_weapon_style_changed(new_style: String) -> void:
+	var current_weapon: Variant = equipment.get("weapon", null)
+	if _active_weapon_style in weapon_loadouts and current_weapon is Dictionary:
+		if str(current_weapon.get("weapon_style", "")) == _active_weapon_style:
+			weapon_loadouts[_active_weapon_style] = current_weapon.duplicate(true)
+			equipment["weapon"] = null
+
+	_active_weapon_style = new_style
+	var stored_weapon: Variant = weapon_loadouts.get(new_style, null)
+	if equipment.get("weapon", null) == null and stored_weapon is Dictionary:
+		if _is_item_compatible_for_style(stored_weapon, new_style):
+			equipment["weapon"] = stored_weapon.duplicate(true)
+
+	emit_signal("equipment_updated")
+	_recalculate_player_stats()
+
+func _store_active_weapon_loadout() -> void:
+	if _active_weapon_style not in weapon_loadouts:
+		return
+	var current_weapon: Variant = equipment.get("weapon", null)
+	if current_weapon is Dictionary and str(current_weapon.get("weapon_style", "")) == _active_weapon_style:
+		weapon_loadouts[_active_weapon_style] = current_weapon.duplicate(true)
+
+func _is_item_compatible_for_style(item: Dictionary, style_id: String) -> bool:
+	var required_style := str(item.get("weapon_style", ""))
+	if not required_style.is_empty() and required_style != style_id:
+		return false
+	var required_class := str(item.get("class_req", ""))
+	if not required_class.is_empty() and ClassProgressionManager:
+		if not ClassProgressionManager.is_class_compatible(required_class):
+			return false
+	return true
 
 func _initialize_starter_items() -> void:
 	# Add starter Conquer-style items: HP Potions, Meteors, Starter Weapon & Armor
@@ -176,6 +225,8 @@ func equip_item_from_slot(index: int) -> bool:
 	var old_eq = equipment.get(target_slot, null)
 	equipment[target_slot] = item
 	slots[index] = old_eq
+	if target_slot == "weapon":
+		_store_active_weapon_loadout()
 	
 	emit_signal("equipment_updated")
 	emit_signal("inventory_updated")
@@ -186,6 +237,8 @@ func equip_item(item: Dictionary) -> bool:
 	var slot_name := str(item.get("slot", ""))
 	if equipment.has(slot_name) and _is_item_compatible(item):
 		equipment[slot_name] = item
+		if slot_name == "weapon":
+			_store_active_weapon_loadout()
 		emit_signal("equipment_updated")
 		_recalculate_player_stats()
 		return true
@@ -209,6 +262,8 @@ func unequip_item(slot_name: String) -> bool:
 	var item = equipment[slot_name]
 	if add_item(item):
 		equipment[slot_name] = null
+		if slot_name == "weapon" and _active_weapon_style in weapon_loadouts:
+			weapon_loadouts[_active_weapon_style] = null
 		emit_signal("equipment_updated")
 		_recalculate_player_stats()
 		return true
@@ -457,9 +512,12 @@ func _recalculate_player_stats() -> void:
 		parent_body.update_equipment_bonuses(total_atk, total_def)
 
 func serialize() -> Dictionary:
+	_store_active_weapon_loadout()
 	return {
 		"slots": slots,
-		"equipment": equipment
+		"equipment": equipment,
+		"weapon_loadouts": weapon_loadouts.duplicate(true),
+		"active_weapon_style": _active_weapon_style
 	}
 
 func deserialize(data: Dictionary) -> void:
@@ -472,6 +530,15 @@ func deserialize(data: Dictionary) -> void:
 			if not restored_equipment.has(slot_name):
 				restored_equipment[slot_name] = null
 		equipment = restored_equipment
+	if data.has("weapon_loadouts") and typeof(data["weapon_loadouts"]) == TYPE_DICTIONARY:
+		var restored_loadouts: Dictionary = data["weapon_loadouts"].duplicate(true)
+		for style_id in weapon_loadouts.keys():
+			if not restored_loadouts.has(style_id):
+				restored_loadouts[style_id] = null
+		weapon_loadouts = restored_loadouts
+	_active_weapon_style = str(data.get("active_weapon_style", ClassProgressionManager.selected_weapon_style if ClassProgressionManager else ""))
+	if not data.has("weapon_loadouts"):
+		_store_active_weapon_loadout()
 	emit_signal("inventory_updated")
 	emit_signal("equipment_updated")
 	_recalculate_player_stats()
