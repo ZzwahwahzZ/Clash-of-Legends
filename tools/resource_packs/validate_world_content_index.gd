@@ -55,10 +55,10 @@ func _run_validation() -> void:
 	if index.is_source_quest_available(6126, 89, 0, 0, []):
 		_fail("Level gate for source quest 6126 was incorrectly accepted below level 90.")
 		return
-	if not index.is_source_quest_available(650, 8, 10, 0, []):
+	if not index.is_source_quest_available(650, 8, 10, 0, [608]):
 		_fail("Profession gate for source quest 650 was not accepted for profession 10.")
 		return
-	if index.is_source_quest_available(650, 8, 20, 0, []):
+	if index.is_source_quest_available(650, 8, 20, 0, [608]):
 		_fail("Profession gate for source quest 650 was incorrectly accepted for profession 20.")
 		return
 	if index.get_quests_by_mission_id(3938).size() != 2:
