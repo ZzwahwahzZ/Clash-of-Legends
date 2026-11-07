@@ -69,6 +69,23 @@ func _run_travel_test() -> void:
 	if not armorer_offer_found:
 		_fail("Source NPC 2001 did not expose the unlocked Armorer quest.")
 		return
+	if int(graph_summary.get("map_directory", 0)) != 92:
+		_fail("Expected 92 source map directory entries, got %s." % str(graph_summary.get("map_directory", 0)))
+		return
+	var desert_city := quest_graph.get_map_directory_entry("1000")
+	var bird_island := quest_graph.get_map_directory_entry("1015")
+	var ape_city := quest_graph.get_map_directory_entry("1020")
+	var birth_village := quest_graph.get_map_directory_entry("1010")
+	if str(desert_city.get("resource_path", "")) != "map/map/desert.7z" or str(bird_island.get("resource_path", "")) != "map/map/island.7z" or str(ape_city.get("resource_path", "")) != "map/map/canyon.7z":
+		_fail("Source map directory did not resolve the smaller-city resource paths.")
+		return
+	if str(birth_village.get("status", "")) != "MAP_RESOURCE_MISSING_FROM_INDEX":
+		_fail("Birth Village missing-map status was not preserved.")
+		return
+	var whorf_dialogue := quest_graph.get_dialogue_links("5455")
+	if whorf_dialogue.is_empty():
+		_fail("Source dialogue linkage for mission 5455 was not imported.")
+		return
 	var blacksmith_placements := quest_graph.get_npc_placements("0005", "1002")
 	if blacksmith_placements.is_empty() or str(blacksmith_placements[0].get("name", "")) != "Blacksmith":
 		_fail("Source NPC placement crosswalk did not resolve Blacksmith 0005 in Twin City.")
