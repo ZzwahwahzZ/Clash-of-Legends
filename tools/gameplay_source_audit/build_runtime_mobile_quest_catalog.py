@@ -170,6 +170,34 @@ def main():
         "mapdestination_section_count": row.get("mapdestination_section_count", 0),
         "status": "MAP_RESOURCE_INDEXED" if row.get("gamemap_resource") else "MAP_RESOURCE_MISSING_FROM_INDEX",
     } for row in world_map_names]
+    mob_reference_index = {}
+    for mob_ref in world_links.get("mob_references", []):
+        key = (str(mob_ref.get("map_id", "")), str(mob_ref.get("x", "")), str(mob_ref.get("y", "")))
+        if mob_ref.get("name") and mob_ref.get("monster_type_ids"):
+            mob_reference_index.setdefault(key, []).append(mob_ref)
+    for mission in rows.values():
+        description = str(mission.get("intention_description", "")).casefold()
+        for intention in mission.get("intentions", []):
+            if intention.get("kind") != "mob" or intention.get("monster_name"):
+                continue
+            key = (str(intention.get("map_id", "")), str(intention.get("x", "")), str(intention.get("y", "")))
+            candidates = mob_reference_index.get(key, [])
+            names = {str(row.get("name", "")).strip() for row in candidates if row.get("name")}
+            matching = []
+            for name in names:
+                normalized = name.casefold()
+                plural = normalized + "s"
+                if normalized in description or plural in description:
+                    matching.append(name)
+            if len(matching) == 1:
+                chosen = matching[0]
+                source_rows = [row for row in candidates if str(row.get("name", "")).strip() == chosen]
+                type_ids = sorted({str(value) for row in source_rows for value in row.get("monster_type_ids", [])})
+                intention["monster_name"] = chosen
+                intention["monster_type_ids"] = type_ids
+                intention["target_resolution"] = "DESCRIPTION_AND_MAP_COORDINATE_MATCH_CANDIDATE"
+            else:
+                intention["target_resolution"] = "UNRESOLVED_SOURCE_MOB_TARGET"
     npc_placements = world_links.get("npc_placements", [])
     npc_refs_by_mission = {}
     for npc_ref in world_links.get("npc_references", []):
