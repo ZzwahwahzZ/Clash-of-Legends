@@ -144,10 +144,14 @@ The research pass now includes technical material outside the official Mobile gu
    - https://github.com/darkfoxdeveloper/LongV6270/blob/main/src/modules/Long.Module.TaskDetail/Network/MsgTaskDetailInfo.cs
    - https://github.com/darkfoxdeveloper/LongV6270/blob/main/src/Long.Kernel/Network/Game/Packets/MsgTaskDialog.cs
    This is an independently authored server implementation, not TQ's original Mobile source. Its implementation choices and enum values must be checked against the target Mobile build before adoption.
-4. **Cooldown developer discussion on NPC/task database behavior** — a 2025 thread discusses cq_npc/cq_dynanpc task slots, cq_action execution, task-driven NPC dialogs and task-to-action chaining:
+4. **COPS v6 Emulator — public Lua task samples** — its project description documents a Lua scripting engine for NPCs, monster-death hooks, items, events and traps based on cq_action/cq_task; its Data/Tasks directory exposes some NPC script samples:
+   - https://gitlab.com/conquer-online/servers/cops-v6-emulator-enhanced-edition/-/tree/master
+   - https://gitlab.com/conquer-online/servers/cops-v6-emulator-enhanced-edition/-/tree/master/Data/Tasks
+   The public samples are explicitly incomplete according to a maintainer's community post, and the emulator's database layout is legacy COPS/TQ-derived. Use them as task-graph and scripting examples only.
+5. **Cooldown developer discussion on NPC/task database behavior** — a 2025 thread discusses cq_npc/cq_dynanpc task slots, cq_action execution, task-driven NPC dialogs and task-to-action chaining:
    - https://cooldown.dev/topic/410-looking-for-help-with-tq-binary-database-npc-actions/
    This is community technical discussion and an implementation lead, not authoritative Mobile documentation. Statements about database access/version-specific server behavior remain unverified until corroborated.
-5. **Mobile event guides outside the main Quests index** — independent event pages expose additional time-limited activity structures. Five historical examples have been added to the research catalogue: Love Cycles, Forbidden Area, Frostland Park, Into Wilds and Trial of Legends. They remain inactive historical research records; their dates, eligibility, NPCs, maps and mechanics are source-backed, while missing IDs/branches/targets are explicitly unresolved.
+6. **Mobile event guides outside the main Quests index** — independent event pages expose additional time-limited activity structures. Five historical examples have been added to the research catalogue: Love Cycles, Forbidden Area, Frostland Park, Into Wilds and Trial of Legends. They remain inactive historical research records; their dates, eligibility, NPCs, maps and mechanics are source-backed, while missing IDs/branches/targets are explicitly unresolved.
 
 ### How these references may be used
 
