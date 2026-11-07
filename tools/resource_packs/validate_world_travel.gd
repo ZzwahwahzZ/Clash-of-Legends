@@ -140,6 +140,35 @@ func _run_travel_test() -> void:
 	if not source_agent.completed_source_mission_ids.has("650"):
 		_fail("Source quest turn-in did not record mission 650 as completed.")
 		return
+	source_agent.completed_source_mission_ids.append("606")
+	if not source_agent.activate_source_mission("665", 8, "2"):
+		_fail("Jade Glyph source quest 665 did not unlock after prerequisite 606.")
+		return
+	source_agent.on_source_item_collected("710836", "Jade Glyph", "1002", 1)
+	var item_state: Dictionary = source_agent.get_source_active_state()
+	if not bool(item_state.get("ready_to_turn_in", false)):
+		_fail("Jade Glyph item-name and item-ID objectives did not complete together.")
+		return
+	if not source_agent.complete_source_mission_turnin("665", "5673", "1002"):
+		_fail("Jade Glyph quest did not turn in to Kungfu Boy on Twin City map.")
+		return
+	source_agent.completed_source_mission_ids.append("607")
+	var mob_mission: Dictionary = source_agent.get_source_mission("608")
+	if str(mob_mission.get("intentions", [])[0].get("monster_name", "")) != "Pheasant":
+		_fail("Quest 608 did not retain its corroborated Pheasant target.")
+		return
+	if not source_agent.activate_source_mission("608", 4, "2"):
+		_fail("Pheasant hunting quest 608 did not unlock after prerequisite 607.")
+		return
+	for _kill_index in range(10):
+		source_agent.on_source_enemy_killed("Pheasant", "1002")
+	var mob_state: Dictionary = source_agent.get_source_active_state()
+	if not bool(mob_state.get("ready_to_turn_in", false)):
+		_fail("Ten source-matched Pheasant kills did not satisfy paired chk_quest counter 608.")
+		return
+	if not source_agent.complete_source_mission_turnin("608", "2001", "1002"):
+		_fail("Pheasant hunting quest 608 did not turn in to Twin City Captain.")
+		return
 	source_agent.queue_free()
 	print("QUEST GRAPH AUDIT PASSED: ", graph_summary, " | city map IDs missing resource index: ", missing_city_maps)
 
