@@ -1,6 +1,6 @@
 extends Node
 
-func _initialize() -> void:
+func _ready() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
