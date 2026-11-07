@@ -220,6 +220,7 @@
   ],
   "negative_npc_id_sentinel_references": 140,
   "npc_template_sections": 2721,
+  "npc_model_template_sections": 1071,
   "class_selection_sections": {
     "en": 11,
     "ar": 11,
@@ -416,6 +417,7 @@
   "encodings": {
     "gamemapex": "utf-8-sig",
     "npc": "utf-8-sig",
+    "npcx": "utf-8-sig",
     "quest_en": "utf-8-sig",
     "quest_ar": "utf-8-sig",
     "class_selection": {
@@ -424,7 +426,7 @@
       "sp": "gb18030"
     }
   },
-  "output_bytes": 15107113,
+  "output_bytes": 15463071,
   "validation": "GODOT_RUNTIME_AUDIT_PASSED",
   "godot_runtime_validation": {
     "engine": "Godot 4.3",
