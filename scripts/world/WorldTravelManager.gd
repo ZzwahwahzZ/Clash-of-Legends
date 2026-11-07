@@ -24,6 +24,24 @@ func _ready() -> void:
 func get_destinations() -> Dictionary:
 	return DESTINATIONS.duplicate(true)
 
+func get_source_city_hubs() -> Array[Dictionary]:
+	var graph := QuestRuntimeGraph.new()
+	if not graph.load_graph():
+		return []
+	return graph.get_city_hubs()
+
+func get_source_map_directory_entry(map_id: String) -> Dictionary:
+	var graph := QuestRuntimeGraph.new()
+	if not graph.load_graph():
+		return {}
+	return graph.get_map_directory_entry(map_id)
+
+func get_source_mission_route(mission_id: String, turn_in: bool = false) -> Dictionary:
+	var graph := QuestRuntimeGraph.new()
+	if not graph.load_graph():
+		return {}
+	return graph.get_route(mission_id, turn_in)
+
 func get_current_destination_id() -> String:
 	return current_destination_id
 
