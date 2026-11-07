@@ -212,11 +212,17 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("archive", type=Path)
     ap.add_argument("--output", type=Path, default=Path("gameplay-source-table-audit.json"))
+    ap.add_argument("--lookup-item-ids", nargs="*", default=[],
+                    help="Report visible ID/name records for these exact Mobile item IDs; leave all other columns opaque.")
     args = ap.parse_args()
+    lookup_ids = {str(value).strip() for value in args.lookup_item_ids if str(value).strip()}
     if not args.archive.is_file():
         raise SystemExit(f"Archive not found: {args.archive}")
     with zipfile.ZipFile(args.archive) as outer:
         results = {}
+        itemtype_id_lookups = []
+        quest_promotion_candidates = []
+        promotion_text_hits = []
         with tempfile.TemporaryDirectory(prefix="co-source-audit-") as temp_dir:
             # The supplied bundle stores the Android client as a nested APK.
             # Index both direct archive members and files inside the exact-version APK.
@@ -253,10 +259,46 @@ def main() -> None:
                         if rel.lower().startswith("ini/itemtype/itemtype") and rel.lower().endswith(".ini"):
                             for source_zip, member, display in candidates:
                                 data = source_zip.read(member)
+                                parsed_itemtype = parse_itemtype(data, include_column_59_candidate=rel.lower().endswith("itemtype13.ini"))
+                                for row in parsed_itemtype.get("records", []):
+                                    if row.get("record_id") in lookup_ids:
+                                        itemtype_id_lookups.append({
+                                            "source_member": display, "relative_path": rel,
+                                            "source_sha256": hashlib.sha256(data).hexdigest(),
+                                            "record": {key: value for key, value in row.items() if key != "column_59_candidate"},
+                                            "column_59_candidate": row.get("column_59_candidate"),
+                                            "evidence_policy": "ID_AND_VISIBLE_NAME_ONLY; ALL_OTHER_POSITIONAL_FIELDS_OPAQUE"
+                                        })
                                 record = {"source_member": display, "relative_path": rel, "size_bytes": len(data),
-                                          "sha256": hashlib.sha256(data).hexdigest(), **parse_itemtype(data, include_column_59_candidate=rel.lower().endswith("itemtype13.ini"))}
+                                          "sha256": hashlib.sha256(data).hexdigest(), **parsed_itemtype}
                                 entries.append(record)
                 results[category] = entries
+            # Discover quest/promotion/NPC source members by exact APK path and safe raw-text hits.
+            # This is a candidate inventory only; it does not decode binary records or infer schema.
+            candidate_path_pattern = re.compile(r"(quest|task|promot|mission|npc|job|profession|class|role)", re.I)
+            promotion_terms = ("archer god", "archergod", "eagle archer", "oriental assassin", "path of shadow", "throwing knife")
+            for rel, candidates in sources.items():
+                if not candidate_path_pattern.search(rel):
+                    continue
+                for source_zip, member, display in candidates:
+                    data = source_zip.read(member)
+                    entry = {
+                        "relative_path": rel, "source_member": display,
+                        "size_bytes": len(data), "sha256": hashlib.sha256(data).hexdigest(),
+                        "extension": Path(rel).suffix.lower(),
+                        "evidence_status": "PATH_CANDIDATE_ONLY"
+                    }
+                    quest_promotion_candidates.append(entry)
+                    if len(data) <= 8 * 1024 * 1024:
+                        decoded = decode_text(data).casefold()
+                        found = [term for term in promotion_terms if term in decoded]
+                        if found:
+                            promotion_text_hits.append({
+                                **entry,
+                                "matched_ascii_or_decoded_terms": found,
+                                "evidence_status": "TEXT_HIT_REQUIRES_CONTEXT_AND_READER_VALIDATION"
+                            })
+
             # Inventory the complete mobile skill-icon/UI directory, not only the named INI/DAT files.
             # This captures the actual skill button assets and any per-skill metadata stored beside them.
             # Inventory motion tables and action clips in parallel with skill definitions.
@@ -406,6 +448,17 @@ def main() -> None:
                     "c3_mount_related_paths": [x for x in c3_model_paths if path_patterns["mount_related"].search(x["relative_path"])],
                     "ini_asset_mapping_inventory": ini_asset_mapping_inventory,
                     "policy": "Path discovery only. File names and opaque table sections do not prove undocumented model joins."
+                },
+                "quest_promotion_candidate_inventory": {
+                    "file_count": len(quest_promotion_candidates),
+                    "files": quest_promotion_candidates,
+                    "text_hits": promotion_text_hits,
+                    "policy": "Path/text discovery only; not proof of quest semantics or runtime schema."
+                },
+                "itemtype_id_lookups": {
+                    "requested_ids": sorted(lookup_ids),
+                    "matches": itemtype_id_lookups,
+                    "policy": "Exact ID and visible name only; all undocumented itemtype columns remain opaque."
                 },
                 "itemtype_catalog": {
                     "file_count": len(itemtypes),
