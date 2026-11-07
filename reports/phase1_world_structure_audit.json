@@ -7336,6 +7336,11 @@
         0
       ],
       "resolved": true,
+      "target_world": [
+        0,
+        4.17999982833862,
+        -126
+      ],
       "type": "Node3D"
     },
     {
@@ -7427,42 +7432,42 @@
       "descendant_meshes": [
         {
           "global_position": [
-            -11.6000003814697,
-            4.19999980926514,
-            -31.5
+            0,
+            0,
+            0
           ],
           "mesh_aabb_local": [
             [
-              -1,
-              -1.07500004768372,
-              -0.07000000029802
+              -9.5,
+              -0.2499955445528,
+              -220
             ],
             [
-              2,
-              2.15000009536743,
-              0.140000000596046
+              19,
+              0.214991092681885,
+              320
             ]
           ],
           "mesh_aabb_world": [
             [
-              -12.6000003814697,
-              3.12499976158142,
-              -31.5699996948242
+              -9.5,
+              -0.2499955445528,
+              -220
             ],
             [
-              2,
-              2.14999985694885,
-              0.139999389648438
+              19,
+              0.214991092681885,
+              320
             ]
           ],
-          "path": "/root/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiTenementDistrict/AvenueHotelBladeBacking"
+          "path": "/root/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/CentralAvenue"
         }
       ],
       "global_transform": [
         [
-          -1,
+          1,
           0,
-          -0.00000008742278
+          0
         ],
         [
           0,
@@ -7470,40 +7475,40 @@
           0
         ],
         [
-          0.0000000874227765734759,
           0,
-          -1
+          0,
+          1
         ],
         [
-          -11.6000003814697,
-          4.19999980926514,
-          -31.5
+          0,
+          0,
+          0
         ]
       ],
       "id": "jianghai.hotel_frontage",
       "mesh_aabb_local": [
         [
-          -1,
-          -1.07500004768372,
-          -0.07000000029802
+          -9.5,
+          -0.2499955445528,
+          -220
         ],
         [
-          2,
-          2.15000009536743,
-          0.140000000596046
+          19,
+          0.214991092681885,
+          320
         ]
       ],
-      "node_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict/AvenueHotelBladeBacking",
+      "node_path": "JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/CentralAvenue",
       "position_global": [
-        -11.6000003814697,
-        4.19999980926514,
-        -31.5
+        0,
+        0,
+        0
       ],
       "resolved": true,
-      "target_inside_anchor_mesh_aabb": false,
+      "target_inside_anchor_mesh_aabb": true,
       "target_world": [
-        -11.6000003814697,
-        0,
+        -9.5,
+        -0.14000000059605,
         -34.5
       ],
       "type": "MeshInstance3D"
@@ -7512,42 +7517,42 @@
       "descendant_meshes": [
         {
           "global_position": [
-            11.6000003814697,
-            4.30000019073486,
-            -45
+            0,
+            0,
+            0
           ],
           "mesh_aabb_local": [
             [
-              -1,
-              -1.07500004768372,
-              -0.07000000029802
+              -19,
+              -0.10499999672174,
+              -76.5
             ],
             [
-              2,
-              2.15000009536743,
-              0.140000000596046
+              38,
+              0.119999997317791,
+              33
             ]
           ],
           "mesh_aabb_world": [
             [
-              10.6000003814697,
-              3.22500014305115,
-              -45.0699996948242
+              -19,
+              -0.10499999672174,
+              -76.5
             ],
             [
-              2,
-              2.14999985694885,
-              0.139999389648438
+              38,
+              0.119999997317791,
+              33
             ]
           ],
-          "path": "/root/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiTenementDistrict/AvenueMedicineBladeBacking"
+          "path": "/root/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/ExtractionSquare"
         }
       ],
       "global_transform": [
         [
-          -1,
+          1,
           0,
-          -0.00000008742278
+          0
         ],
         [
           0,
@@ -7555,40 +7560,40 @@
           0
         ],
         [
-          0.0000000874227765734759,
           0,
-          -1
+          0,
+          1
         ],
         [
-          11.6000003814697,
-          4.30000019073486,
-          -45
+          0,
+          0,
+          0
         ]
       ],
       "id": "jianghai.medicine_frontage",
       "mesh_aabb_local": [
         [
-          -1,
-          -1.07500004768372,
-          -0.07000000029802
+          -19,
+          -0.10499999672174,
+          -76.5
         ],
         [
-          2,
-          2.15000009536743,
-          0.140000000596046
+          38,
+          0.119999997317791,
+          33
         ]
       ],
-      "node_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict/AvenueMedicineBladeBacking",
+      "node_path": "JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/ExtractionSquare",
       "position_global": [
-        11.6000003814697,
-        4.30000019073486,
-        -45
+        0,
+        0,
+        0
       ],
       "resolved": true,
-      "target_inside_anchor_mesh_aabb": false,
+      "target_inside_anchor_mesh_aabb": true,
       "target_world": [
         11.6000003814697,
-        0,
+        -0.04500000178814,
         -48
       ],
       "type": "MeshInstance3D"
@@ -7597,42 +7602,42 @@
       "descendant_meshes": [
         {
           "global_position": [
-            11.6000003814697,
-            4.34999990463257,
-            -5
+            0,
+            0,
+            0
           ],
           "mesh_aabb_local": [
             [
-              -1,
-              -1.07500004768372,
-              -0.07000000029802
+              -9.5,
+              -0.2499955445528,
+              -220
             ],
             [
-              2,
-              2.15000009536743,
-              0.140000000596046
+              19,
+              0.214991092681885,
+              320
             ]
           ],
           "mesh_aabb_world": [
             [
-              10.6000003814697,
-              3.27499985694885,
-              -5.07000017166138
+              -9.5,
+              -0.2499955445528,
+              -220
             ],
             [
-              2,
-              2.15000033378601,
-              0.140000343322754
+              19,
+              0.214991092681885,
+              320
             ]
           ],
-          "path": "/root/full_city_preview/JianghaiOldCityAuthoredScene/JianghaiTenementDistrict/AvenueTeaBladeBacking"
+          "path": "/root/full_city_preview/JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/CentralAvenue"
         }
       ],
       "global_transform": [
         [
-          -1,
+          1,
           0,
-          -0.00000008742278
+          0
         ],
         [
           0,
@@ -7640,40 +7645,40 @@
           0
         ],
         [
-          0.0000000874227765734759,
           0,
-          -1
+          0,
+          1
         ],
         [
-          11.6000003814697,
-          4.34999990463257,
-          -5
+          0,
+          0,
+          0
         ]
       ],
       "id": "jianghai.tea_frontage",
       "mesh_aabb_local": [
         [
-          -1,
-          -1.07500004768372,
-          -0.07000000029802
+          -9.5,
+          -0.2499955445528,
+          -220
         ],
         [
-          2,
-          2.15000009536743,
-          0.140000000596046
+          19,
+          0.214991092681885,
+          320
         ]
       ],
-      "node_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict/AvenueTeaBladeBacking",
+      "node_path": "JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/CentralAvenue",
       "position_global": [
-        11.6000003814697,
-        4.34999990463257,
-        -5
+        0,
+        0,
+        0
       ],
       "resolved": true,
-      "target_inside_anchor_mesh_aabb": false,
+      "target_inside_anchor_mesh_aabb": true,
       "target_world": [
-        11.6000003814697,
-        0,
+        9.5,
+        -0.14000000059605,
         -8
       ],
       "type": "MeshInstance3D"
