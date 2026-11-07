@@ -55,6 +55,20 @@ class TQFileCipherKnownAnswerTests(unittest.TestCase):
             self.assertEqual(standalone_decoder.decrypt_tq(encrypted, seed), sample)
             self.assertEqual(archive_decoder.decrypt_tq(encrypted, seed), sample)
 
+    def test_high_binary_bytes_do_not_count_as_printable_lua(self):
+        sample = bytes(range(0xC0, 0x100)) * 32
+        result = archive_decoder.signals(sample)
+        self.assertEqual(result["printable_ratio"], 0.0)
+        self.assertFalse(result["lua_signature"])
+        self.assertFalse(result["ini_signature"])
+        self.assertEqual(archive_decoder.classify(sample), "BINARY_OR_ENCRYPTED_UNCLASSIFIED")
+
+    def test_ascii_lua_signature_survives_non_ascii_locale_payload(self):
+        # The structural tokens are ASCII even when localized strings are UTF-8.
+        sample = 'local MainTask = { ["TaskID"] = 10017, ["Name"] = "任务" }'.encode("utf-8")
+        result = archive_decoder.signals(sample)
+        self.assertTrue(result["lua_signature"])
+
 
 if __name__ == "__main__":
     unittest.main()
