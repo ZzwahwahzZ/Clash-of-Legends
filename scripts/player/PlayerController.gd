@@ -1,7 +1,7 @@
 extends CharacterBody3D
 class_name PlayerController
 
-@export var character_class: String = "Trojan"
+@export var character_class: String = "Archer"
 @export_enum("male", "female") var character_gender: String = "male"
 @export var base_speed: float = 6.5
 @export var mount_speed_multiplier: float = 1.6
@@ -58,6 +58,11 @@ var footstep_timer: float = 0.0
 @onready var c3_vat_animator: C3VatCharacterAnimator = get_node_or_null("C3VatAnimator")
 
 func _ready() -> void:
+	# Carry the class selected on the title screen into the actual player instance.
+	if GameManager:
+		var selected_class := str(GameManager.selected_class).strip_edges()
+		if not selected_class.is_empty():
+			character_class = selected_class
 	if navigation_agent:
 		navigation_agent.radius = 0.5
 		navigation_agent.height = 1.8
