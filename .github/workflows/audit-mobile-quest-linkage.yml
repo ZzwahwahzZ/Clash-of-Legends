@@ -55,7 +55,14 @@ jobs:
                               or "/client_realm_task/" in low and base.endswith(".dat")
                               or "/clienttask" in low and base.endswith(".dat")
                               or low.startswith("assets/conquerres/ini/itemtype/") and base.endswith(".ini")
-                          or low.startswith("assets/conquerres/script/") and base.endswith(".dat")):
+                          or low.startswith("assets/conquerres/script/") and base.endswith(".dat")
+                          or any(folder in low for folder in (
+                              "/ini/luaui/dialog/dlgnpcdialogue/","/ini/luaui/dialog/dlgrealmtask/",
+                              "/ini/luaui/dialog/dlgxmtaskguide/","/ini/luaui/dialog/dlgmaycelebrations/",
+                              "/ini/luaui/dialog/dlgbaotree/","/ini/luaui/dialog/dlgcoordinates/",
+                              "/ini/luaui/fairygui/window/ydhdailytask/","/ini/luaui/fairygui/window/yunyoutask/",
+                              "/ini/luaui/fairygui/window/fgui_rzqzhd_task/"
+                          )) and base.endswith(".dat")):
                               target=out/"selected"/Path(info.filename).relative_to("assets/ConquerRes")
                               target.parent.mkdir(parents=True,exist_ok=True)
                               with z.open(info) as src, target.open("wb") as dst:
