@@ -27,14 +27,22 @@ func _run() -> void:
 	var factory_doorway_clear := _ray_is_clear(Vector3(86.0, 1.0, -11.0), Vector3(86.0, 1.0, -5.0))
 	var pawnshop_wall_blocks := _ray_hits_collision(Vector3(-88.5, 1.0, -115.0), Vector3(-88.5, 1.0, -109.0))
 	var factory_wall_blocks := _ray_hits_collision(Vector3(83.5, 1.0, -11.0), Vector3(83.5, 1.0, -5.0))
+	var bridge_rail := world.find_child("MarketRail_-123.95_4.85", true, false) as MeshInstance3D
+	var bridge_rail_blocks := false
+	if bridge_rail != null and bridge_rail.mesh != null:
+		var rail_world_bounds: AABB = bridge_rail.global_transform * bridge_rail.get_aabb()
+		var rail_center := rail_world_bounds.get_center()
+		var rail_hit := _ray_result(rail_center + Vector3(0.0, 0.0, 1.0), rail_center - Vector3(0.0, 0.0, 1.0))
+		bridge_rail_blocks = not rail_hit.is_empty() and (rail_hit.get("collider") as Node).name == "MarketBridgeRailCollision"
 	print("PHASE1 BUILDING DOORWAY COLLISION PROBE: ", JSON.stringify({
 		"pawnshop_doorway_clear": pawnshop_doorway_clear,
 		"factory_doorway_clear": factory_doorway_clear,
 		"pawnshop_adjacent_wall_blocks": pawnshop_wall_blocks,
-		"factory_adjacent_wall_blocks": factory_wall_blocks
+		"factory_adjacent_wall_blocks": factory_wall_blocks,
+		"market_bridge_guardrail_blocks": bridge_rail_blocks
 	}))
-	if not pawnshop_doorway_clear or not factory_doorway_clear or not pawnshop_wall_blocks or not factory_wall_blocks:
-		_fail("Pawnshop or factory doorway clearance / adjacent wall collision validation failed.")
+	if not pawnshop_doorway_clear or not factory_doorway_clear or not pawnshop_wall_blocks or not factory_wall_blocks or not bridge_rail_blocks:
+		_fail("Pawnshop/factory doorway clearance, adjacent wall collision, or market bridge guardrail collision validation failed.")
 		return
 
 	var player_packed := load(PLAYER_SCENE_PATH) as PackedScene
@@ -156,6 +164,7 @@ func _run() -> void:
 		"factory_doorway_clear": factory_doorway_clear,
 		"pawnshop_adjacent_wall_blocks": pawnshop_wall_blocks,
 		"factory_adjacent_wall_blocks": factory_wall_blocks,
+		"market_bridge_guardrail_blocks": bridge_rail_blocks,
 		"player_scene_loaded": true,
 		"navigation_map_valid": navigation_map.is_valid(),
 		"navigation_map_region_count": map_region_count,
