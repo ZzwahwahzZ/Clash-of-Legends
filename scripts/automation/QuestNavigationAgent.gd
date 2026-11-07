@@ -63,6 +63,7 @@ func activate_source_mission(mission_id: String, player_level: int, profession_c
 		source_objective_progress[mission_id].append(false)
 	source_ready_to_turn_in_ids.erase(mission_id)
 	emit_signal("quest_state_changed", mission_id, "source_active_candidate")
+	_notify_source_quest_state()
 	return true
 
 func select_source_mission_at_npc(mission_id: String, npc_id: String, player_level: int, class_id: String) -> bool:
@@ -142,6 +143,7 @@ func _advance_source_objectives(event_kind: String, target: String, map_id: Stri
 	if all_complete and not source_ready_to_turn_in_ids.has(active_source_mission_id):
 		source_ready_to_turn_in_ids.append(active_source_mission_id)
 		emit_signal("quest_state_changed", active_source_mission_id, "source_ready_to_turn_in_candidate")
+	_notify_source_quest_state()
 
 func complete_source_mission_turnin(mission_id: String, npc_id: String = "") -> bool:
 	if mission_id != active_source_mission_id or completed_source_mission_ids.has(mission_id):
@@ -158,7 +160,29 @@ func complete_source_mission_turnin(mission_id: String, npc_id: String = "") -> 
 	source_objective_progress.erase(mission_id)
 	active_source_mission_id = ""
 	emit_signal("quest_state_changed", mission_id, "source_completed_candidate")
+	_notify_source_quest_state()
 	return true
+
+func _notify_source_quest_state() -> void:
+	if not GameManager:
+		return
+	if active_source_mission_id.is_empty():
+		GameManager.emit_signal("quest_updated", "", "لا توجد مهمة مصدر نشطة" if GameManager.current_language == "ar" else "No active source quest", 0, 0, false)
+		GameManager.emit_signal("quest_description_changed", "")
+		return
+	var mission := source_graph.get_mission(active_source_mission_id)
+	if mission.is_empty():
+		return
+	var progress: Array = source_objective_progress.get(active_source_mission_id, [])
+	var completed_count := 0
+	for value in progress:
+		if bool(value):
+			completed_count += 1
+	var title := str(mission.get("name_ar", mission.get("name", active_source_mission_id))) if GameManager.current_language == "ar" else str(mission.get("name", active_source_mission_id))
+	var ready := source_ready_to_turn_in_ids.has(active_source_mission_id)
+	GameManager.emit_signal("quest_updated", active_source_mission_id, title, completed_count, progress.size(), ready)
+	var description := str(mission.get("intention_description", ""))
+	GameManager.emit_signal("quest_description_changed", description)
 
 func get_source_mission(mission_id: String) -> Dictionary:
 	return source_catalog.get_mission(mission_id)
