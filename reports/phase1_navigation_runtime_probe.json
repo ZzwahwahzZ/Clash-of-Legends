@@ -1,4 +1,10 @@
 {
+  "bridge_landmark_route_rejected": true,
+  "bridge_landmark_route_result": {
+    "anchor_id": "jianghai.market_bridge",
+    "ok": false,
+    "reason": "anchor_is_landmark_not_navigation_target"
+  },
   "collision_probe_passed": true,
   "factory_adjacent_wall_blocks": true,
   "factory_doorway_clear": true,
@@ -12,6 +18,84 @@
   "horizontal_displacement": 26.5373611450195,
   "horizontal_distance_to_projected_target": 0.203686788678169,
   "initial_floor_contact": true,
+  "interaction_registry_bound": true,
+  "market_bridge_crossing": {
+    "distance_to_target": 1.4832935333252,
+    "final_position": [
+      19.5167064666748,
+      4.34003686904907,
+      -126
+    ],
+    "floor_contact": true,
+    "frames_used": 375,
+    "is_moving_to_target_at_finish": true,
+    "next_path_position_at_finish": [
+      21,
+      4.44999980926514,
+      -126
+    ],
+    "passed": true,
+    "path_waypoint_count": 3,
+    "path_waypoints": [
+      [
+        -21,
+        4.44999980926514,
+        -126
+      ],
+      [
+        0.125,
+        4.44999980926514,
+        -126
+      ],
+      [
+        21,
+        4.44999980926514,
+        -126
+      ]
+    ],
+    "player_velocity_at_finish": [
+      6.5,
+      0,
+      0
+    ],
+    "slide_collisions_at_finish": [
+      {
+        "collider": "WalkableCollision_07",
+        "normal": [
+          0,
+          1,
+          0
+        ],
+        "position": [
+          19.5167064666748,
+          4.33999967575073,
+          -126
+        ]
+      }
+    ],
+    "start_projected": [
+      -21,
+      4.44999980926514,
+      -126
+    ],
+    "start_projection_distance": 0,
+    "start_requested": [
+      -21,
+      4.44999980926514,
+      -126
+    ],
+    "target_projected": [
+      21,
+      4.44999980926514,
+      -126
+    ],
+    "target_projection_distance": 0,
+    "target_requested": [
+      21,
+      4.44999980926514,
+      -126
+    ]
+  },
   "market_bridge_guardrail_blocks": true,
   "market_bridge_guardrail_hit_collider": "MarketBridgeRailCollision",
   "navigation_cell_height_matches": true,
@@ -64,40 +148,40 @@
     {
       "floor_contact": true,
       "frames_used": 1032,
-      "horizontal_displacement": 96.1219940185547,
-      "horizontal_distance_to_target": 1.47788560390472,
+      "horizontal_displacement": 96.1202545166016,
+      "horizontal_distance_to_target": 1.47971570491791,
       "route": "pawnshop_approach",
       "target_reached": true
     },
     {
       "floor_contact": true,
-      "frames_used": 1023,
-      "horizontal_displacement": 97.1401672363281,
-      "horizontal_distance_to_target": 1.39189553260803,
+      "frames_used": 1021,
+      "horizontal_displacement": 97.037712097168,
+      "horizontal_distance_to_target": 1.49768996238708,
       "route": "factory_approach",
       "target_reached": true
     },
     {
       "floor_contact": true,
       "frames_used": 532,
-      "horizontal_displacement": 52.2463569641113,
-      "horizontal_distance_to_target": 1.4067440032959,
+      "horizontal_displacement": 52.2464447021484,
+      "horizontal_distance_to_target": 1.40664613246918,
       "route": "market_bridge_west_approach",
       "target_reached": true
     },
     {
       "floor_contact": true,
       "frames_used": 142,
-      "horizontal_displacement": 15.2749652862549,
-      "horizontal_distance_to_target": 1.41516959667206,
+      "horizontal_displacement": 15.2750329971313,
+      "horizontal_distance_to_target": 1.4151017665863,
       "route": "medicine_frontage",
       "target_reached": true
     },
     {
       "floor_contact": true,
       "frames_used": 475,
-      "horizontal_displacement": 51.3327713012695,
-      "horizontal_distance_to_target": 1.44015836715698,
+      "horizontal_displacement": 51.3325042724609,
+      "horizontal_distance_to_target": 1.44042277336121,
       "route": "tea_frontage",
       "target_reached": true
     }

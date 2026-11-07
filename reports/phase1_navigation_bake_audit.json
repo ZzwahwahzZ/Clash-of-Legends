@@ -54,21 +54,6 @@
       ]
     },
     {
-      "id": "jianghai.market_bridge",
-      "projected_position": [
-        0,
-        4.45000457763672,
-        -126
-      ],
-      "projection_distance": 0.270004749298096,
-      "projection_valid": true,
-      "source_position": [
-        0,
-        4.17999982833862,
-        -126
-      ]
-    },
-    {
       "id": "jianghai.hotel_frontage",
       "projected_position": [
         -8.75,
@@ -193,8 +178,8 @@
   "npc_spawning_enabled": false,
   "parsed_geometry_type": "MESH_INSTANCES",
   "pawnshop_obstacle_shape_count": 40,
-  "polygon_count": 92,
-  "projection_pass_count": 7,
+  "polygon_count": 88,
+  "projection_pass_count": 6,
   "route_connectivity": [
     {
       "connected": true,
@@ -209,13 +194,6 @@
       "path_length": 111.462965965271,
       "to": "jianghai.factory_approach",
       "waypoint_count": 14
-    },
-    {
-      "connected": true,
-      "from": "jianghai.central_avenue",
-      "path_length": 66.6840854883194,
-      "to": "jianghai.market_bridge",
-      "waypoint_count": 7
     },
     {
       "connected": true,
@@ -246,23 +224,23 @@
       "waypoint_count": 22
     }
   ],
-  "route_connectivity_pass_count": 7,
+  "route_connectivity_pass_count": 6,
   "route_status": "CONNECTED",
   "runtime_android_performance_validated": false,
   "saved_navigation_mesh": "res://assets/environment/phase1/jianghai/jianghai_city_navmesh.tres",
   "saved_runtime_world_scene": "res://scenes/world/JianghaiOldCity.tscn",
   "saved_scene_validation": {
-    "collision_bodies": 13,
-    "collision_shapes": 62,
+    "collision_bodies": 15,
+    "collision_shapes": 60,
     "factory_obstacle_shapes": 8,
     "market_bridge_rail_collision_shapes": 4,
     "navigation_regions": 1,
     "pawnshop_obstacle_shapes": 40,
     "valid": true,
-    "walkable_collision_bodies": 10,
-    "walkable_collision_shapes": 10,
-    "walkable_shape_identity_transform_count": 10,
-    "walkable_shape_transform_checks": 10
+    "walkable_collision_bodies": 8,
+    "walkable_collision_shapes": 8,
+    "walkable_shape_identity_transform_count": 8,
+    "walkable_shape_transform_checks": 8
   },
   "selected_walkable_sources": [
     "JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/CentralAvenue",
@@ -272,11 +250,9 @@
     "JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/ExtractionSquare",
     "JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/PawnshopApproach",
     "JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/FactoryApproach",
-    "JianghaiOldCityAuthoredScene/OldCityMarketBridge/MarketBridgeDeck",
-    "JianghaiOldCityAuthoredScene/OldCityMarketBridge/MarketEastRamp",
-    "JianghaiOldCityAuthoredScene/OldCityMarketBridge/MarketWestRamp"
+    "JianghaiOldCityAuthoredScene/OldCityMarketBridge/MarketBridgeDeck"
   ],
   "source_geometry_mode": "GROUPS_EXPLICIT",
-  "vertex_count": 90,
-  "walkable_floor_collision_shape_count": 10
+  "vertex_count": 86,
+  "walkable_floor_collision_shape_count": 8
 }

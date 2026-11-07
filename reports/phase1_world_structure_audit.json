@@ -15288,11 +15288,6 @@
         0
       ],
       "resolved": true,
-      "target_world": [
-        0,
-        4.17999982833862,
-        -126
-      ],
       "type": "Node3D"
     },
     {
