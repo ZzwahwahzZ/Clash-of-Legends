@@ -115,10 +115,12 @@
     }
   ],
   "bake_status": "BAKED",
-  "building_obstacle_collisions_included": false,
+  "building_obstacle_collisions_included": true,
   "city_scene": "res://assets/environment/phase1/jianghai/full_city_preview.glb",
   "collision_bake_included": true,
+  "doorway_openings_preserved_by_excluding_door_frames_and_lintels": true,
   "excluded_geometry_policy": "All unlisted city meshes are excluded from navigation baking.",
+  "factory_obstacle_shape_count": 8,
   "navigation_map_valid": true,
   "npc_spawn_projection_pass_count": 4,
   "npc_spawn_projections": [
@@ -189,6 +191,7 @@
   ],
   "npc_spawning_enabled": false,
   "parsed_geometry_type": "MESH_INSTANCES",
+  "pawnshop_obstacle_shape_count": 40,
   "polygon_count": 92,
   "projection_pass_count": 7,
   "route_connectivity": [
@@ -248,12 +251,16 @@
   "saved_navigation_mesh": "res://assets/environment/phase1/jianghai/jianghai_city_navmesh.tres",
   "saved_runtime_world_scene": "res://scenes/world/JianghaiOldCity.tscn",
   "saved_scene_validation": {
-    "collision_bodies": 10,
-    "collision_shape_identity_transform_count": 10,
-    "collision_shape_transform_checks": 10,
-    "collision_shapes": 10,
+    "collision_bodies": 12,
+    "collision_shapes": 58,
+    "factory_obstacle_shapes": 8,
     "navigation_regions": 1,
-    "valid": true
+    "pawnshop_obstacle_shapes": 40,
+    "valid": true,
+    "walkable_collision_bodies": 10,
+    "walkable_collision_shapes": 10,
+    "walkable_shape_identity_transform_count": 10,
+    "walkable_shape_transform_checks": 10
   },
   "selected_walkable_sources": [
     "JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/CentralAvenue",

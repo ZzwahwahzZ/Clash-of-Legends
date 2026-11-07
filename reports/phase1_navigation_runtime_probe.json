@@ -1,4 +1,6 @@
 {
+  "factory_adjacent_wall_blocks": true,
+  "factory_doorway_clear": true,
   "final_floor_contact": true,
   "final_player_position": [
     -8.68390560150146,
@@ -14,6 +16,8 @@
   "navigation_map_region_count": 1,
   "navigation_map_valid": true,
   "path_waypoint_count": 5,
+  "pawnshop_adjacent_wall_blocks": true,
+  "pawnshop_doorway_clear": true,
   "player_scene_loaded": true,
   "project_default_cell_height": 0.1,
   "projected_target_position": [
