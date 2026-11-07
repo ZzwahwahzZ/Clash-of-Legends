@@ -171,16 +171,22 @@ def main():
     for name in CLASSES:
         records = unique_records(identity.get(name, []))
         joined = [r for r in records if r["simple_object_id"] is not None]
-        selection = [r for r in selection_labels if r["normalized_source_token"] == name]
+        selection = [
+            r for r in selection_labels
+            if r["normalized_source_token"] == name
+            or (name in ("Water Taoist", "Fire Taoist") and r["normalized_source_token"] == "Taoist")
+        ]
         if joined:
             status = "SOURCE_CLASS_GENDER_AND_SIMPLE_ROLE_JOIN_FOUND_BODY_ASSET_UNRESOLVED"
         elif records:
             status = "SOURCE_ROLE_LABEL_FOUND_SIMPLE_ROLE_JOIN_UNRESOLVED"
         else:
             status = "NO_DIRECT_SOURCE_IDENTITY_EVIDENCE_FOUND"
+        if name in ("Water Taoist", "Fire Taoist") and selection and not records:
+            status = "TAOIST_BASE_CLASS_LABEL_FOUND_SPECIALIZATION_NOT_DISTINGUISHED_IN_CHARACTER_SELECTION"
         matrix.append({
             "game_class": name,
-            "source_identity_tokens": [name] if records else [],
+            "source_identity_tokens": [name] if records else (["Taoist"] if selection and name in ("Water Taoist", "Fire Taoist") else []),
             "source_identity_records": records,
             "simple_role_join_records": joined,
             "character_selection_label_records": selection,
@@ -222,7 +228,9 @@ def main():
         "body_model_candidates": sorted(bodies.values(), key=lambda x: x["model_id"]),
         "class_matrix": matrix,
         "normalization_notes": {
-            "Taoist": "A generic Taoist source token and Role0/Role1 simple-role joins exist, but the source evidence does not split them into Water Taoist and Fire Taoist.",
+            "Taoist": "The original character-selection description explicitly says Taoists choose Water or Fire at Level 40. Both game subclasses therefore inherit the generic Taoist base-selection evidence; neither subclass has a separate body-model mapping yet.",
+            "Thunderstriker": "No direct Thunderstriker selection label was found. Windwalker's source description mentions thundercloud summoning, which is not sufficient evidence to equate the two classes.",
+            "Saint": "Saint appears as a separate source selection slot beside Monk. It is retained as an unnormalized source identity rather than silently merged into Monk.",
             "Dragon Warrior": "No direct source token found; do not infer from generic Warrior.",
             "Ninja": "Source role labels exist, but no matching simple-role records were joined.",
             "Monk": "A source role label exists, but no matching simple-role record was joined.",
