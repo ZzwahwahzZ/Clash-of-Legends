@@ -51,7 +51,7 @@ jobs:
                           low=info.filename.lower()
                           if not info.filename.startswith("assets/ConquerRes/"): continue
                           base=low.rsplit("/",1)[-1]
-                          if (base in {"questinfo.dat","taskitem_info.dat","questinfo.ini","questinfopassionserver.ini","terrainnpc.ini","npc.ini","npcx.ini","npcex.ini","npcdialogueinfo.dat","npcdialoguefunc.dat","npcdialoguetext_ar.dat","npcdialoguetext_en.dat","npcdialoguetext_sp.dat","gamemap.dat","gamemapex.ini","mapdestination.ini","item.ini","monstertype.ini","clienttask124.dat","scriptdialoguetext_ar.dat","scriptdialoguetext_en.dat","scriptdialoguetext_sp.dat","npcdialogueinfo.dat","npcdialoguetext_ar.dat","npcdialoguetext_en.dat","npcdialoguetext_sp.dat","luascriptmgr.dat"}
+                          if (base in {"questinfo.dat","taskitem_info.dat","questinfo.ini","questinfopassionserver.ini","terrainnpc.ini","npc.ini","npcx.ini","npcex.ini","npcdialogueinfo.dat","npcdialoguefunc.dat","npcdialoguetext_ar.dat","npcdialoguetext_en.dat","npcdialoguetext_sp.dat","gamemap.dat","gamemapex.ini","mapdestination.ini","item.ini","monstertype.ini","slotnpc.ini","clienttask124.dat","scriptdialoguetext_ar.dat","scriptdialoguetext_en.dat","scriptdialoguetext_sp.dat","npcdialogueinfo.dat","npcdialoguetext_ar.dat","npcdialoguetext_en.dat","npcdialoguetext_sp.dat","luascriptmgr.dat"}
                               or "/client_realm_task/" in low and base.endswith(".dat")
                               or "/clienttask" in low and base.endswith(".dat")
                               or low.startswith("assets/conquerres/script/") and base.endswith(".dat")):
