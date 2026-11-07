@@ -12,7 +12,7 @@ import tempfile
 VERSION = "ConquerOnline-1.1.2.3"
 ROOT = "assets/ConquerRes/"
 EXACT = {
-    "ini/gamemap.dat", "ini/npc.ini", "ini/npcex.ini", "ini/npcx.ini",
+    "ini/gamemap.dat", "ini/gamemapex.ini", "ini/gamemaplayer.ini", "ini/npc.ini", "ini/npcex.ini", "ini/npcx.ini",
     "ini/slotnpc.ini", "ini/terrainnpc.ini", "ini/questinfo.dat",
     "ini/taskitem_info.dat", "ini/monster.dat", "ini/itemcfg.dat",
     "ini/copydrop.dat", "script/dialogtext/scriptdialoguetext_ar.dat",
