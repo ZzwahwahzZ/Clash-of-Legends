@@ -39,6 +39,7 @@ var travel_list: VBoxContainer = null
 func _ready() -> void:
 	if GameManager:
 		GameManager.player_stats_changed.connect(_on_player_stats_changed)
+		GameManager.player_registered.connect(_on_player_registered)
 		GameManager.quest_updated.connect(_on_quest_updated)
 		GameManager.quest_description_changed.connect(_on_quest_description_changed)
 		GameManager.notification_posted.connect(_on_notification_posted)
@@ -46,6 +47,9 @@ func _ready() -> void:
 
 	if CombatEngine:
 		CombatEngine.damage_dealt.connect(_on_damage_dealt)
+	if ClassProgressionManager:
+		ClassProgressionManager.weapon_style_changed.connect(_on_weapon_style_changed)
+		ClassProgressionManager.progression_unlocked.connect(_on_progression_unlocked)
 
 	if attack_btn:
 		attack_btn.pressed.connect(_on_attack_pressed)
@@ -80,6 +84,15 @@ func _ready() -> void:
 
 	_refresh_hud_labels()
 	_update_interact_button()
+
+func _on_player_registered(_player: CharacterBody3D) -> void:
+	_update_skill_buttons()
+
+func _on_weapon_style_changed(_style_id: String) -> void:
+	_update_skill_buttons()
+
+func _on_progression_unlocked(_path_id: String) -> void:
+	_update_skill_buttons()
 
 func _on_player_stats_changed(hp: int, max_hp: int, mp: int, max_mp: int, xp: int, max_xp: int, level: int, gold: int) -> void:
 	if hp_bar:
