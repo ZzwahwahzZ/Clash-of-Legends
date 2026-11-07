@@ -139,10 +139,16 @@ def main():
             continue
         talks = data.get("DlgTalk", {})
         resolved_talks = []
+        model_template_ids = set()
         if isinstance(talks, dict):
             for step, talk in sorted(talks.items(), key=lambda item: (0, int(item[0])) if str(item[0]).isdigit() else (1, str(item[0]))):
                 if not isinstance(talk, dict):
                     continue
+                show_info = talk.get("DlgShowInfo", {})
+                if isinstance(show_info, dict):
+                    model_id = show_info.get("id")
+                    if isinstance(model_id, int) and model_id > 0:
+                        model_template_ids.add(model_id)
                 text_key = ""
                 dlg_text = talk.get("DlgText", {})
                 if isinstance(dlg_text, dict):
