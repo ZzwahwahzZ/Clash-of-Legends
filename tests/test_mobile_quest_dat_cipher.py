@@ -38,7 +38,7 @@ class TQFileCipherKnownAnswerTests(unittest.TestCase):
     def test_both_decoders_match_known_ciphertext(self):
         plaintext = (
             b'local MainTask = { [0] = { ["TaskID"] = 10017, '
-            b'["Goal"] = 30 } }\\n'
+            b'["Goal"] = 30 } }\n'
         )
         ciphertext = bytes.fromhex(
             "c1b5c2f01bbc5db97aefdefe74641d167d76239f2ee900c8"
