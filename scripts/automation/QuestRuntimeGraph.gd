@@ -10,6 +10,7 @@ var status := "NOT_LOADED"
 var missions: Dictionary = {}
 var maps: Dictionary = {}
 var map_names: Dictionary = {}
+var map_directory: Dictionary = {}
 var dependents: Dictionary = {}
 var npc_starts: Dictionary = {}
 var npc_turnins: Dictionary = {}
@@ -24,6 +25,7 @@ func load_graph(path: String = DEFAULT_CATALOG) -> bool:
 	missions.clear()
 	maps.clear()
 	map_names.clear()
+	map_directory.clear()
 	dependents.clear()
 	npc_starts.clear()
 	npc_turnins.clear()
@@ -65,6 +67,11 @@ func load_graph(path: String = DEFAULT_CATALOG) -> bool:
 			var map_id := str(row.get("map_id", ""))
 			if not map_id.is_empty():
 				map_names[map_id] = row
+	for row in root.get("map_directory", []):
+		if row is Dictionary:
+			var map_id := str(row.get("map_id", ""))
+			if not map_id.is_empty():
+				map_directory[map_id] = row
 	for row in root.get("city_hubs", []):
 		if row is Dictionary:
 			city_hubs.append(row)
@@ -188,6 +195,12 @@ func get_route(mission_id: String, turn_in: bool = false) -> Dictionary:
 		"runtime_transform_verified": false,
 	}
 
+func get_map_directory_entry(map_id: String) -> Dictionary:
+	return (map_directory.get(map_id, {}) as Dictionary).duplicate(true)
+
+func get_city_hubs() -> Array[Dictionary]:
+	return city_hubs.duplicate(true)
+
 func get_npc_placements(npc_id: String, map_id: String = "") -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	for row in npc_placements:
@@ -210,6 +223,7 @@ func get_world_summary() -> Dictionary:
 		"missions": missions.size(),
 		"map_ids": maps.size(),
 		"map_names": map_names.size(),
+		"map_directory": map_directory.size(),
 		"city_hubs": city_hubs.duplicate(true),
 		"npc_start_ids": npc_starts.size(),
 		"npc_turnin_ids": npc_turnins.size(),
