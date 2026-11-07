@@ -162,7 +162,7 @@ func is_available_for_class(mission_id: String, completed_ids: Array, player_lev
 	return is_available(mission_id, completed_ids, player_level, profession_code)
 
 func get_available_at_npc_for_class(npc_id: String, completed_ids: Array, player_level: int, class_id: String, map_id: String = "") -> Array[Dictionary]:
-	var profession_code := GameContentDatabase.get_source_profession_id(class_id) if GameContentDatabase else ""
+	var profession_code: String = GameContentDatabase.get_source_profession_id(class_id) if GameContentDatabase != null else ""
 	return get_available_at_npc(npc_id, completed_ids, player_level, profession_code, map_id)
 
 func get_available_at_npc(npc_id: String, completed_ids: Array = [], player_level: int = 0, profession_code: String = "", map_id: String = "") -> Array[Dictionary]:
