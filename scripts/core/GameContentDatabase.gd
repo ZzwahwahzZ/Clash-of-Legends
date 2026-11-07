@@ -102,6 +102,25 @@ const CLASSES := {
 	}
 }
 
+const SOURCE_PROFESSION_ID_BY_CLASS := {
+	"Taoist": "0",
+	"WaterTaoist": "0",
+	"FireTaoist": "0",
+	"Trojan": "2",
+	"Archer": "4",
+	"Warrior": "6",
+	"Ninja": "8",
+	"Monk": "10",
+	"Pirate": "12",
+	"DragonWarrior": "14",
+	"Windwalker": "16",
+	# Thunderstriker has two distinct source creation records (20 and 22).
+	# They remain unresolved rather than being silently collapsed.
+}
+
+func get_source_profession_id(class_id: String) -> String:
+	return str(SOURCE_PROFESSION_ID_BY_CLASS.get(class_id, ""))
+
 const SKILLS := {
  "archer_shadow_dagger":{"name_ar":"خنجر الظل","name_en":"Shadow Dagger","class_req":"Archer","weapon_style":"throwing_knives","cooldown":2.5,"mp_cost":18,"damage_multiplier":1.8,"range":4.0,"is_aoe":false,"effect":"damage"},
  "archer_eastern_tempest":{"name_ar":"عاصفة الشرق","name_en":"Eastern Tempest","class_req":"Archer","weapon_style":"throwing_knives","cooldown":7.0,"mp_cost":38,"damage_multiplier":2.0,"range":5.0,"is_aoe":true,"aoe_radius":5.5,"effect":"damage"},
