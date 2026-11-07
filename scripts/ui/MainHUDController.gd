@@ -286,7 +286,7 @@ func _on_quest_updated(_quest_id: String, objective_title: String, progress: int
 	if quest_progress:
 		var is_ar = GameManager and GameManager.current_language == "ar"
 		if is_done:
-			quest_progress.text = "اكتملت وأضيفت المكافأة تلقائياً" if is_ar else "Completed; reward added automatically"
+			quest_progress.text = "اكتمل الهدف؛ عُد إلى صاحب المهمة لاستلام المكافأة" if is_ar else "Objective complete; return to the quest NPC to claim your reward"
 		else:
 			quest_progress.text = "التقدم: %d / %d (انقر للملاحة)" % [progress, goal] if is_ar else "Progress: %d / %d (Tap to navigate)" % [progress, goal]
 
