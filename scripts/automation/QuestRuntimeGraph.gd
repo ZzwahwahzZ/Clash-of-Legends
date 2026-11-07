@@ -254,6 +254,40 @@ func get_dialogue_links(mission_id: String) -> Array[Dictionary]:
 			result.append(row.duplicate(true))
 	return result
 
+func get_objective_coverage() -> Dictionary:
+	var kind_counts: Dictionary = {}
+	var supported_candidate_count := 0
+	var total_count := 0
+	for mission_id in missions:
+		var mission: Dictionary = missions[mission_id]
+		for intention in mission.get("intentions", []):
+			if not intention is Dictionary:
+				continue
+			total_count += 1
+			var kind := str(intention.get("kind", "unknown"))
+			kind_counts[kind] = int(kind_counts.get(kind, 0)) + 1
+			var supported := false
+			match kind:
+				"npc":
+				supported = not str(intention.get("npc_id", "")).is_empty()
+				"mob":
+				supported = not str(intention.get("monster_name", "")).is_empty()
+				"item_t":
+				supported = not str(intention.get("item_name", "")).is_empty()
+				"chk_item":
+				supported = not intention.get("parts", []).is_empty()
+				"map":
+				supported = not str(intention.get("map_id", "")).is_empty()
+			if supported:
+				supported_candidate_count += 1
+	return {
+		"total_intentions": total_count,
+		"supported_candidate_intentions": supported_candidate_count,
+		"unsupported_or_unresolved_intentions": total_count - supported_candidate_count,
+		"kind_counts": kind_counts,
+		"status": "PARTIAL_OBJECTIVE_INTERPRETATION_LUA_AND_QUEST_COUNTER_SEMANTICS_PENDING",
+	}
+
 func get_world_summary() -> Dictionary:
 	return {
 		"missions": missions.size(),
@@ -266,6 +300,7 @@ func get_world_summary() -> Dictionary:
 		"npc_placements": npc_placements.size(),
 		"dialogue_links": dialogue_links.size(),
 		"dependency_edges": _count_edges(),
+		"objective_coverage": get_objective_coverage(),
 		"status": status,
 	}
 
