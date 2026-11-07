@@ -30,7 +30,8 @@ const ANCHORS := {
 	"jianghai.factory_approach": Vector3(86.0, -0.078, -12.0),
 	"jianghai.hotel_frontage": Vector3(-9.5, -0.14, -34.5),
 	"jianghai.medicine_frontage": Vector3(11.6, -0.045, -48.0),
-	"jianghai.tea_frontage": Vector3(9.5, -0.14, -8.0)
+	"jianghai.tea_frontage": Vector3(9.5, -0.14, -8.0),
+	"jianghai.west_market_entry": Vector3(-35.0, 0.15, -164.0)
 }
 
 var _city: Node3D
@@ -452,7 +453,8 @@ func _validate_navigation_after_sync() -> void:
 		["jianghai.central_avenue", "jianghai.hotel_frontage"],
 		["jianghai.central_avenue", "jianghai.medicine_frontage"],
 		["jianghai.central_avenue", "jianghai.tea_frontage"],
-		["jianghai.pawnshop_approach", "jianghai.factory_approach"]
+		["jianghai.pawnshop_approach", "jianghai.factory_approach"],
+		["jianghai.central_avenue", "jianghai.west_market_entry"]
 	]
 	var route_rows: Array[Dictionary] = []
 	for pair in route_pairs:
