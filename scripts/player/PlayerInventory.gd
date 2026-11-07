@@ -35,10 +35,10 @@ func _ready() -> void:
 	slots.resize(MAX_SLOTS)
 	for i in range(MAX_SLOTS):
 		slots[i] = null
-	_initialize_starter_items()
 	if ClassProgressionManager and not ClassProgressionManager.weapon_style_changed.is_connected(_on_weapon_style_changed):
 		ClassProgressionManager.weapon_style_changed.connect(_on_weapon_style_changed)
-	# Parent PlayerController configures the selected class in its _ready().
+	# Parent PlayerController configures the selected class before deferred starter gear is granted.
+	call_deferred("_initialize_starter_items")
 	call_deferred("_sync_active_weapon_style")
 
 func _sync_active_weapon_style() -> void:
@@ -118,20 +118,37 @@ func _initialize_starter_items() -> void:
 		"rarity": "elite"
 	})
 	
-	# Initial weapon
-	equip_item({
-		"id": "coronet_trojan_bronze",
-		"slot": "weapon",
-		"name_ar": "فأس التروجان البرونزي",
-		"name_en": "Bronze Trojan Axe",
-		"type": "equipment",
-		"attack_bonus": 32,
-		"defense_bonus": 4,
-		"refine_level": 1,
-		"sockets": 1,
-		"sell_price": 240,
-		"rarity": "refined"
-	})
+	# The pinned Mobile character-creation record maps Archer to right_weapon_id 500239.
+	# Its exact itemtype display name and combat fields are still being resolved;
+	# preserve the source ID and weapon family without inventing stats.
+	var selected_class := str(GameManager.selected_class) if GameManager else "Warrior"
+	if selected_class == "Archer":
+		equip_item({
+			"id": "500239",
+			"slot": "weapon",
+			"name_ar": "سلاح رامي السهام",
+			"name_en": "Archer Starter Weapon",
+			"type": "equipment",
+			"class_req": "Archer",
+			"weapon_style": "bow",
+			"source_version": "1.1.2.3",
+			"source_item_id": "500239",
+			"source_name_status": "UNRESOLVED"
+		})
+	else:
+		equip_item({
+			"id": "coronet_trojan_bronze",
+			"slot": "weapon",
+			"name_ar": "فأس التروجان البرونزي",
+			"name_en": "Bronze Trojan Axe",
+			"type": "equipment",
+			"attack_bonus": 32,
+			"defense_bonus": 4,
+			"refine_level": 1,
+			"sockets": 1,
+			"sell_price": 240,
+			"rarity": "refined"
+		})
 
 func can_add_item(item_data: Dictionary) -> bool:
 	var item_id := str(item_data.get("id", "")).strip_edges()
