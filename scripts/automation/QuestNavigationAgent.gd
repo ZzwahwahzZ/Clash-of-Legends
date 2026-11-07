@@ -233,59 +233,111 @@ func _claim_completed_quest() -> void:
 		is_quest_completed = true
 		emit_signal("quest_state_changed", completed_id, "chain_completed")
 
-func _get_navigation_target() -> Dictionary:
+func _resolve_quest_navigation_target() -> Dictionary:
 	if active_quest_id.is_empty():
-		return {}
-	var destination := Vector3(18.0, 0.0, 15.0)
-	var travel_id := "twin_city"
-	var turn_in_npc := ""
+		return {"ok": false, "reason": "no_active_quest"}
+	var quest := get_active_quest()
+	if quest.is_empty():
+		return {"ok": false, "reason": "active_quest_missing"}
+
+	# Preserve the quest's existing objective, requirements and rewards.
+	# Navigation is resolved separately from the progression data.
+	var target_type := ""
+	var target_id := ""
 	if is_quest_completed:
-		var active_data := get_active_quest()
-		turn_in_npc = str(active_data.get("turn_in_npc_id", "npc_sage"))
-		if turn_in_npc == "npc_blacksmith":
-			destination = Vector3(-5.0, 0.0, 4.0)
-		else:
-			destination = Vector3(4.0, 0.0, 3.0)
+		target_type = "npc"
+		target_id = str(quest.get("turn_in_npc_id", ""))
 	else:
-		match active_quest_id:
-			"quest_wolves", "quest_wolf_alpha", "quest_meteor_gather":
-				travel_id = "twin_plains"
-				destination = Vector3(18.0, 0.0, 15.0)
-			"quest_dragon":
-				travel_id = "mountain_summit"
-				destination = Vector3(40.0, 0.0, -35.0)
-			"quest_guardian":
-				travel_id = "desert_ruins"
-				destination = Vector3(-32.0, 0.0, 28.0)
-			"quest_blacksmith_visit":
-				travel_id = "twin_city"
-				destination = Vector3(-5.0, 0.0, 4.0)
-			"quest_final_sage":
-				travel_id = "twin_city"
-				destination = Vector3(4.0, 0.0, 3.0)
-	return {
-		"travel_id": travel_id,
-		"destination": destination,
-		"turn_in": is_quest_completed,
-		"turn_in_npc_id": turn_in_npc
-	}
+		var objective_type := str(quest.get("objective_type", "kill"))
+		match objective_type:
+			"talk":
+				target_type = "npc"
+				target_id = str(quest.get("objective_target", ""))
+			"kill", "collect":
+				var nav_data: Variant = quest.get("navigation_target", {})
+				if not (nav_data is Dictionary) or nav_data.is_empty():
+					return {"ok": false, "reason": "objective_navigation_target_not_authored", "objective_type": objective_type}
+				return _resolve_authored_navigation_target(nav_data)
+			"reach_level":
+				return {"ok": false, "reason": "objective_has_no_world_destination"}
+			_:
+				return {"ok": false, "reason": "unsupported_objective_navigation_type"}
+
+	if target_type != "npc" or target_id.is_empty():
+		return {"ok": false, "reason": "quest_npc_target_missing"}
+	for npc in get_tree().get_nodes_in_group("npcs"):
+		if not is_instance_valid(npc) or not npc is Node3D:
+			continue
+		if str(npc.get("npc_id")) == target_id:
+			return {
+				"ok": true,
+				"target_type": "npc",
+				"target_id": target_id,
+				"node": npc,
+				"destination": (npc as Node3D).global_position,
+				"interaction_range": 3.5,
+				"turn_in": is_quest_completed
+			}
+	return {"ok": false, "reason": "quest_npc_not_present", "target_id": target_id}
+
+func _resolve_authored_navigation_target(nav_data: Dictionary) -> Dictionary:
+	# Area/object targets must be authored and registered by the world. Never
+	# infer a destination from quest text, quest IDs, map centers, or old offsets.
+	if not bool(nav_data.get("navigation_enabled", false)):
+		return {"ok": false, "reason": "objective_navigation_not_enabled"}
+	var target_type := str(nav_data.get("target_type", ""))
+	var target_id := str(nav_data.get("target_id", ""))
+	var map_id := str(nav_data.get("map_id", ""))
+	var anchor_id := str(nav_data.get("approach_anchor_id", ""))
+	if target_type.is_empty() or target_id.is_empty() or map_id.is_empty() or anchor_id.is_empty():
+		return {"ok": false, "reason": "objective_navigation_metadata_incomplete"}
+	for target in get_tree().get_nodes_in_group("quest_navigation_targets"):
+		if not is_instance_valid(target) or not target is Node3D:
+			continue
+		if str(target.get("target_id")) != target_id:
+			continue
+		if str(target.get("map_id")) != map_id:
+			continue
+		if str(target.get("approach_anchor_id")) != anchor_id:
+			continue
+		return {
+			"ok": true,
+			"target_type": target_type,
+			"target_id": target_id,
+			"node": target,
+			"destination": (target as Node3D).global_position,
+			"interaction_range": maxf(0.5, float(nav_data.get("interaction_range", 2.0))),
+			"map_id": map_id,
+			"approach_anchor_id": anchor_id
+		}
+	return {"ok": false, "reason": "authored_objective_target_not_present", "target_id": target_id, "map_id": map_id}
 
 func navigate_to_quest_target() -> void:
 	if not GameManager or not is_instance_valid(GameManager.player_reference):
 		return
-	var target := _get_navigation_target()
-	if target.is_empty():
+	var target := _resolve_quest_navigation_target()
+	if not bool(target.get("ok", false)):
+		var reason := str(target.get("reason", "target_unavailable"))
+		var message_ar := "وجهة هذه الخطوة غير معرّفة أو غير متاحة للملاحة بعد."
+		var message_en := "This quest step has no validated navigation target yet."
+		if GameManager.current_language == "ar":
+			GameManager.post_notification(message_ar, true)
+		else:
+			GameManager.post_notification(message_en, true)
+		push_warning("Quest navigation rejected: %s (%s)" % [reason, str(target.get("target_id", active_quest_id))])
 		return
-	var destination: Vector3 = target.get("destination", Vector3.ZERO)
-	var travel_id := str(target.get("travel_id", "twin_city"))
-	var travel_manager := get_tree().get_first_node_in_group("world_travel_manager")
-	if travel_manager and travel_manager.has_method("travel_to"):
-		if not travel_manager.travel_to(travel_id, "quest"):
-			return
-	if GameManager.player_reference.has_method("move_towards_target_position"):
-		GameManager.player_reference.move_towards_target_position(destination, 0.0)
-		var message := "العودة إلى صاحب المهمة لاستلام المكافأة..." if bool(target.get("turn_in", false)) and GameManager.current_language == "ar" else ("الملاحة التلقائية إلى موقع المهمة..." if GameManager.current_language == "ar" else ("Returning to the quest NPC to claim the reward..." if bool(target.get("turn_in", false)) else "Navigating to quest objective..."))
-		GameManager.post_notification(message, false)
+
+	var player = GameManager.player_reference
+	if not player.has_method("move_towards_target_position"):
+		return
+	# Quest navigation walks through the player's shared path executor. It must
+	# never call WorldTravelManager: instant travel remains a separate UI feature.
+	player.move_towards_target_position(target["destination"], float(target.get("interaction_range", 2.0)))
+	var returning := bool(target.get("turn_in", false))
+	var message := "العودة إلى صاحب المهمة لاستلام المكافأة..." if returning else "الملاحة التلقائية إلى هدف المهمة..."
+	if GameManager.current_language != "ar":
+		message = "Returning to the quest NPC to claim the reward..." if returning else "Navigating to the active quest objective..."
+	GameManager.post_notification(message, false)
 
 func _notify_game_manager() -> void:
 	if not GameManager:
