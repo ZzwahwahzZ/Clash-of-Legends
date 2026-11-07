@@ -117,7 +117,7 @@ func _on_navigation_baked() -> void:
 	_region.navigation_mesh = _navigation_mesh
 	call_deferred("_validate_navigation_after_sync")
 
-func _save_world_scene() -> Error:
+func _save_world_scene() -> int:
 	var world_directory := ProjectSettings.globalize_path("res://scenes/world")
 	var directory_error := DirAccess.make_dir_recursive_absolute(world_directory)
 	if directory_error != OK and directory_error != ERR_ALREADY_EXISTS:
