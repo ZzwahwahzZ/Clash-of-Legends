@@ -102,8 +102,12 @@ func collect_by_player(player: CharacterBody3D) -> void:
 
 	if not item_payload.is_empty():
 		for agent in get_tree().get_nodes_in_group("quest_agents"):
+			var item_id := str(item_payload.get("id", ""))
+			var item_name := str(item_payload.get("name_en", ""))
 			if agent.has_method("on_item_collected"):
-				agent.on_item_collected(str(item_payload.get("id", "")), collected_quantity)
+				agent.on_item_collected(item_id, collected_quantity)
+			if agent.has_method("on_source_item_collected"):
+				agent.on_source_item_collected(item_id, item_name, "", collected_quantity)
 		if AutoLootManager:
 			var item_name = item_payload.get("name_ar", "عتاد") if (GameManager and GameManager.current_language == "ar") else item_payload.get("name_en", "Gear")
 			AutoLootManager.emit_signal("loot_collected", item_name, collected_quantity, false)

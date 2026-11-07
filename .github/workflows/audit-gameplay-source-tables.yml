@@ -5,8 +5,12 @@ on:
     paths:
       - ".github/workflows/audit-gameplay-source-tables.yml"
       - "tools/gameplay_source_audit/**"
+      - "tools/resource_packs/**"
+      - "tests/test_mobile_quest_dat_cipher.py"
+      - "tests/test_quest_ecosystem_inventory.py"
+      - "tests/test_mobile_apk_reader_probe.py"
 permissions:
-  contents: read
+  contents: write
 concurrency:
   group: gameplay-source-table-audit-${{ github.ref }}
   cancel-in-progress: true
@@ -21,41 +25,136 @@ jobs:
           set -euo pipefail
           mkdir -p build/source reports
           curl --fail --location --retry 5 --retry-all-errors \
-            "https://github.com/ZzwahwahzZ/Conquer-Mobile-Assets./releases/download/mobile-extracted-assets/extracted-assets-001.zip" \
-            -o build/source/extracted-assets-001.zip
-          echo "0d21a110c09b762ed5f1a5f4da022857b0534e489eb85052d15da460cb229d2a  build/source/extracted-assets-001.zip" | sha256sum -c -
-      - name: Install professional content-based format analyzer
+            "https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/untagged-4406b3bcf98aaafd485f/ConquerOnline.zip" \
+            -o build/source/ConquerOnline.zip
+          echo "b1c6958109a07c237631943fc0442d3161563d89e1020b143d95437ba9a6fdb0  build/source/ConquerOnline.zip" | sha256sum -c -
+      - name: Install analyzer and run decoder tests
         run: |
           python3 -m venv .venv
           .venv/bin/pip install --disable-pip-version-check polyfile
           echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
-          python3 -m py_compile tools/gameplay_source_audit/comprehensive_asset_inventory.py tools/gameplay_source_audit/audit_source_tables.py
+          .venv/bin/python -m py_compile tools/gameplay_source_audit/comprehensive_asset_inventory.py tools/gameplay_source_audit/audit_source_tables.py tools/gameplay_source_audit/mobile_quest_source_decoder.py tools/gameplay_source_audit/quest_ecosystem_inventory.py tools/gameplay_source_audit/mobile_apk_reader_probe.py tools/resource_packs/decode_mobile_quest_dat.py tests/test_mobile_quest_dat_cipher.py tests/test_quest_ecosystem_inventory.py tests/test_mobile_apk_reader_probe.py
+          .venv/bin/python -m unittest discover -s tests -p 'test_mobile_quest_dat_cipher.py' -v
+          .venv/bin/python -m unittest discover -s tests -p 'test_quest_ecosystem_inventory.py' -v
+          .venv/bin/python -m unittest discover -s tests -p 'test_mobile_apk_reader_probe.py' -v
       - name: Recursively inventory every archive member by content
         run: |
-          python3 tools/gameplay_source_audit/comprehensive_asset_inventory.py \
-            build/source/extracted-assets-001.zip \
+          .venv/bin/python tools/gameplay_source_audit/comprehensive_asset_inventory.py \
+            build/source/ConquerOnline.zip \
             --output reports/comprehensive-asset-inventory.json \
             --polyfile-report reports/polyfile-mobile.sbud.json
-          python3 -m json.tool reports/comprehensive-asset-inventory.json > /dev/null
+          .venv/bin/python -m json.tool reports/comprehensive-asset-inventory.json > /dev/null
       - name: Inventory and parse safe source fields
         run: |
-          python3 tools/gameplay_source_audit/audit_source_tables.py \
-            build/source/extracted-assets-001.zip \
+          .venv/bin/python tools/gameplay_source_audit/audit_source_tables.py \
+            build/source/ConquerOnline.zip \
             --output reports/gameplay-source-table-audit.json
-      - name: Validate report JSON and print concise inventory
+          .venv/bin/python -m json.tool reports/gameplay-source-table-audit.json > /dev/null
+      - name: Decode and classify the version-matched quest DAT candidates
         run: |
-          python3 -m json.tool reports/gameplay-source-table-audit.json > /dev/null
-          python3 - <<'PY'
+          .venv/bin/python tools/gameplay_source_audit/mobile_quest_source_decoder.py \
+            build/source/ConquerOnline.zip \
+            --output reports/mobile-quest-source-audit.json \
+            --decoded-dir build/mobile_quest_candidates
+          .venv/bin/python -m json.tool reports/mobile-quest-source-audit.json > /dev/null
+      - name: Probe exact Mobile APK DEX and native resource-reader hints
+        run: |
+          .venv/bin/python tools/gameplay_source_audit/mobile_apk_reader_probe.py \
+            build/source/ConquerOnline.zip \
+            --output reports/mobile-apk-reader-probe.json
+          .venv/bin/python -m json.tool reports/mobile-apk-reader-probe.json > /dev/null
+      - name: Inventory quest, NPC, map, item, reward and dialogue source candidates
+        run: |
+          .venv/bin/python tools/gameplay_source_audit/quest_ecosystem_inventory.py \
+            build/source/ConquerOnline.zip \
+            --output reports/quest-ecosystem-inventory.json \
+            --output-dir build/quest-ecosystem
+          .venv/bin/python -m json.tool reports/quest-ecosystem-inventory.json > /dev/null
+      - name: Print concise source inventory
+        run: |
+          .venv/bin/python - <<'PY'
           import json
           from pathlib import Path
           data=json.loads(Path("reports/gameplay-source-table-audit.json").read_text(encoding="utf-8"))
           print("Version-matched members:", data["version_matched_member_count"])
           print("Itemtype files/records:", data["itemtype_catalog"]["file_count"], data["itemtype_catalog"]["record_count"])
-          print("Unlabelled column-59 candidates:", data["itemtype_catalog"].get("column_59_candidate_count", 0))
           for category, value in data["categories"].items():
               print(category, value["file_count"])
+          reader=json.loads(Path("reports/mobile-apk-reader-probe.json").read_text(encoding="utf-8"))
+          print("APK reader hint binaries:", reader["reader_hint_count"])
+          quest=json.loads(Path("reports/quest-ecosystem-inventory.json").read_text(encoding="utf-8"))
+          print("Quest ecosystem files:", quest["files_found"])
+          print("Quest ecosystem categories:", quest["category_file_counts"])
+          print("Plausible cipher candidates:", quest["plausible_cipher_decode_candidates"])
+          print("Candidate TaskIDs:", len(quest["unique_task_ids_in_candidates"]))
           PY
-      - name: Upload source table audit report
+
+      - name: Publish sanitized audit summary to the source branch
+        if: always()
+        env:
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          def load(path):
+              p=Path(path)
+              if not p.is_file():
+                  return None
+              return json.loads(p.read_text(encoding="utf-8"))
+          source=Path("build/source/ConquerOnline.zip")
+          gameplay=load("reports/gameplay-source-table-audit.json")
+          reader=load("reports/mobile-apk-reader-probe.json")
+          quest=load("reports/quest-ecosystem-inventory.json")
+          archive_hash=None
+          if source.is_file():
+              digest=hashlib.sha256()
+              with source.open("rb") as stream:
+                  for block in iter(lambda: stream.read(1024*1024),b""):
+                      digest.update(block)
+              archive_hash=digest.hexdigest()
+          summary={
+              "schema_version":"1.0.0",
+              "workflow_job_status":os.environ.get("JOB_STATUS","unknown"),
+              "source_archive":{
+                  "present":source.is_file(),
+                  "size_bytes":source.stat().st_size if source.is_file() else None,
+                  "sha256":archive_hash
+              },
+              "gameplay_source_table_audit":{
+                  "report_present":gameplay is not None,
+                  "version_matched_member_count":gameplay.get("version_matched_member_count") if gameplay else None,
+                  "itemtype_file_count":gameplay.get("itemtype_catalog",{}).get("file_count") if gameplay else None,
+                  "itemtype_record_count":gameplay.get("itemtype_catalog",{}).get("record_count") if gameplay else None
+              },
+              "mobile_apk_reader_probe":{
+                  "report_present":reader is not None,
+                  "apk_count":reader.get("apk_count") if reader else None,
+                  "reader_hint_count":reader.get("reader_hint_count") if reader else None,
+                  "apks":[{"archive_member":x.get("archive_member"),"apk_size_bytes":x.get("apk_size_bytes"),"apk_sha256":x.get("apk_sha256"),"binary_count":x.get("binary_count")} for x in reader.get("results",[])] if reader else []
+              },
+              "quest_ecosystem_inventory":{
+                  "report_present":quest is not None,
+                  "files_found":quest.get("files_found") if quest else None,
+                  "category_file_counts":quest.get("category_file_counts") if quest else None,
+                  "plausible_cipher_decode_candidates":quest.get("plausible_cipher_decode_candidates") if quest else None,
+                  "unique_task_id_count":len(quest.get("unique_task_ids_in_candidates",[])) if quest else None
+              },
+              "safety":"Metadata and counts only. No decoded source text, proprietary asset bytes, or candidate payloads are committed."
+          }
+          Path("reports/quest-audit-summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2)+"\\n",encoding="utf-8")
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/quest-audit-summary.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Publish sanitized mobile quest audit summary"
+            git push
+          else
+            echo "Sanitized audit summary unchanged."
+          fi
+      - name: Upload source audit reports and decoded candidates
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -64,5 +163,11 @@ jobs:
             reports/gameplay-source-table-audit.json
             reports/comprehensive-asset-inventory.json
             reports/polyfile-mobile-*.json
-          if-no-files-found: error
+            reports/mobile-quest-source-audit.json
+            reports/mobile-apk-reader-probe.json
+            reports/quest-ecosystem-inventory.json
+            reports/quest-audit-summary.json
+            build/mobile_quest_candidates/**/*.lua
+            build/quest-ecosystem/decoded_candidates/**/*.candidate
+          if-no-files-found: warn
           retention-days: 30

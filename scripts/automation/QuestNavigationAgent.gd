@@ -10,6 +10,211 @@ var active_quest_id: String = DEFAULT_QUEST_ID
 var quest_progress: int = 0
 var is_quest_completed: bool = false
 var completed_quest_ids: Array[String] = []
+var source_catalog := QuestSourceCatalog.new()
+var source_graph := QuestRuntimeGraph.new()
+var active_source_mission_id := ""
+var completed_source_mission_ids: Array[String] = []
+var source_objective_progress: Dictionary = {}
+var source_objective_counts: Dictionary = {}
+var source_ready_to_turn_in_ids: Array[String] = []
+
+func get_source_catalog_status() -> Dictionary:
+	return source_catalog.get_counts()
+
+func get_source_graph_summary() -> Dictionary:
+	return source_graph.get_world_summary()
+
+func get_source_missions_available_at_npc(npc_id: String, player_level: int = 0, profession_code: String = "") -> Array[Dictionary]:
+	return source_graph.get_available_at_npc(npc_id, completed_source_mission_ids, player_level, profession_code)
+
+func get_source_missions_available_for_class(npc_id: String, player_level: int, class_id: String, map_id: String = "") -> Array[Dictionary]:
+	return source_graph.get_available_at_npc_for_class(npc_id, completed_source_mission_ids, player_level, class_id, map_id)
+
+func get_source_missions_for_npc_interaction(npc_id: String, player_level: int, class_id: String, map_id: String = "") -> Array[Dictionary]:
+	var result := source_graph.get_available_at_npc_for_class(npc_id, completed_source_mission_ids, player_level, class_id, map_id)
+	if not active_source_mission_id.is_empty() and source_graph.is_turnin_npc(active_source_mission_id, npc_id, map_id):
+		var active := source_graph.get_mission(active_source_mission_id)
+		if not active.is_empty():
+			active["runtime_state"] = "READY_TO_TURN_IN" if source_ready_to_turn_in_ids.has(active_source_mission_id) else "ACTIVE_OBJECTIVES"
+			result.push_front(active)
+	return result
+
+func get_source_active_state() -> Dictionary:
+	if active_source_mission_id.is_empty():
+		return {}
+	return {
+		"mission_id": active_source_mission_id,
+		"ready_to_turn_in": source_ready_to_turn_in_ids.has(active_source_mission_id),
+		"objective_progress": source_objective_progress.get(active_source_mission_id, []).duplicate(true),
+	}
+
+func get_source_mission_route(mission_id: String, turn_in: bool = false) -> Dictionary:
+	return source_graph.get_route(mission_id, turn_in)
+
+func activate_source_mission(mission_id: String, player_level: int, profession_code: String = "") -> bool:
+	if not active_source_mission_id.is_empty() or not source_graph.is_available(mission_id, completed_source_mission_ids, player_level, profession_code):
+		return false
+	var mission := source_graph.get_mission(mission_id)
+	if mission.is_empty():
+		return false
+	active_source_mission_id = mission_id
+	source_objective_progress[mission_id] = []
+	for _intention in mission.get("intentions", []):
+		source_objective_progress[mission_id].append(false)
+	source_ready_to_turn_in_ids.erase(mission_id)
+	emit_signal("quest_state_changed", mission_id, "source_active_candidate")
+	_notify_source_quest_state()
+	return true
+
+func select_source_mission_at_npc(mission_id: String, npc_id: String, player_level: int, class_id: String, map_id: String = "") -> bool:
+	if mission_id == active_source_mission_id:
+		if not source_ready_to_turn_in_ids.has(mission_id) or not source_graph.is_turnin_npc(mission_id, npc_id, map_id):
+			return false
+		return complete_source_mission_turnin(mission_id, npc_id, map_id)
+	var mission := source_graph.get_mission(mission_id)
+	if mission.is_empty():
+		return false
+	var begin_npc: Dictionary = mission.get("begin_npc", {})
+	if str(begin_npc.get("npc_id", "")).lstrip("0") != npc_id.lstrip("0"):
+		return false
+	if not map_id.is_empty() and str(begin_npc.get("map_id", "")) != map_id:
+		return false
+	if not map_id.is_empty() and str(begin_npc.get("map_id", "")) != map_id:
+		return false
+	var profession_code := GameContentDatabase.get_source_profession_id(class_id) if GameContentDatabase else ""
+	if not source_graph.is_available(mission_id, completed_source_mission_ids, player_level, profession_code):
+		return false
+	return activate_source_mission(mission_id, player_level, profession_code)
+
+func on_source_npc_talked(npc_id: String, map_id: String = "") -> void:
+	_advance_source_objectives("npc", npc_id, map_id, 1)
+
+func on_source_enemy_killed(monster_name: String, map_id: String = "") -> void:
+	_advance_source_objectives("mob", monster_name, map_id, 1)
+
+func on_source_item_collected(item_id: String, item_name: String = "", map_id: String = "", quantity: int = 1) -> void:
+	if not item_id.is_empty():
+		_advance_source_objectives("item_id", item_id, map_id, maxi(1, quantity))
+	if not item_name.is_empty():
+		_advance_source_objectives("item_name", item_name, map_id, maxi(1, quantity))
+
+func on_source_map_entered(map_id: String) -> void:
+	_advance_source_objectives("map", map_id, map_id, 1)
+
+func _advance_source_objectives(event_kind: String, target: String, map_id: String, amount: int) -> void:
+	if active_source_mission_id.is_empty() or amount <= 0:
+		return
+	var mission := source_graph.get_mission(active_source_mission_id)
+	var intentions: Array = mission.get("intentions", [])
+	var progress: Array = source_objective_progress.get(active_source_mission_id, [])
+	if intentions.is_empty() or progress.size() != intentions.size():
+		return
+	for index in range(intentions.size()):
+		if bool(progress[index]):
+			continue
+		var intention: Dictionary = intentions[index]
+		var kind := str(intention.get("kind", ""))
+		var matched := false
+		var required := 1
+		match kind:
+			"npc":
+				matched = event_kind == "npc" and str(intention.get("npc_id", "")).lstrip("0") == target.lstrip("0") and (map_id.is_empty() or str(intention.get("map_id", "")) == map_id)
+				if matched and not map_id.is_empty() and not str(intention.get("map_id", "")).is_empty():
+					matched = str(intention.get("map_id", "")) == map_id
+			"mob":
+				var expected_mob := str(intention.get("monster_name", "")).strip_edges()
+				matched = event_kind == "mob" and not expected_mob.is_empty() and expected_mob.casefold() == target.casefold()
+				if matched and not map_id.is_empty() and not str(intention.get("map_id", "")).is_empty():
+					matched = str(intention.get("map_id", "")) == map_id
+				if matched:
+					for companion in intentions:
+						if str(companion.get("kind", "")) == "chk_quest" and str(companion.get("quest_id", "")) == active_source_mission_id and str(companion.get("field", "")) == str(intention.get("field", "")):
+							var condition_parts: Array = companion.get("parts", [])
+							if not condition_parts.is_empty():
+								required = maxi(required, int(condition_parts[condition_parts.size() - 1]))
+			"item_t":
+				var expected_item := str(intention.get("item_name", "")).strip_edges().to_lower().replace(" ", "").replace("_", "").replace("-", "")
+				var actual_item := target.to_lower().replace(" ", "").replace("_", "").replace("-", "")
+				matched = event_kind == "item_name" and not expected_item.is_empty() and expected_item == actual_item
+			"chk_item":
+				var parts: Array = intention.get("parts", [])
+				if not parts.is_empty():
+					matched = event_kind == "item_id" and str(parts[0]) == target
+					if parts.size() > 1:
+						required = maxi(1, int(parts[1]))
+			"map":
+				matched = event_kind == "map" and str(intention.get("map_id", "")) == map_id
+			_:
+				matched = false
+		if matched:
+			var counter_key := "%s:%d" % [active_source_mission_id, index]
+			var count := int(source_objective_counts.get(counter_key, 0)) + amount
+			source_objective_counts[counter_key] = count
+			if count >= required:
+				progress[index] = true
+				if kind == "mob":
+					for companion_index in range(intentions.size()):
+						var companion: Dictionary = intentions[companion_index]
+						if str(companion.get("kind", "")) == "chk_quest" and str(companion.get("quest_id", "")) == active_source_mission_id and str(companion.get("field", "")) == str(intention.get("field", "")):
+							progress[companion_index] = true
+	source_objective_progress[active_source_mission_id] = progress
+	var all_complete := true
+	for value in progress:
+		if not bool(value):
+			all_complete = false
+			break
+	if all_complete and not source_ready_to_turn_in_ids.has(active_source_mission_id):
+		source_ready_to_turn_in_ids.append(active_source_mission_id)
+		emit_signal("quest_state_changed", active_source_mission_id, "source_ready_to_turn_in_candidate")
+	_notify_source_quest_state()
+
+func complete_source_mission_turnin(mission_id: String, npc_id: String = "", map_id: String = "") -> bool:
+	if mission_id != active_source_mission_id or completed_source_mission_ids.has(mission_id):
+		return false
+	if not source_ready_to_turn_in_ids.has(mission_id):
+		return false
+	if not npc_id.is_empty() and not source_graph.is_turnin_npc(mission_id, npc_id, map_id):
+		return false
+	var mission := source_graph.get_mission(mission_id)
+	if mission.is_empty():
+		return false
+	completed_source_mission_ids.append(mission_id)
+	source_ready_to_turn_in_ids.erase(mission_id)
+	source_objective_progress.erase(mission_id)
+	active_source_mission_id = ""
+	emit_signal("quest_state_changed", mission_id, "source_completed_candidate")
+	_notify_source_quest_state()
+	return true
+
+func _notify_source_quest_state() -> void:
+	if not GameManager:
+		return
+	if active_source_mission_id.is_empty():
+		GameManager.emit_signal("quest_updated", "", "لا توجد مهمة مصدر نشطة" if GameManager.current_language == "ar" else "No active source quest", 0, 0, false)
+		GameManager.emit_signal("quest_description_changed", "")
+		return
+	var mission := source_graph.get_mission(active_source_mission_id)
+	if mission.is_empty():
+		return
+	var progress: Array = source_objective_progress.get(active_source_mission_id, [])
+	var completed_count := 0
+	for value in progress:
+		if bool(value):
+			completed_count += 1
+	var title := str(mission.get("name_ar", mission.get("name", active_source_mission_id))) if GameManager.current_language == "ar" else str(mission.get("name", active_source_mission_id))
+	var ready := source_ready_to_turn_in_ids.has(active_source_mission_id)
+	GameManager.emit_signal("quest_updated", active_source_mission_id, title, completed_count, progress.size(), ready)
+	var description := str(mission.get("intention_description", ""))
+	GameManager.emit_signal("quest_description_changed", description)
+
+func get_source_mission(mission_id: String) -> Dictionary:
+	return source_catalog.get_mission(mission_id)
+
+func get_source_missions_for_npc(npc_id: String, role: String = "") -> Array[Dictionary]:
+	return source_catalog.get_missions_for_npc(npc_id, role)
+
+func get_source_missions_for_map(map_id: String) -> Array[Dictionary]:
+	return source_catalog.get_missions_for_map(map_id)
 
 # This is an offline starter chain. Content can be expanded without changing
 # the progression API or requiring a server.
@@ -117,8 +322,27 @@ var quest_database: Dictionary = {
 }
 
 func _ready() -> void:
+	source_catalog.load_catalog()
+	source_graph.load_graph()
 	_validate_quest_database()
 	_notify_game_manager()
+	call_deferred("_connect_source_world_travel")
+
+func _connect_source_world_travel() -> void:
+	var manager := get_tree().get_first_node_in_group("world_travel_manager")
+	if manager and manager.has_signal("travel_completed") and not manager.travel_completed.is_connected(_on_source_world_travel_completed):
+		manager.travel_completed.connect(_on_source_world_travel_completed)
+	if manager and manager.has_method("get_current_source_map_id"):
+		var current_map := str(manager.get_current_source_map_id())
+		if not current_map.is_empty():
+			on_source_map_entered(current_map)
+
+func _on_source_world_travel_completed(_destination_id: String, _world_position: Vector3) -> void:
+	var manager := get_tree().get_first_node_in_group("world_travel_manager")
+	if manager and manager.has_method("get_current_source_map_id"):
+		var current_map := str(manager.get_current_source_map_id())
+		if not current_map.is_empty():
+			on_source_map_entered(current_map)
 
 func _validate_quest_database() -> bool:
 	for quest_id in quest_database:
@@ -270,8 +494,66 @@ func _get_navigation_target() -> Dictionary:
 		"turn_in_npc_id": turn_in_npc
 	}
 
+func navigate_to_active_source_mission() -> bool:
+	if active_source_mission_id.is_empty():
+		return false
+	var mission := source_graph.get_mission(active_source_mission_id)
+	var objectives := source_graph.get_objective_routes(active_source_mission_id)
+	var progress: Array = source_objective_progress.get(active_source_mission_id, [])
+	var player := GameManager.player_reference if GameManager else null
+	if player == null or not is_instance_valid(player):
+		return false
+	for index in range(objectives.size()):
+		if index < progress.size() and bool(progress[index]):
+			continue
+		var objective: Dictionary = objectives[index]
+		var map_id := str(objective.get("map_id", ""))
+		var manager := get_tree().get_first_node_in_group("world_travel_manager")
+		var current_map := str(manager.get_current_source_map_id()) if manager and manager.has_method("get_current_source_map_id") else ""
+		if not map_id.is_empty() and not current_map.is_empty() and map_id != current_map:
+			if manager and manager.has_method("travel_to"):
+				return bool(manager.travel_to("city_" + map_id, "quest"))
+			return false
+		if str(objective.get("kind", "")) == "npc":
+			var wanted_npc := str(objective.get("npc_id", "")).lstrip("0")
+			for npc in get_tree().get_nodes_in_group("source_quest_npcs"):
+				if str(npc.get("source_npc_id")).lstrip("0") == wanted_npc and str(npc.get("source_map_id")) == map_id:
+					if player.has_method("move_towards_target_position"):
+						player.move_towards_target_position(npc.global_position, 0.0)
+					return true
+			_notify_source_navigation_gap("لم يتم إدماج شخصية المهمة المطلوبة في هذه الخريطة بعد: " + str(objective.get("npc_name", wanted_npc)))
+			return false
+		if str(objective.get("kind", "")) == "mob":
+			_notify_source_navigation_gap("هدف المهمة: " + str(objective.get("monster_name", "وحش غير محدد")) + " — لم يُربط نموذج هذا الوحش بالخريطة بعد.")
+			return false
+		if str(objective.get("kind", "")) in ["item_t", "chk_item"]:
+			_notify_source_navigation_gap("هدف المهمة يتطلب العنصر: " + str(objective.get("item_name", objective.get("item_id", ""))) + " — ربط مصدر العنصر قيد الاستكمال.")
+			return false
+		_notify_source_navigation_gap("شرط المهمة يحتاج إلى ربط مصدر إضافي: " + str(objective.get("kind", "")))
+		return false
+	if source_ready_to_turn_in_ids.has(active_source_mission_id):
+		var turnin := source_graph.get_route(active_source_mission_id, true)
+		_notify_source_navigation_gap("اكتمل الهدف. ارجع إلى " + str(turnin.get("npc_name", "صاحب المهمة")) + " لاستلام المكافأة.")
+		return true
+	_notify_source_navigation_gap("لا توجد أهداف قابلة للملاحة في بيانات المهمة الحالية.")
+	return false
+
+func _notify_source_navigation_gap(message: String) -> void:
+	if GameManager:
+		GameManager.post_notification(message, true)
+
 func navigate_to_quest_target() -> void:
 	if not GameManager or not is_instance_valid(GameManager.player_reference):
+		return
+	if not active_source_mission_id.is_empty():
+		var source_turn_in := source_ready_to_turn_in_ids.has(active_source_mission_id)
+		var source_route := source_graph.get_route(active_source_mission_id, source_turn_in)
+		var source_travel_manager := get_tree().get_first_node_in_group("world_travel_manager")
+		if source_travel_manager and source_travel_manager.has_method("navigate_to_source_route"):
+			if source_travel_manager.navigate_to_source_route(source_route):
+				return
+		if GameManager:
+			GameManager.post_notification("تعذر الوصول إلى خريطة أو شخصية المهمة من المشهد المحمّل." if GameManager.current_language == "ar" else "The quest map or NPC is not available in the loaded scene.", true)
 		return
 	var target := _get_navigation_target()
 	if target.is_empty():

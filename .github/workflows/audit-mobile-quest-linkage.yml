@@ -1,0 +1,474 @@
+name: Audit Mobile quest reader and world linkage
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/audit-mobile-quest-linkage.yml"
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: mobile-quest-linkage-audit-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  quest-linkage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and verify the indexed source archive
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p build/source build/mobile-quest-source reports
+          curl --fail --location --retry 5 --retry-all-errors \
+            -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/octet-stream" \
+            "https://api.github.com/repos/ZzwahwahzZ/Conquer-Mobile-Assets./releases/assets/709852618" \
+            -o build/source/extracted-assets-001.zip
+          echo "0d21a110c09b762ed5f1a5f4da022857b0534e489eb85052d15da460cb229d2a  build/source/extracted-assets-001.zip" | sha256sum -c -
+      - name: Download and verify the complete arm64 split APK bundle
+        run: |
+          set -euo pipefail
+          mkdir -p build/source reports
+          curl --fail --location --retry 5 --retry-all-errors \
+            "https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/untagged-4406b3bcf98aaafd485f/ConquerOnline.zip" \
+            -o build/source/ConquerOnline.zip
+          echo "b1c6958109a07c237631943fc0442d3161563d89e1020b143d95437ba9a6fdb0  build/source/ConquerOnline.zip" | sha256sum -c -
+          unzip -l build/source/ConquerOnline.zip | tee reports/split-bundle-list.txt
+      - name: Extract the exact 1.1.2.3 APK and quest-world source files
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import zipfile
+          from pathlib import Path
+          archive=Path("build/source/extracted-assets-001.zip")
+          out=Path("build/mobile-quest-source")
+          version="ConquerOnline-1.1.2.3"
+          with zipfile.ZipFile(archive) as outer:
+              matches=[n for n in outer.namelist() if version in n and n.lower().endswith(".apk")]
+              if not matches:
+                  raise SystemExit("Pinned 1.1.2.3 APK not found")
+              for i,name in enumerate(matches):
+                  apk=out/f"apk-{i}.apk"
+                  apk.parent.mkdir(parents=True,exist_ok=True)
+                  with outer.open(name) as src, apk.open("wb") as dst:
+                      while block:=src.read(1024*1024): dst.write(block)
+                  with zipfile.ZipFile(apk) as z:
+                      selected=[]
+                      for info in z.infolist():
+                          low=info.filename.lower()
+                          if not info.filename.startswith("assets/ConquerRes/"): continue
+                          base=low.rsplit("/",1)[-1]
+                          if (base in {"questinfo.dat","taskitem_info.dat","questinfo.ini","questinfopassionserver.ini","terrainnpc.ini","npc.ini","npcx.ini","npcex.ini","npcdialogueinfo.dat","npcdialoguefunc.dat","dlgcommonactivityguideconfig.dat","dlgcommonactivityguideui.dat","sevendaygoalinfo.dat","luauires.dat","luauires_ar.dat","luauires_en.dat","luauires_sp.dat","dlgnpcdialogue.dat","dlgxmtaskguideui.dat","dlgxmtaskskilltip.dat","dlgmaycelebrationstaskui.dat","dlgchristmastaskui.dat","npcdialoguetext_ar.dat","npcdialoguetext_en.dat","npcdialoguetext_sp.dat","gamemap.dat","gamemapex.ini","mapdestination.ini","item.ini","monstertype.ini","slotnpc.ini","clienttask124.dat","scriptdialoguetext_ar.dat","scriptdialoguetext_en.dat","scriptdialoguetext_sp.dat","npcdialogueinfo.dat","npcdialoguetext_ar.dat","npcdialoguetext_en.dat","npcdialoguetext_sp.dat","luascriptmgr.dat"}
+                              or "/client_realm_task/" in low and base.endswith(".dat")
+                              or "/clienttask" in low and base.endswith(".dat")
+                              or low.startswith("assets/conquerres/ini/itemtype/") and base.endswith(".ini")
+                          or low.startswith("assets/conquerres/script/") and base.endswith(".dat")
+                          or any(folder in low for folder in (
+                              "/ini/luaui/dialog/dlgnpcdialogue/","/ini/luaui/dialog/dlgrealmtask/",
+                              "/ini/luaui/dialog/dlgxmtaskguide/","/ini/luaui/dialog/dlgmaycelebrations/",
+                              "/ini/luaui/dialog/dlgbaotree/","/ini/luaui/dialog/dlgcoordinates/",
+                              "/ini/luaui/fairygui/window/ydhdailytask/","/ini/luaui/fairygui/window/yunyoutask/",
+                              "/ini/luaui/fairygui/window/fgui_rzqzhd_task/"
+                          )) and base.endswith(".dat")):
+                              target=out/"selected"/Path(info.filename).relative_to("assets/ConquerRes")
+                              target.parent.mkdir(parents=True,exist_ok=True)
+                              with z.open(info) as src, target.open("wb") as dst:
+                                  while block:=src.read(1024*1024): dst.write(block)
+                              selected.append({"path":info.filename,"size_bytes":info.file_size})
+                  print({"apk_member":name,"selected_count":len(selected),"selected_files":selected})
+          PY
+      - name: Set up Java 11 for the official Baksmali build
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+      - name: Build Baksmali 3.0.10 fat JAR from its pinned official source
+        run: |
+          set -euo pipefail
+          git clone --depth 1 --branch 3.0.10 https://github.com/google/smali.git /tmp/smali-src
+          cd /tmp/smali-src
+          ./gradlew --no-daemon baksmali:fatJar
+          BAKSMALI_JAR="$(find baksmali/build/libs -maxdepth 1 -type f -name '*fat.jar' -print -quit)"
+          test -n "$BAKSMALI_JAR"
+          cp "$BAKSMALI_JAR" /tmp/baksmali-fat.jar
+          unzip -p /tmp/baksmali-fat.jar META-INF/MANIFEST.MF | grep -q '^Main-Class: com.android.tools.smali.baksmali.Main'
+          java -jar /tmp/baksmali-fat.jar --version
+      - name: Set up Java 17 for JADX and APK inspection
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Preserve APK bytecode and inspect exact reader implementations
+        run: |
+          set -euo pipefail
+          mkdir -p build/apk-reader/dex build/apk-reader/native
+          python3 - <<'PY'
+          import zipfile
+          from pathlib import Path
+          outer=zipfile.ZipFile("build/source/extracted-assets-001.zip")
+          apk_name=next(n for n in outer.namelist() if "ConquerOnline-1.1.2.3" in n and n.lower().endswith(".apk"))
+          apk_path=Path("build/apk-reader/ConquerOnline-1.1.2.3.apk")
+          with outer.open(apk_name) as src, apk_path.open("wb") as dst:
+              while block:=src.read(1024*1024): dst.write(block)
+          with zipfile.ZipFile(apk_path) as apk:
+              for info in apk.infolist():
+                  name=info.filename.rsplit("/",1)[-1]
+                  low=info.filename.lower()
+                  if name.startswith("classes") and name.endswith(".dex"):
+                      (Path("build/apk-reader/dex")/name).write_bytes(apk.read(info))
+                  elif (low.startswith("lib/") or low.startswith("assets/conquerres/lib/")) and low.endswith(".so"):
+                      # The game engine libraries are shipped as ConquerRes assets and copied
+                      # to app-private storage by CQ2ClientActivity before System.load().
+                      target=Path("build/apk-reader/native")/Path(info.filename).relative_to("assets/ConquerRes/lib") if low.startswith("assets/conquerres/lib/") else Path("build/apk-reader/native")/Path(info.filename).name
+                      target.parent.mkdir(parents=True,exist_ok=True)
+                      target.write_bytes(apk.read(info))
+          print("APK bytecode and in-APK native libraries extracted for static inspection")
+          PY
+      - name: Extract and inventory every split APK and install-time asset pack
+        run: |
+          set -euo pipefail
+          mkdir -p build/apk-reader/split-apks build/apk-reader/split-assets build/apk-reader/native/splits build/apk-reader/embedded-payloads/splits
+          python3 - <<'PY'
+          import hashlib, json, zipfile
+          from pathlib import Path
+          bundle=zipfile.ZipFile("build/source/ConquerOnline.zip")
+          report=[]
+          for info in bundle.infolist():
+              if not info.filename.lower().endswith(".apk"):
+                  continue
+              name=Path(info.filename).name
+              apk_path=Path("build/apk-reader/split-apks")/name
+              with bundle.open(info) as src, apk_path.open("wb") as dst:
+                  while block:=src.read(1024*1024): dst.write(block)
+              row={"bundle_member":info.filename,"apk_path":str(apk_path),"apk_bytes":apk_path.stat().st_size,"apk_sha256":hashlib.sha256(apk_path.read_bytes()).hexdigest(),"native_libraries":[],"dex_payloads":[],"conquerres_files":0,"conquerres_bytes":0}
+              with zipfile.ZipFile(apk_path) as split:
+                  for item in split.infolist():
+                      low=item.filename.lower()
+                      if low.endswith(".so"):
+                          target=Path("build/apk-reader/native/splits")/Path(name).stem/Path(item.filename).name
+                          target.parent.mkdir(parents=True,exist_ok=True)
+                          target.write_bytes(split.read(item))
+                          row["native_libraries"].append({"path":item.filename,"bytes":item.file_size,"sha256":hashlib.sha256(split.read(item)).hexdigest(),"output":str(target)})
+                      if low.startswith("assets/") and ("dex" in low.rsplit("/",1)[-1] or low.endswith(".dex")):
+                          target=Path("build/apk-reader/embedded-payloads/splits")/Path(name).stem/Path(item.filename).name
+                          target.parent.mkdir(parents=True,exist_ok=True)
+                          target.write_bytes(split.read(item))
+                          row["dex_payloads"].append({"path":item.filename,"bytes":item.file_size,"sha256":hashlib.sha256(split.read(item)).hexdigest(),"output":str(target)})
+                      if low.startswith("assets/conquerres/"):
+                          row["conquerres_files"]+=1
+                          row["conquerres_bytes"]+=item.file_size
+                          target=Path("build/apk-reader/split-assets")/Path(name).stem/Path(item.filename).relative_to("assets/ConquerRes")
+                          target.parent.mkdir(parents=True,exist_ok=True)
+                          if not item.is_dir():
+                              target.write_bytes(split.read(item))
+              report.append(row)
+          Path("reports/split-apk-inventory.json").write_text(json.dumps(report,indent=2)+"\n")
+          print(json.dumps(report,indent=2))
+          assert any("install_time_1001" in r["bundle_member"].lower() for r in report), "install_time_1001 split was not present"
+          PY
+      - name: Run APKiD and unblob against the APK bundle and opaque payloads
+        continue-on-error: true
+        run: |
+          set -u
+          python3 -m pip install --user --disable-pip-version-check apkid unblob
+          export PATH="$HOME/.local/bin:$PATH"
+          mkdir -p reports/unblob-39285EFA
+          apkid --version > reports/apkid-version.txt 2>&1 || true
+          set +e
+          apkid -j -o reports/apkid-results.json build/apk-reader/ConquerOnline-1.1.2.3.apk build/apk-reader/split-apks/*.apk > reports/apkid.log 2>&1
+          echo "$?" > reports/apkid-exit-code.txt
+          unblob --report reports/unblob-39285EFA.json --extract-dir build/apk-reader/unblob-39285EFA --depth 3 --entropy-depth 2 -vvv build/apk-reader/embedded-payloads/39285EFA.dex > reports/unblob-39285EFA.log 2>&1
+          echo "$?" > reports/unblob-39285EFA-exit-code.txt
+          set -e
+          echo "APKiD and unblob diagnostics captured; failures are non-blocking and preserved."
+      - name: Locate and preserve external game-engine native libraries
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, zipfile
+          from pathlib import Path
+          src=zipfile.ZipFile("build/source/extracted-assets-001.zip")
+          out=Path("build/apk-reader/native")
+          out.mkdir(parents=True,exist_ok=True)
+          found=[]
+          for info in src.infolist():
+              low=info.filename.lower()
+              if low.endswith(".so") and ("conquerres" in low or "/lib/" in low or low.startswith("lib")):
+                  target=out/Path(info.filename).name
+                  if target.exists() and target.stat().st_size==info.file_size:
+                      continue
+                  with src.open(info) as r, target.open("wb") as w:
+                      while block:=r.read(1024*1024): w.write(block)
+                  found.append({"archive_path":info.filename,"output":str(target),"bytes":info.file_size})
+          Path("reports/native-library-inventory.json").write_text(json.dumps(found,indent=2)+"\\n")
+          print(json.dumps({"native_library_count":len(found),"libraries":found},indent=2))
+          PY
+          # Diagnose every embedded DEX-like asset instead of silently excluding it.
+          # If it is a real DEX with stale integrity fields, repair only a disposable copy.
+          python3 - <<'PY'
+          import hashlib, json, struct, zlib, zipfile
+          from pathlib import Path
+          apk=zipfile.ZipFile("build/apk-reader/ConquerOnline-1.1.2.3.apk")
+          out=Path("build/apk-reader/embedded-payloads")
+          out.mkdir(parents=True,exist_ok=True)
+          report=[]
+          for info in apk.infolist():
+              low=info.filename.lower()
+              if not (low.startswith("assets/") and (low.endswith(".dex") or "dex" in low.rsplit("/",1)[-1].lower())):
+                  continue
+              raw=apk.read(info)
+              target=out/Path(info.filename).name
+              target.write_bytes(raw)
+              row={"apk_path":info.filename,"bytes":len(raw),"sha256":hashlib.sha256(raw).hexdigest(),"magic_hex":raw[:16].hex(),"magic_ascii":raw[:8].decode("latin1")}
+              if raw.startswith(b"dex\n") and len(raw)>=0x70:
+                  declared=struct.unpack_from("<I",raw,0x20)[0]
+                  header=struct.unpack_from("<I",raw,0x24)[0]
+                  row.update({"classification":"dex_header_present","declared_file_size":declared,"header_size":header})
+                  if declared==len(raw) and header==0x70:
+                      fixed=bytearray(raw)
+                      fixed[12:32]=hashlib.sha1(fixed[32:]).digest()
+                      struct.pack_into("<I",fixed,8,zlib.adler32(fixed[12:]) & 0xffffffff)
+                      fixed_path=out/(target.stem+".integrity-repaired.dex")
+                      fixed_path.write_bytes(fixed)
+                      row["integrity_repaired_copy"]=str(fixed_path)
+                      row["integrity_repair"]="SHA-1 signature and Adler-32 checksum recalculated; original preserved"
+                  else:
+                      row["classification"]="dex_header_inconsistent"
+              elif raw.startswith(b"PK\x03\x04"):
+                  row["classification"]="zip_container"
+              elif raw.startswith(b"\x1f\x8b"):
+                  row["classification"]="gzip_container"
+              else:
+                  row["classification"]="no_plain_dex_magic_possible_packed_or_custom_container"
+                  for wbits,label in [(zlib.MAX_WBITS,"zlib"),(-zlib.MAX_WBITS,"raw_deflate"),(zlib.MAX_WBITS|16,"gzip")]:
+                      try:
+                          dec=zlib.decompress(raw,wbits)
+                          if dec:
+                              dp=out/(target.stem+"."+label+".bin"); dp.write_bytes(dec)
+                              row.setdefault("decompression_candidates",[]).append({"method":label,"path":str(dp),"bytes":len(dec),"magic_hex":dec[:8].hex()})
+                      except Exception:
+                          pass
+              # The game ships one DEX-like asset with a repeating 4-byte XOR wrapper.
+              # Derive the key from the public DEX magic, then accept it only if every header
+              # and integrity check validates against the recovered DEX bytes.
+              if not raw.startswith(b"dex\\n") and len(raw)>=0x70:
+                  for version in (b"035",b"037",b"038",b"039",b"040",b"041"):
+                      expected=b"dex\\n"+version+b"\\0"
+                      key=bytes(raw[i]^expected[i] for i in range(4))
+                      if bytes(raw[i]^key[i%4] for i in range(8)) != expected:
+                          continue
+                      decoded=bytes(value^key[i%4] for i,value in enumerate(raw))
+                      declared=struct.unpack_from("<I",decoded,0x20)[0]
+                      header=struct.unpack_from("<I",decoded,0x24)[0]
+                      signature_ok=decoded[12:32]==hashlib.sha1(decoded[32:]).digest()
+                      checksum_ok=struct.unpack_from("<I",decoded,8)[0]==(zlib.adler32(decoded[12:]) & 0xffffffff)
+                      if declared==len(decoded) and header==0x70 and signature_ok and checksum_ok:
+                          decoded_path=out/(target.stem+".decoded.dex")
+                          decoded_path.write_bytes(decoded)
+                          row["classification"]="verified_dex_after_repeating_xor"
+                          row["xor_recovery"]={"key_hex":key.hex(),"key_length":len(key),"dex_version":version.decode(),"declared_file_size":declared,"header_size":header,"sha1_signature_valid":signature_ok,"adler32_checksum_valid":checksum_ok,"decoded_path":str(decoded_path),"decoded_sha256":hashlib.sha256(decoded).hexdigest()}
+                          break
+              report.append(row)
+          Path("reports/embedded-dex-payload-triage.json").write_text(json.dumps(report,indent=2)+"\n")
+          print(json.dumps(report,indent=2))
+          PY
+          curl --fail --location --retry 3             "https://github.com/skylot/jadx/releases/download/v1.5.3/jadx-1.5.3.zip"             -o /tmp/jadx.zip
+          mkdir -p /tmp/jadx
+          unzip -q /tmp/jadx.zip -d /tmp/jadx
+          chmod +x /tmp/jadx/bin/jadx
+          /tmp/jadx/bin/jadx --version
+          # Use baksmali as an independent parser on embedded payloads and integrity-repaired copies.
+          # Use the official fat release jar (the Maven baksmali artifact is a thin jar without a Main-Class).
+          test -s /tmp/baksmali-fat.jar
+          java -jar /tmp/baksmali-fat.jar --version
+          mkdir -p build/apk-reader/baksmali
+          # Parse all six standard DEX files independently, then the suspicious embedded payload.
+          find build/apk-reader/dex -maxdepth 1 -type f -name "classes*.dex" -print0 | sort -z | while IFS= read -r -d '' dex; do
+            name=$(basename "$dex" .dex)
+            java -jar /tmp/baksmali-fat.jar disassemble "$dex" -o "build/apk-reader/baksmali/$name" >"reports/baksmali-$name.log" 2>&1 || echo "PARSER_FAILED:$name" >> reports/baksmali-status.txt
+          done
+          find build/apk-reader/embedded-payloads -type f -name "*.dex" -print0 | while IFS= read -r -d '' dex; do
+            name=$(basename "$dex" .dex)
+            java -jar /tmp/baksmali-fat.jar disassemble "$dex" -o "build/apk-reader/baksmali/$name" >"reports/baksmali-$name.log" 2>&1 || echo "PARSER_FAILED:$name" >> reports/baksmali-status.txt
+          done
+          find build/apk-reader/embedded-payloads -type f -name "*.integrity-repaired.dex" -print0 | while IFS= read -r -d '' dex; do
+            name=$(basename "$dex" .integrity-repaired.dex)
+            java -jar /tmp/baksmali-fat.jar disassemble "$dex" -o "build/apk-reader/baksmali/$name-repaired" >"reports/baksmali-$name-repaired.log" 2>&1 || echo "PARSER_FAILED:$name-repaired" >> reports/baksmali-status.txt
+          done
+          # The APK carries embedded payloads. They are now triaged and independently parsed above;
+          # omit them only from the whole-APK JADX pass to prevent a malformed payload aborting sibling DEX parsing.
+          python3 - <<'PY'
+          import zipfile
+          src="build/apk-reader/ConquerOnline-1.1.2.3.apk"
+          dst="build/apk-reader/ConquerOnline-1.1.2.3-standard-dex-only.apk"
+          with zipfile.ZipFile(src) as zin, zipfile.ZipFile(dst,"w",zipfile.ZIP_DEFLATED) as zout:
+              for info in zin.infolist():
+                  if info.filename.lower().startswith("assets/") and info.filename.lower().endswith(".dex"):
+                      continue
+                  zout.writestr(info,zin.read(info))
+          print("Standard APK copy prepared; non-standard assets/*.dex retained separately in original APK.")
+          PY
+          JADX_STATUS=0
+          /tmp/jadx/bin/jadx --no-res --no-imports --show-bad-code \
+            -d build/apk-reader/decompiled build/apk-reader/ConquerOnline-1.1.2.3-standard-dex-only.apk \
+            2>&1 | tee reports/jadx-standard-dex.log || JADX_STATUS=$?
+          printf '%s\n' "$JADX_STATUS" > reports/jadx-standard-dex-exit-code.txt
+          echo "JADX finished with exit code $JADX_STATUS; preserving partial decompilation and continuing evidence scan."
+          python3 - <<'PY'
+          import json,re
+          from pathlib import Path
+          roots=[Path("build/apk-reader/decompiled"),Path("build/apk-reader/native")]
+          terms=re.compile(r"AesDecrypt|AesDecryptWithKey|AesEncrypt|DataEncryptUtil|CIPHER_KEY|TQ_FILE_CIPHER|questinfo\\.dat|taskitem_info\\.dat|client_realm_task|NpcDialogueText|DexClassLoader|InMemoryDexClassLoader|PathClassLoader|BaseDexClassLoader|loadDex|loadLibrary|OpenMemory|OpenCommon|decrypt|cipher|JNI_OnLoad",re.I)
+          hits=[]
+          for root in roots:
+              for p in root.rglob("*"):
+                  if not p.is_file() or p.suffix not in {".java",".txt",".xml",".so"}: continue
+                  try: lines=p.read_text(encoding="utf-8",errors="ignore").splitlines()
+                  except OSError: continue
+                  for no,line in enumerate(lines,1):
+                      if terms.search(line):
+                          hits.append({"file":str(p),"line":no,"text":line.strip()[:500]})
+          payload_report=Path("reports/embedded-dex-payload-triage.json")
+          payloads=json.loads(payload_report.read_text()) if payload_report.exists() else []
+          Path("reports/mobile-apk-reader-implementation-hits.json").write_text(json.dumps({"target":"ConquerOnline-1.1.2.3","hit_count":len(hits),"hits":hits,"embedded_payloads":payloads,"native_libraries":[str(p) for p in Path("build/apk-reader/native").glob("*.so")],"policy":"Trace actual asset read -> transform/decrypt -> class-loader call path. A DEX checksum repair is attempted only on a copy and is not treated as decryption. If payload has no DEX magic, derive the exact transform from app Java/JNI code or runtime capture; do not guess AES parameters."},ensure_ascii=False,indent=2)+"\\n",encoding="utf-8")
+          print("reader implementation hits:",len(hits))
+          PY
+      - name: Run existing quest decoder, ecosystem inventory, and APK reader probe
+        run: |
+          set -euo pipefail
+          python3 tools/gameplay_source_audit/mobile_quest_source_decoder.py \
+            build/source/extracted-assets-001.zip \
+            --output reports/mobile-quest-source-audit.json \
+            --decoded-dir build/mobile_quest_candidates
+          python3 tools/gameplay_source_audit/quest_ecosystem_inventory.py \
+            build/source/extracted-assets-001.zip \
+            --output reports/quest-ecosystem-inventory.json \
+            --output-dir build/quest-ecosystem
+          python3 tools/gameplay_source_audit/mobile_apk_reader_probe.py \
+            build/source/extracted-assets-001.zip \
+            --output reports/mobile-apk-reader-probe.json
+      - name: Parse the readable 2,510-record mission catalogue and cross-file references
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tools/gameplay_source_audit/parse_mobile_quest_catalog.py
+          python3 tools/gameplay_source_audit/parse_mobile_quest_catalog.py \
+            build/mobile-quest-source/selected \
+            --output reports/mobile-quest-catalog.json
+          python3 -m json.tool reports/mobile-quest-catalog.json > /dev/null
+      - name: Decode Lua dialogue, localization, and story-scene candidates
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tools/gameplay_source_audit/decode_mobile_lua_content.py
+          python3 tools/gameplay_source_audit/decode_mobile_lua_content.py \
+            build/mobile-quest-source/selected \
+            --output reports/mobile-lua-decode-candidates.json \
+            --decoded-dir build/mobile_lua_candidates
+          python3 -m json.tool reports/mobile-lua-decode-candidates.json > /dev/null
+      - name: Build verified quest NPC map dialogue and story-scene cross-links
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tools/gameplay_source_audit/parse_mobile_quest_catalog.py
+          python3 -m py_compile tools/gameplay_source_audit/decode_mobile_lua_content.py
+          python3 -m py_compile tools/gameplay_source_audit/build_mobile_quest_world_links.py
+          python3 tools/gameplay_source_audit/build_mobile_quest_world_links.py \
+            build/mobile-quest-source/selected \
+            --output reports/mobile-quest-world-links.json
+          python3 -m json.tool reports/mobile-quest-world-links.json > /dev/null
+          python3 -m py_compile tools/gameplay_source_audit/analyze_mobile_quest_system.py
+          python3 tools/gameplay_source_audit/analyze_mobile_quest_system.py \
+            build/mobile-quest-source/selected \
+            --output reports/mobile-quest-system-analysis.json
+          python3 -m json.tool reports/mobile-quest-system-analysis.json > /dev/null
+      - name: Validate quest dialogue and world-linkage acceptance checks
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path("reports/mobile-quest-world-links.json").read_text(encoding="utf-8"))
+          assert p["mission_catalog"]["record_count"] == 2510
+          assert p["mission_catalog"]["unique_mission_ids"] == 2509
+          assert p["dialogue_linkage"]["dialogue_flow_count"] >= 1900
+          assert p["dialogue_linkage"]["mission_ids_with_dialogue_flows"] >= 250
+          assert p["story_scene_linkage"]["client_realm_task_registry_count"] == 58
+          assert p["story_scene_linkage"]["client_realm_task_decoded_script_count"] == 58
+          assert p["lua_script_reference_count"] == 1572
+          assert p["lua_npc_name_match_references"] > 0
+          assert "TwinCity" in str(next(x for x in p["map_linkage"]["map_id_names"] if x["map_id"] == "1002")["quest_source_names"])
+          m={x["mission_id"]:x for x in p["dialogue_linkage"]["mission_dialogue_links"]}
+          assert "Whorf" in str(m["5455"]["dialogues"])
+          assert "David" in str(m["5456"]["dialogues"]) and "Jack" in str(m["5456"]["dialogues"])
+          print("Quest linkage acceptance checks passed")
+          PY
+      - name: Build source-to-world cross-reference evidence pack
+        run: |
+          python3 - <<'PY'
+          import csv, hashlib, json, re, zipfile
+          from pathlib import Path
+          root=Path("build/mobile-quest-source/selected")
+          rows=[]
+          for p in sorted(root.rglob("*")):
+              if not p.is_file(): continue
+              raw=p.read_bytes()
+              text=raw.decode("utf-8",errors="replace")
+              if not text.strip():
+                  text=raw.decode("gbk",errors="replace")
+              fields=sorted(set(re.findall(r'(?m)^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=',text)))
+              ids=sorted(set(re.findall(r'(?<!\d)(?:10\d{2,5}|[1-9]\d{2,7})(?!\d)',text)))
+              rows.append({"path":str(p.relative_to(root)),"size_bytes":len(raw),"sha256":hashlib.sha256(raw).hexdigest(),"text_lines":len(text.splitlines()),"field_names":fields[:250],"numeric_tokens_sample":ids[:500]})
+          (Path("reports")/"selected-world-source-index.json").write_text(json.dumps(rows,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+          quest=json.loads(Path("reports/mobile-quest-source-audit.json").read_text())
+          ecosystem=json.loads(Path("reports/quest-ecosystem-inventory.json").read_text())
+          reader=json.loads(Path("reports/mobile-apk-reader-probe.json").read_text())
+          summary={
+            "source_archive_sha256":"0d21a110c09b762ed5f1a5f4da022857b0534e489eb85052d15da460cb229d2a",
+            "selected_world_source_files":len(rows),
+            "selected_world_source_paths":[r["path"] for r in rows],
+            "quest_decoder":{"files_found":quest.get("files_found"),"apk_members":quest.get("apk_members"),"candidate_records":[{"path":r.get("relative_path"),"raw_classification":r.get("raw_classification"),"cipher_candidates":r.get("cipher_candidates",[])} for r in quest.get("records",[]) if any(x in r.get("relative_path","").lower() for x in ("questinfo","taskitem","client_realm_task","clienttask"))]},
+            "quest_ecosystem":{"files_found":ecosystem.get("files_found"),"category_file_counts":ecosystem.get("category_file_counts"),"candidate_task_ids":ecosystem.get("unique_task_ids_in_candidates")},
+            "apk_reader":{"apk_count":reader.get("apk_count"),"reader_hint_count":reader.get("reader_hint_count"),"results":reader.get("results")},
+            "policy":"Discovery and cross-reference evidence only. No guessed field meanings or runtime approval."
+          }
+          Path("reports/mobile-quest-linkage-summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+          PY
+      - name: Upload compact quest linkage evidence and selected raw source files
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mobile-Quest-Linkage-Evidence
+          path: |
+            reports/mobile-quest-source-audit.json
+            reports/quest-ecosystem-inventory.json
+            reports/mobile-apk-reader-probe.json
+            reports/mobile-apk-reader-implementation-hits.json
+            build/apk-reader/dex/
+            build/apk-reader/native/
+            build/apk-reader/embedded-payloads/
+            build/apk-reader/split-apks/
+            build/apk-reader/split-assets/
+            build/apk-reader/unblob-39285EFA/
+            reports/split-apk-inventory.json
+            reports/split-bundle-list.txt
+            reports/native-library-inventory.json
+            reports/apkid-*.txt
+            reports/apkid*.json
+            reports/apkid.log
+            reports/unblob-39285EFA*
+            reports/unblob-39285EFA.json
+            build/apk-reader/baksmali/
+            reports/embedded-dex-payload-triage.json
+            reports/baksmali-*.log
+            build/apk-reader/decompiled/
+            reports/selected-world-source-index.json
+            reports/mobile-quest-linkage-summary.json
+            reports/mobile-quest-catalog.json
+            reports/mobile-lua-decode-candidates.json
+            reports/mobile-quest-world-links.json
+            reports/mobile-quest-system-analysis.json
+            build/mobile-quest-source/selected/
+            build/mobile_quest_candidates/
+            build/mobile_lua_candidates/
+            build/quest-ecosystem/decoded_candidates/
+          if-no-files-found: warn
+          retention-days: 30
+          compression-level: 6

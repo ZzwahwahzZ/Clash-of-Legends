@@ -243,13 +243,23 @@ func _refresh_travel_destinations() -> void:
 		travel_list.add_child(missing)
 		return
 	var destinations: Dictionary = manager.get_destinations()
+	var city_header_added := false
 	for destination_id in destinations:
+		if str(destination_id).begins_with("city_") and not city_header_added:
+			var city_header := Label.new()
+			city_header.text = "المدن الرئيسية والفرعية" if GameManager.current_language == "ar" else "Main and Minor Cities"
+			city_header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			travel_list.add_child(city_header)
+			city_header_added = true
 		var data: Dictionary = destinations[destination_id]
 		var is_ar := GameManager.current_language == "ar"
 		var button := Button.new()
 		var title := str(data.get("name_ar", destination_id)) if is_ar else str(data.get("name_en", destination_id))
 		var description := str(data.get("description_ar", "")) if is_ar else str(data.get("description_en", ""))
 		button.text = title + "  —  " + description
+		button.disabled = not bool(data.get("enabled", true))
+		if button.disabled:
+			button.text += "  (" + ("قيد دمج الخريطة" if is_ar else "Map integration pending") + ")"
 		button.custom_minimum_size = Vector2(0, 38)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.pressed.connect(_on_travel_destination_selected.bind(str(destination_id)))
@@ -286,7 +296,7 @@ func _on_quest_updated(_quest_id: String, objective_title: String, progress: int
 	if quest_progress:
 		var is_ar = GameManager and GameManager.current_language == "ar"
 		if is_done:
-			quest_progress.text = "اكتملت وأضيفت المكافأة تلقائياً" if is_ar else "Completed; reward added automatically"
+			quest_progress.text = "اكتمل الهدف؛ عُد إلى صاحب المهمة لاستلام المكافأة" if is_ar else "Objective complete; return to the quest NPC to claim your reward"
 		else:
 			quest_progress.text = "التقدم: %d / %d (انقر للملاحة)" % [progress, goal] if is_ar else "Progress: %d / %d (Tap to navigate)" % [progress, goal]
 

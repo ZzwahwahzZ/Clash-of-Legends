@@ -1,0 +1,85 @@
+name: Rebuild quest-system analysis from retained evidence
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/rebuild-mobile-quest-system-analysis.yml"
+      - "tools/gameplay_source_audit/analyze_mobile_quest_system.py"
+permissions:
+  contents: read
+  actions: read
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore full quest source pack including itemtype definitions
+        uses: actions/download-artifact@v4
+        with:
+          name: Mobile-Quest-Linkage-Evidence
+          run-id: 42364746967
+          github-token: ${{ github.token }}
+          path: /tmp/quest-evidence
+      - name: Rebuild dependencies, NPCs, dialogues, monsters and item links
+        run: |
+          set -euo pipefail
+          SOURCE=/tmp/quest-evidence/build/mobile-quest-source/selected
+          test -d "$SOURCE/ini/itemtype"
+          test "$(find "$SOURCE/ini/itemtype" -name '*.ini' | wc -l)" -eq 89
+          python3 -m py_compile tools/gameplay_source_audit/analyze_mobile_quest_system.py
+          python3 tools/gameplay_source_audit/analyze_mobile_quest_system.py "$SOURCE" --output reports/mobile-quest-system-analysis.json
+          python3 -m json.tool reports/mobile-quest-system-analysis.json > /dev/null
+      - name: Validate quest-system analysis coverage and provenance
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path("reports/mobile-quest-system-analysis.json").read_text(encoding="utf-8"))
+          assert p["mission_summary"]["records"] == 2510
+          assert p["mission_summary"]["unique_ids"] == 2509
+          assert p["mission_summary"]["type_id_names"]["1"] == "Main Quests"
+          assert p["alternate_server_catalog"]["records"] == 906
+          assert p["dependency_graph"]["prerequisite_edges"] == 1230
+          assert p["progress_conditions"]["reference_count"] == 2050
+          assert p["npc_linkage"]["exact_coordinate_matches"] == 127
+          assert p["npc_linkage"]["unique_world_placement_candidates"] == 881
+          assert p["dialogue"]["dialogue_count"] == 1931
+          assert p["dialogue"]["arabic_keys_found"] > 5000
+          assert p["monster_linkage"]["reference_count"] == 364
+          assert p["item_linkage"]["item_definitions_available"] > 50000
+          assert p["item_linkage"]["matched_item_ids"] > 1000
+          assert len(p["map_linkage"]["map_id_details"]) == 92
+          twin=next(x for x in p["map_linkage"]["map_id_details"] if x["map_id"] == "1002")
+          assert twin["resource_path"] == "map/map/newplain.7z"
+          assert "TwinCity" in twin["quest_source_names"]
+          assert p["progress_conditions"]["self_reference_count"] > 2000
+          assert p["progress_conditions"]["cross_mission_reference_count"] == 24
+          assert p["dialogue_npc_linkage"]["mission_ids_with_dialogue_npcs"] >= 190
+          mn={x["mission_id"]:x["npc_references"] for x in p["mission_dialogue_npcs"]}
+          assert "Whorf" in str(mn["5455"])
+          assert "David" in str(mn["5456"]) and "Jack" in str(mn["5456"])
+          assert p["dialogue_npc_linkage"]["speaker_refs_with_quest_location_candidates"] >= 1100
+          whorf=next(x for x in mn["5455"] if x["npc_type_name"] == "Whorf")
+          assert whorf["simple_object_id"] == "186"
+          assert all(x["simple_object_id"] in ("214","8") for x in mn["5456"] if x["npc_type_name"] in ("David","Jack"))
+          exports=Path("reports/quest_exports")
+          manifest=json.loads((exports/"manifest.json").read_text(encoding="utf-8"))
+          assert len(manifest["exports"]) == 11
+          assert sum(1 for _ in (exports/"mission_npc_map_links.csv").open(encoding="utf-8-sig")) == 4919
+          assert sum(1 for _ in (exports/"mission_catalog.csv").open(encoding="utf-8-sig")) == 2510
+          assert sum(1 for _ in (exports/"mission_catalog_source_records.csv").open(encoding="utf-8-sig")) == 2511
+          assert sum(1 for _ in (exports/"mission_map_links.csv").open(encoding="utf-8-sig")) == 5502
+          assert sum(1 for _ in (exports/"npc_world_placements.csv").open(encoding="utf-8-sig")) == 882
+          print("Quest-system analysis acceptance checks passed")
+          PY
+      - name: Upload rebuilt quest-system report
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mobile-Quest-System-Analysis-v2
+          path: |
+            reports/mobile-quest-system-analysis.json
+            reports/quest_exports/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 6

@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0.0",
+  "workflow_job_status": "failure",
+  "source_archive": {
+    "present": false,
+    "size_bytes": null,
+    "sha256": null
+  },
+  "gameplay_source_table_audit": {
+    "report_present": false,
+    "version_matched_member_count": null,
+    "itemtype_file_count": null,
+    "itemtype_record_count": null
+  },
+  "mobile_apk_reader_probe": {
+    "report_present": false,
+    "apk_count": null,
+    "reader_hint_count": null,
+    "apks": []
+  },
+  "quest_ecosystem_inventory": {
+    "report_present": false,
+    "files_found": null,
+    "category_file_counts": null,
+    "plausible_cipher_decode_candidates": null,
+    "unique_task_id_count": null
+  },
+  "safety": "Metadata and counts only. No decoded source text, proprietary asset bytes, or candidate payloads are committed."
+}\n

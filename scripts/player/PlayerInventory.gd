@@ -132,6 +132,7 @@ func add_item(item_data: Dictionary) -> bool:
 					remaining -= to_add
 				if remaining <= 0:
 					emit_signal("inventory_updated")
+					_notify_source_item_collected(item_data, int(item_data.get("quantity", 1)))
 					return true
 
 	while remaining > 0:
@@ -146,7 +147,15 @@ func add_item(item_data: Dictionary) -> bool:
 		remaining -= stack_quantity
 
 	emit_signal("inventory_updated")
+	_notify_source_item_collected(item_data, int(item_data.get("quantity", 1)))
 	return true
+
+func _notify_source_item_collected(item_data: Dictionary, quantity: int) -> void:
+	var item_id := str(item_data.get("source_item_id", item_data.get("id", "")))
+	var item_name := str(item_data.get("source_item_name", item_data.get("name_en", "")))
+	for agent in get_tree().get_nodes_in_group("quest_agents"):
+		if agent.has_method("on_source_item_collected"):
+			agent.on_source_item_collected(item_id, item_name, "", quantity)
 
 func remove_item_at(index: int, quantity: int = 1) -> bool:
 	if quantity <= 0 or index < 0 or index >= MAX_SLOTS or slots[index] == null:
