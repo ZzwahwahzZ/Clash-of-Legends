@@ -140,6 +140,27 @@ func _run_travel_test() -> void:
 	source_agent.queue_free()
 	print("QUEST GRAPH AUDIT PASSED: ", graph_summary, " | city map IDs missing resource index: ", missing_city_maps)
 
+	var source_agent := QuestNavigationAgent.new()
+	get_root().add_child(source_agent)
+	await process_frame
+	source_agent.completed_source_mission_ids.append("608")
+	if not source_agent.activate_source_mission("650", 8, "10"):
+		_fail("Source mission 650 could not be accepted after its prerequisite and profession gate.")
+		return
+	source_agent.on_source_npc_talked("0004")
+	var source_state: Dictionary = source_agent.get_source_active_state()
+	if not bool(source_state.get("ready_to_turn_in", false)):
+		_fail("Source NPC objective did not move mission 650 to ready-to-turn-in.")
+		return
+	if not source_agent.complete_source_mission_turnin("650", "0004"):
+		_fail("Source mission 650 was not safely turned in to its designated Armorer NPC.")
+		return
+	if not source_agent.completed_source_mission_ids.has("650"):
+		_fail("Source mission 650 completion was not persisted in the runtime agent.")
+		return
+	print("SOURCE QUEST RUNTIME AUDIT PASSED: accept -> exact NPC objective -> designated turn-in.")
+	source_agent.queue_free()
+
 	var player := CharacterBody3D.new()
 	player.name = "TravelTestPlayer"
 	get_root().add_child(player)
