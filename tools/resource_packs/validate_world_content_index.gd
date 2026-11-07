@@ -49,11 +49,20 @@ func _run_validation() -> void:
 	if index.get_quests_for_map(1002).is_empty():
 		_fail("Source map 1002 is not connected to its quest records.")
 		return
-	if not index.is_source_quest_available(6126, 90, 0, 0, []):
-		_fail("Level gate for source quest 6126 was not accepted at level 90.")
+	# Exercise the exact level gate recorded in the source row rather than assuming
+	# a hard-coded level or profession for this quest.
+	var quest_row: Dictionary = known_quest[0]
+	var required_level := int(quest_row.get("min_level", 0))
+	var test_level := required_level if required_level > 0 else 1
+	var allowed_professions: Array = quest_row.get("profession_ids", [])
+	var test_profession := int(allowed_professions[0]) if not allowed_professions.is_empty() else 0
+	var required_sex := int(quest_row.get("sex", 0))
+	var prerequisites: Array = quest_row.get("prerequisite_ids", []).duplicate()
+	if not index.is_source_quest_available(6126, test_level, test_profession, required_sex, prerequisites):
+		_fail("Source quest 6126 was rejected when tested with its own source level/profession/sex/prerequisite gates.")
 		return
-	if index.is_source_quest_available(6126, 89, 0, 0, []):
-		_fail("Level gate for source quest 6126 was incorrectly accepted below level 90.")
+	if required_level > 1 and index.is_source_quest_available(6126, required_level - 1, test_profession, required_sex, prerequisites):
+		_fail("Source quest 6126 incorrectly passed one level below its source minimum.")
 		return
 	if not index.is_source_quest_available(650, 8, 10, 0, [608]):
 		_fail("Profession gate for source quest 650 was not accepted for profession 10.")
