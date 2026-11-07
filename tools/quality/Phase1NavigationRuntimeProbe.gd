@@ -63,6 +63,29 @@ func _run() -> void:
 	var map_region_count := NavigationServer3D.map_get_regions(navigation_map).size()
 	var projected_target := NavigationServer3D.map_get_closest_point(navigation_map, TARGET_POSITION)
 
+	# Verify that the runtime NavigationAgent can resolve the two long city routes,
+	# not merely that the bake-time NavigationServer query found connected paths.
+	var runtime_route_targets := {
+		"pawnshop_approach": Vector3(-86.0, -0.078, -106.0),
+		"factory_approach": Vector3(86.0, -0.078, -12.0)
+	}
+	var runtime_route_checks: Array[Dictionary] = []
+	for route_id in runtime_route_targets:
+		var route_target: Vector3 = runtime_route_targets[route_id]
+		navigation_agent.target_position = NavigationServer3D.map_get_closest_point(navigation_map, route_target)
+		for _sync_frame in range(3):
+			await physics_frame
+		var runtime_path := navigation_agent.get_current_navigation_path()
+		runtime_route_checks.append({
+			"route": route_id,
+			"waypoint_count": runtime_path.size(),
+			"path_valid": runtime_path.size() >= 2
+		})
+	var runtime_routes_passed := 0
+	for route_check in runtime_route_checks:
+		if bool(route_check["path_valid"]):
+			runtime_routes_passed += 1
+
 	player.call("move_towards_target_position", TARGET_POSITION, 1.0 / 60.0)
 	for _frame in range(3):
 		await physics_frame
@@ -100,6 +123,8 @@ func _run() -> void:
 		"project_default_cell_height": expected_cell_height,
 		"navigation_cell_height_matches": is_equal_approx(map_cell_height, expected_cell_height),
 		"path_waypoint_count": path_waypoint_count,
+		"runtime_route_checks": runtime_route_checks,
+		"runtime_routes_passed": runtime_routes_passed,
 		"start_position": _vec(start_after_settle),
 		"requested_target_position": _vec(TARGET_POSITION),
 		"projected_target_position": _vec(projected_target),
@@ -128,6 +153,9 @@ func _run() -> void:
 	if path_waypoint_count < 2:
 		_fail("Player NavigationAgent3D did not receive a usable path.")
 		return
+	if runtime_routes_passed != runtime_route_targets.size():
+		_fail("Player NavigationAgent3D could not resolve both pawnshop and factory approach routes: " + JSON.stringify(runtime_route_checks))
+		return
 	if horizontal_displacement < 8.0 or not target_reached:
 		_fail("Player did not follow the baked navigation path to the hotel frontage.")
 		return
@@ -135,7 +163,7 @@ func _run() -> void:
 		_fail("Player did not remain supported by the generated walkable floor collisions.")
 		return
 
-	print("PHASE1 NAVIGATION PLAYER MOVEMENT AND FLOOR COLLISION: PASS")
+	print("PHASE1 NAVIGATION PLAYER MOVEMENT, CITY ROUTES AND FLOOR COLLISION: PASS")
 	quit(0)
 
 func _ray_is_clear(from_position: Vector3, to_position: Vector3) -> bool:
