@@ -101,3 +101,30 @@ Official guide: https://comobile.99.com/guide/info/quests/2023-02-16/quests_-_mo
 - Taoist Epic Quest: https://comobile.99.com/guide/info/quests/2023-02-16/quest_-_taoist_epic_quest.shtml
 - Trojan Inspiring Quest: https://comobile.99.com/guide/info/quests/2023-02-16/inspiring_quests_-_trojan_inspiring_quest.shtml
 - DAT format documentation (legacy PC patch documentation; comparison only): https://conquer-online.github.io/wiki/files/formats/dat.html
+
+
+## Expanded catalogue research (2026-11-07)
+
+A deeper pass has been committed to `docs/quests/QUEST_CATALOGUE_RESEARCH_AND_RUNTIME_SCHEMA.md`. It adds:
+- Main Quest in Spheres level bands (1–50, 50–75, 75–130, 1st Rebirth 1–60 and 60–130, 2nd Rebirth 1–140 and 140+), including the official named guidance NPCs and unlock milestones.
+- The full published objective families and tier/stacking/Go-pathfinding mechanics of Bounty Hall.
+- Expanded exact published rules for Farmland Defence, Hunting Battle and Mayhem Land Crusade.
+- Full published item/actor/stage/failure-retry chains for Ninja, Taoist and Monk Epic Quests.
+- New Evil Labyrinth, Beast Scramble/Realm Quests, Sea Treasure Hunt, Twinkling Fest, Love Cycles, Into Wilds, New Server Bash and New Server Carnival as separate event/activity evidence.
+- A normalized data contract and typed objective-handler requirements, explicitly marked as our integration schema rather than the original Mobile file format.
+
+Important distinction: the official Mobile guide index itself currently enumerates four Daily Quests, three Epic Quests and one Inspiring Quest, while the Main Quest in Spheres and many event/activity guides are separate pages. This is a verified published-guide index, **not proof that the full in-game quest catalogue contains only these entries**. The external inventory remains incomplete and must continue across dated event pages, tutorial/zone/rebirth/sub-class/house/equipment quests and the pinned APK's own data.
+
+### Technical research correction
+The legacy PC DAT and TQ cipher documentation is useful only to understand possible file-format families. It does not validate the Android 1.1.2.3 reader, cipher or quest schema. Existing candidate `questinfo.dat` / `taskitem_info.dat` decodes remain unapproved. Do not use candidate counts as runtime quest totals.
+
+### Newly added official Mobile references
+- Main Quest in Spheres: https://comobile.99.com/guide/2024-03-19/main_quest_in_spheres.shtml
+- New Evil Labyrinth: https://comobile.99.com/guide/2023-08-29/new_evil_labyrinth.shtml
+- Beast Scramble: https://comobile.99.com/guide/2023-08-03/beast_scramble_-_unite_for_the_realm_and_compete_to_be_the_strongest_.shtml
+- Sea Treasure Hunt: https://comobile.99.com/guide/2024-07-26/sea_treasure_hunt.shtml
+- Twinkling Fest: https://comobile.99.com/guide/2026-02-05/join_the_twinkling_fest_and_start_an_amazing_adventure.shtml
+- Love Cycles: https://comobile.99.com/guide/2026-09-03/love_cycles_is_now_live_from_sept__8th_to_sept__21st_.shtml
+- Into Wilds: https://comobile.99.com/guide/2026-09-24/join_into_wilds_now_for_generous_rewards_from_sept__29th_to_oct__12th_.shtml
+- New Server Bash: https://comobile.99.com/guide/info/quests/2024-01-05/new_server_-_new_server_bash.shtml
+- New Server Carnival: https://comobile.99.com/guide/info/quests/2024-03-25/new%20server%20spheres%20carnival.shtml
