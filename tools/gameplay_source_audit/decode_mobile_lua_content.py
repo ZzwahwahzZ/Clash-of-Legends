@@ -64,18 +64,18 @@ def main():
                 "signals":sig,"candidate_path":str(target),
             }
             if "npcdialogueinfo" in str(rel).lower():
-                row["dialogue_ids"]=sorted({int(x) for x in re.findall(r"Dialog_Dialogue\\[(\\d+)\\]\\s*=",text)})
+                row["dialogue_ids"]=sorted({int(x) for x in re.findall(r"Dialog_Dialogue\[(\d+)\]\s*=",text)})
                 row["dialogue_text_keys"]=sorted(set(re.findall(r'"(STR_[A-Za-z0-9_]+)"',text)))
-                row["dialogue_type_counts"]={str(i):len(re.findall(r'\\["DlgType"\\]\\s*=\\s*'+str(i)+r'\\b',text)) for i in range(1,7)}
+                row["dialogue_type_counts"]={str(i):len(re.findall(r'\["DlgType"\]\s*=\s*'+str(i)+r'\b',text)) for i in range(1,7)}
             if "npcdialoguetext_" in str(rel).lower():
-                row["text_key_count"]=len(set(re.findall(r'NpcDialogueText_[A-Z]+\\["([^"]+)"\\]\\s*=',text)))
-                row["task_text_key_count"]=len(set(re.findall(r'"(STR_TASK_\\d+)"',text)))
+                row["text_key_count"]=len(set(re.findall(r'NpcDialogueText_[A-Z]+\["([^"]+)"\]\s*=',text)))
+                row["task_text_key_count"]=len(set(re.findall(r'"(STR_TASK_\d+)"',text)))
             if "luascriptmgr" in str(rel).lower():
-                row["script_registry"]=[{"script_id":int(a),"file":b} for a,b in re.findall(r"\\[(\\d+)\\]\\s*=\\s*\\{\\s*file\\s*=\\s*[\\"']([^\\"']+)",text)]
+                row["script_registry"]=[{"script_id":int(a),"file":b} for a,b in re.findall(r"\[(\d+)\]\s*=\s*\\{\s*file\s*=\s*[\\"']([^\\"']+)",text)]
             if "client_realm_task" in str(rel).lower():
-                row["scene_function_names"]=re.findall(r"local function\\s+(\\w+)",text)
-                row["scene_api_calls"]=sorted(set(re.findall(r"(LuaScriptMgr_\\w+)\\s*\\(",text)))
-                row["view_positions"]=[{"x":int(x),"y":int(y)} for x,y in re.findall(r"LuaScriptMgr_SetViewPosByCell\\((\\d+)\\s*,\\s*(\\d+)\\)",text)]
+                row["scene_function_names"]=re.findall(r"local function\s+(\w+)",text)
+                row["scene_api_calls"]=sorted(set(re.findall(r"(LuaScriptMgr_\w+)\s*\(",text)))
+                row["view_positions"]=[{"x":int(x),"y":int(y)} for x,y in re.findall(r"LuaScriptMgr_SetViewPosByCell\((\d+)\s*,\s*(\d+)\)",text)]
             rows.append(row)
     report={
         "schema_version":"1.0.0","target":"Conquer Online Mobile 1.1.2.3",
@@ -84,7 +84,7 @@ def main():
         "candidates":rows,
     }
     args.output.parent.mkdir(parents=True,exist_ok=True)
-    args.output.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\\n",encoding="utf-8")
+    args.output.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     print(json.dumps({"candidate_count":len(rows),"seed_counts":report["candidate_seed_counts"],
         "dialogue_id_count":sum(len(r.get("dialogue_ids",[])) for r in rows),
         "script_registry_count":sum(len(r.get("script_registry",[])) for r in rows),
