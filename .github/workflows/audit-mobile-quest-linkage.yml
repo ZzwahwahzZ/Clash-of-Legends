@@ -93,6 +93,14 @@ jobs:
             --output reports/mobile-lua-decode-candidates.json \
             --decoded-dir build/mobile_lua_candidates
           python3 -m json.tool reports/mobile-lua-decode-candidates.json > /dev/null
+      - name: Build verified quest NPC map dialogue and story-scene cross-links
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tools/gameplay_source_audit/build_mobile_quest_world_links.py
+          python3 tools/gameplay_source_audit/build_mobile_quest_world_links.py \
+            build/mobile-quest-source/selected \
+            --output reports/mobile-quest-world-links.json
+          python3 -m json.tool reports/mobile-quest-world-links.json > /dev/null
       - name: Build source-to-world cross-reference evidence pack
         run: |
           python3 - <<'PY'
@@ -136,6 +144,7 @@ jobs:
             reports/mobile-quest-linkage-summary.json
             reports/mobile-quest-catalog.json
             reports/mobile-lua-decode-candidates.json
+            reports/mobile-quest-world-links.json
             build/mobile-quest-source/selected/
             build/mobile_quest_candidates/
             build/mobile_lua_candidates/
