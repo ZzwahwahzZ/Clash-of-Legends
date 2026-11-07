@@ -8,7 +8,7 @@
 
 1. The archive decoder locates APK members whose archive path contains the pinned version string and records each extracted APK member's byte size and SHA-256.
 2. The quest decoder inventories exact-path quest candidates and probes the two currently documented TQ seeds (9527 and 1234). Any decoded Lua-looking output remains a candidate.
-3. The APK reader probe enumerates DEX files and native shared libraries inside the exact APK, extracts DEX string tables and printable native strings, and records references that may lead to the quest/resource reader.
+3. The APK reader probe enumerates DEX files and native shared libraries inside the exact APK, extracts DEX string tables and printable native strings, and records references that may lead to the quest/resource reader. It also records the extracted APK member's byte size and streaming SHA-256 fingerprint in the reader report.
 4. The probe does not disassemble bytecode, resolve obfuscated names, emulate native code, or prove the cipher. A string match is a navigation clue only.
 
 ## Why the cipher is not yet accepted
@@ -38,6 +38,10 @@ Do not import any extracted quest data into runtime until all of these are satis
 - task, NPC, map, monster, item and reward references cross-join to independently extracted records;
 - unresolved references and duplicate IDs are reported explicitly;
 - integration tests prove quest navigation and objective progression in the Godot runtime.
+
+## Audit environment consistency
+
+The workflow creates a dedicated `.venv`, installs PolyFile there, and now runs compilation, unit tests, and every Python audit script through `.venv/bin/python`. This keeps the `polyfile` Python module import and its command-line executable in the same environment; a successful run must still be confirmed from the workflow's own artifact and logs.
 
 ## Known operational limitation
 
