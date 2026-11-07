@@ -235,7 +235,14 @@ def main():
     gmex={s["section"] for s in sections(read_text(root/"ini/gamemapex.ini")) if s["section"].isdigit()} if (root/"ini/gamemapex.ini").is_file() else set()
     mapdest_ids={k[0] for k in md}
     npc_type_names={s["section"].replace("NpcType",""):s["fields"].get("Name","") for s in npc_types if s["section"].startswith("NpcType")}
+    npc_type_defs={s["section"].replace("NpcType",""):s["fields"] for s in npc_types if s["section"].startswith("NpcType")}
     dialogue=parse_dialogue_file(root/"ini/luaui/publicfiles/otherconf/npcdialogueinfo.dat",root/"ini/luaui/publicfiles/wordfiles/npcdialoguetext_ar.dat",mission_ids,npc_type_names,skins)
+    quest_npc_by_name=defaultdict(list)
+    for nr in npc_refs:
+        if nr.get("name"):
+            key=(nr.get("mission_id"),nr.get("role"),nr.get("npc_id"),nr.get("map_id"),nr.get("x"),nr.get("y"))
+            if not any((x.get("mission_id"),x.get("role"),x.get("npc_id"),x.get("map_id"),x.get("x"),x.get("y"))==key for x in quest_npc_by_name[nr["name"].casefold()]):
+                quest_npc_by_name[nr["name"].casefold()].append(nr)
     dialogue_npc_refs=[]
     mission_dialogue_npcs=defaultdict(list)
     for flow in dialogue["flows"]:
@@ -243,16 +250,25 @@ def main():
         for talk in flow["talks"]:
             info=talk.get("show_info",{})
             if info.get("npc_type_name"):
+                npc_type_id=str(info["id"])
+                definition=npc_type_defs.get(npc_type_id,{})
+                location_candidates=quest_npc_by_name.get(info["npc_type_name"].casefold(),[])
                 ref={"mission_id":flow["mission_id"],"dialogue_id":flow["dialogue_id"],"talk_index":talk["index"],
-                     "npc_type_id":str(info["id"]),"npc_type_name":info["npc_type_name"],
-                     "arabic_display_name":info.get("arabic_name"),"name_key":info.get("name_key"),
-                     "appearance_candidates":info.get("appearance_candidates",[])}
+                     "npc_type_id":npc_type_id,"npc_type_name":info["npc_type_name"],
+                     "simple_object_id":definition.get("SimpleObjID"),"effect":definition.get("Effect"),
+                     "standby_motion":definition.get("StandByMotion"),"arabic_display_name":info.get("arabic_name"),
+                     "name_key":info.get("name_key"),"appearance_candidates":info.get("appearance_candidates",[]),
+                     "quest_location_candidates":[{"mission_id":x.get("mission_id"),"role":x.get("role"),"npc_id":x.get("npc_id"),
+                         "map_id":x.get("map_id"),"x":x.get("x"),"y":x.get("y"),"map_name":x.get("map_name")} for x in location_candidates]}
                 dialogue_npc_refs.append(ref)
                 mission_dialogue_npcs[flow["mission_id"]].append(ref)
     dialogue_npc_summary={"reference_count":len(dialogue_npc_refs),
         "unique_npc_type_ids":len({r["npc_type_id"] for r in dialogue_npc_refs}),
         "mission_ids_with_dialogue_npcs":len(mission_dialogue_npcs),
-        "npc_type_name_match_refs":sum(bool(r["appearance_candidates"]) for r in dialogue_npc_refs)}
+        "npc_type_name_match_refs":sum(bool(r["appearance_candidates"]) for r in dialogue_npc_refs),
+        "speaker_refs_with_quest_location_candidates":sum(bool(r["quest_location_candidates"]) for r in dialogue_npc_refs),
+        "unique_speaker_names_with_quest_locations":len({r["npc_type_name"] for r in dialogue_npc_refs if r["quest_location_candidates"]}),
+        "unique_speaker_names_without_quest_locations":sorted({r["npc_type_name"] for r in dialogue_npc_refs if not r["quest_location_candidates"]})}
     # Item lookup is optional until the itemtype directory is included in the selected source pack.
     item_defs={}
     for ip in sorted((root/"ini/itemtype").glob("*.ini")) if (root/"ini/itemtype").exists() else []:
