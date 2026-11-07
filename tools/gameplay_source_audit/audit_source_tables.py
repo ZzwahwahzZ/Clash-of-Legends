@@ -276,9 +276,12 @@ def main() -> None:
             # Discover quest/promotion/NPC source members by exact APK path and safe raw-text hits.
             # This is a candidate inventory only; it does not decode binary records or infer schema.
             candidate_path_pattern = re.compile(r"(quest|task|promot|mission|npc|job|profession|class|role)", re.I)
+            candidate_text_extensions = {".ini", ".dat", ".lua", ".txt", ".json", ".xml", ".cfg"}
             promotion_terms = ("archer god", "archergod", "eagle archer", "oriental assassin", "path of shadow", "throwing knife")
             for rel, candidates in sources.items():
-                if not candidate_path_pattern.search(rel):
+                if Path(rel).suffix.lower() not in candidate_text_extensions:
+                    continue
+                if not candidate_path_pattern.search(Path(rel).name):
                     continue
                 for source_zip, member, display in candidates:
                     data = source_zip.read(member)
@@ -289,7 +292,7 @@ def main() -> None:
                         "evidence_status": "PATH_CANDIDATE_ONLY"
                     }
                     quest_promotion_candidates.append(entry)
-                    if len(data) <= 8 * 1024 * 1024:
+                    if len(data) <= 4 * 1024 * 1024:
                         decoded = decode_text(data).casefold()
                         found = [term for term in promotion_terms if term in decoded]
                         if found:
