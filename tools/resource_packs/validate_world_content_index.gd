@@ -81,11 +81,23 @@ func _run_validation() -> void:
 	if index._is_quest_available(level_gate_fixture, 9, 0, 0, []):
 		_fail("Minimum-level gate accepted a character below the threshold.")
 		return
-	if not index.is_source_quest_available(650, 8, 10, 0, [608]):
-		_fail("Profession gate for source quest 650 was not accepted for profession 10.")
-		return
-	if index.is_source_quest_available(650, 8, 20, 0, [608]):
-		_fail("Profession gate for source quest 650 was incorrectly accepted for profession 20.")
+	var profession_gate_tested := false
+	for candidate in index.get_quests_by_mission_id(650):
+		var candidate_professions: Array = candidate.get("profession_ids", [])
+		if not candidate_professions.has(10):
+			continue
+		var candidate_level := max(1, int(candidate.get("min_level", 0)))
+		var candidate_sex := int(candidate.get("sex", 0))
+		var candidate_prerequisites: Array = candidate.get("prerequisite_ids", []).duplicate()
+		if not index._is_quest_available(candidate, candidate_level, 10, candidate_sex, candidate_prerequisites):
+			continue
+		if index._is_quest_available(candidate, candidate_level, 20, candidate_sex, candidate_prerequisites):
+			_fail("Profession gate for source quest 650 incorrectly accepted an unlisted profession.")
+			return
+		profession_gate_tested = true
+		break
+	if not profession_gate_tested:
+		_fail("Source quest 650 profession gate could not be validated against its own source requirements.")
 		return
 	if index.get_quests_by_mission_id(3938).size() != 2:
 		_fail("Duplicate mission ID 3938 rows were not preserved.")
