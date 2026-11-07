@@ -15,6 +15,7 @@ EXACT = {
     "ini/gamemap.dat", "ini/gamemapex.ini", "ini/gamemaplayer.ini",
     "ini/npc.ini", "ini/npcex.ini", "ini/npcx.ini", "ini/slotnpc.ini", "ini/terrainnpc.ini",
     "ini/questinfo.ini", "ini/questinfopassionserver.ini",
+    "ini/selectcharacter.ini", "ini_ar/selectcharacter.ini", "ini_sp/selectcharacter.ini",
     "ini/luacfg/questinfo.dat", "ini/luacfg/taskitem_info.dat",
     "ini_ar/luacfg/questinfo.dat", "ini_ar/luacfg/taskitem_info.dat",
     "ini_ar/questinfo.ini", "ini_ar/npc.ini", "ini_ar/npcx.ini", "ini_ar/terrainnpc.ini",
