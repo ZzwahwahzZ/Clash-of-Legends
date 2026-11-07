@@ -7,6 +7,9 @@ on:
     paths:
       - "scripts/progression/ClassProgressionManager.gd"
       - "scripts/player/PlayerInventory.gd"
+      - "scripts/player/PlayerController.gd"
+      - "scripts/core/GameManager.gd"
+      - "scenes/characters/Player.tscn"
       - "scripts/core/GameContentDatabase.gd"
       - "scripts/combat/CombatEngine.gd"
       - "scripts/ui/MainHUDController.gd"
