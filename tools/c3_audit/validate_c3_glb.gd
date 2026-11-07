@@ -173,10 +173,15 @@ func _validate() -> void:
 	var vat_clip_meshes: Dictionary = {}
 	var vat_scene_cache: Dictionary = {}
 	var vat_mesh_cache: Dictionary = {}
-	var expected_vat_clips := [
-		"look7_model7130000_weapon500_action100", "look7_model7130000_weapon500_action110", "look7_model7130000_weapon500_action120",
-		"look8_model8133010_weapon500_action100", "look8_model8133010_weapon500_action110", "look8_model8133010_weapon500_action120"
-	]
+	var expected_vat_clips: Array[String] = []
+	for clip_report in audit_data.get("vat_motion_poc", []):
+		var expected_clip_id := str(clip_report.get("clip_id", ""))
+		if not expected_clip_id.is_empty() and not expected_vat_clips.has(expected_clip_id):
+			expected_vat_clips.append(expected_clip_id)
+	var expected_motion_poc_count := 0
+	for motion_row in audit_data.get("external_motion_poc", []):
+		if str(motion_row.get("status", "")) == "EXPORTED_PENDING_GODOT_IMPORT_VALIDATION":
+			expected_motion_poc_count += 1
 	var vat_dir := DirAccess.open("res://build/c3-glb/motion-poc-vat")
 	if vat_dir != null:
 		var vat_files := vat_dir.get_files()
@@ -333,11 +338,11 @@ func _validate() -> void:
 	for clip_instance_value in vat_scene_cache.values():
 		if is_instance_valid(clip_instance_value):
 			clip_instance_value.free()
-	var vat_status := "PASSED" if clips_with_moving_mesh == 6 and vat_validated_count == vat_results.size() and vat_results.size() >= 6 and not vat_failed and unexpected_vat_clips.is_empty() and vat_static_parts_retained else "FAILED"
+	var vat_status := "PASSED" if clips_with_moving_mesh == expected_vat_clips.size() and vat_validated_count == vat_results.size() and vat_results.size() >= 6 and not vat_failed and unexpected_vat_clips.is_empty() and vat_static_parts_retained else "FAILED"
 	var poc_report := {
-		"expected_clip_count": 6,
+		"expected_clip_count": expected_motion_poc_count,
 		"validated_clip_count": motion_poc_results.filter(func(row): return row.get("status") == "GODOT_IMPORT_VALIDATED").size(),
-		"status": "PASSED" if motion_poc_results.size() == 6 and not motion_poc_failed else "FAILED",
+		"status": "PASSED" if expected_motion_poc_count > 0 and motion_poc_results.size() == expected_motion_poc_count and not motion_poc_failed else "FAILED",
 		"clips": motion_poc_results,
 		"expected_skeletal_clip_count": 2,
 		"validated_skeletal_clip_count": skeletal_poc_results.filter(func(row): return row.get("status") == "GODOT_SKELETON_VALIDATED").size(),
@@ -347,7 +352,7 @@ func _validate() -> void:
 		"validated_skeleton_catalog_count": skeleton_catalog_results.filter(func(row): return row.get("status") == "GODOT_SKELETON_CATALOG_VALIDATED").size(),
 		"skeleton_catalog_status": "PASSED" if int(audit_data.get("skeleton_catalog_poc_count", 0)) > 0 and skeleton_catalog_results.size() == int(audit_data.get("skeleton_catalog_poc_count", 0)) and not skeleton_catalog_failed else "FAILED",
 		"skeleton_catalog": skeleton_catalog_results,
-		"expected_vat_clip_count": 6,
+		"expected_vat_clip_count": expected_vat_clips.size(),
 		"validated_vat_clip_count": clips_with_moving_mesh,
 		"vat_exported_deforming_mesh_count": vat_validated_count,
 		"vat_static_parts_retained": vat_static_parts_retained,
@@ -366,8 +371,8 @@ func _validate() -> void:
 	poc_file.close()
 	print("C3 SKELETAL POC SUMMARY: ", JSON.stringify(poc_report))
 	print("C3 MOTION POC VALIDATION: ", poc_report["validated_clip_count"], "/", poc_report["expected_clip_count"], " clips passed Godot import and animation-track checks.")
-	if motion_poc_results.size() != 6 or motion_poc_failed:
-		push_error("C3 motion POC validation failed: expected six fully animated imported clips.")
+	if expected_motion_poc_count <= 0 or motion_poc_results.size() != expected_motion_poc_count or motion_poc_failed:
+		push_error("C3 motion POC validation failed: the complete exact-signature full-character motion proof set.")
 		quit(1)
 		return
 	if poc_report["skeleton_catalog_status"] != "PASSED":
@@ -378,7 +383,7 @@ func _validate() -> void:
 	# separate diagnostic for two representative idle rigs and is not a gate
 	# for the six complete VAT clips.
 	if vat_status != "PASSED":
-		push_error("C3 VAT validation failed: all six clips, deforming meshes, source vertex mapping, and static-part retention must pass.")
+		push_error("C3 VAT validation failed: all discovered VAT clips, deforming meshes, source vertex mapping, and static-part retention must pass.")
 		quit(1)
 		return
 
