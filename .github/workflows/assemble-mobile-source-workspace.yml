@@ -47,7 +47,7 @@ jobs:
             -o mobile-source-workspace/01_ARCHIVES/extracted-assets-001.zip
           echo "0d21a110c09b762ed5f1a5f4da022857b0534e489eb85052d15da460cb229d2a  mobile-source-workspace/01_ARCHIVES/extracted-assets-001.zip" | sha256sum -c -
           curl --fail --location --retry 5 --retry-all-errors \
-            -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/octet-stream" "https://api.github.com/repos/ZzwahwahzZ/Clash-of-Legends/releases/assets/716478589" \
+            "https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/original-mobile-assets-2026-11-06/ConquerOnline.zip" \
             -o mobile-source-workspace/01_ARCHIVES/ConquerOnline.zip
           echo "b1c6958109a07c237631943fc0442d3161563d89e1020b143d95437ba9a6fdb0  mobile-source-workspace/01_ARCHIVES/ConquerOnline.zip" | sha256sum -c -
       - name: Restore the existing source index and prior audit results
