@@ -62,6 +62,8 @@ func _run() -> void:
 	get_root().add_child(_city)
 	await process_frame
 
+	_add_market_bridge_navigation_connectors()
+
 	for relative_path in WALKABLE_PATHS:
 		var source := _city.get_node_or_null(NodePath(relative_path)) as MeshInstance3D
 		if source == null or source.mesh == null:
@@ -98,6 +100,31 @@ func _run() -> void:
 		_city,
 		Callable(self, "_on_source_geometry_parsed")
 	)
+
+func _add_market_bridge_navigation_connectors() -> void:
+	# The authored ramp/deck meshes overlap by only 0.2 m. Recast erodes
+	# walkable edges by the 0.5 m agent radius, splitting the bridge into
+	# islands. These two navigation-only sloped strips extend the real ramp
+	# profiles into the deck; they are not added to the runtime render scene
+	# or physics collision, and retain the 0.5 m agent clearance profile.
+	var connector_mesh := ArrayMesh.new()
+	var vertices := PackedVector3Array([
+		Vector3(-24.0, 3.72, -128.15), Vector3(-22.0, 4.34, -128.15), Vector3(-22.0, 4.34, -123.85),
+		Vector3(-24.0, 3.72, -128.15), Vector3(-22.0, 4.34, -123.85), Vector3(-24.0, 3.72, -123.85),
+		Vector3(22.0, 4.34, -128.15), Vector3(24.0, 3.72, -128.15), Vector3(24.0, 3.72, -123.85),
+		Vector3(22.0, 4.34, -128.15), Vector3(24.0, 3.72, -123.85), Vector3(22.0, 4.34, -123.85)
+	])
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = vertices
+	connector_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	var connector := MeshInstance3D.new()
+	connector.name = "MarketBridgeNavigationSeamConnectors"
+	connector.mesh = connector_mesh
+	connector.add_to_group("jianghai_nav_walkable")
+	_city.add_child(connector)
+	_selected_sources.append("Generated/MarketBridgeNavigationSeamConnectors")
+	print("PHASE1 BRIDGE NAVIGATION SEAM CONNECTORS: added two ramp-profile strips with 0.5 m agent clearance")
 
 func _on_source_geometry_parsed() -> void:
 	NavigationServer3D.bake_from_source_geometry_data_async(
