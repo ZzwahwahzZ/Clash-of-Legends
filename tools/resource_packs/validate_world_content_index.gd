@@ -66,34 +66,20 @@ func _run_validation() -> void:
 	if index.get_quests_for_map(1002).is_empty():
 		_fail("Source map 1002 is not connected to its quest records.")
 		return
-	# Find a source quest with a pure minimum-level gate so the test does not
-	# invent requirements for a particular mission or mix in profession/prerequisite gates.
-	var level_gate_tested := false
-	for candidate in index.get_quests():
-		var candidate_mission := int(candidate.get("mission_id", -1))
-		var candidate_min := int(candidate.get("min_level", 0))
-		var candidate_max := int(candidate.get("max_level", 0))
-		var candidate_professions: Array = candidate.get("profession_ids", [])
-		var candidate_prerequisites: Array = candidate.get("prerequisite_ids", [])
-		if candidate_mission < 0 or candidate_min <= 1:
-			continue
-		if index.get_quests_by_mission_id(candidate_mission).size() != 1:
-			continue
-		if candidate_max > 0 and candidate_max < candidate_min:
-			continue
-		if not candidate_professions.is_empty() and not candidate_professions.has(0):
-			continue
-		if int(candidate.get("sex", 0)) != 0 or not candidate_prerequisites.is_empty():
-			continue
-		if not index.is_source_quest_available(candidate_mission, candidate_min, 0, 0, []):
-			continue
-		if index.is_source_quest_available(candidate_mission, candidate_min - 1, 0, 0, []):
-			_fail("Source quest minimum-level gate was incorrectly accepted below its recorded threshold.")
-			return
-		level_gate_tested = true
-		break
-	if not level_gate_tested:
-		_fail("No isolated source minimum-level gate could be exercised.")
+	# Isolate the level-gate predicate itself; the real source quest 6126 has
+	# additional gates and must not be assigned invented profession assumptions.
+	var level_gate_fixture := {
+		"min_level": 10,
+		"max_level": 0,
+		"profession_ids": [],
+		"sex": 0,
+		"prerequisite_ids": []
+	}
+	if not index._is_quest_available(level_gate_fixture, 10, 0, 0, []):
+		_fail("Minimum-level gate rejected a character at the exact threshold.")
+		return
+	if index._is_quest_available(level_gate_fixture, 9, 0, 0, []):
+		_fail("Minimum-level gate accepted a character below the threshold.")
 		return
 	if not index.is_source_quest_available(650, 8, 10, 0, [608]):
 		_fail("Profession gate for source quest 650 was not accepted for profession 10.")
