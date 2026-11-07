@@ -17,12 +17,52 @@ const DESTINATIONS := {
 var current_destination_id := "twin_city"
 var travel_in_progress := false
 var travel_serial := 0
+var source_quest_graph := QuestRuntimeGraph.new()
 
 func _ready() -> void:
 	add_to_group("world_travel_manager")
+	source_quest_graph.load_graph()
+
+func get_source_city_hubs() -> Array[Dictionary]:
+	return source_quest_graph.get_city_hubs()
+
+func get_source_city_runtime_state(map_id: String) -> Dictionary:
+	var hub := source_quest_graph.get_city_hub(map_id)
+	if hub.is_empty():
+		return {}
+	var scene_path := "res://scenes/cities/City_%s.tscn" % map_id
+	var scene_available := ResourceLoader.exists(scene_path)
+	var is_main_city := map_id == "1002"
+	return {
+		"map_id": map_id,
+		"name_ar": str(hub.get("name_ar", "")),
+		"name_en": str(hub.get("name_en", "")),
+		"kind": str(hub.get("kind", "minor")),
+		"resource_path": str(hub.get("resource_path", "")),
+		"scene_path": scene_path,
+		"scene_available": scene_available,
+		"available": is_main_city or scene_available,
+		"status": "MAIN_CITY_ACTIVE" if is_main_city else ("CITY_SCENE_READY" if scene_available else "CITY_SOURCE_INDEXED_SCENE_PENDING"),
+	}
 
 func get_destinations() -> Dictionary:
-	return DESTINATIONS.duplicate(true)
+	var result := DESTINATIONS.duplicate(true)
+	for hub in source_quest_graph.get_city_hubs():
+		var map_id := str(hub.get("map_id", ""))
+		var state := get_source_city_runtime_state(map_id)
+		if map_id.is_empty() or state.is_empty():
+			continue
+		var destination_id := "city_" + map_id
+		result[destination_id] = {
+			"name_ar": str(hub.get("name_ar", "")),
+			"name_en": str(hub.get("name_en", "")),
+			"description_ar": "المدينة الرئيسية" if map_id == "1002" else ("خريطة المدينة مرتبطة بالمصدر؛ مشهدها ثلاثي الأبعاد قيد الدمج" if not bool(state.get("available", false)) else "مدينة مرتبطة بمشهدها"),
+			"description_en": "Main city" if map_id == "1002" else ("Source city indexed; 3D scene integration pending" if not bool(state.get("available", false)) else "City scene available"),
+			"source_map_id": map_id,
+			"enabled": bool(state.get("available", false)),
+			"status": str(state.get("status", "")),
+		}
+	return result
 
 func get_source_city_hubs() -> Array[Dictionary]:
 	var graph := QuestRuntimeGraph.new()
@@ -46,6 +86,16 @@ func get_current_destination_id() -> String:
 	return current_destination_id
 
 func travel_to(destination_id: String, reason: String = "manual") -> bool:
+	if destination_id.begins_with("city_"):
+		var source_map_id := destination_id.trim_prefix("city_")
+		if source_map_id == "1002":
+			return travel_to("twin_city", reason)
+		var city_state := get_source_city_runtime_state(source_map_id)
+		if city_state.is_empty() or not bool(city_state.get("available", false)):
+			_notify("هذه المدينة موجودة في سجل العالم، لكن مشهدها ثلاثي الأبعاد لم يُدمج بعد." if GameManager.current_language == "ar" else "This city is indexed in the world source, but its 3D scene is not integrated yet.", true)
+			return false
+		_notify("مشهد المدينة يحتاج إلى مهيئ الانتقال الخاص به." if GameManager.current_language == "ar" else "This city requires its dedicated scene transition handler.", true)
+		return false
 	if travel_in_progress:
 		return false
 	var game_manager := _get_game_manager()
