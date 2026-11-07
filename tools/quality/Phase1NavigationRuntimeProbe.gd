@@ -3,6 +3,7 @@ extends SceneTree
 const WORLD_SCENE_PATH := "res://scenes/world/JianghaiOldCity.tscn"
 const PLAYER_SCENE_PATH := "res://scenes/characters/Player.tscn"
 const REPORT_PATH := "reports/phase1_navigation_runtime_probe.json"
+const WORLD_INTERACTION_REGISTRY_SCRIPT := preload("res://scripts/world/WorldInteractionRegistry.gd")
 const START_POSITION := Vector3(0.0, -0.14, -60.0)
 const TARGET_POSITION := Vector3(-9.5, -0.14, -34.5)
 const MAX_TEST_FRAMES := 1200
@@ -74,6 +75,11 @@ func _run() -> void:
 	var expected_cell_height := float(ProjectSettings.get_setting("navigation/3d/default_cell_height", 0.25))
 	var map_region_count := NavigationServer3D.map_get_regions(navigation_map).size()
 	var projected_target := NavigationServer3D.map_get_closest_point(navigation_map, TARGET_POSITION)
+	var authored_city := world.get_node_or_null("AuthoredCity") as Node3D
+	var interaction_registry = WORLD_INTERACTION_REGISTRY_SCRIPT.new()
+	var interaction_registry_bound := authored_city != null and interaction_registry.bind_world(authored_city)
+	var bridge_landmark_route: Dictionary = interaction_registry.get_navigation_path("jianghai.market_bridge", START_POSITION, navigation_map) if interaction_registry_bound else {"ok": false, "reason": "registry_bind_failed"}
+	var bridge_landmark_rejected := not bool(bridge_landmark_route.get("ok", false)) and str(bridge_landmark_route.get("reason", "")) == "anchor_is_landmark_not_navigation_target"
 
 	# Verify that the runtime NavigationAgent can resolve the two long city routes,
 	# not merely that the bake-time NavigationServer query found connected paths.
@@ -220,6 +226,9 @@ func _run() -> void:
 		"navigation_map_valid": navigation_map.is_valid(),
 		"navigation_map_region_count": map_region_count,
 		"navigation_map_cell_height": map_cell_height,
+		"interaction_registry_bound": interaction_registry_bound,
+		"bridge_landmark_route_rejected": bridge_landmark_rejected,
+		"bridge_landmark_route_result": bridge_landmark_route,
 		"project_default_cell_height": expected_cell_height,
 		"navigation_cell_height_matches": is_equal_approx(map_cell_height, expected_cell_height),
 		"path_waypoint_count": path_waypoint_count,
@@ -278,6 +287,9 @@ func _run() -> void:
 	if map_region_count < 1:
 		_fail("Runtime navigation map contains no registered regions.")
 		return
+	if not interaction_registry_bound or not bridge_landmark_rejected:
+		_fail("Market bridge landmark was incorrectly exposed as a navigation destination: " + JSON.stringify(bridge_landmark_route))
+		return
 	if not is_equal_approx(map_cell_height, expected_cell_height):
 		_fail("Runtime navigation map cell height does not match project settings.")
 		return
@@ -291,7 +303,7 @@ func _run() -> void:
 		_fail("Player did not physically reach every tested city landmark: " + JSON.stringify(runtime_route_movement_checks))
 		return
 	if not bridge_cross_passed:
-		_fail("Player could not physically cross the market bridge from west ramp to east ramp: " + JSON.stringify({
+		_fail("Player could not physically cross the authored market bridge deck (ramps are excluded): " + JSON.stringify({
 			"path_waypoint_count": bridge_cross_path.size(),
 			"start_projection_distance": bridge_cross_start_projection_distance,
 			"target_projection_distance": bridge_cross_target_projection_distance,
