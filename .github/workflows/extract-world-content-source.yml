@@ -37,6 +37,27 @@ jobs:
           python3 -m json.tool data/world_content_index.json > /dev/null
           python3 tools/gameplay_source_audit/validate_runtime_world_index.py data/world_content_index.json
           python3 -m json.tool reports/world-content-index-validation.json > /dev/null
+      - name: Setup Godot 4.3 for runtime index validation
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.3.0
+          use-dotnet: false
+          include-templates: false
+      - name: Import project and validate live Godot world index
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          godot --headless --editor --path . --quit 2>&1 | tee ci-logs/import.log
+          if grep -Eq "SCRIPT ERROR:|Parse Error:|Compile Error:|ERROR: Failed to load script|ERROR: Failed to create an autoload" ci-logs/import.log; then
+            echo "Godot import reported a script or autoload error."
+            exit 1
+          fi
+          godot --headless --path . --script tools/resource_packs/validate_world_content_index.gd --quit-after 5 2>&1 | tee ci-logs/world-index.log
+          grep -q "RUNTIME WORLD CONTENT INDEX AUDIT PASSED" ci-logs/world-index.log
+          if grep -Eq "SCRIPT ERROR:|Parse Error:|Compile Error:|RUNTIME WORLD CONTENT INDEX AUDIT FAILED" ci-logs/world-index.log; then
+            echo "Runtime world index failed its Godot audit."
+            exit 1
+          fi
       - name: Commit generated runtime index to this feature branch
         run: |
           set -euo pipefail
@@ -58,5 +79,6 @@ jobs:
             data/world_content_index.json
             reports/world-content-source-subset.json
             reports/world-content-index-validation.json
+            ci-logs/
           if-no-files-found: error
           retention-days: 30
