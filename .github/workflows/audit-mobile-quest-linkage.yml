@@ -76,6 +76,14 @@ jobs:
           python3 tools/gameplay_source_audit/mobile_apk_reader_probe.py \
             build/source/extracted-assets-001.zip \
             --output reports/mobile-apk-reader-probe.json
+      - name: Parse the readable 2,510-record mission catalogue and cross-file references
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tools/gameplay_source_audit/parse_mobile_quest_catalog.py
+          python3 tools/gameplay_source_audit/parse_mobile_quest_catalog.py \
+            build/mobile-quest-source/selected \
+            --output reports/mobile-quest-catalog.json
+          python3 -m json.tool reports/mobile-quest-catalog.json > /dev/null
       - name: Build source-to-world cross-reference evidence pack
         run: |
           python3 - <<'PY'
