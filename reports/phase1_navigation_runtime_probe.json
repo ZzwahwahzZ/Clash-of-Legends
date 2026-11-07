@@ -1,4 +1,5 @@
 {
+  "collision_probe_passed": true,
   "factory_adjacent_wall_blocks": true,
   "factory_doorway_clear": true,
   "final_floor_contact": true,
@@ -11,6 +12,8 @@
   "horizontal_displacement": 26.5373611450195,
   "horizontal_distance_to_projected_target": 0.203686788678169,
   "initial_floor_contact": true,
+  "market_bridge_guardrail_blocks": true,
+  "market_bridge_guardrail_hit_collider": "MarketBridgeRailCollision",
   "navigation_cell_height_matches": true,
   "navigation_map_cell_height": 0.100000001490116,
   "navigation_map_region_count": 1,
@@ -85,16 +88,16 @@
     {
       "floor_contact": true,
       "frames_used": 142,
-      "horizontal_displacement": 15.2750329971313,
-      "horizontal_distance_to_target": 1.4151017665863,
+      "horizontal_displacement": 15.2749652862549,
+      "horizontal_distance_to_target": 1.41516959667206,
       "route": "medicine_frontage",
       "target_reached": true
     },
     {
       "floor_contact": true,
       "frames_used": 475,
-      "horizontal_displacement": 51.3325042724609,
-      "horizontal_distance_to_target": 1.44042277336121,
+      "horizontal_displacement": 51.3327713012695,
+      "horizontal_distance_to_target": 1.44015836715698,
       "route": "tea_frontage",
       "target_reached": true
     }

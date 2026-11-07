@@ -1,0 +1,26 @@
+Chinese district preview and main-game integration	PASS	0
+Chinese district preview image	PASS	0
+City top-down layout image	PASS	0
+Chinese district close-up image	PASS	0
+Chinese district gate detail image	PASS	0
+Market bridge detail image	PASS	0
+Main-game gate integration image	PASS	0
+Main-game bridge integration image	PASS	0
+Main-game street integration image	PASS	0
+Full city visual preview	PASS	0
+Full city preview image	PASS	0
+Full city close-up image	PASS	0
+Urban infill visual and bounds audit	PASS	0
+Urban infill top-down image	PASS	0
+Urban infill oblique image	PASS	0
+Urban infill bounds report	PASS	0
+World structure and authored geometry audit	PASS	0
+World structure JSON report	PASS	0
+Navigation bake and saved-scene collision audit	PASS	0
+Navigation bake JSON report	PASS	0
+Saved runtime world scene	PASS	0
+Saved navigation mesh	PASS	0
+Physical movement, route, doorway, wall and bridge collision suite	PASS	0
+Runtime movement and collision JSON report	PASS	0
+Anchor surface and landmark audit	PASS	0
+Anchor surface candidate report	PASS	0

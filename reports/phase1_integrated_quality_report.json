@@ -1,0 +1,150 @@
+{
+  "suite": "Phase 1 integrated city/world quality gate",
+  "checks_total": 27,
+  "checks_passed": 27,
+  "checks_failed": 0,
+  "overall": "PASS",
+  "results": [
+    {
+      "check": "Chinese district preview and main-game integration",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "Chinese district preview image",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "City top-down layout image",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "Chinese district close-up image",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "Chinese district gate detail image",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "Market bridge detail image",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "Main-game gate integration image",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "Main-game bridge integration image",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "Main-game street integration image",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "Full city visual preview",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "Full city preview image",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "Full city close-up image",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "Urban infill visual and bounds audit",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "Urban infill top-down image",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "Urban infill oblique image",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "Urban infill bounds report",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "World structure and authored geometry audit",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "World structure JSON report",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "Navigation bake and saved-scene collision audit",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "Navigation bake JSON report",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "Saved runtime world scene",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "Saved navigation mesh",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "Physical movement, route, doorway, wall and bridge collision suite",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "Runtime movement and collision JSON report",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "Anchor surface and landmark audit",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "Anchor surface candidate report",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "Godot import status",
+      "status": "PASS",
+      "details": {
+        "exit_code": 0,
+        "error_markers_found": false,
+        "passed": true
+      }
+    }
+  ],
+  "npc_spawning_enabled": false,
+  "android_device_performance_validated": false
+}
