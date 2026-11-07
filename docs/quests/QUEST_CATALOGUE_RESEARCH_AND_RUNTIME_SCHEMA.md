@@ -164,6 +164,7 @@ Still to enumerate and verify against the pinned client:
 - Every generated Bounty Hall template/record, not just the five published objective families.
 - Other daily/weekly/repeatable activities and quest-like trials; confirm whether they are classified as quests or standalone activities in the pinned UI.
 - All map/zone quests, boss quests, class-specific quests beyond the three Epic families and Trojan Inspiring Quest, rebirth quests, sub-class tasks, house/equipment bonus questlines, tutorial/newcomer tasks and seasonal events.
+- **Priority class progression:** the owner's primary Archer questline, including Archer starter/tutorial progression and the level-40 promotion/unlock to the reversible Oriental Assassin form. Track its Bow/Throwing Knife equipment, Path of Shadow, separate skill sets, promotion dialogue, prerequisites and rewards in [ARCHER_ORIENTAL_ASSASSIN_PROGRESSION_CONTRACT.md](ARCHER_ORIENTAL_ASSASSIN_PROGRESSION_CONTRACT.md). The Mobile skill guide verifies the form mechanics; the full Mobile promotion quest and IDs remain unresolved. PC promotion pages are comparison-only.
 - Historical and current Mobile event guides must be searched by date and checked for expiration/revision.
 - Official guides can omit exact target IDs, monster spawn lists, dialogue scripts and some rewards. These must be sourced from the pinned client or corroborated runtime evidence before being admitted.
 
