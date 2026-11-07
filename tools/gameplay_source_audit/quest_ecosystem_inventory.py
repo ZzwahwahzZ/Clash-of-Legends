@@ -105,15 +105,40 @@ def parse_ascii_ids(data: bytes) -> dict:
     }
 
 
-def is_interesting(path: str) -> bool:
-    low = path.lower()
+DISCOVERY_DIRS = (
+    "/ini/luacfg/", "/script/", "/data/client_realm_task/",
+    "/data/quest/", "/data/task/",
+)
+QUEST_CONTENT_MARKERS = (
+    b"MainTask", b"TaskID", b"NpcID", b"ReachNpcID", b"MapID",
+    b"GoalPos", b"IntentionCount", b"TaskReward", b"taskitem",
+    b"clienttask", b"juqing",
+)
+
+
+def path_discovery_reason(path: str) -> str | None:
+    low = path.lower().replace("\\\\", "/")
     if not low.startswith(ROOT.lower()):
-        return False
+        return None
     base = low.rsplit("/", 1)[-1]
-    if any(token in low for token in TOKENS):
+    if any(token in low for token in TOKENS) or re.fullmatch(r"(clienttask\\d+|juqing\\d+)\\.dat", base):
+        return "PATH_KEYWORD"
+    if Path(low).suffix.lower() in (".dat", ".lua", ".txt", ".ini") and any(
+        directory in low for directory in DISCOVERY_DIRS
+    ):
+        return "CONTENT_SIGNATURE_CHECK_REQUIRED"
+    return None
+
+
+def is_interesting(path: str, data: bytes | None = None) -> bool:
+    reason = path_discovery_reason(path)
+    if reason == "PATH_KEYWORD":
         return True
-    # Known Lua quest data conventions, even when the parent folder is generic.
-    return bool(re.fullmatch(r"(clienttask\d+|juqing\d+)\.dat", base))
+    if reason != "CONTENT_SIGNATURE_CHECK_REQUIRED" or data is None:
+        return False
+    sample = data[:2 * 1024 * 1024].lower()
+    # This is a discovery signature only; it does not establish a decoded schema.
+    return any(marker.lower() in sample for marker in QUEST_CONTENT_MARKERS)
 
 
 def inspect_apk(apk_bytes_path: Path, apk_member: str, out_dir: Path) -> list[dict]:
@@ -122,15 +147,15 @@ def inspect_apk(apk_bytes_path: Path, apk_member: str, out_dir: Path) -> list[di
         for info in apk.infolist():
             if info.is_dir():
                 continue
+            discovery_reason = path_discovery_reason(info.filename)
+            if discovery_reason is None:
+                continue
             raw = apk.read(info)
             if not is_interesting(info.filename, raw):
                 continue
+            if discovery_reason == "CONTENT_SIGNATURE_CHECK_REQUIRED":
+                discovery_reason = "CONTENT_SIGNATURE_IN_MOBILE_SCRIPT_CONFIG_DIRECTORY"
             rel = info.filename[len(ROOT):] if info.filename.startswith(ROOT) else info.filename
-            low_path = info.filename.lower()
-            discovery_reason = (
-                "PATH_KEYWORD" if any(token in low_path for token in TOKENS)
-                else "CONTENT_SIGNATURE_IN_MOBILE_SCRIPT_CONFIG_DIRECTORY"
-            )
             row = {
                 "discovery_reason": discovery_reason,
                 "apk_member": apk_member + "!" + info.filename,
