@@ -67,6 +67,15 @@ Immediate next route audit:
 5. Inspect the land on both sides of roads independently for documented hunting, quest, hidden-character, cave, or resource functions.
 6. Do not enable NPCs, quests, or enemies based on visual guesswork.
 
+
+## Source-identity gate (Jianghai)
+
+The current Jianghai district README identifies the scene as a project-authored 1990s Lingnan river-industrial city composition for Operation Steel Tide, with Godot gameplay collision, navigation, loot, spawning, doors, and mission state authored separately. Its source provenance points to that separate project, not to the pinned Conquer Online Mobile client/map. Therefore this scene is valid evidence for its own geometry and authored building layout only; it is not canonical evidence for Conquer map topology, named destinations, monster fields, hidden characters, or quest placement.
+
+Before using any scene as gameplay-semantic authority, record its identity and provenance and match it to the pinned Conquer Mobile reference. If it is a visual environment adaptation or unrelated authored scene, use it only for visual/physical construction. Do not derive Conquer routes, map zones, NPC roles, or activities from its appearance. Canonical map evidence must come from the pinned client, verified map resources, or matching official mobile documentation/screenshots.
+
+For Jianghai specifically, current evidence is insufficient to certify the western coastal route, western shops/residences as Conquer destinations, or any roadside combat/quest parcels. Those remain unclassified pending canonical reference matching. Physical collision and scene topology may still be audited as construction issues, but no gameplay route acceptance test may target an unverified destination.
+
 ## Acceptance principle
 
 A route passes only when it is physically possible, collision-safe, navigationally connected, and semantically correct for the documented gameplay destination. All four conditions matter. A landmark remains observational unless a specific task explicitly assigns it an interaction.
