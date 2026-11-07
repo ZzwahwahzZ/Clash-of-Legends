@@ -56,13 +56,18 @@ jobs:
           whorf=next(x for x in mn["5455"] if x["npc_type_name"] == "Whorf")
           assert whorf["simple_object_id"] == "186"
           assert all(x["simple_object_id"] in ("214","8") for x in mn["5456"] if x["npc_type_name"] in ("David","Jack"))
+          exports=Path("reports/quest_exports")
+          manifest=json.loads((exports/"manifest.json").read_text(encoding="utf-8"))
+          assert len(manifest["exports"]) == 9
+          assert sum(1 for _ in (exports/"mission_npc_map_links.csv").open(encoding="utf-8-sig")) == 4919
+          assert sum(1 for _ in (exports/"mission_catalog.csv").open(encoding="utf-8-sig")) == 2510
           print("Quest-system analysis acceptance checks passed")
           PY
       - name: Upload rebuilt quest-system report
         uses: actions/upload-artifact@v4
         with:
           name: Mobile-Quest-System-Analysis-v2
-          path: reports/mobile-quest-system-analysis.json
+          path: |\n            reports/mobile-quest-system-analysis.json\n            reports/quest_exports/
           if-no-files-found: error
           retention-days: 30
           compression-level: 6
