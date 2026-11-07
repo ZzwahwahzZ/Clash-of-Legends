@@ -29,6 +29,8 @@ var dialogue_lines_en: Array[String] = [
 
 func _ready() -> void:
 	add_to_group("npcs")
+	if not source_npc_id.is_empty():
+		add_to_group("source_quest_npcs")
 	_update_title()
 	if interaction_area:
 		interaction_area.body_entered.connect(_on_interaction_area_entered)
@@ -89,14 +91,14 @@ func _open_source_quest_dialogue(player: CharacterBody3D) -> bool:
 		var offers: Array = agent.get_source_missions_for_npc_interaction(source_npc_id, player.current_level, class_id, source_map_id)
 		if offers.is_empty():
 			continue
-		if not _source_quest_callback.is_null() and dlg.source_quest_selected.is_connected(_source_quest_callback):
-			dlg.source_quest_selected.disconnect(_source_quest_callback)
+		if not _source_quest_callback.is_null() and dlg.is_connected("source_quest_selected", _source_quest_callback):
+			dlg.disconnect("source_quest_selected", _source_quest_callback)
 		_source_quest_agent = agent
 		_source_quest_callback = Callable(self, "_on_source_quest_selected").bind(agent, source_npc_id, player)
 		if not dlg.source_quest_selected.is_connected(_source_quest_callback):
-			dlg.source_quest_selected.connect(_source_quest_callback)
+			dlg.connect("source_quest_selected", _source_quest_callback)
 		var intro := "المهام المتاحة هنا مرتبطة بسجلات العالم ومتطلبات شخصيتك." if GameManager.current_language == "ar" else "Available quests are checked against the world source and your character requirements."
-		dlg.show_source_quest_offers(npc_name_ar if GameManager.current_language == "ar" else npc_name_en, intro, offers, str(agent.active_source_mission_id), "blacksmith" if role == "blacksmith" else "")
+		dlg.show_source_quest_offers(npc_name_ar if GameManager.current_language == "ar" else npc_name_en, intro, offers, str(agent.get("active_source_mission_id")), "blacksmith" if role == "blacksmith" else "")
 		return true
 	return false
 
@@ -118,7 +120,8 @@ func _on_source_quest_selected(mission_id: String, agent: Node, selected_npc_id:
 			GameManager.post_notification("المهمة غير متاحة بعد أو لم يكتمل هدفها." if GameManager.current_language == "ar" else "This quest is locked or its objectives are not complete.", true)
 		return
 	var mission: Dictionary = agent.call("get_source_mission", mission_id)
-	var is_completed := agent.completed_source_mission_ids.has(mission_id)
+	var completed_ids: Array = agent.get("completed_source_mission_ids")
+	var is_completed := completed_ids.has(mission_id)
 	var message := str(mission.get("content_ar", mission.get("intention_description_ar", mission.get("name_ar", "تم تحديث المهمة."))))
 	if is_completed:
 		message = "تم تسليم المهمة: " + str(mission.get("name_ar", mission_id))
