@@ -25,9 +25,9 @@ jobs:
           set -euo pipefail
           mkdir -p build/source reports
           curl --fail --location --retry 5 --retry-all-errors \
-            "https://github.com/ZzwahwahzZ/Conquer-Mobile-Assets./releases/download/mobile-extracted-assets/extracted-assets-001.zip" \
-            -o build/source/extracted-assets-001.zip
-          echo "0d21a110c09b762ed5f1a5f4da022857b0534e489eb85052d15da460cb229d2a  build/source/extracted-assets-001.zip" | sha256sum -c -
+            "https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/untagged-4406b3bcf98aaafd485f/ConquerOnline.zip" \
+            -o build/source/ConquerOnline.zip
+          echo "b1c6958109a07c237631943fc0442d3161563d89e1020b143d95437ba9a6fdb0  build/source/ConquerOnline.zip" | sha256sum -c -
       - name: Install analyzer and run decoder tests
         run: |
           python3 -m venv .venv
@@ -40,33 +40,33 @@ jobs:
       - name: Recursively inventory every archive member by content
         run: |
           .venv/bin/python tools/gameplay_source_audit/comprehensive_asset_inventory.py \
-            build/source/extracted-assets-001.zip \
+            build/source/ConquerOnline.zip \
             --output reports/comprehensive-asset-inventory.json \
             --polyfile-report reports/polyfile-mobile.sbud.json
           .venv/bin/python -m json.tool reports/comprehensive-asset-inventory.json > /dev/null
       - name: Inventory and parse safe source fields
         run: |
           .venv/bin/python tools/gameplay_source_audit/audit_source_tables.py \
-            build/source/extracted-assets-001.zip \
+            build/source/ConquerOnline.zip \
             --output reports/gameplay-source-table-audit.json
           .venv/bin/python -m json.tool reports/gameplay-source-table-audit.json > /dev/null
       - name: Decode and classify the version-matched quest DAT candidates
         run: |
           .venv/bin/python tools/gameplay_source_audit/mobile_quest_source_decoder.py \
-            build/source/extracted-assets-001.zip \
+            build/source/ConquerOnline.zip \
             --output reports/mobile-quest-source-audit.json \
             --decoded-dir build/mobile_quest_candidates
           .venv/bin/python -m json.tool reports/mobile-quest-source-audit.json > /dev/null
       - name: Probe exact Mobile APK DEX and native resource-reader hints
         run: |
           .venv/bin/python tools/gameplay_source_audit/mobile_apk_reader_probe.py \
-            build/source/extracted-assets-001.zip \
+            build/source/ConquerOnline.zip \
             --output reports/mobile-apk-reader-probe.json
           .venv/bin/python -m json.tool reports/mobile-apk-reader-probe.json > /dev/null
       - name: Inventory quest, NPC, map, item, reward and dialogue source candidates
         run: |
           .venv/bin/python tools/gameplay_source_audit/quest_ecosystem_inventory.py \
-            build/source/extracted-assets-001.zip \
+            build/source/ConquerOnline.zip \
             --output reports/quest-ecosystem-inventory.json \
             --output-dir build/quest-ecosystem
           .venv/bin/python -m json.tool reports/quest-ecosystem-inventory.json > /dev/null
@@ -103,7 +103,7 @@ jobs:
               if not p.is_file():
                   return None
               return json.loads(p.read_text(encoding="utf-8"))
-          source=Path("build/source/extracted-assets-001.zip")
+          source=Path("build/source/ConquerOnline.zip")
           gameplay=load("reports/gameplay-source-table-audit.json")
           reader=load("reports/mobile-apk-reader-probe.json")
           quest=load("reports/quest-ecosystem-inventory.json")
