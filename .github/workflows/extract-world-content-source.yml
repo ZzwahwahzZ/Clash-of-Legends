@@ -7,6 +7,12 @@ on:
       - "tools/gameplay_source_audit/extract_world_content_sources.py"
       - "tools/gameplay_source_audit/build_runtime_world_index.py"
       - "tools/gameplay_source_audit/validate_runtime_world_index.py"
+      - "scripts/world/WorldContentIndex.gd"
+      - "scripts/world/WorldTravelManager.gd"
+      - "scripts/automation/QuestNavigationAgent.gd"
+      - "scripts/progression/ClassProgressionManager.gd"
+      - "tools/resource_packs/validate_world_content_index.gd"
+      - "project.godot"
 permissions:
   contents: write
 concurrency:
