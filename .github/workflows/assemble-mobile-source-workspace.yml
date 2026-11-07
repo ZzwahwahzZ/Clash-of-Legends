@@ -1,0 +1,106 @@
+name: Assemble mobile source workspace (no re-scan)
+on:
+  push:
+    paths:
+      - ".github/workflows/assemble-mobile-source-workspace.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: mobile-source-workspace-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  assemble:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create one canonical workspace layout
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p mobile-source-workspace/{01_ARCHIVES,02_INVENTORY,03_EXISTING_REPORTS,04_QUEST_CANDIDATES,05_CURRENT_RUN}
+          cat > mobile-source-workspace/README.md <<'EOF'
+          # Mobile source workspace
+          
+          This is the single working root for source archives, the historical index, prior reports, quest candidates, and the next audit output.
+          
+          - `01_ARCHIVES/`: exact source ZIPs with SHA-256 verification.
+          - `02_INVENTORY/`: existing 13,494-row resource-source index.
+          - `03_EXISTING_REPORTS/`: prior archive/gameplay/map/TPI reports.
+          - `04_QUEST_CANDIDATES/`: previous exploratory quest and task-item decodes.
+          - `05_CURRENT_RUN/`: reserved for the next validated results.
+          
+          The two archives are separate sources. The historical index was generated from `extracted-assets-001.zip`; `ConquerOnline.zip` is a distinct upload. Do not merge their provenance or assume identical contents.
+          
+          This workflow only assembles existing material. It does not rerun inventory, decode, modify game files, or merge any pull request.
+          EOF
+      - name: Download both exact source archives into the same folder
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 5 --retry-all-errors \
+            "https://github.com/ZzwahwahzZ/Conquer-Mobile-Assets./releases/download/mobile-extracted-assets/extracted-assets-001.zip" \
+            -o mobile-source-workspace/01_ARCHIVES/extracted-assets-001.zip
+          echo "0d21a110c09b762ed5f1a5f4da022857b0534e489eb85052d15da460cb229d2a  mobile-source-workspace/01_ARCHIVES/extracted-assets-001.zip" | sha256sum -c -
+          curl --fail --location --retry 5 --retry-all-errors \
+            "https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/untagged-4406b3bcf98aaafd485f/ConquerOnline.zip" \
+            -o mobile-source-workspace/01_ARCHIVES/ConquerOnline.zip
+          echo "b1c6958109a07c237631943fc0442d3161563d89e1020b143d95437ba9a6fdb0  mobile-source-workspace/01_ARCHIVES/ConquerOnline.zip" | sha256sum -c -
+      - name: Restore the existing source index and prior audit results
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/ZzwahwahzZ/Clash-of-Legends/actions/artifacts/13397844417/zip" \
+            -o /tmp/previous-source-audit.zip
+          mkdir -p /tmp/previous-source-audit
+          unzip -q /tmp/previous-source-audit.zip -d /tmp/previous-source-audit
+          cp /tmp/previous-source-audit/reports/resource-source-index.csv mobile-source-workspace/02_INVENTORY/
+          for f in source-archive-extension-audit.json gameplay-data-source-probe.json gameplay-readable-catalog-report.json map-audit.json tpi-extraction-audit.json source-format-samples.txt; do
+            cp "/tmp/previous-source-audit/reports/$f" mobile-source-workspace/03_EXISTING_REPORTS/
+          done
+          cp /tmp/previous-source-audit/build/gameplay_decode_candidates/quest_definitions_questinfo_seed_9527.txt mobile-source-workspace/04_QUEST_CANDIDATES/
+          cp /tmp/previous-source-audit/build/gameplay_decode_candidates/quest_item_requirements_taskitem_info_seed_9527.txt mobile-source-workspace/04_QUEST_CANDIDATES/
+      - name: Write verified workspace manifest
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import csv, hashlib, json
+          from pathlib import Path
+          root=Path("mobile-source-workspace")
+          index=root/"02_INVENTORY/resource-source-index.csv"
+          with index.open(encoding="utf-8-sig",newline="") as f:
+              rows=list(csv.DictReader(f))
+          from collections import Counter
+          counts=Counter(r["category"] for r in rows)
+          archives={}
+          for p in sorted((root/"01_ARCHIVES").glob("*.zip")):
+              h=hashlib.sha256()
+              with p.open("rb") as f:
+                  for block in iter(lambda:f.read(1024*1024),b""):
+                      h.update(block)
+              archives[p.name]={"size_bytes":p.stat().st_size,"sha256":h.hexdigest()}
+          manifest={
+              "workspace":"mobile-source-workspace",
+              "historical_index":{"file":"02_INVENTORY/resource-source-index.csv","rows":len(rows),"sha256":hashlib.sha256(index.read_bytes()).hexdigest(),"category_counts":dict(sorted(counts.items()))},
+              "archives":archives,
+              "provenance_note":"The historical index is from extracted-assets-001.zip. ConquerOnline.zip is separate; compare member lists before treating as equivalent.",
+              "candidate_decode_note":"Quest candidate files used research seed 9527 and are not authoritative until the exact mobile reader/decryption path is validated."
+          }
+          (root/"workspace-manifest.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+          print(json.dumps(manifest,ensure_ascii=False,indent=2))
+          PY
+      - name: Upload the consolidated workspace as one downloadable artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mobile-Source-Workspace
+          path: mobile-source-workspace/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
