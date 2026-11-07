@@ -215,6 +215,48 @@ func _run() -> void:
 	var bridge_cross_next_path_position: Vector3 = navigation_agent.get_next_path_position()
 	var bridge_cross_passed := bridge_cross_path.size() >= 2 and bridge_cross_start_projection_distance <= 2.0 and bridge_cross_target_projection_distance <= 2.0 and bridge_cross_distance <= 1.5 and bridge_cross_floor_contact
 
+	# The West Market frontage candidate is taken from the authored RiverWardStreet
+	# bounds and placed outside the WestMarketRow01 building footprint. This is a
+	# diagnostic road-surface candidate, not an approved interaction anchor. A
+	# nearest-point projection alone is never accepted as route connectivity.
+	var west_market_candidate_requested := Vector3(-35.0, -0.14, -164.0)
+	var west_market_candidate_projected := NavigationServer3D.map_get_closest_point(navigation_map, west_market_candidate_requested)
+	var west_market_projection_distance := west_market_candidate_projected.distance_to(west_market_candidate_requested)
+	var west_market_route_path := NavigationServer3D.map_get_path(navigation_map, bridge_cross_target, west_market_candidate_projected, true, 1)
+	var west_market_route_connected := west_market_projection_distance <= 2.0 and west_market_route_path.size() >= 2
+	var west_market_movement := {
+		"attempted": false,
+		"reached": false,
+		"floor_contact": false,
+		"frames_used": 0,
+		"final_position": _vec(bridge_cross_target),
+		"distance_to_candidate": -1.0
+	}
+	if west_market_route_connected:
+		player.call("clear_movement_target")
+		player.velocity = Vector3.ZERO
+		player.global_position = bridge_cross_target
+		for _reset_frame in range(8):
+			await physics_frame
+		player.call("move_towards_target_position", west_market_candidate_projected, 1.0 / 60.0)
+		var west_frames := 0
+		for west_frame in range(2400):
+			await physics_frame
+			west_frames = west_frame + 1
+			var west_distance := Vector2(player.global_position.x - west_market_candidate_projected.x, player.global_position.z - west_market_candidate_projected.z).length()
+			if west_distance <= 1.5 or not bool(player.get("is_moving_to_target")):
+				break
+		var west_final: Vector3 = player.global_position
+		var west_final_distance := Vector2(west_final.x - west_market_candidate_projected.x, west_final.z - west_market_candidate_projected.z).length()
+		west_market_movement = {
+			"attempted": true,
+			"reached": west_final_distance <= 1.5,
+			"floor_contact": player.is_on_floor(),
+			"frames_used": west_frames,
+			"final_position": _vec(west_final),
+			"distance_to_candidate": west_final_distance
+		}
+
 	var report := {
 		"world_scene_loaded": true,
 		"pawnshop_doorway_clear": pawnshop_doorway_clear,
@@ -231,7 +273,19 @@ func _run() -> void:
 		"interaction_registry_bound": interaction_registry_bound,
 		"bridge_landmark_route_rejected": bridge_landmark_rejected,
 		"bridge_landmark_route_result": bridge_landmark_route,
-		"west_market_route_status": "NOT_TESTED_NO_VERIFIED_WALKABLE_ENTRY_ANCHOR",
+		"west_market_route_status": "CONNECTED_DIAGNOSTIC_CANDIDATE" if west_market_route_connected else "NO_CONTINUOUS_ROUTE_TO_VERIFIED_RIVER_WARD_STREET_CANDIDATE",
+		"west_market_route_candidate": {
+			"surface_source": "AuthoredStreetNetwork/RiverWardStreet",
+			"outside_building_footprint": "WestMarketRow01",
+			"requested_position": _vec(west_market_candidate_requested),
+			"projected_position": _vec(west_market_candidate_projected),
+			"projection_distance": west_market_projection_distance,
+			"path_waypoint_count": west_market_route_path.size(),
+			"path_length": _path_length(west_market_route_path),
+			"connected": west_market_route_connected,
+			"physical_movement": west_market_movement,
+			"approved_interaction_anchor": false
+		},
 		"project_default_cell_height": expected_cell_height,
 		"navigation_cell_height_matches": is_equal_approx(map_cell_height, expected_cell_height),
 		"path_waypoint_count": path_waypoint_count,
