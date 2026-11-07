@@ -171,7 +171,38 @@ def main():
         "status": "MAP_RESOURCE_INDEXED" if row.get("gamemap_resource") else "MAP_RESOURCE_MISSING_FROM_INDEX",
     } for row in world_map_names]
     npc_placements = world_links.get("npc_placements", [])
-    dialogue_links = world_links.get("dialogue_linkage", {}).get("mission_dialogue_links", [])
+    npc_refs_by_mission = {}
+    for npc_ref in world_links.get("npc_references", []):
+        if npc_ref.get("status") != "NPC_REFERENCE" or not npc_ref.get("npc_id"):
+            continue
+        npc_refs_by_mission.setdefault(str(npc_ref.get("mission_id", "")), []).append(npc_ref)
+    dialogue_links = []
+    for raw_link in world_links.get("dialogue_linkage", {}).get("mission_dialogue_links", []):
+        link = dict(raw_link)
+        mission_id = str(link.get("mission_id", ""))
+        refs = npc_refs_by_mission.get(mission_id, [])
+        source_matches = []
+        for dialogue in link.get("dialogues", []):
+            for model in dialogue.get("model_references", []):
+                model_name = str(model.get("name", "")).strip().casefold()
+                if not model_name:
+                    continue
+                for npc_ref in refs:
+                    source_name = str(npc_ref.get("name", npc_ref.get("npc_name", ""))).strip().casefold()
+                    if source_name and source_name == model_name:
+                        match = {
+                            "npc_id": str(npc_ref.get("npc_id", "")),
+                            "map_id": str(npc_ref.get("map_id", "")),
+                            "source_name": str(npc_ref.get("name", npc_ref.get("npc_name", ""))),
+                            "npc_type_id": str(model.get("npc_type_id", "")),
+                            "dialogue_id": dialogue.get("dialogue_id"),
+                            "join_status": "EXACT_NAME_MATCH_CANDIDATE_NOT_IDENTITY_PROVEN",
+                        }
+                        if match not in source_matches:
+                            source_matches.append(match)
+        link["source_npc_matches"] = source_matches
+        link["npc_join_status"] = "EXACT_NAME_MATCH_CANDIDATE_NOT_IDENTITY_PROVEN" if source_matches else "MISSION_DIALOGUE_LINK_ONLY"
+        dialogue_links.append(link)
     city_definitions = {
         "1002": ("TwinCity", "مدينة التوأم", "main"),
         "1000": ("DesertCity", "مدينة الصحراء", "minor"),
