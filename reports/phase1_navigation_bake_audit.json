@@ -1,9 +1,9 @@
 {
   "agent_profile": {
-    "cell_height": 0.25,
+    "cell_height": 0.100000001490116,
     "cell_size": 0.25,
     "height": 1.79999995231628,
-    "max_climb": 0.449999988079071,
+    "max_climb": 0.400000005960464,
     "max_slope_degrees": 38,
     "radius": 0.5
   },
@@ -11,11 +11,11 @@
     {
       "id": "jianghai.central_avenue",
       "projected_position": [
-        0.0236301422119141,
-        0.255940347909927,
-        -59.9932823181152
+        -0.00464344024658,
+        0.095681831240654,
+        -60.0016250610352
       ],
-      "projection_distance": 0.396701723337173,
+      "projection_distance": 0.235733181238174,
       "projection_valid": true,
       "source_position": [
         0,
@@ -27,10 +27,10 @@
       "id": "jianghai.pawnshop_approach",
       "projected_position": [
         -86,
-        0.250004470348358,
+        0.150004476308823,
         -106
       ],
-      "projection_distance": 0.328004479408264,
+      "projection_distance": 0.228004485368729,
       "projection_valid": true,
       "source_position": [
         -86,
@@ -42,10 +42,10 @@
       "id": "jianghai.factory_approach",
       "projected_position": [
         86,
-        0.250004470348358,
+        0.150004476308823,
         -12
       ],
-      "projection_distance": 0.328004479408264,
+      "projection_distance": 0.228004485368729,
       "projection_valid": true,
       "source_position": [
         86,
@@ -57,10 +57,10 @@
       "id": "jianghai.market_bridge",
       "projected_position": [
         0,
-        4.75000429153442,
+        4.45000457763672,
         -126
       ],
-      "projection_distance": 0.570004463195801,
+      "projection_distance": 0.270004749298096,
       "projection_valid": true,
       "source_position": [
         0,
@@ -72,10 +72,10 @@
       "id": "jianghai.hotel_frontage",
       "projected_position": [
         -8.75,
-        0.347322106361389,
-        -34.4917411804199
+        0.106675952672958,
+        -34.5018577575684
       ],
-      "projection_distance": 0.894455671310425,
+      "projection_distance": 0.789526760578156,
       "projection_valid": true,
       "source_position": [
         -9.5,
@@ -87,10 +87,10 @@
       "id": "jianghai.medicine_frontage",
       "projected_position": [
         11.6000022888184,
-        0.500004470348358,
+        0.150004476308823,
         -47.9999771118164
       ],
-      "projection_distance": 0.545004487037659,
+      "projection_distance": 0.195004478096962,
       "projection_valid": true,
       "source_position": [
         11.6000003814697,
@@ -102,10 +102,10 @@
       "id": "jianghai.tea_frontage",
       "projected_position": [
         9,
-        0.250004470348358,
-        -8
+        0.05257573351264,
+        -8.00017547607422
       ],
-      "projection_distance": 0.634116291999817,
+      "projection_distance": 0.535803556442261,
       "projection_valid": true,
       "source_position": [
         9.5,
@@ -127,10 +127,10 @@
       "npc_id": "npc_jianghai_pawnshop",
       "projected_position": [
         -86,
-        0.250004470348358,
+        0.150004476308823,
         -101
       ],
-      "projection_distance": 0.328004479408264,
+      "projection_distance": 0.228004485368729,
       "projection_valid": true,
       "source_position": [
         -86,
@@ -142,11 +142,11 @@
       "collision_clearance_validated": false,
       "npc_id": "npc_jianghai_innkeeper",
       "projected_position": [
-        -8.67119598388672,
-        0.342620432376862,
-        -34.4918212890625
+        -8.66532135009766,
+        0.0941338762640953,
+        -34.5017585754395
       ],
-      "projection_distance": 0.483548372983932,
+      "projection_distance": 0.236694648861885,
       "projection_valid": true,
       "source_position": [
         -8.69999980926514,
@@ -159,10 +159,10 @@
       "npc_id": "npc_jianghai_apothecary",
       "projected_position": [
         12.9999990463257,
-        0.500004470348358,
+        0.150004476308823,
         -48.0000228881836
       ],
-      "projection_distance": 0.545004487037659,
+      "projection_distance": 0.195004478096962,
       "projection_valid": true,
       "source_position": [
         13,
@@ -174,11 +174,11 @@
       "collision_clearance_validated": false,
       "npc_id": "npc_jianghai_tea_merchant",
       "projected_position": [
-        8.69999980926514,
-        0.250004470348358,
-        -8
+        8.70000267028809,
+        0.05257573351264,
+        -8.00017547607422
       ],
-      "projection_distance": 0.390004456043243,
+      "projection_distance": 0.192575812339783,
       "projection_valid": true,
       "source_position": [
         8.69999980926514,
@@ -189,57 +189,57 @@
   ],
   "npc_spawning_enabled": false,
   "parsed_geometry_type": "MESH_INSTANCES",
-  "polygon_count": 72,
+  "polygon_count": 92,
   "projection_pass_count": 7,
   "route_connectivity": [
     {
       "connected": true,
       "from": "jianghai.central_avenue",
-      "path_length": 111.237913310528,
+      "path_length": 113.268183887005,
       "to": "jianghai.pawnshop_approach",
-      "waypoint_count": 11
-    },
-    {
-      "connected": true,
-      "from": "jianghai.central_avenue",
-      "path_length": 111.443691775203,
-      "to": "jianghai.factory_approach",
       "waypoint_count": 10
     },
     {
       "connected": true,
       "from": "jianghai.central_avenue",
-      "path_length": 66.6782790720463,
+      "path_length": 111.462965965271,
+      "to": "jianghai.factory_approach",
+      "waypoint_count": 14
+    },
+    {
+      "connected": true,
+      "from": "jianghai.central_avenue",
+      "path_length": 66.6840854883194,
       "to": "jianghai.market_bridge",
-      "waypoint_count": 8
-    },
-    {
-      "connected": true,
-      "from": "jianghai.central_avenue",
-      "path_length": 26.9687366485596,
-      "to": "jianghai.hotel_frontage",
-      "waypoint_count": 2
-    },
-    {
-      "connected": true,
-      "from": "jianghai.central_avenue",
-      "path_length": 16.6735601350665,
-      "to": "jianghai.medicine_frontage",
       "waypoint_count": 7
     },
     {
       "connected": true,
       "from": "jianghai.central_avenue",
-      "path_length": 52.7660870999098,
+      "path_length": 26.9686958342791,
+      "to": "jianghai.hotel_frontage",
+      "waypoint_count": 5
+    },
+    {
+      "connected": true,
+      "from": "jianghai.central_avenue",
+      "path_length": 16.7010465413332,
+      "to": "jianghai.medicine_frontage",
+      "waypoint_count": 8
+    },
+    {
+      "connected": true,
+      "from": "jianghai.central_avenue",
+      "path_length": 52.7827777042985,
       "to": "jianghai.tea_frontage",
-      "waypoint_count": 9
+      "waypoint_count": 16
     },
     {
       "connected": true,
       "from": "jianghai.pawnshop_approach",
-      "path_length": 222.681299686432,
+      "path_length": 224.028342425823,
       "to": "jianghai.factory_approach",
-      "waypoint_count": 19
+      "waypoint_count": 22
     }
   ],
   "route_connectivity_pass_count": 7,
@@ -268,6 +268,6 @@
     "JianghaiOldCityAuthoredScene/OldCityMarketBridge/MarketWestRamp"
   ],
   "source_geometry_mode": "GROUPS_EXPLICIT",
-  "vertex_count": 78,
+  "vertex_count": 90,
   "walkable_floor_collision_shape_count": 10
 }
