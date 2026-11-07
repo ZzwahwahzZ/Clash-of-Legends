@@ -265,7 +265,7 @@ jobs:
             echo 'Godot runtime navigation probe reported a script or probe failure'
             exit 1
           fi
-          if ! grep -q 'PHASE1 NAVIGATION PLAYER MOVEMENT AND FLOOR COLLISION: PASS' reports/phase1_navigation_runtime_probe.log; then
+          if ! grep -q 'PHASE1 NAVIGATION PLAYER MOVEMENT, CITY ROUTES AND FLOOR COLLISION: PASS' reports/phase1_navigation_runtime_probe.log; then
             echo 'Godot runtime navigation probe did not emit its movement and floor-contact PASS marker'
             exit 1
           fi
