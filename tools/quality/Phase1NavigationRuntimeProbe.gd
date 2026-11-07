@@ -45,9 +45,9 @@ func _run() -> void:
 		"market_bridge_guardrail_blocks": bridge_rail_blocks,
 		"market_bridge_guardrail_hit_collider": bridge_rail_hit_name
 	}))
-	if not pawnshop_doorway_clear or not factory_doorway_clear or not pawnshop_wall_blocks or not factory_wall_blocks or not bridge_rail_blocks:
-		_fail("Pawnshop/factory doorway clearance, adjacent wall collision, or market bridge guardrail collision validation failed.")
-		return
+	var collision_probe_passed := pawnshop_doorway_clear and factory_doorway_clear and pawnshop_wall_blocks and factory_wall_blocks and bridge_rail_blocks
+	if not collision_probe_passed:
+		push_warning("One or more physical collision checks failed; continuing the complete player/navigation suite to collect all results.")
 
 	var player_packed := load(PLAYER_SCENE_PATH) as PackedScene
 	if player_packed == null:
@@ -170,6 +170,7 @@ func _run() -> void:
 		"factory_adjacent_wall_blocks": factory_wall_blocks,
 		"market_bridge_guardrail_blocks": bridge_rail_blocks,
 		"market_bridge_guardrail_hit_collider": bridge_rail_hit_name,
+		"collision_probe_passed": collision_probe_passed,
 		"player_scene_loaded": true,
 		"navigation_map_valid": navigation_map.is_valid(),
 		"navigation_map_region_count": map_region_count,
@@ -200,6 +201,16 @@ func _run() -> void:
 	file.close()
 	print("PHASE1 NAVIGATION RUNTIME PROBE: ", JSON.stringify(report))
 
+	if not collision_probe_passed:
+		_fail("Physical collision suite failed: " + JSON.stringify({
+			"pawnshop_doorway_clear": pawnshop_doorway_clear,
+			"factory_doorway_clear": factory_doorway_clear,
+			"pawnshop_adjacent_wall_blocks": pawnshop_wall_blocks,
+			"factory_adjacent_wall_blocks": factory_wall_blocks,
+			"market_bridge_guardrail_blocks": bridge_rail_blocks,
+			"market_bridge_guardrail_hit_collider": bridge_rail_hit_name
+		}))
+		return
 	if map_region_count < 1:
 		_fail("Runtime navigation map contains no registered regions.")
 		return
