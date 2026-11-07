@@ -29,6 +29,14 @@ def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
 def read_uleb128(data: bytes, offset: int) -> tuple[int, int]:
     value = 0
     shift = 0
@@ -105,6 +113,8 @@ def inspect_apk(apk_path: Path, archive_member: str) -> dict:
             })
     return {
         "archive_member": archive_member,
+        "apk_size_bytes": apk_path.stat().st_size,
+        "apk_sha256": sha256_file(apk_path),
         "binary_count": len(binaries),
         "binaries_with_reader_hints": sum(bool(item["matching_strings"]) for item in binaries),
         "binaries": binaries,
