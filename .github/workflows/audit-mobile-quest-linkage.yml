@@ -70,6 +70,53 @@ jobs:
                               selected.append({"path":info.filename,"size_bytes":info.file_size})
                   print({"apk_member":name,"selected_count":len(selected),"selected_files":selected})
           PY
+      - name: Preserve APK bytecode and inspect exact reader implementations
+        run: |
+          set -euo pipefail
+          mkdir -p build/apk-reader/dex build/apk-reader/native
+          python3 - <<'PY'
+          import zipfile
+          from pathlib import Path
+          outer=zipfile.ZipFile("build/source/extracted-assets-001.zip")
+          apk_name=next(n for n in outer.namelist() if "ConquerOnline-1.1.2.3" in n and n.lower().endswith(".apk"))
+          apk_path=Path("build/apk-reader/ConquerOnline-1.1.2.3.apk")
+          with outer.open(apk_name) as src, apk_path.open("wb") as dst:
+              while block:=src.read(1024*1024): dst.write(block)
+          with zipfile.ZipFile(apk_path) as apk:
+              for info in apk.infolist():
+                  name=info.filename.rsplit("/",1)[-1]
+                  low=info.filename.lower()
+                  if name.startswith("classes") and name.endswith(".dex"):
+                      (Path("build/apk-reader/dex")/name).write_bytes(apk.read(info))
+                  elif low.startswith("lib/") and low.endswith(".so"):
+                      target=Path("build/apk-reader/native")/Path(info.filename).name
+                      target.write_bytes(apk.read(info))
+          print("APK bytecode and native libraries extracted for static inspection")
+          PY
+          curl --fail --location --retry 3             "https://github.com/skylot/jadx/releases/download/v1.5.3/jadx-1.5.3.zip"             -o /tmp/jadx.zip
+          mkdir -p /tmp/jadx
+          unzip -q /tmp/jadx.zip -d /tmp/jadx
+          chmod +x /tmp/jadx/bin/jadx
+          /tmp/jadx/bin/jadx --version
+          /tmp/jadx/bin/jadx --no-res --no-imports --show-bad-code \
+            -d build/apk-reader/decompiled build/apk-reader/ConquerOnline-1.1.2.3.apk
+          python3 - <<'PY'
+          import json,re
+          from pathlib import Path
+          roots=[Path("build/apk-reader/decompiled"),Path("build/apk-reader/native")]
+          terms=re.compile(r"AesDecrypt|AesDecryptWithKey|AesEncrypt|DataEncryptUtil|CIPHER_KEY|TQ_FILE_CIPHER|questinfo\\.dat|taskitem_info\\.dat|client_realm_task|NpcDialogueText",re.I)
+          hits=[]
+          for root in roots:
+              for p in root.rglob("*"):
+                  if not p.is_file() or p.suffix not in {".java",".txt",".xml",".so"}: continue
+                  try: lines=p.read_text(encoding="utf-8",errors="ignore").splitlines()
+                  except OSError: continue
+                  for no,line in enumerate(lines,1):
+                      if terms.search(line):
+                          hits.append({"file":str(p),"line":no,"text":line.strip()[:500]})
+          Path("reports/mobile-apk-reader-implementation-hits.json").write_text(json.dumps({"target":"ConquerOnline-1.1.2.3","hit_count":len(hits),"hits":hits,"policy":"String and decompiler hits are leads only; method call paths and file read sites must be traced before cipher approval."},ensure_ascii=False,indent=2)+"\\n",encoding="utf-8")
+          print("reader implementation hits:",len(hits))
+          PY
       - name: Run existing quest decoder, ecosystem inventory, and APK reader probe
         run: |
           set -euo pipefail
@@ -175,6 +222,10 @@ jobs:
             reports/mobile-quest-source-audit.json
             reports/quest-ecosystem-inventory.json
             reports/mobile-apk-reader-probe.json
+            reports/mobile-apk-reader-implementation-hits.json
+            build/apk-reader/dex/
+            build/apk-reader/native/
+            build/apk-reader/decompiled/
             reports/selected-world-source-index.json
             reports/mobile-quest-linkage-summary.json
             reports/mobile-quest-catalog.json
