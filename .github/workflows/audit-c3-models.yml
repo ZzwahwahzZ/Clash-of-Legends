@@ -4,6 +4,7 @@ on:
     paths:
       - ".github/workflows/audit-c3-models.yml"
       - "tools/c3_audit/**"
+      - "third_party_patches/c3-mesh-extension-tags.patch"
       - "tools/external_assets/audit_c3_equipment_families.py"
       - "tools/external_assets/render_c3_equipment_previews.py"
       - "tools/external_assets/assemble_c3_equipment_contact_sheets.py"
@@ -51,6 +52,8 @@ jobs:
         run: |
           git clone --filter=blob:none https://github.com/deklol/Preservation-CO-Client.git build/preservation
           git -C build/preservation checkout 090541d10d8a7d001fe804dd1c23325c344f861d
+          git -C build/preservation apply "$GITHUB_WORKSPACE/third_party_patches/c3-mesh-extension-tags.patch"
+          git -C build/preservation diff --check
       - name: Test C3 parser and per-mesh GLB animation exporter
         run: cargo test --manifest-path tools/c3_audit/Cargo.toml --release
       - name: Audit all original C3 models
