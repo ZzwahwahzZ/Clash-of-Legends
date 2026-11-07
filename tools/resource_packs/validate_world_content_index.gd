@@ -43,6 +43,10 @@ func _run_validation() -> void:
 	if source_dialogue.is_empty() or source_dialogue.get("talks", []).is_empty():
 		_fail("Known NPC dialogue 1051 was not parsed into runtime talk steps.")
 		return
+	var model_template: Dictionary = index.get_npc_model_template(5002)
+	if str(model_template.get("fields", {}).get("Name", "")).strip_edges() != "WindSage":
+		_fail("Source NPC model 5002 did not resolve to its audited WindSage template.")
+		return
 	var model_dialogue: Dictionary = index.get_npc_dialogue_for_model_id(5002)
 	if int(model_dialogue.get("dialogue_id", -1)) != 1060:
 		_fail("NPC model 5002 was not linked through its exact dialogue DlgShowInfo.id reference.")
