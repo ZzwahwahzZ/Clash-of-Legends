@@ -9,6 +9,71 @@
   ],
   "map_metadata_sections": 674,
   "map_metadata_without_binary_path": 420,
+  "source_map_archives": [
+    {
+      "map_id": 1000,
+      "name_en": "Desert",
+      "resource_path": "map/map/desert.7z",
+      "flags": 256,
+      "size_bytes": 0,
+      "sha256": "",
+      "status": "SOURCE_ARCHIVE_NOT_EXTRACTED"
+    },
+    {
+      "map_id": 1002,
+      "name_en": "WindPlain",
+      "resource_path": "map/map/newplain.7z",
+      "flags": 256,
+      "size_bytes": 0,
+      "sha256": "",
+      "status": "SOURCE_ARCHIVE_NOT_EXTRACTED"
+    },
+    {
+      "map_id": 1011,
+      "name_en": "MapleForest",
+      "resource_path": "map/map/woods.7z",
+      "flags": 256,
+      "size_bytes": 0,
+      "sha256": "",
+      "status": "SOURCE_ARCHIVE_NOT_EXTRACTED"
+    },
+    {
+      "map_id": 1014,
+      "name_en": "DragonPool",
+      "resource_path": "map/map/dragon.7z",
+      "flags": 256,
+      "size_bytes": 0,
+      "sha256": "",
+      "status": "SOURCE_ARCHIVE_NOT_EXTRACTED"
+    },
+    {
+      "map_id": 1036,
+      "name_en": "Market",
+      "resource_path": "map/map/street.7z",
+      "flags": 256,
+      "size_bytes": 0,
+      "sha256": "",
+      "status": "SOURCE_ARCHIVE_NOT_EXTRACTED"
+    },
+    {
+      "map_id": 12771,
+      "name_en": "",
+      "resource_path": "map/map/woods.7z",
+      "flags": 256,
+      "size_bytes": 0,
+      "sha256": "",
+      "status": "SOURCE_ARCHIVE_NOT_EXTRACTED"
+    },
+    {
+      "map_id": 12731,
+      "name_en": "",
+      "resource_path": "map/map/newplain.7z",
+      "flags": 256,
+      "size_bytes": 0,
+      "sha256": "",
+      "status": "SOURCE_ARCHIVE_NOT_EXTRACTED"
+    }
+  ],
   "map_binary_ids_without_metadata": [
     1004,
     1012,
@@ -426,7 +491,7 @@
       "sp": "gb18030"
     }
   },
-  "output_bytes": 15463071,
+  "output_bytes": 15464149,
   "validation": "GODOT_RUNTIME_AUDIT_PASSED",
   "godot_runtime_validation": {
     "engine": "Godot 4.3",
