@@ -140,11 +140,15 @@ def main():
                 except ValueError:x=y=None
                 mapdest[(mid,f["npcid"].zfill(4))].append({"section":s["section"],"title":f.get("title",""),"x":x,"y":y,"radius":f.get("radius","")})
 
+    map_names_by_id=defaultdict(set)
     npc_refs=[]; map_refs=[]; mob_refs=[]; item_refs=[]; prereq_refs=[]; quest_condition_refs=[]; lua_refs=[]
     for s in quests:
         f=s["fields"];mid=f.get("MissionId","")
+        map_field=f.get("Map","0")
+        if map_field and map_field!="0":map_refs.append({"mission_id":mid,"role":"MapField","map_id":map_field,"x":None,"y":None})
         for role,key in [("begin","BeginNpcId"),("finish","FinishNpcId")]:
             loc=parse_loc(f.get(key,""))
+            if loc.get("map_id") and loc.get("map_name"):map_names_by_id[loc["map_id"]].add(loc["map_name"])
             if loc["status"] in ("NPC_REFERENCE","LOCATION_ONLY"):
                 map_refs.append({"mission_id":mid,"role":role,**{k:loc.get(k) for k in ("map_id","x","y")}})
             if loc["status"]=="NPC_REFERENCE":
@@ -180,6 +184,14 @@ def main():
                     elif head=="map" and len(p)>=4:
                         map_refs.append({"mission_id":mid,"role":key,"map_id":p[1],"x":int(p[2]) if p[2].isdigit() else None,"y":int(p[3]) if p[3].isdigit() else None})
                     elif head=="lua" and p:
+                        raw_handler=p[1] if len(p)>1 else ""
+                        marker_match=re.search(r"</([A-Z]+)>(.*)$",raw_handler)
+                        if raw_handler.startswith("</") and marker_match:
+                            handler_marker=marker_match.group(1);function_name=marker_match.group(2);handler_data=""
+                        elif marker_match:
+                            handler_marker=marker_match.group(1);function_name=raw_handler[:marker_match.start()];handler_data=marker_match.group(2)
+                        else:handler_marker="";function_name=raw_handler;handler_data=""
+                        lua_refs.append({"mission_id":mid,"field":key,"npc_name":p[0],"script_function":function_name,"handler_marker":handler_marker,"handler_data":handler_data,"raw":token})
                         lua_refs.append({"mission_id":mid,"field":key,"npc_name":p[0],"script_function":p[1].replace("</F>","") if len(p)>1 else "","raw":token})
                     elif head=="chk_item" and len(p)>=2:item_refs.append({"mission_id":mid,"item_id":p[0],"quantity":p[1]})
                     elif head=="chk_quest" and p:quest_condition_refs.append({"mission_id":mid,"condition_quest_id":p[0],"condition_args":p[1:]})
@@ -197,7 +209,7 @@ def main():
         "gamemap_dat_ids":len(gamemap_ids),"gamemapex_ini_ids":len(gmex),"mapdestination_ini_ids":len(mapdest_ids),
         "referenced_ids_missing_from_gamemap_dat":sorted(map_ids-gamemap_ids),
         "referenced_ids_missing_from_all_three_map_sources":sorted(map_ids-all_map_ids),
-        "map_id_names":[{"map_id":x,"gamemapex_name":gmex.get(x),"gamemap_resource":next((m["resource_path"] for m in gamemap if m["map_id"]==x),None),"mapdestination_section_count":sum(1 for s in sections(read_text(mapdest_path)) if s["section"].startswith(x+"-")) if mapdest_path.is_file() else 0} for x in sorted(map_ids)],
+        "map_id_names":[{"map_id":x,"gamemapex_name":gmex.get(x),"gamemap_resource":next((m["resource_path"] for m in gamemap if m["map_id"]==x),None),"quest_source_names":sorted(map_names_by_id.get(x,set())),"mapdestination_section_count":sum(1 for s in sections(read_text(mapdest_path)) if s["section"].startswith(x+"-")) if mapdest_path.is_file() else 0} for x in sorted(map_ids)],
     }
 
     dlg_path=root/"ini/luaui/publicfiles/otherconf/npcdialogueinfo.dat"
