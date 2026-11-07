@@ -86,7 +86,7 @@ func _run_validation() -> void:
 		var candidate_professions: Array = candidate.get("profession_ids", [])
 		if not candidate_professions.has(10):
 			continue
-		var candidate_level := max(1, int(candidate.get("min_level", 0)))
+		var candidate_level: int = maxi(1, int(candidate.get("min_level", 0)))
 		var candidate_sex := int(candidate.get("sex", 0))
 		var candidate_prerequisites: Array = candidate.get("prerequisite_ids", []).duplicate()
 		if not index._is_quest_available(candidate, candidate_level, 10, candidate_sex, candidate_prerequisites):
