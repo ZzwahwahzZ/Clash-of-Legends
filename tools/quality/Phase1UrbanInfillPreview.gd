@@ -50,6 +50,25 @@ func _run() -> void:
   quit(6)
   return
  print("JIANGHAI TASK LANDMARKS VALIDATED: ",JSON.stringify(interaction_registry.get_anchor_ids()))
+ for anchor_id in interaction_registry.get_anchor_ids():
+  var target_data:Dictionary=interaction_registry.get_anchor_target(anchor_id)
+  if not bool(target_data.get("ok",false)):
+   push_error("Could not resolve task target position: "+anchor_id)
+   quit(6)
+   return
+  print("JIANGHAI TASK TARGET: ",anchor_id," @ ",target_data.get("reference_position"))
+ var pawnshop_approach:=city.get_node_or_null("JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/PawnshopApproach") as MeshInstance3D
+ if pawnshop_approach==null or pawnshop_approach.mesh==null:
+  push_error("Pawnshop approach surface mesh is missing.")
+  quit(7)
+  return
+ var pawnshop_spawn:Dictionary=interaction_registry.get_npc_spawn_candidate("jianghai.pawnshop_courtyard")
+ var pawnshop_spawn_local:Vector3=pawnshop_approach.to_local(pawnshop_spawn.get("candidate_position",Vector3.ZERO))
+ if not pawnshop_approach.get_aabb().has_point(pawnshop_spawn_local):
+  push_error("Pawnshop NPC spawn candidate is outside its authored approach surface: "+str(pawnshop_spawn_local))
+  quit(7)
+  return
+ print("PAWNSHOP SPAWN SURFACE CHECK: PASS @ ",pawnshop_spawn.get("candidate_position"))
  var npc_anchor_ids:PackedStringArray=PackedStringArray(["jianghai.pawnshop_courtyard","jianghai.hotel_frontage","jianghai.medicine_frontage","jianghai.tea_frontage"])
  for npc_anchor_id in npc_anchor_ids:
   var spawn_candidate:Dictionary=interaction_registry.get_npc_spawn_candidate(npc_anchor_id)
