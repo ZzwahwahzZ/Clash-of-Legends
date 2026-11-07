@@ -6,6 +6,8 @@ extends SceneTree
 
 const CITY_PATH := "res://assets/environment/phase1/jianghai/full_city_preview.glb"
 const REPORT_PATH := "reports/phase1_navigation_bake_audit.json"
+const NAVMESH_PATH := "res://assets/environment/phase1/jianghai/jianghai_city_navmesh.tres"
+const WORLD_SCENE_PATH := "res://scenes/world/JianghaiOldCity.tscn"
 const WALKABLE_PATHS := [
 	"JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/CentralAvenue",
 	"JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/RiverWardStreet",
@@ -104,8 +106,45 @@ func _on_navigation_baked() -> void:
 	if _navigation_mesh.get_polygon_count() <= 0:
 		_fail("Navigation bake produced zero polygons.")
 		return
+	var navmesh_save_error := ResourceSaver.save(_navigation_mesh, NAVMESH_PATH)
+	if navmesh_save_error != OK:
+		_fail("Could not save baked navigation resource: " + str(navmesh_save_error))
+		return
+	var world_scene_save_error := _save_world_scene()
+	if world_scene_save_error != OK:
+		_fail("Could not save Jianghai runtime world scene: " + str(world_scene_save_error))
+		return
 	_region.navigation_mesh = _navigation_mesh
 	call_deferred("_validate_navigation_after_sync")
+
+func _save_world_scene() -> Error:
+	var world_directory := ProjectSettings.globalize_path("res://scenes/world")
+	var directory_error := DirAccess.make_dir_recursive_absolute(world_directory)
+	if directory_error != OK and directory_error != ERR_ALREADY_EXISTS:
+		return directory_error
+	var root := Node3D.new()
+	root.name = "JianghaiOldCity"
+	var city_packed := load(CITY_PATH) as PackedScene
+	if city_packed == null:
+		root.free()
+		return ERR_CANT_OPEN
+	var city_instance := city_packed.instantiate()
+	city_instance.name = "AuthoredCity"
+	root.add_child(city_instance)
+	city_instance.owner = root
+	var navigation_region := NavigationRegion3D.new()
+	navigation_region.name = "CuratedNavigationRegion"
+	navigation_region.navigation_mesh = _navigation_mesh
+	root.add_child(navigation_region)
+	navigation_region.owner = root
+	var packed_world := PackedScene.new()
+	var pack_error := packed_world.pack(root)
+	if pack_error != OK:
+		root.free()
+		return pack_error
+	var save_error := ResourceSaver.save(packed_world, WORLD_SCENE_PATH)
+	root.free()
+	return save_error
 
 func _validate_navigation_after_sync() -> void:
 	await physics_frame
@@ -182,6 +221,8 @@ func _validate_navigation_after_sync() -> void:
 
 	var report := {
 		"city_scene": CITY_PATH,
+		"saved_navigation_mesh": NAVMESH_PATH,
+		"saved_runtime_world_scene": WORLD_SCENE_PATH,
 		"bake_status": "BAKED",
 		"route_status": "CONNECTED" if connected_routes == route_pairs.size() else "BAKED_WITH_ROUTE_GAPS",
 		"source_geometry_mode": "GROUPS_EXPLICIT",
