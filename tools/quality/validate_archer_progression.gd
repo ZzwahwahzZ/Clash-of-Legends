@@ -1,20 +1,28 @@
 extends SceneTree
 
-class TestArcherPlayer extends CharacterBody3D:
-	var current_level: int = 40
-	func get_character_class() -> String:
-		return "Archer"
-
 func _initialize() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
-	var progression = ClassProgressionManager
 	GameManager.selected_class = "Archer"
-	var player := TestArcherPlayer.new()
-	player.name = "TestArcherPlayer"
+	var player_scene := load("res://scenes/characters/Player.tscn") as PackedScene
+	if player_scene == null:
+		_fail("Could not load the real Player scene for class-selection validation.")
+		return
+	var player := player_scene.instantiate() as PlayerController
+	if player == null:
+		_fail("Player scene did not instantiate a PlayerController.")
+		return
+	player.current_level = 40
 	root.add_child(player)
-	GameManager.player_reference = player
+	await process_frame
+	var progression = ClassProgressionManager
+	if player.get_character_class() != "Archer":
+		_fail("The title-screen Archer selection did not reach the actual PlayerController.")
+		return
+	if not player.has_node("PlayerInventory"):
+		_fail("The actual Player scene has no PlayerInventory child.")
+		return
 	progression.configure_for_character("Archer")
 
 	if progression.selected_weapon_style != "bow" or progression.get_form_id() != "Archer":
@@ -65,10 +73,7 @@ func _run() -> void:
 		_fail("Verified promotion did not unlock Throwing Knives.")
 		return
 
-	var inventory := PlayerInventory.new()
-	inventory.name = "PlayerInventory"
-	player.add_child(inventory)
-	await process_frame
+	var inventory := player.get_node("PlayerInventory") as PlayerInventory
 	var starter_weapon: Variant = inventory.equipment.get("weapon", null)
 	if not starter_weapon is Dictionary or str(starter_weapon.get("id", "")) != "500239" or str(starter_weapon.get("weapon_style", "")) != "bow":
 		_fail("Archer character creation did not equip the pinned Mobile source weapon ID 500239 as a Bow.")
