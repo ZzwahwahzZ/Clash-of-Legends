@@ -83,10 +83,20 @@ func _ready() -> void:
 		joystick.joystick_moved.connect(_on_joystick_moved)
 
 	_refresh_hud_labels()
-	_update_skill_buttons()
+	if GameManager and is_instance_valid(GameManager.player_reference):
+		_on_player_registered(GameManager.player_reference)
+	else:
+		_update_skill_buttons()
 	_update_interact_button()
 
-func _on_player_registered(_player: CharacterBody3D) -> void:
+func _on_player_registered(player: CharacterBody3D) -> void:
+	if is_instance_valid(player) and player.has_node("PlayerInventory"):
+		var inventory = player.get_node("PlayerInventory")
+		if inventory.has_signal("equipment_updated") and not inventory.equipment_updated.is_connected(_on_player_equipment_updated):
+			inventory.equipment_updated.connect(_on_player_equipment_updated)
+	_update_skill_buttons()
+
+func _on_player_equipment_updated() -> void:
 	_update_skill_buttons()
 
 func _on_weapon_style_changed(_style_id: String) -> void:
@@ -139,15 +149,19 @@ func _update_skill_buttons() -> void:
 	if skill_1_btn and current_skills.size() > 0:
 		var first_skill = CombatEngine.skill_database[current_skills[0]]
 		skill_1_btn.text = first_skill["name_ar"] if is_ar else first_skill["name_en"]
+		skill_1_btn.disabled = not CombatEngine.can_cast_skill(current_skills[0], player)
 		skill_1_btn.visible = true
 	elif skill_1_btn:
 		skill_1_btn.visible = false
+		skill_1_btn.disabled = false
 	if skill_2_btn and current_skills.size() > 1:
 		var second_skill = CombatEngine.skill_database[current_skills[1]]
 		skill_2_btn.text = second_skill["name_ar"] if is_ar else second_skill["name_en"]
+		skill_2_btn.disabled = not CombatEngine.can_cast_skill(current_skills[1], player)
 		skill_2_btn.visible = true
 	elif skill_2_btn:
 		skill_2_btn.visible = false
+		skill_2_btn.disabled = false
 
 func _on_attack_pressed() -> void:
 	var player = GameManager.player_reference if GameManager else null
