@@ -69,6 +69,14 @@ func _run_travel_test() -> void:
 	if not armorer_offer_found:
 		_fail("Source NPC 2001 did not expose the unlocked Armorer quest.")
 		return
+	var blacksmith_placements := quest_graph.get_npc_placements("0005", "1002")
+	if blacksmith_placements.is_empty() or str(blacksmith_placements[0].get("name", "")) != "Blacksmith":
+		_fail("Source NPC placement crosswalk did not resolve Blacksmith 0005 in Twin City.")
+		return
+	var armorer_placements := quest_graph.get_npc_placements("0004", "1002")
+	if armorer_placements.is_empty():
+		_fail("Source NPC placement crosswalk did not resolve Armorer 0004 in Twin City.")
+		return
 	var armorer_route := quest_graph.get_route("650", true)
 	if str(armorer_route.get("npc_id", "")) != "0004" or str(armorer_route.get("map_id", "")) != "1002":
 		_fail("Source quest graph did not resolve mission 650 turn-in route.")
