@@ -24,6 +24,9 @@ func get_source_graph_summary() -> Dictionary:
 func get_source_missions_available_at_npc(npc_id: String, player_level: int = 0, profession_code: String = "") -> Array[Dictionary]:
 	return source_graph.get_available_at_npc(npc_id, completed_source_mission_ids, player_level, profession_code)
 
+func get_source_missions_available_for_class(npc_id: String, player_level: int, class_id: String) -> Array[Dictionary]:
+	return source_graph.get_available_at_npc_for_class(npc_id, completed_source_mission_ids, player_level, class_id)
+
 func get_source_mission_route(mission_id: String, turn_in: bool = false) -> Dictionary:
 	return source_graph.get_route(mission_id, turn_in)
 
