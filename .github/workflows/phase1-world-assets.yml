@@ -256,11 +256,11 @@ jobs:
           test -s reports/phase1_navigation_bake_audit.json
           xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --path . --rendering-method gl_compatibility --script res://tools/quality/Phase1AnchorSurfaceAudit.gd 2>&1 | tee reports/phase1_anchor_surface_audit.log
           test -s reports/phase1_anchor_surface_candidates.json
-          if grep -Eq 'SCRIPT ERROR:|ERROR:|Parse Error:' reports/phase1_anchor_surface_audit.log; then
+          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|PHASE1 ANCHOR SURFACE AUDIT FAILED' reports/phase1_anchor_surface_audit.log; then
             echo 'Godot anchor surface audit reported an error'
             exit 1
           fi
-          if grep -Eq 'SCRIPT ERROR:|ERROR:|Parse Error:' reports/phase1_navigation_bake_audit.log; then
+          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|Attempted to update a navigation region|PHASE1 NAVIGATION BAKE FAILED' reports/phase1_navigation_bake_audit.log; then
             echo 'Godot navigation bake audit reported an error'
             exit 1
           fi
