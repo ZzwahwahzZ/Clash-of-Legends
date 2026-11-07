@@ -275,6 +275,7 @@ def main():
     assert len(output["maps"]) == 413, f"Expected 413 map index records, got {len(output['maps'])}"
     assert rows["650"]["name_ar"] == "تاجر الملابس الحربية", "Arabic mission 650 localization was not imported"
     assert rows["650"]["finish_npc_ar"]["npc_name_ar"] == "تاجر الملابس الحربية"
+    assert rows["608"]["intentions"][0].get("monster_name") == "Pheasant", "Quest 608 mob target was not corroborated by description and map coordinates"
     assert len(source_city_hubs) == 6 and len(npc_placements) == 881, "Source city/NPC placement evidence count mismatch"
     assert len(output["duplicate_mission_ids"]) == 1 and output["duplicate_mission_ids"][0] == "3938"
     print(f"Imported {len(rows)} unique missions, {len(output['maps'])} map IDs; duplicate IDs: {output['duplicate_mission_ids']}; bytes={a.output.stat().st_size}")
