@@ -29,7 +29,7 @@ jobs:
           python3 -m venv .venv
           .venv/bin/pip install --disable-pip-version-check polyfile
           echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
-          python3 -m py_compile tools/gameplay_source_audit/comprehensive_asset_inventory.py tools/gameplay_source_audit/audit_source_tables.py
+          python3 -m py_compile tools/gameplay_source_audit/comprehensive_asset_inventory.py tools/gameplay_source_audit/audit_source_tables.py tools/gameplay_source_audit/mobile_quest_source_decoder.py
       - name: Recursively inventory every archive member by content
         run: |
           python3 tools/gameplay_source_audit/comprehensive_asset_inventory.py \
@@ -42,6 +42,13 @@ jobs:
           python3 tools/gameplay_source_audit/audit_source_tables.py \
             build/source/extracted-assets-001.zip \
             --output reports/gameplay-source-table-audit.json
+      - name: Decode and classify every version-matched quest source file
+        run: |
+          python3 tools/gameplay_source_audit/mobile_quest_source_decoder.py \
+            build/source/extracted-assets-001.zip \
+            --output reports/mobile-quest-source-audit.json \
+            --decoded-dir build/mobile_quest_candidates
+          python3 -m json.tool reports/mobile-quest-source-audit.json > /dev/null
       - name: Validate report JSON and print concise inventory
         run: |
           python3 -m json.tool reports/gameplay-source-table-audit.json > /dev/null
@@ -64,5 +71,7 @@ jobs:
             reports/gameplay-source-table-audit.json
             reports/comprehensive-asset-inventory.json
             reports/polyfile-mobile-*.json
+            reports/mobile-quest-source-audit.json
+            build/mobile_quest_candidates/**/*.lua
           if-no-files-found: error
           retention-days: 30
