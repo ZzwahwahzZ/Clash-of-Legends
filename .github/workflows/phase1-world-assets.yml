@@ -18,6 +18,7 @@ on:
       - "assets/environment/phase1/jianghai/interaction_anchors.json"
       - "scripts/world/WorldInteractionRegistry.gd"
       - "scripts/player/PlayerController.gd"
+      - "scripts/core/AssetCatalog.gd"
       - "scenes/characters/Player.tscn"
       - "project.godot"
   workflow_dispatch:
@@ -260,7 +261,7 @@ jobs:
           test -s reports/phase1_navigation_bake_audit.json
           godot --headless --path . --script res://tools/quality/Phase1NavigationRuntimeProbe.gd 2>&1 | tee reports/phase1_navigation_runtime_probe.log
           test -s reports/phase1_navigation_runtime_probe.json
-          if grep -Eq 'SCRIPT ERROR:|Parse Error:|PHASE1 NAVIGATION RUNTIME PROBE FAILED' reports/phase1_navigation_runtime_probe.log; then
+          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Condition "!is_inside_tree\\(\\)"|PHASE1 NAVIGATION RUNTIME PROBE FAILED' reports/phase1_navigation_runtime_probe.log; then
             echo 'Godot runtime navigation probe reported an error'
             exit 1
           fi
