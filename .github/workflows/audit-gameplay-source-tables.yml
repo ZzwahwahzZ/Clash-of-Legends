@@ -10,7 +10,7 @@ on:
       - "tests/test_quest_ecosystem_inventory.py"
       - "tests/test_mobile_apk_reader_probe.py"
 permissions:
-  contents: read
+  contents: write
 concurrency:
   group: gameplay-source-table-audit-${{ github.ref }}
   cancel-in-progress: true
@@ -88,6 +88,65 @@ jobs:
           print("Plausible cipher candidates:", quest["plausible_cipher_decode_candidates"])
           print("Candidate TaskIDs:", len(quest["unique_task_ids_in_candidates"]))
           PY
+
+      - name: Publish sanitized audit summary to the source branch
+        if: always()
+        env:
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          set -euo pipefail
+          .venv/bin/python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          def load(path):
+              p=Path(path)
+              if not p.is_file():
+                  return None
+              return json.loads(p.read_text(encoding="utf-8"))
+          source=Path("build/source/extracted-assets-001.zip")
+          gameplay=load("reports/gameplay-source-table-audit.json")
+          reader=load("reports/mobile-apk-reader-probe.json")
+          quest=load("reports/quest-ecosystem-inventory.json")
+          summary={
+              "schema_version":"1.0.0",
+              "workflow_job_status":"${JOB_STATUS}",
+              "source_archive":{
+                  "present":source.is_file(),
+                  "size_bytes":source.stat().st_size if source.is_file() else None,
+                  "sha256":hashlib.sha256(source.read_bytes()).hexdigest() if source.is_file() else None
+              },
+              "gameplay_source_table_audit":{
+                  "report_present":gameplay is not None,
+                  "version_matched_member_count":gameplay.get("version_matched_member_count") if gameplay else None,
+                  "itemtype_file_count":gameplay.get("itemtype_catalog",{}).get("file_count") if gameplay else None,
+                  "itemtype_record_count":gameplay.get("itemtype_catalog",{}).get("record_count") if gameplay else None
+              },
+              "mobile_apk_reader_probe":{
+                  "report_present":reader is not None,
+                  "apk_count":reader.get("apk_count") if reader else None,
+                  "reader_hint_count":reader.get("reader_hint_count") if reader else None,
+                  "apks":[{"archive_member":x.get("archive_member"),"apk_size_bytes":x.get("apk_size_bytes"),"apk_sha256":x.get("apk_sha256"),"binary_count":x.get("binary_count")} for x in reader.get("results",[])] if reader else []
+              },
+              "quest_ecosystem_inventory":{
+                  "report_present":quest is not None,
+                  "files_found":quest.get("files_found") if quest else None,
+                  "category_file_counts":quest.get("category_file_counts") if quest else None,
+                  "plausible_cipher_decode_candidates":quest.get("plausible_cipher_decode_candidates") if quest else None,
+                  "unique_task_id_count":len(quest.get("unique_task_ids_in_candidates",[])) if quest else None
+              },
+              "safety":"Metadata and counts only. No decoded source text, proprietary asset bytes, or candidate payloads are committed."
+          }
+          Path("reports/quest-audit-summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2)+"\\n",encoding="utf-8")
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/quest-audit-summary.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Publish sanitized mobile quest audit summary"
+            git push
+          else
+            echo "Sanitized audit summary unchanged."
+          fi
       - name: Upload source audit reports and decoded candidates
         if: always()
         uses: actions/upload-artifact@v4
