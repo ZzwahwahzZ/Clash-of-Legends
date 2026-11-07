@@ -37,8 +37,10 @@ def signals(data: bytes) -> dict:
     sample = data[:min(len(data), 256 * 1024)]
     if not sample:
         return {"printable_ratio": 0.0, "lua_signature": False, "ini_signature": False}
-    printable = sum(x in (9, 10, 13) or 32 <= x <= 126 or x >= 0xc0 for x in sample) / len(sample)
-    text = sample.decode("latin-1")
+    # Count ASCII text bytes only. High bytes are not automatically printable:
+    # encrypted/compressed data can contain many 0xC0-0xFF bytes by chance.
+    printable = sum(x in (9, 10, 13) or 32 <= x <= 126 for x in sample) / len(sample)
+    text = sample.decode("ascii", errors="ignore")
     return {
         "printable_ratio": round(printable, 4),
         "lua_signature": bool(re.search(r"(?m)^\s*(local\s+\w+|return\s+\w+)", text) or "ret.data" in text or "MainTask" in text),
@@ -94,20 +96,29 @@ def main():
     args = parser.parse_args()
     if not args.archive.is_file():
         raise SystemExit(f"archive not found: {args.archive}")
-    records, apk_names = [], []
+    records, apk_names, apk_provenance = [], [], []
     with zipfile.ZipFile(args.archive) as outer, tempfile.TemporaryDirectory(prefix="quest-apk-") as temp:
         apk_members = [n for n in outer.namelist() if VERSION in n and n.lower().endswith(".apk")]
         if not apk_members:
             raise SystemExit("Exact-version Android APK not found in source archive")
         for apk_member in apk_members:
             apk_path = Path(temp) / f"{len(apk_names)}.apk"
+            apk_hasher = hashlib.sha256()
+            apk_size = 0
             with outer.open(apk_member) as src, apk_path.open("wb") as dst:
                 while True:
                     block = src.read(1024 * 1024)
                     if not block:
                         break
                     dst.write(block)
+                    apk_hasher.update(block)
+                    apk_size += len(block)
             apk_names.append(apk_member)
+            apk_provenance.append({
+                "archive_member": apk_member,
+                "size_bytes": apk_size,
+                "sha256": apk_hasher.hexdigest(),
+            })
             with zipfile.ZipFile(apk_path) as apk:
                 for member in apk.namelist():
                     if not member.startswith(ROOT) or not is_target(member):
@@ -139,7 +150,8 @@ def main():
                             row["cipher_candidates"].append(item)
                     records.append(row)
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    report = {"schema_version": "1.0.0", "source_client": VERSION, "apk_members": apk_names,
+    report = {"schema_version": "1.1.0", "source_client": VERSION, "apk_members": apk_names,
+              "apk_member_provenance": apk_provenance,
               "files_found": len(records), "records": records,
               "acceptance_policy": "All TQ decryptions remain candidates until independently matched to the exact Android 1.1.2.3 reader/schema. No guessed PC format, field, ID join or candidate is approved for runtime."}
     args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
