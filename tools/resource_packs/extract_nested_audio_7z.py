@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Extract audio payloads embedded in staged resource PCK 7z archives.
+"""Extract audio payloads embedded in every staged resource PCK 7z archive.
 
 Only audio file members are extracted. Every output is indexed with the exact
 outer archive path, inner member path, byte size and SHA-256. Unsafe paths and
@@ -17,7 +17,7 @@ from pathlib import Path, PurePosixPath
 import py7zr
 
 ROOT = Path.cwd()
-AUDIO_ROOT = ROOT / "resource_stage" / "audio"
+STAGE = ROOT / "resource_stage"
 INDEX = ROOT / "reports" / "resource-source-index.csv"
 REPORT = ROOT / "reports" / "nested-audio-extraction.json"
 AUDIO_EXTENSIONS = {".ogg", ".wav", ".mp3", ".flac", ".mid", ".midi", ".opus", ".aac", ".m4a"}
@@ -33,18 +33,30 @@ def safe_member(name: str) -> str | None:
 
 
 def main() -> None:
-    if not AUDIO_ROOT.is_dir() or not INDEX.is_file():
-        raise SystemExit("Audio staging directory or verified resource source index is missing.")
-    rows = list(csv.DictReader(INDEX.open("r", encoding="utf-8-sig", newline="")))
-    # The index also contains 904 source-only paths absent from the published
-    # baseline PCKs. Only files physically present in staging count as duplicates.
+    if not STAGE.is_dir() or not INDEX.is_file():
+        raise SystemExit("Resource staging directory or verified resource source index is missing.")
+    with INDEX.open("r", encoding="utf-8-sig", newline="") as stream:
+        rows = list(csv.DictReader(stream))
+
+    # The index can contain source-only files absent from the baseline PCKs.
+    # Only staged files count as already present when preventing duplicates.
     seen_hashes: set[str] = set()
     for row in rows:
         staged = str(row.get("staged_path", "")).replace("\\", "/")
         staged_path = ROOT / Path(staged)
         if staged_path.is_file():
-            seen_hashes.add(str(row.get("sha256", "")).lower())
-    archives = sorted(path for path in AUDIO_ROOT.rglob("*") if path.is_file() and path.suffix.lower() == ".7z" and "nested_7z" not in path.parts)
+            digest = str(row.get("sha256", "")).lower()
+            if len(digest) == 64:
+                seen_hashes.add(digest)
+
+    # Audio can be nested inside map/world/model archives, not just archives
+    # whose outer resource category happens to be named "audio".
+    archives = sorted(
+        path for path in STAGE.rglob("*")
+        if path.is_file()
+        and path.suffix.lower() == ".7z"
+        and "nested_7z" not in path.relative_to(STAGE).parts
+    )
     report = {
         "archives_found": len(archives),
         "archives_with_audio": 0,
@@ -58,15 +70,15 @@ def main() -> None:
     new_rows: list[dict] = []
     for archive_path in archives:
         relative_archive = archive_path.relative_to(ROOT).as_posix()
+        archive_rel = archive_path.relative_to(STAGE)
+        source_category = archive_rel.parts[0] if archive_rel.parts else "unknown"
         archive_result = {"archive": relative_archive, "audio_members": 0, "extracted": 0, "bytes": 0, "error": ""}
         try:
             with py7zr.SevenZipFile(archive_path, mode="r") as archive:
                 targets = []
                 for raw_name in archive.getnames():
                     member = safe_member(raw_name)
-                    if member is None:
-                        continue
-                    if Path(member).suffix.lower() in AUDIO_EXTENSIONS:
+                    if member is not None and Path(member).suffix.lower() in AUDIO_EXTENSIONS:
                         targets.append(raw_name)
                 archive_result["audio_members"] = len(targets)
                 report["audio_members_found"] += len(targets)
@@ -83,20 +95,23 @@ def main() -> None:
                         inner = extracted_path.relative_to(extracted_root).as_posix()
                         if Path(inner).suffix.lower() not in AUDIO_EXTENSIONS:
                             continue
-                        data_hash = hashlib.sha256()
+                        digest_builder = hashlib.sha256()
                         size = 0
                         with extracted_path.open("rb") as stream:
                             for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-                                data_hash.update(chunk)
+                                digest_builder.update(chunk)
                                 size += len(chunk)
-                        digest = data_hash.hexdigest()
+                        digest = digest_builder.hexdigest()
                         if size <= 0:
                             continue
                         if digest in seen_hashes:
                             report["duplicate_members"] += 1
                             continue
-                        archive_parent = archive_path.relative_to(AUDIO_ROOT).parent
-                        output_rel = Path("resource_stage/audio/nested_7z") / archive_parent / archive_path.stem / Path(inner)
+                        archive_parent = Path(*archive_rel.parts[1:-1])
+                        output_rel = (
+                            Path("resource_stage/audio/nested_7z")
+                            / source_category / archive_parent / archive_path.stem / Path(inner)
+                        )
                         output_path = ROOT / output_rel
                         output_path.parent.mkdir(parents=True, exist_ok=True)
                         shutil.copyfile(extracted_path, output_path)
@@ -117,6 +132,7 @@ def main() -> None:
             archive_result["error"] = str(exc)[:500]
             report["errors"].append({"archive": relative_archive, "error": archive_result["error"]})
         report["archive_results"].append(archive_result)
+
     if new_rows:
         with INDEX.open("w", encoding="utf-8", newline="") as stream:
             writer = csv.DictWriter(stream, fieldnames=FIELDS)

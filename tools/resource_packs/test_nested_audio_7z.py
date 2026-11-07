@@ -20,12 +20,14 @@ class NestedAudioExtractionTests(unittest.TestCase):
         self.assertIsNone(EXTRACTOR.safe_member("/absolute/escape.ogg"))
         self.assertEqual(EXTRACTOR.safe_member("music/theme.ogg"), "music/theme.ogg")
 
-    def test_extracts_only_audio_and_appends_provenance(self):
+    def test_extracts_audio_from_non_audio_category_and_appends_provenance(self):
         with tempfile.TemporaryDirectory(prefix="clash-audio-test-") as temp:
             root = Path(temp)
-            audio_root = root / "resource_stage" / "audio"
-            audio_root.mkdir(parents=True)
-            archive_path = audio_root / "sample.7z"
+            stage = root / "resource_stage"
+            map_root = stage / "maps" / "nested_7z"
+            map_root.mkdir(parents=True)
+            archive_path = map_root / "city" / "city.7z"
+            archive_path.parent.mkdir(parents=True)
             source_audio = root / "theme.ogg"
             source_audio.write_bytes(b"verified-audio-payload")
             source_text = root / "readme.txt"
@@ -33,43 +35,40 @@ class NestedAudioExtractionTests(unittest.TestCase):
             with py7zr.SevenZipFile(archive_path, mode="w") as archive:
                 archive.write(source_audio, arcname="music/theme.ogg")
                 archive.write(source_text, arcname="music/readme.txt")
+
             index_path = root / "reports" / "resource-source-index.csv"
             index_path.parent.mkdir(parents=True)
             with index_path.open("w", encoding="utf-8", newline="") as stream:
                 writer = csv.DictWriter(stream, fieldnames=EXTRACTOR.FIELDS)
                 writer.writeheader()
                 writer.writerow({
-                    "category": "audio",
+                    "category": "maps",
                     "source_archive": "resource-packs-v4",
-                    "source_path": "resource_stage/audio/sample.7z",
-                    "staged_path": "resource_stage/audio/sample.7z",
+                    "source_path": "resource_stage/maps/nested_7z/city/city.7z",
+                    "staged_path": "resource_stage/maps/nested_7z/city/city.7z",
                     "size_bytes": archive_path.stat().st_size,
-                    "sha256": "0" * 64,
+                    "sha256": hashlib.sha256(archive_path.read_bytes()).hexdigest(),
                 })
-                writer.writerow({
-                    "category": "audio",
-                    "source_archive": "original-source-index",
-                    "source_path": "music/theme.ogg",
-                    "staged_path": "resource_stage/audio/not-in-baseline/theme.ogg",
-                    "size_bytes": source_audio.stat().st_size,
-                    "sha256": hashlib.sha256(source_audio.read_bytes()).hexdigest(),
-                })
-            old = (EXTRACTOR.ROOT, EXTRACTOR.AUDIO_ROOT, EXTRACTOR.INDEX, EXTRACTOR.REPORT)
+
+            old = (EXTRACTOR.ROOT, EXTRACTOR.STAGE, EXTRACTOR.INDEX, EXTRACTOR.REPORT)
             EXTRACTOR.ROOT = root
-            EXTRACTOR.AUDIO_ROOT = audio_root
+            EXTRACTOR.STAGE = stage
             EXTRACTOR.INDEX = index_path
             EXTRACTOR.REPORT = root / "reports" / "nested-audio-extraction.json"
             try:
                 EXTRACTOR.main()
             finally:
-                EXTRACTOR.ROOT, EXTRACTOR.AUDIO_ROOT, EXTRACTOR.INDEX, EXTRACTOR.REPORT = old
-            outputs = list((audio_root / "nested_7z").rglob("theme.ogg"))
+                EXTRACTOR.ROOT, EXTRACTOR.STAGE, EXTRACTOR.INDEX, EXTRACTOR.REPORT = old
+
+            outputs = list((stage / "audio" / "nested_7z").rglob("theme.ogg"))
             self.assertEqual(len(outputs), 1)
             self.assertEqual(outputs[0].read_bytes(), source_audio.read_bytes())
-            rows = list(csv.DictReader(index_path.open("r", encoding="utf-8", newline="")))
-            self.assertEqual(len(rows), 3)
-            self.assertTrue(rows[-1]["source_path"].endswith("sample.7z!music/theme.ogg"))
+            with index_path.open("r", encoding="utf-8", newline="") as stream:
+                rows = list(csv.DictReader(stream))
+            self.assertEqual(len(rows), 2)
+            self.assertTrue(rows[-1]["source_path"].endswith("city.7z!music/theme.ogg"))
             self.assertEqual(rows[-1]["category"], "audio")
+            self.assertEqual(rows[-1]["sha256"], hashlib.sha256(source_audio.read_bytes()).hexdigest())
 
 
 if __name__ == "__main__":
