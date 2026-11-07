@@ -44,7 +44,7 @@ jobs:
           apktool --version
           jadx --version
           androguard --version || true
-          python3 -m py_compile tools/gameplay_source_audit/comprehensive_asset_inventory.py tools/gameplay_source_audit/audit_source_tables.py tools/gameplay_source_audit/quest_source_extractor.py
+          python3 -m py_compile tools/gameplay_source_audit/comprehensive_asset_inventory.py tools/gameplay_source_audit/audit_source_tables.py tools/gameplay_source_audit/quest_source_extractor.py tools/gameplay_source_audit/androguard_deep_analysis.py
       - name: Recursively inventory every archive member by content
         run: |
           python3 tools/gameplay_source_audit/comprehensive_asset_inventory.py \
@@ -101,6 +101,9 @@ jobs:
             jadx --no-res --show-bad-code -d "reports/android-analysis/$base.jadx" "$apk" > "reports/android-analysis/$base.jadx.log" 2>&1
             find "reports/android-analysis/$base.jadx" -type f \( -name '*.java' -o -name '*.kt' \) | wc -l
           done
+          python3 tools/gameplay_source_audit/androguard_deep_analysis.py \
+            --apk-dir build/apks \
+            --output-dir reports/android-analysis
           python3 - <<'PY'
           import json
           from pathlib import Path
@@ -129,7 +132,7 @@ jobs:
           q=json.loads(Path("reports/quest-source-extraction.json").read_text(encoding="utf-8"))
           data=json.loads(Path("reports/gameplay-source-table-audit.json").read_text(encoding="utf-8"))
           inventory=json.loads(Path("reports/comprehensive-asset-inventory.json").read_text(encoding="utf-8"))
-          android=json.loads(Path("reports/android-analysis/android-analysis-summary.json").read_text(encoding="utf-8"))
+          android=json.loads(Path("reports/android-analysis/android-analysis-summary.json").read_text(encoding="utf-8"))\n          deep=json.loads(Path("reports/android-analysis/androguard-deep-analysis.json").read_text(encoding="utf-8"))
           print("QUEST SOURCE EXTRACTOR:", q["source_version"])
           print("Expected APKs:", json.dumps(q.get("expected_apk_paths", []), ensure_ascii=False))
           print("Found APKs:", json.dumps(q.get("mobile_apk_candidates", []), ensure_ascii=False))
@@ -144,7 +147,7 @@ jobs:
           print("Read errors:", len(q["read_errors"]))
           print("Version-matched members:", data["version_matched_member_count"])
           print("Total inventory records:", inventory["total_inventory_records"])
-          print("Android specialized analysis:", json.dumps(android, ensure_ascii=False))
+          print("Android specialized analysis:", json.dumps(android, ensure_ascii=False))\n          print("Androguard deep DEX/XREF summary:", json.dumps({"apk_count":deep["apk_count"],"success_count":len(deep["results"]),"error_count":len(deep["errors"]),"task_string_hits":sum(len(x["quest_task_string_hits"]) for x in deep["results"])}, ensure_ascii=False))
           print("Itemtype files/records:", data["itemtype_catalog"]["file_count"], data["itemtype_catalog"]["record_count"])
           print("Unlabelled column-59 candidates:", data["itemtype_catalog"].get("column_59_candidate_count", 0))
           for category, value in data["categories"].items():
