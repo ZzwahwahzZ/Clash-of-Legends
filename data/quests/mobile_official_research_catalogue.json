@@ -115,6 +115,42 @@
       "verified_guide_mechanics": "Inspiration Guide UI entry; unlocks Inspiration and Trojan-specific rewards.",
       "source_quest_id": null,
       "admission_state": "RESEARCH_ONLY_NOT_RUNTIME_APPROVED"
+    },
+    {
+      "project_record_id": "mobile_guide.trial.chi_canyon",
+      "source_title": "Chi Canyon",
+      "category": "trial_activity",
+      "source_uri": "https://comobile.99.com/guide/info/quests/2023-01-31/trials_-_chi_canyon.shtml",
+      "published_gate": "Trials button; two free attempts/day or Purple Sage",
+      "published_npc": null,
+      "published_map_references": "Chi Canyon (exact map ID/coordinates not published)",
+      "verified_guide_mechanics": "Three monster tiers; 100/200/300 points by tier; 180-second run; reward quality scales with score; Tiger Chi Liquor and Mystic EXP Balls.",
+      "source_quest_id": null,
+      "admission_state": "RESEARCH_ONLY_NOT_RUNTIME_APPROVED"
+    },
+    {
+      "project_record_id": "mobile_guide.trial.battle_dojo",
+      "source_title": "Battle Dojo",
+      "category": "trial_activity",
+      "source_uri": "https://comobile.99.com/guide/info/quests/2023-01-31/trials_-_battle_dojo.shtml",
+      "published_gate": "Trials button; two free attempts/day or Dojo Challenge Letter",
+      "published_npc": null,
+      "published_map_references": "Battle Dojo (exact map ID/coordinates not published)",
+      "verified_guide_mechanics": "Activate dojo array to summon masters; array refreshes after each master defeat; up to four master challenges; 180 seconds per round; faster completion yields higher score/rewards.",
+      "source_quest_id": null,
+      "admission_state": "RESEARCH_ONLY_NOT_RUNTIME_APPROVED"
+    },
+    {
+      "project_record_id": "mobile_guide.trial.rune_mountain",
+      "source_title": "Rune Mountain",
+      "category": "trial_activity",
+      "source_uri": "https://comobile.99.com/guide/info/quests/2023-01-31/trials_-_rune_mountain.shtml",
+      "published_gate": "Trials button; one free attempt/day or Rune Challenge Letter",
+      "published_npc": null,
+      "published_map_references": "Rune Mountain (exact map ID/coordinates not published)",
+      "verified_guide_mechanics": "Defeat four waves of Bushfire Beasts; Lich Kings appear after all waves; defeat Lich Kings to obtain Yellow Rune Essences.",
+      "source_quest_id": null,
+      "admission_state": "RESEARCH_ONLY_NOT_RUNTIME_APPROVED"
     }
   ],
   "official_mobile_map_names": [
@@ -130,5 +166,17 @@
     "legacy PC DAT decoding assumptions",
     "unapproved questinfo.dat/taskitem_info.dat candidate decodes"
   ],
-  "admission_rule": "Do not activate a record until exact steps, branches, IDs, targets, UI states, rewards, and matching pinned-client evidence are verified. Expired event content is not active by default."
+  "admission_rule": "Do not activate a record until exact steps, branches, IDs, targets, UI states, rewards, and matching pinned-client evidence are verified. Expired event content is not active by default.",
+  "adjacent_guide_sections": {
+    "welfare": {
+      "items": [
+        "Sign In",
+        "Daily Packs"
+      ],
+      "classification": "account_reward_and_daily_claim_systems_not_yet_confirmed_as_missions",
+      "source_uri": "https://comobile.99.com/guide/info/info.shtml"
+    },
+    "note": "The official Mobile guide navigation places Welfare and Trials under Quests. Trials are catalogued as gameplay activities, not assumed narrative NPC quests. Welfare is tracked separately pending deeper mechanics review."
+  },
+  "source_comparison_policy": "External PC Conquer lists and development references are discovery/architecture leads only. A record is admitted to Mobile catalogue only with Mobile-specific evidence."
 }
