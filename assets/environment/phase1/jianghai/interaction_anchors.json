@@ -110,7 +110,7 @@
     },
     {
       "id": "jianghai.hotel_frontage",
-      "node_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict/AvenueHotelBladeBacking",
+      "node_path": "JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/CentralAvenue",
       "kind": "service_frontage",
       "task_tags": [
         "visit",
@@ -124,21 +124,22 @@
       "npc_id": "npc_jianghai_innkeeper",
       "role": "innkeeper",
       "spawn_offset_local": [
-        0,
-        -4.2,
-        3
+        -8.7,
+        -0.14,
+        -34.5
       ],
       "spawn_enabled": false,
       "requires_clearance_validation": true,
       "target_offset_local": [
-        0,
-        -4.2,
-        3
-      ]
+        -9.5,
+        -0.14,
+        -34.5
+      ],
+      "surface_validation_status": "central_avenue_walkable_edge_candidate_pending_nav_projection_and_clearance"
     },
     {
       "id": "jianghai.medicine_frontage",
-      "node_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict/AvenueMedicineBladeBacking",
+      "node_path": "JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/ExtractionSquare",
       "kind": "service_frontage",
       "task_tags": [
         "visit",
@@ -153,21 +154,22 @@
       "npc_id": "npc_jianghai_apothecary",
       "role": "apothecary",
       "spawn_offset_local": [
-        0,
-        -4.3,
-        3
+        13,
+        -0.045,
+        -48
       ],
       "spawn_enabled": false,
       "requires_clearance_validation": true,
       "target_offset_local": [
-        0,
-        -4.3,
-        3
-      ]
+        11.6,
+        -0.045,
+        -48
+      ],
+      "surface_validation_status": "extraction_square_walkable_surface_candidate_pending_nav_projection_and_clearance"
     },
     {
       "id": "jianghai.tea_frontage",
-      "node_path": "JianghaiOldCityAuthoredScene/JianghaiTenementDistrict/AvenueTeaBladeBacking",
+      "node_path": "JianghaiOldCityAuthoredScene/AuthoredStreetNetwork/CentralAvenue",
       "kind": "service_frontage",
       "task_tags": [
         "visit",
@@ -182,17 +184,18 @@
       "npc_id": "npc_jianghai_tea_merchant",
       "role": "merchant",
       "spawn_offset_local": [
-        0,
-        -4.35,
-        3
+        8.7,
+        -0.14,
+        -8
       ],
       "spawn_enabled": false,
       "requires_clearance_validation": true,
       "target_offset_local": [
-        0,
-        -4.35,
-        3
-      ]
+        9.5,
+        -0.14,
+        -8
+      ],
+      "surface_validation_status": "central_avenue_walkable_edge_candidate_pending_nav_projection_and_clearance"
     }
   ]
 }
