@@ -143,8 +143,11 @@ func _run() -> void:
 		_fail("Path of Shadow did not activate Assassin form and its Throwing Knife.")
 		return
 	var assassin_skills := CombatEngine.get_class_skills("Archer")
-	if assassin_skills.is_empty() or assassin_skills[0] != "archer_path_of_shadow" or assassin_skills.has("archer_rapid_arrow") or not assassin_skills.has("archer_shadow_dagger"):
-		_fail("Assassin form did not filter the Archer skill set correctly.")
+	if assassin_skills.is_empty() or assassin_skills[0] != "archer_path_of_shadow":
+		_fail("Path of Shadow disappeared from the Assassin form skill list.")
+		return
+	if progression.is_skill_compatible(bow_skill) or not progression.is_skill_compatible(assassin_skill):
+		_fail("Assassin form did not enforce the separate Throwing Knife skill eligibility rule.")
 		return
 	if not CombatEngine.execute_skill("archer_path_of_shadow", player, null):
 		_fail("Path of Shadow failed to return to Archer form.")
@@ -153,8 +156,11 @@ func _run() -> void:
 		_fail("Path of Shadow did not restore Archer form and its Bow.")
 		return
 	var restored_bow_skills := CombatEngine.get_class_skills("Archer")
-	if restored_bow_skills.is_empty() or restored_bow_skills[0] != "archer_path_of_shadow" or restored_bow_skills.has("archer_shadow_dagger") or not restored_bow_skills.has("archer_rapid_arrow"):
-		_fail("Archer form did not restore the Bow-only skill set.")
+	if restored_bow_skills.is_empty() or restored_bow_skills[0] != "archer_path_of_shadow":
+		_fail("Path of Shadow disappeared after returning to Archer form.")
+		return
+	if not progression.is_skill_compatible(bow_skill) or progression.is_skill_compatible(assassin_skill):
+		_fail("Archer form did not restore the separate Bow skill eligibility rule.")
 		return
 	if not CombatEngine.execute_skill("archer_path_of_shadow", player, null):
 		_fail("Path of Shadow failed on the second Assassin activation.")
