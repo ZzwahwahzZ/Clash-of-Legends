@@ -96,6 +96,8 @@ jobs:
       - name: Build verified quest NPC map dialogue and story-scene cross-links
         run: |
           set -euo pipefail
+          python3 -m py_compile tools/gameplay_source_audit/parse_mobile_quest_catalog.py
+          python3 -m py_compile tools/gameplay_source_audit/decode_mobile_lua_content.py
           python3 -m py_compile tools/gameplay_source_audit/build_mobile_quest_world_links.py
           python3 tools/gameplay_source_audit/build_mobile_quest_world_links.py \
             build/mobile-quest-source/selected \
