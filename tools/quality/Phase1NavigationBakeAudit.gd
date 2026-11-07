@@ -185,7 +185,7 @@ func _save_world_scene() -> int:
 		static_body.owner = root
 		collision_shape.owner = root
 		_walkable_collision_count += 1
-	_add_approved_urban_infill(city_instance)
+	_add_approved_urban_infill(city_instance, root)
 	_add_building_obstacle_collisions(city_instance, root)
 	_add_infill_obstacle_collisions(city_instance, root)
 	_add_market_bridge_rail_collisions(city_instance, root)
@@ -203,7 +203,7 @@ func _save_world_scene() -> int:
 	root.free()
 	return save_error
 
-func _add_approved_urban_infill(city_instance: Node3D) -> void:
+func _add_approved_urban_infill(city_instance: Node3D, scene_root: Node3D) -> void:
 	# Four candidates passed the transformed-AABB audit: no authored-building
 	# or street-network overlap. Reuse the exact source meshes/materials.
 	var district := city_instance.get_node_or_null("JianghaiOldCityAuthoredScene/JianghaiTenementDistrict") as Node3D
@@ -231,14 +231,16 @@ func _add_approved_urban_infill(city_instance: Node3D) -> void:
 		clone.transform = template.transform
 		clone.position = Vector3(float(placement["x"]), template.position.y, float(placement["z"]))
 		clone.scale = template.scale * float(placement["scale"])
-		clone.owner = city_instance
-		for child in clone.get_children():
-			if child is Node:
-				child.owner = city_instance
+		_set_owner_recursive(clone, scene_root)
 		added += 1
 	print("PHASE1 APPROVED URBAN INFILL: integrated ", added, "/", placements.size(), " source-matched buildings")
 	if added != placements.size():
 		push_error("Urban infill integration incomplete: expected four approved placements.")
+
+func _set_owner_recursive(node: Node, scene_root: Node) -> void:
+	node.owner = scene_root
+	for child in node.get_children():
+		_set_owner_recursive(child, scene_root)
 
 func _add_infill_obstacle_collisions(city_instance: Node3D, scene_root: Node3D) -> void:
 	var infill_names := ["Integrated_WestMidShop", "Integrated_EastMidShop", "Integrated_EastSouthArcade", "Integrated_EastSouthHall"]
