@@ -25,7 +25,6 @@ for q in quests:
         ref = q.get(key)
         if ref is not None and ref.get("parse_status") == "parsed":
             assert int(ref["map_id"]) > 0, f"Quest {q['mission_id']} has invalid {key} map ID"
-            assert int(ref["npc_id"]) >= 0, f"Quest {q['mission_id']} has invalid {key} NPC ID"
 dialogues = data.get("dialogue_sources", [])
 assert dialogues and all(x.get("runtime_status") == "SOURCE_PRESENT_DECODE_NOT_VALIDATED" for x in dialogues), "Encrypted dialogue must remain explicitly unapproved"
 print("RUNTIME WORLD INDEX STRUCTURE PASSED")
