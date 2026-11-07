@@ -306,6 +306,29 @@ def main():
                          "map_id":x.get("map_id"),"x":x.get("x"),"y":x.get("y"),"map_name":x.get("map_name")} for x in location_candidates]}
                 dialogue_npc_refs.append(ref)
                 mission_dialogue_npcs[flow["mission_id"]].append(ref)
+    placement_groups={}
+    for nr in npc_refs:
+        nid=int_or_none(nr.get("npc_id"))
+        if nid is None or nid<=0:continue
+        key=(str(nr.get("npc_id")),str(nr.get("map_id")),nr.get("x"),nr.get("y"),nr.get("name",""))
+        if key not in placement_groups:
+            placement_groups[key]={"npc_id":key[0],"map_id":key[1],"x":key[2],"y":key[3],"name":key[4],
+                "mission_ids":set(),"roles":set(),"npc_type_name_candidates":set(),"npc_appearance_name_candidates":set(),
+                "mapdestination_exact_coordinate_match":False,"mapdestination_matches":[]}
+        g=placement_groups[key]
+        g["mission_ids"].add(nr["mission_id"]);g["roles"].add(nr["role"])
+        g["npc_type_name_candidates"].update(nr.get("npc_type_name_candidates",[]))
+        g["npc_appearance_name_candidates"].update(nr.get("npc_appearance_name_candidates",[]))
+        g["mapdestination_exact_coordinate_match"]=g["mapdestination_exact_coordinate_match"] or nr.get("mapdestination_exact_coordinate_match",False)
+        g["mapdestination_matches"].extend(nr.get("mapdestination_matches",[]))
+    npc_world_placements=[]
+    for key,g in sorted(placement_groups.items(),key=lambda x:(x[0][1],x[0][0],x[0][2] or -1,x[0][3] or -1)):
+        g["mission_ids"]=sorted(g["mission_ids"],key=lambda x:int(x) if x.isdigit() else x)
+        g["roles"]=sorted(g["roles"])
+        g["npc_type_name_candidates"]=sorted(g["npc_type_name_candidates"])
+        g["npc_appearance_name_candidates"]=sorted(g["npc_appearance_name_candidates"])
+        g["mapdestination_matches"]=[dict(t) for t in {tuple(sorted(x.items())) for x in g["mapdestination_matches"]}]
+        npc_world_placements.append(g)
     dialogue_npc_summary={"reference_count":len(dialogue_npc_refs),
         "unique_npc_type_ids":len({r["npc_type_id"] for r in dialogue_npc_refs}),
         "mission_ids_with_dialogue_npcs":len(mission_dialogue_npcs),
@@ -336,13 +359,13 @@ def main():
       "alternate_server_catalog":{"source":"ini/questinfopassionserver.ini","records":len(passion_records),"unique_mission_ids":len(passion_ids),"overlap_with_default_catalog":len(passion_ids&mission_ids),"type_id_names":passion_type_names},
       "dependency_graph":{"prerequisite_edges":len(prereq),"unique_edges":len(set(prereq)),"unresolved_edges":unresolved,"unique_unresolved_ids":sorted({x["prerequisite_id"] for x in unresolved},key=lambda x:int(x) if x.isdigit() else x),"unresolved_ids_also_present_in_passion_server_catalog":sorted({x["prerequisite_id"] for x in unresolved if x["prerequisite_id"] in passion_ids},key=lambda x:int(x) if x.isdigit() else x),"self_edges":[{"from":p,"to":m} for p,m in prereq if p==m],"cycles":cycles,"missions_with_prerequisites":len({m for p,m in prereq}),"root_mission_count":len(mission_ids-{m for p,m in prereq if m in mission_ids})},
       "progress_conditions":{"reference_count":len(checks),"unresolved_references":checks_unresolved,"self_reference_count":sum(x["condition_quest_id"]==x["mission_id"] for x in checks),"cross_mission_reference_count":sum(x["condition_quest_id"]!=x["mission_id"] for x in checks),"self_references":[x for x in checks if x["condition_quest_id"]==x["mission_id"]]},
-      "npc_linkage":{"reference_count":len(npc_refs),"unique_positive_npc_ids":len({r["npc_id"] for r in npc_refs if int_or_none(r["npc_id"]) and int_or_none(r["npc_id"])>0}),"mapdestination_id_map_matches":sum(bool(r["mapdestination_matches"]) for r in npc_refs),"exact_coordinate_matches":sum(r["mapdestination_exact_coordinate_match"] for r in npc_refs),"npc_type_name_candidate_refs":sum(bool(r["npc_type_name_candidates"]) for r in npc_refs),"appearance_name_candidate_refs":sum(bool(r["npc_appearance_name_candidates"]) for r in npc_refs)},
+      "npc_linkage":{"reference_count":len(npc_refs),"unique_positive_npc_ids":len({r["npc_id"] for r in npc_refs if int_or_none(r["npc_id"]) and int_or_none(r["npc_id"])>0}),"mapdestination_id_map_matches":sum(bool(r["mapdestination_matches"]) for r in npc_refs),"exact_coordinate_matches":sum(r["mapdestination_exact_coordinate_match"] for r in npc_refs),"npc_type_name_candidate_refs":sum(bool(r["npc_type_name_candidates"]) for r in npc_refs),"appearance_name_candidate_refs":sum(bool(r["npc_appearance_name_candidates"]) for r in npc_refs),"unique_world_placement_candidates":len(npc_world_placements)},
       "map_linkage":{"unique_map_ids":len(map_ids),"missing_from_all_available_map_indexes":sorted(map_ids-(gamemap|gmex|mapdest_ids)),"map_ids_in_gamemap_dat":len(gamemap),"map_ids_in_gamemapex_ini":len(gmex),"map_ids_in_mapdestination_ini":len(mapdest_ids),"map_id_details":map_id_details},
       "monster_linkage":{"reference_count":len(mob_refs),"unique_names":len({r["name"] for r in mob_refs}),"matched_references":sum(bool(r["monster_type_ids"]) for r in mob_refs),"npc_type_candidate_references":sum(bool(r["npc_type_ids"]) for r in mob_refs),"npc_appearance_candidate_references":sum(bool(r["npc_appearance_ids"]) for r in mob_refs),"mapdestination_title_candidate_references":sum(bool(r["mapdestination_title_sections"]) for r in mob_refs),"unresolved_or_scripted_object_references":sum(not r["target_classifications"] or r["target_classifications"]==["unresolved_or_scripted_object"] for r in mob_refs),"unmatched_names":sorted({r["name"] for r in mob_refs if not r["monster_type_ids"]})},
       "item_linkage":{"reference_count":len(item_refs),"unique_item_ids":len({r.get("item_id") for r in item_refs if r.get("item_id")}),"item_definitions_available":len(item_defs),"matched_item_ids":sum(bool(r.get("item_definition")) for r in item_refs if r.get("item_id")),"unmatched_item_ids":sorted({r["item_id"] for r in item_refs if r.get("item_id") and r["item_id"] not in item_defs},key=lambda x:int(x) if x.isdigit() else x),"matched_world_item_name_references":sum(bool(r.get("item_name_candidate_ids")) for r in item_refs)},
       "dialogue":{k:v for k,v in dialogue.items() if k not in ("flows","mission_flows")},"dialogue_npc_linkage":dialogue_npc_summary,
       "missions": [rows[0] for _,rows in sorted(by_id.items(),key=lambda x:int(x[0]))],"mission_source_records":mission_records_all,
-      "npc_references":npc_refs,"dialogue_npc_references":dialogue_npc_refs,"mission_dialogue_npcs":[{"mission_id":k,"npc_references":v} for k,v in sorted(mission_dialogue_npcs.items(),key=lambda x:int(x[0]))],"map_references":map_refs,"mob_references":mob_refs,"item_references":item_refs,
+      "npc_references":npc_refs,"npc_world_placements":npc_world_placements,"dialogue_npc_references":dialogue_npc_refs,"mission_dialogue_npcs":[{"mission_id":k,"npc_references":v} for k,v in sorted(mission_dialogue_npcs.items(),key=lambda x:int(x[0]))],"map_references":map_refs,"mob_references":mob_refs,"item_references":item_refs,
       "dialogue_flows":dialogue["flows"],"mission_dialogue_flows":dialogue["mission_flows"]
     }
     # Keep a compact source fingerprint manifest with the report.
@@ -410,6 +433,8 @@ def main():
             ["source_section","source_line","mission_id","name","name_ar","type_id","type_name","big_type_id","level_min","level_max","activity_type","repeat_or_abandon","map_field","begin_raw","finish_raw"]),
         write_csv("mission_npc_map_links.csv",npc_export,
             ["mission_id","mission_name","mission_name_ar","mission_type_id","mission_type_name","role","npc_id","name","map_id","map_name","x","y","npc_type_name_candidates","npc_appearance_name_candidates","mapdestination_exact_coordinate_match","mapdestination_matches"]),
+        write_csv("npc_world_placements.csv",npc_world_placements,
+            ["npc_id","name","map_id","x","y","mission_ids","roles","npc_type_name_candidates","npc_appearance_name_candidates","mapdestination_exact_coordinate_match","mapdestination_matches"]),
         write_csv("mission_dialogue_npc_links.csv",dialogue_npc_export,
             ["mission_id","mission_name","mission_name_ar","dialogue_id","talk_index","npc_type_id","npc_type_name","simple_object_id","effect","standby_motion","arabic_display_name","name_key","appearance_candidates","quest_location_candidates"]),
         write_csv("mission_map_links.csv",map_export,["mission_id","mission_name","mission_name_ar","role","map_id","x","y","gamemapex_name","map_resource_path","quest_source_map_names"]),
