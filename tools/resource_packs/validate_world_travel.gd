@@ -12,8 +12,8 @@ func _run_travel_test() -> void:
 	if int(source_counts.get("missions", 0)) != 2509:
 		_fail("Expected 2509 unique source missions, got %s." % str(source_counts.get("missions", 0)))
 		return
-	if int(source_counts.get("maps", 0)) != 413:
-		_fail("Expected 413 source map records, got %s." % str(source_counts.get("maps", 0)))
+	if int(source_counts.get("maps", 0)) != 411:
+		_fail("Expected 411 unique source map records, got %s." % str(source_counts.get("maps", 0)))
 		return
 	var source_mission := source_catalog.get_mission("650")
 	if source_mission.is_empty() or str(source_mission.get("finish_npc", {}).get("npc_id", "")) != "0004":
