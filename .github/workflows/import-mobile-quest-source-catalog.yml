@@ -47,4 +47,6 @@ jobs:
             exit 0
           fi
           git commit -m "Import source-backed Mobile quest and map catalog"
+          git fetch origin research/mobile-quest-dat-decoder
+          git rebase origin/research/mobile-quest-dat-decoder
           git push origin HEAD:research/mobile-quest-dat-decoder
