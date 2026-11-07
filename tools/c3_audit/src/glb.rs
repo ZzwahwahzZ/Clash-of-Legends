@@ -1,5 +1,6 @@
 use sandbox_data::c3::{C3Document, Matrix4};
 use serde_json::{json, Value};
+use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 
@@ -141,7 +142,21 @@ pub fn export_document_with_external_motion(
     export_document(&merged_document, texture_png, source, output)
 }
 
+#[derive(Clone)]
+pub struct MeshTexture { pub key: String, pub png: Vec<u8> }
+
 pub fn export_document(document: &C3Document, texture_png: &[u8], source: &str, output: &Path) -> Result<(u64, usize, usize), Box<dyn std::error::Error>> {
+    let shared = if texture_png.is_empty() { None } else {
+        Some(MeshTexture { key: "shared".to_owned(), png: texture_png.to_vec() })
+    };
+    let bindings = vec![shared; document.meshes.len()];
+    export_document_with_mesh_textures(document, &bindings, source, output)
+}
+
+pub fn export_document_with_mesh_textures(document: &C3Document, bindings: &[Option<MeshTexture>], source: &str, output: &Path) -> Result<(u64, usize, usize), Box<dyn std::error::Error>> {
+    if bindings.len() != document.meshes.len() {
+        return Err("per-mesh texture binding count does not match PHY mesh count".into());
+    }
     let mut builder = GlbBuilder::new();
     let mut gltf_meshes: Vec<Value> = Vec::new();
     let mut nodes: Vec<Value> = vec![json!({"name":"C3_Root","children":[]})];
@@ -151,6 +166,11 @@ pub fn export_document(document: &C3Document, texture_png: &[u8], source: &str, 
     let mut animation_frame_report: Vec<Value> = Vec::new();
     let mut mesh_count = 0usize;
     let mut animated_mesh_count = 0usize;
+    let mut materials: Vec<Value> = Vec::new();
+    let mut samplers: Vec<Value> = Vec::new();
+    let mut textures: Vec<Value> = Vec::new();
+    let mut images: Vec<Value> = Vec::new();
+    let mut texture_cache: HashMap<String, usize> = HashMap::new();
 
     // C3 documents commonly store one MOTI chunk per PHY mesh. Do not reuse
     // document.motions.first() for every mesh: that freezes most body parts.
@@ -158,6 +178,25 @@ pub fn export_document(document: &C3Document, texture_png: &[u8], source: &str, 
         if mesh.vertices.is_empty() || (mesh.opaque_indices.is_empty() && mesh.alpha_indices.is_empty()) {
             continue;
         }
+        let texture_index = if let Some(binding) = bindings[mesh_index].as_ref() {
+            if let Some(index) = texture_cache.get(&binding.key) { Some(*index) } else {
+                let index = textures.len();
+                let image_view = builder.add_view(&binding.png, None);
+                images.push(json!({"bufferView":image_view,"mimeType":"image/png"}));
+                samplers.push(json!({"magFilter":9729,"minFilter":9987,"wrapS":10497,"wrapT":10497}));
+                textures.push(json!({"sampler":index,"source":index}));
+                texture_cache.insert(binding.key.clone(), index);
+                Some(index)
+            }
+        } else { None };
+        let opaque_material = materials.len();
+        let mut opaque_pbr = json!({"baseColorFactor":[1.0,1.0,1.0,1.0],"metallicFactor":0.0,"roughnessFactor":1.0});
+        if let Some(index) = texture_index { opaque_pbr["baseColorTexture"] = json!({"index":index}); }
+        materials.push(json!({"name":format!("C3 mesh {mesh_index} opaque"),"pbrMetallicRoughness":opaque_pbr,"doubleSided":true}));
+        let alpha_material = materials.len();
+        let mut alpha_pbr = json!({"baseColorFactor":[1.0,1.0,1.0,1.0],"metallicFactor":0.0,"roughnessFactor":1.0});
+        if let Some(index) = texture_index { alpha_pbr["baseColorTexture"] = json!({"index":index}); }
+        materials.push(json!({"name":format!("C3 mesh {mesh_index} alpha"),"pbrMetallicRoughness":alpha_pbr,"alphaMode":"BLEND","doubleSided":true}));
         let motion = document.motions.get(mesh_index);
         // VAT stores frame zero as its base row. The GLB morph base must use
         // that exact same C3 sample even when a mesh's first MOTI key starts
@@ -232,14 +271,14 @@ pub fn export_document(document: &C3Document, texture_png: &[u8], source: &str, 
         if !mesh.opaque_indices.is_empty() {
             let view = builder.add_view(&u16_bytes(&mesh.opaque_indices), Some(34963));
             let accessor = builder.add_accessor(view, 5123, mesh.opaque_indices.len(), "SCALAR", None, None);
-            let mut primitive = json!({"attributes":{"POSITION":pos_accessor,"NORMAL":normal_accessor,"TEXCOORD_0":uv_accessor,"TEXCOORD_1":source_index_accessor},"indices":accessor,"material":0,"mode":4});
+            let mut primitive = json!({"attributes":{"POSITION":pos_accessor,"NORMAL":normal_accessor,"TEXCOORD_0":uv_accessor,"TEXCOORD_1":source_index_accessor},"indices":accessor,"material":opaque_material,"mode":4});
             if animated { primitive["targets"] = json!(targets); }
             primitives.push(primitive);
         }
         if !mesh.alpha_indices.is_empty() {
             let view = builder.add_view(&u16_bytes(&mesh.alpha_indices), Some(34963));
             let accessor = builder.add_accessor(view, 5123, mesh.alpha_indices.len(), "SCALAR", None, None);
-            let mut primitive = json!({"attributes":{"POSITION":pos_accessor,"NORMAL":normal_accessor,"TEXCOORD_0":uv_accessor,"TEXCOORD_1":source_index_accessor},"indices":accessor,"material":1,"mode":4});
+            let mut primitive = json!({"attributes":{"POSITION":pos_accessor,"NORMAL":normal_accessor,"TEXCOORD_0":uv_accessor,"TEXCOORD_1":source_index_accessor},"indices":accessor,"material":alpha_material,"mode":4});
             if animated { primitive["targets"] = json!(targets); }
             primitives.push(primitive);
         }
@@ -290,33 +329,6 @@ pub fn export_document(document: &C3Document, texture_png: &[u8], source: &str, 
     }
     nodes[0]["children"] = json!(children);
 
-    let (materials, samplers, textures, images) = if texture_png.is_empty() {
-        (
-            vec![
-                json!({"name":"C3 opaque color-only","pbrMetallicRoughness":{"baseColorFactor":[1.0,1.0,1.0,1.0],"metallicFactor":0.0,"roughnessFactor":1.0},"doubleSided":true}),
-                json!({"name":"C3 alpha color-only","pbrMetallicRoughness":{"baseColorFactor":[1.0,1.0,1.0,1.0],"metallicFactor":0.0,"roughnessFactor":1.0},"alphaMode":"BLEND","doubleSided":true})
-            ],
-            Vec::<Value>::new(),
-            Vec::<Value>::new(),
-            Vec::<Value>::new()
-        )
-    } else {
-        let image_view = builder.add_view(texture_png, None);
-        (
-            vec![
-                json!({"name":"C3 opaque texture","pbrMetallicRoughness":{"baseColorFactor":[1.0,1.0,1.0,1.0],"baseColorTexture":{"index":0},"metallicFactor":0.0,"roughnessFactor":1.0},"doubleSided":true}),
-                json!({"name":"C3 alpha texture","pbrMetallicRoughness":{"baseColorFactor":[1.0,1.0,1.0,1.0],"baseColorTexture":{"index":0},"metallicFactor":0.0,"roughnessFactor":1.0},"alphaMode":"BLEND","doubleSided":true})
-            ],
-            vec![json!({"magFilter":9729,"minFilter":9987,"wrapS":10497,"wrapT":10497})],
-            vec![json!({"sampler":0,"source":0})],
-            vec![json!({"bufferView":image_view,"mimeType":"image/png"})]
-        )
-    };
-    let animations = if animation_channels.is_empty() {
-        Vec::new()
-    } else {
-        vec![json!({"name":"C3_Motion_0","samplers":animation_samplers,"channels":animation_channels})]
-    };
     let motion_info: Vec<Value> = document.motions.iter()
         .map(|m| json!({"bone_count":m.bone_count,"frame_count":m.frame_count,"key_count":m.keys.len(),"morph_count":m.morph_count}))
         .collect();
@@ -422,6 +434,23 @@ mod tests {
         assert!(gltf["textures"].as_array().unwrap().is_empty());
         assert!(gltf["materials"][0]["pbrMetallicRoughness"].get("baseColorTexture").is_none());
         fs::remove_file(output).unwrap();
+    }
+
+    #[test]
+    fn per_mesh_color_only_and_textured_materials_are_separate() {
+        let document = C3Document { version:"test".into(), meshes:vec![mesh("a"),mesh("b")], motions:Vec::new(), unknown_chunks:Vec::new() };
+        let bindings = vec![Some(MeshTexture{key:"atlas".into(),png:b"png".to_vec()}),None];
+        let path = std::env::temp_dir().join(format!("c3-per-mesh-{}.glb",std::process::id()));
+        export_document_with_mesh_textures(&document,&bindings,"test.c3",&path).unwrap();
+        let bytes=fs::read(&path).unwrap();
+        let n=u32::from_le_bytes(bytes[12..16].try_into().unwrap()) as usize;
+        let doc:Value=serde_json::from_slice(&bytes[20..20+n]).unwrap();
+        assert_eq!(doc["images"].as_array().unwrap().len(),1);
+        assert_eq!(doc["materials"].as_array().unwrap().len(),4);
+        assert_eq!(doc["meshes"][0]["primitives"][0]["material"],0);
+        assert_eq!(doc["meshes"][1]["primitives"][0]["material"],2);
+        assert!(doc["materials"][2]["pbrMetallicRoughness"].get("baseColorTexture").is_none());
+        fs::remove_file(path).unwrap();
     }
 
     #[test]

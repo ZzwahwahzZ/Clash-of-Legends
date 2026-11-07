@@ -296,13 +296,43 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             "texture_expected":texture_path.to_string_lossy()
                         }));
                     } else if mixed_color_and_textured {
-                        skipped.push(json!({
-                            "source":relative,
-                            "reason":"mixed color-only and textured PHY meshes require per-mesh material binding",
-                            "texture_assignment":texture_assignment,
-                            "source_texture_names":document.meshes.iter().map(|mesh| mesh.texture_name.clone())
-                                .filter(|name| !name.is_empty()).collect::<std::collections::BTreeSet<_>>()
-                        }));
+                        let parent = rel_path.parent().unwrap_or(Path::new(""));
+                        let mut bindings = Vec::with_capacity(document.meshes.len());
+                        let mut assignments = Vec::new();
+                        let mut missing = std::collections::BTreeSet::new();
+                        for mesh in &document.meshes {
+                            let name = mesh.texture_name.trim();
+                            if name.is_empty() || name.eq_ignore_ascii_case("C3EXP_COLOR") {
+                                bindings.push(None);
+                                assignments.push(json!({"mesh":mesh.name,"texture":name,"path":Value::Null}));
+                                continue;
+                            }
+                            let normalized = name.replace('\\', "/");
+                            let stem = Path::new(&normalized).file_stem().and_then(|v|v.to_str()).unwrap_or("");
+                            let path = pvr_root.join(parent).join(format!("{stem}.png"));
+                            if !stem.is_empty() && path.is_file() {
+                                let key = path.to_string_lossy().to_string();
+                                bindings.push(Some(glb::MeshTexture{key:key.clone(),png:fs::read(&path)?}));
+                                assignments.push(json!({"mesh":mesh.name,"texture":name,"path":key}));
+                            } else {
+                                missing.insert(name.to_owned());
+                                bindings.push(None);
+                                assignments.push(json!({"mesh":mesh.name,"texture":name,"path":Value::Null}));
+                            }
+                        }
+                        if missing.is_empty() {
+                            let output_relative=Path::new(category).join("c3").join(inner.with_extension("glb"));
+                            let output_path=glb_root.join(&output_relative);
+                            match glb::export_document_with_mesh_textures(&document,&bindings,&relative,&output_path) {
+                                Ok((glb_bytes,mesh_count,animated_mesh_count)) => {
+                                    total_animated_meshes += animated_mesh_count as u64;
+                                    converted.push(json!({"source":relative,"output":output_relative.to_string_lossy().replace('\\',"/"),"texture":Value::Null,"texture_assignment":"per_mesh_exact_same_parent_reference","mesh_texture_assignments":assignments,"glb_bytes":glb_bytes,"mesh_count":mesh_count,"motion_chunk_count":document.motions.len(),"animated_mesh_count":animated_mesh_count}));
+                                },
+                                Err(error) => skipped.push(json!({"source":relative,"reason":error.to_string(),"texture_assignment":"per_mesh_exact_same_parent_reference"}))
+                            }
+                        } else {
+                            skipped.push(json!({"source":relative,"reason":"one or more per-mesh texture references unresolved","missing_texture_names":missing,"mesh_texture_assignments":assignments,"texture_assignment":"per_mesh_exact_same_parent_reference"}));
+                        }
                     } else if let Some(texture_bytes) = texture_bytes {
                         let output_relative = Path::new(category).join("c3").join(inner.with_extension("glb"));
                         let output_path = glb_root.join(&output_relative);
