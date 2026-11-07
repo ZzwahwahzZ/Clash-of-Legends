@@ -251,12 +251,13 @@ func _validate_saved_runtime_scene() -> Dictionary:
 		if child is StaticBody3D:
 			body_count += 1
 			var body := child as StaticBody3D
+			if body.name.begins_with("WalkableCollision_"):
+				walkable_body_count += 1
 			for shape_node in body.get_children():
 				if not (shape_node is CollisionShape3D):
 					continue
 				shape_count += 1
 				if body.name.begins_with("WalkableCollision_"):
-					walkable_body_count += 1 if body.get_child_count() > 0 and walkable_shape_count == 0 else 0
 					walkable_shape_count += 1
 					walkable_transform_checks += 1
 					if (shape_node as CollisionShape3D).transform.is_equal_approx(Transform3D.IDENTITY):
