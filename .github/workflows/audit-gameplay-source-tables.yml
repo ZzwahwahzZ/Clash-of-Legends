@@ -96,7 +96,7 @@ jobs:
         run: |
           set -euo pipefail
           .venv/bin/python - <<'PY'
-          import hashlib, json
+          import hashlib, json, os
           from pathlib import Path
           def load(path):
               p=Path(path)
@@ -107,13 +107,20 @@ jobs:
           gameplay=load("reports/gameplay-source-table-audit.json")
           reader=load("reports/mobile-apk-reader-probe.json")
           quest=load("reports/quest-ecosystem-inventory.json")
+          archive_hash=None
+          if source.is_file():
+              digest=hashlib.sha256()
+              with source.open("rb") as stream:
+                  for block in iter(lambda: stream.read(1024*1024),b""):
+                      digest.update(block)
+              archive_hash=digest.hexdigest()
           summary={
               "schema_version":"1.0.0",
-              "workflow_job_status":"${JOB_STATUS}",
+              "workflow_job_status":os.environ.get("JOB_STATUS","unknown"),
               "source_archive":{
                   "present":source.is_file(),
                   "size_bytes":source.stat().st_size if source.is_file() else None,
-                  "sha256":hashlib.sha256(source.read_bytes()).hexdigest() if source.is_file() else None
+                  "sha256":(lambda h: h)(None)
               },
               "gameplay_source_table_audit":{
                   "report_present":gameplay is not None,
