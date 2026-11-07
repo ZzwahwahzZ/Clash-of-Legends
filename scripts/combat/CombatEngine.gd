@@ -46,6 +46,12 @@ func can_cast_skill(skill_id: String, caster: CharacterBody3D) -> bool:
 		return false
 	if not is_skill_compatible(def):
 		return false
+	if def.get("effect", "") == "form_toggle" and ClassProgressionManager and ClassProgressionManager.selected_weapon_style == "bow":
+		var player = GameManager.player_reference if GameManager else null
+		if is_instance_valid(player) and player.has_node("PlayerInventory"):
+			var inventory = player.get_node("PlayerInventory")
+			if inventory.has_method("has_weapon_for_style") and not inventory.has_weapon_for_style("throwing_knives"):
+				return false
 	if cooldown_trackers.get(skill_id, 0.0) > 0.0:
 		return false
 	if caster.has_method("get_mp") and caster.get_mp() < def["mp_cost"]:
