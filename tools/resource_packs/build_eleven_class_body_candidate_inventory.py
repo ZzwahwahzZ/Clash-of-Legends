@@ -35,7 +35,6 @@ def main():
         })
         item["source_rows"] += 1
 
-    # Merge both UI registries, then deduplicate repeated evidence from the same slot.
     identity = {}
     for row in roles.get("selection_ui_roles_unjoined", []):
         src = row.get("source_role_identity") or {}
@@ -62,14 +61,16 @@ def main():
                 "identity_status": row.get("mapping_status"),
             })
 
-    matrix = []
-    for name in CLASSES:
-        records = identity.get(name, [])
+    def unique_records(records):
         unique = {}
         for record in records:
             key = (record["gender"], record["slot"], record["profession_index"], record["simple_object_id"])
             unique[key] = record
-        records = list(unique.values())
+        return list(unique.values())
+
+    matrix = []
+    for name in CLASSES:
+        records = unique_records(identity.get(name, []))
         joined = [r for r in records if r["simple_object_id"] is not None]
         if joined:
             status = "SOURCE_CLASS_GENDER_AND_SIMPLE_ROLE_JOIN_FOUND_BODY_ASSET_UNRESOLVED"
@@ -86,18 +87,28 @@ def main():
             "status": status,
         })
 
-    label_classes = sum(bool(row["source_identity_records"]) for row in matrix)
-    joined_classes = sum(bool(row["simple_role_join_records"]) for row in matrix)
+    unresolved_tokens = []
+    for token in sorted(set(identity) - set(CLASSES)):
+        records = unique_records(identity[token])
+        unresolved_tokens.append({
+            "source_identity_token": token,
+            "source_identity_records": records,
+            "simple_role_join_records": [r for r in records if r["simple_object_id"] is not None],
+            "normalization_status": "SOURCE_TOKEN_NOT_NORMALIZED_TO_A_GAME_CLASS",
+        })
+
     result = {
-        "schema_version": "1.1.0",
+        "schema_version": "1.2.0",
         "source": "Conquer Online Mobile 1.1.2.3 C3 conversion audit",
         "converted_unique_body_models": len(bodies),
-        "source_label_classes": label_classes,
-        "classes_with_simple_role_index_joins": joined_classes,
+        "source_identity_token_count": len(identity),
+        "game_classes_with_source_label_match": sum(bool(x["source_identity_records"]) for x in matrix),
+        "game_classes_with_simple_role_index_joins": sum(bool(x["simple_role_join_records"]) for x in matrix),
+        "unresolved_source_identity_tokens": unresolved_tokens,
         "body_model_candidates": sorted(bodies.values(), key=lambda x: x["model_id"]),
         "class_matrix": matrix,
         "normalization_notes": {
-            "Taoist": "The source token Taoist is not yet split into Water Taoist and Fire Taoist.",
+            "Taoist": "A generic Taoist source token and Role0/Role1 simple-role joins exist, but the source evidence does not split them into Water Taoist and Fire Taoist.",
             "Dragon Warrior": "No direct source token found; do not infer from generic Warrior.",
             "Ninja": "Source role labels exist, but no matching simple-role records were joined.",
             "Monk": "A source role label exists, but no matching simple-role record was joined.",
@@ -115,9 +126,11 @@ def main():
     OUT.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({
         "converted_unique_body_models": len(bodies),
-        "classes": len(CLASSES),
-        "source_label_classes": label_classes,
-        "classes_with_simple_role_index_joins": joined_classes,
+        "game_classes": len(CLASSES),
+        "source_identity_tokens": len(identity),
+        "game_classes_with_source_labels": result["game_classes_with_source_label_match"],
+        "game_classes_with_simple_role_joins": result["game_classes_with_simple_role_index_joins"],
+        "unresolved_source_tokens": len(unresolved_tokens),
     }, ensure_ascii=False))
 
 
