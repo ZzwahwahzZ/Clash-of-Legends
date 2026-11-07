@@ -43,6 +43,7 @@ jobs:
           assert p["dependency_graph"]["prerequisite_edges"] == 1230
           assert p["progress_conditions"]["reference_count"] == 2050
           assert p["npc_linkage"]["exact_coordinate_matches"] == 127
+          assert p["npc_linkage"]["unique_world_placement_candidates"] == 881
           assert p["dialogue"]["dialogue_count"] == 1931
           assert p["dialogue"]["arabic_keys_found"] > 5000
           assert p["monster_linkage"]["reference_count"] == 364
@@ -64,11 +65,12 @@ jobs:
           assert all(x["simple_object_id"] in ("214","8") for x in mn["5456"] if x["npc_type_name"] in ("David","Jack"))
           exports=Path("reports/quest_exports")
           manifest=json.loads((exports/"manifest.json").read_text(encoding="utf-8"))
-          assert len(manifest["exports"]) == 10
+          assert len(manifest["exports"]) == 11
           assert sum(1 for _ in (exports/"mission_npc_map_links.csv").open(encoding="utf-8-sig")) == 4919
           assert sum(1 for _ in (exports/"mission_catalog.csv").open(encoding="utf-8-sig")) == 2510
           assert sum(1 for _ in (exports/"mission_catalog_source_records.csv").open(encoding="utf-8-sig")) == 2511
           assert sum(1 for _ in (exports/"mission_map_links.csv").open(encoding="utf-8-sig")) == 5502
+          assert sum(1 for _ in (exports/"npc_world_placements.csv").open(encoding="utf-8-sig")) == 882
           print("Quest-system analysis acceptance checks passed")
           PY
       - name: Upload rebuilt quest-system report
