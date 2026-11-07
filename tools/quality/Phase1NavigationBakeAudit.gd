@@ -44,6 +44,7 @@ var _selected_sources: Array[String] = []
 var _walkable_collision_count := 0
 var _pawnshop_obstacle_shape_count := 0
 var _factory_obstacle_shape_count := 0
+var _market_bridge_rail_shape_count := 0
 
 func _initialize() -> void:
 	call_deferred("_run")
@@ -158,6 +159,7 @@ func _save_world_scene() -> int:
 		collision_shape.owner = root
 		_walkable_collision_count += 1
 	_add_building_obstacle_collisions(city_instance, root)
+	_add_market_bridge_rail_collisions(city_instance, root)
 	var navigation_region := NavigationRegion3D.new()
 	navigation_region.name = "CuratedNavigationRegion"
 	navigation_region.navigation_mesh = _navigation_mesh
@@ -220,6 +222,40 @@ func _add_building_obstacle_collisions(city_instance: Node3D, scene_root: Node3D
 		if section_shape_count == 0:
 			push_error("No selective wall collision shapes were generated for " + str(definition["name"]))
 
+func _add_market_bridge_rail_collisions(city_instance: Node3D, scene_root: Node3D) -> void:
+	var bridge := city_instance.get_node_or_null("JianghaiOldCityAuthoredScene/OldCityMarketBridge") as Node3D
+	if bridge == null:
+		push_error("Market bridge section is missing; rail collision cannot be generated.")
+		return
+	var body := StaticBody3D.new()
+	body.name = "MarketBridgeRailCollision"
+	body.collision_layer = 1
+	body.collision_mask = 0
+	body.transform = _transform_relative_to(city_instance, bridge)
+	scene_root.add_child(body)
+	body.owner = scene_root
+	var rail_shape_count := 0
+	for mesh_node in bridge.find_children("*", "MeshInstance3D", true, false):
+		var mesh_instance := mesh_node as MeshInstance3D
+		if mesh_instance == null or mesh_instance.mesh == null:
+			continue
+		if not str(mesh_instance.name).begins_with("MarketRail_"):
+			continue
+		var shape := mesh_instance.mesh.create_trimesh_shape()
+		if shape == null:
+			push_warning("Could not create market bridge rail collision for " + str(mesh_instance.get_path()))
+			continue
+		var collision := CollisionShape3D.new()
+		collision.name = str(mesh_instance.name) + "_Collision"
+		collision.shape = shape
+		collision.transform = _transform_relative_to(bridge, mesh_instance)
+		body.add_child(collision)
+		collision.owner = scene_root
+		rail_shape_count += 1
+	if rail_shape_count < 4:
+		push_error("Expected four market bridge guardrail collision shapes; generated " + str(rail_shape_count))
+	_market_bridge_rail_shape_count = rail_shape_count
+
 func _transform_relative_to(ancestor: Node, node: Node3D) -> Transform3D:
 	var relative := Transform3D.IDENTITY
 	var cursor: Node = node
@@ -244,6 +280,7 @@ func _validate_saved_runtime_scene() -> Dictionary:
 	var walkable_shape_count := 0
 	var pawnshop_shape_count := 0
 	var factory_shape_count := 0
+	var market_bridge_rail_shape_count := 0
 	var navigation_regions := 0
 	var walkable_transform_checks := 0
 	var walkable_transform_matches := 0
@@ -266,12 +303,14 @@ func _validate_saved_runtime_scene() -> Dictionary:
 					pawnshop_shape_count += 1
 				elif body.name == "FactoryObstacleCollision":
 					factory_shape_count += 1
+				elif body.name == "MarketBridgeRailCollision":
+					market_bridge_rail_shape_count += 1
 		if child is NavigationRegion3D:
 			navigation_regions += 1
 			if (child as NavigationRegion3D).navigation_mesh == null:
 				instance.free()
 				return {"valid": false, "reason": "saved_navigation_region_missing_mesh"}
-	var valid := walkable_body_count == WALKABLE_PATHS.size() and walkable_shape_count == WALKABLE_PATHS.size() and navigation_regions == 1 and walkable_transform_matches == walkable_transform_checks and pawnshop_shape_count == _pawnshop_obstacle_shape_count and factory_shape_count == _factory_obstacle_shape_count and pawnshop_shape_count > 0 and factory_shape_count > 0
+	var valid := walkable_body_count == WALKABLE_PATHS.size() and walkable_shape_count == WALKABLE_PATHS.size() and navigation_regions == 1 and walkable_transform_matches == walkable_transform_checks and pawnshop_shape_count == _pawnshop_obstacle_shape_count and factory_shape_count == _factory_obstacle_shape_count and market_bridge_rail_shape_count == _market_bridge_rail_shape_count and pawnshop_shape_count > 0 and factory_shape_count > 0 and market_bridge_rail_shape_count >= 4
 	var result := {
 		"valid": valid,
 		"collision_bodies": body_count,
@@ -280,6 +319,7 @@ func _validate_saved_runtime_scene() -> Dictionary:
 		"walkable_collision_shapes": walkable_shape_count,
 		"pawnshop_obstacle_shapes": pawnshop_shape_count,
 		"factory_obstacle_shapes": factory_shape_count,
+		"market_bridge_rail_collision_shapes": market_bridge_rail_shape_count,
 		"navigation_regions": navigation_regions,
 		"walkable_shape_identity_transform_count": walkable_transform_matches,
 		"walkable_shape_transform_checks": walkable_transform_checks
@@ -398,6 +438,7 @@ func _validate_navigation_after_sync() -> void:
 		"building_obstacle_collisions_included": true,
 		"pawnshop_obstacle_shape_count": _pawnshop_obstacle_shape_count,
 		"factory_obstacle_shape_count": _factory_obstacle_shape_count,
+		"market_bridge_rail_collision_shape_count": _market_bridge_rail_shape_count,
 		"doorway_openings_preserved_by_excluding_door_frames_and_lintels": true,
 		"runtime_android_performance_validated": false
 	}
