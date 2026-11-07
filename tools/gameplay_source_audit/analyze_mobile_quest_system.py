@@ -236,12 +236,16 @@ def main():
     # Item lookup is optional until the itemtype directory is included in the selected source pack.
     item_defs={}
     for ip in sorted((root/"ini/itemtype").glob("*.ini")) if (root/"ini/itemtype").exists() else []:
-        for s in sections(read_text(ip)):
-            if s["section"].isdigit():
-                item_defs[s["section"]]=s["fields"]
+        for line in read_text(ip).splitlines():
+            p=line.split("@@")
+            if len(p)>=2 and p[0].strip().isdigit():
+                item_defs[p[0].strip()]={"name":p[1].strip(),"source":ip.name,"field_count":len(p)}
+    item_name_index=defaultdict(list)
+    for iid,meta in item_defs.items():item_name_index[meta["name"].casefold()].append(iid)
     for r in item_refs:
         iid=r.get("item_id")
         if iid:r["item_definition"]=item_defs.get(iid)
+        if r.get("name"):r["item_name_candidate_ids"]=item_name_index.get(r["name"].casefold(),[])
     # Quest type ids are kept raw: the client source in this pack does not define their semantics.
     type_counts=Counter(r["type_id"] for rows in by_id.values() for r in rows)
     checks_unresolved=[x for x in checks if x["condition_quest_id"] not in mission_ids]
@@ -255,7 +259,7 @@ def main():
       "npc_linkage":{"reference_count":len(npc_refs),"unique_positive_npc_ids":len({r["npc_id"] for r in npc_refs if int_or_none(r["npc_id"]) and int_or_none(r["npc_id"])>0}),"mapdestination_id_map_matches":sum(bool(r["mapdestination_matches"]) for r in npc_refs),"exact_coordinate_matches":sum(r["mapdestination_exact_coordinate_match"] for r in npc_refs),"npc_type_name_candidate_refs":sum(bool(r["npc_type_name_candidates"]) for r in npc_refs),"appearance_name_candidate_refs":sum(bool(r["npc_appearance_name_candidates"]) for r in npc_refs)},
       "map_linkage":{"unique_map_ids":len(map_ids),"missing_from_all_available_map_indexes":sorted(map_ids-(gamemap|gmex|mapdest_ids)),"map_ids_in_gamemap_dat":len(gamemap),"map_ids_in_gamemapex_ini":len(gmex),"map_ids_in_mapdestination_ini":len(mapdest_ids)},
       "monster_linkage":{"reference_count":len(mob_refs),"unique_names":len({r["name"] for r in mob_refs}),"matched_references":sum(bool(r["monster_type_ids"]) for r in mob_refs),"unmatched_names":sorted({r["name"] for r in mob_refs if not r["monster_type_ids"]})},
-      "item_linkage":{"reference_count":len(item_refs),"unique_item_ids":len({r.get("item_id") for r in item_refs if r.get("item_id")}),"item_definitions_available":len(item_defs),"matched_item_ids":sum(bool(r.get("item_definition")) for r in item_refs if r.get("item_id"))},
+      "item_linkage":{"reference_count":len(item_refs),"unique_item_ids":len({r.get("item_id") for r in item_refs if r.get("item_id")}),"item_definitions_available":len(item_defs),"matched_item_ids":sum(bool(r.get("item_definition")) for r in item_refs if r.get("item_id")),"unmatched_item_ids":sorted({r["item_id"] for r in item_refs if r.get("item_id") and r["item_id"] not in item_defs},key=lambda x:int(x) if x.isdigit() else x),"matched_world_item_name_references":sum(bool(r.get("item_name_candidate_ids")) for r in item_refs)},
       "dialogue":{k:v for k,v in dialogue.items() if k not in ("flows","mission_flows")},
       "missions": [rows[0] for _,rows in sorted(by_id.items(),key=lambda x:int(x[0]))],
       "npc_references":npc_refs,"map_references":map_refs,"mob_references":mob_refs,"item_references":item_refs,
