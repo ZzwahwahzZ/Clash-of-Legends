@@ -5,6 +5,7 @@ on:
     paths:
       - "tools/resource_packs/**"
       - "tools/c3_audit/**"
+      - "third_party_patches/c3-mesh-extension-tags.patch"
       - "tools/quality/audit_resource_pack_contents.gd"
       - ".github/workflows/build-resource-packs.yml"
 permissions:
@@ -115,6 +116,8 @@ jobs:
         run: |
           git clone --filter=blob:none https://github.com/deklol/Preservation-CO-Client.git build/preservation
           git -C build/preservation checkout 090541d10d8a7d001fe804dd1c23325c344f861d
+          git -C build/preservation apply "$GITHUB_WORKSPACE/third_party_patches/c3-mesh-extension-tags.patch"
+          git -C build/preservation diff --check
       - name: Test C3 parser and per-mesh GLB animation exporter
         run: cargo test --manifest-path tools/c3_audit/Cargo.toml --release
       - name: Convert original C3 models and validate Godot imports
