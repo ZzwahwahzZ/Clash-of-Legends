@@ -55,7 +55,9 @@ def main() -> None:
         path for path in STAGE.rglob("*")
         if path.is_file()
         and path.suffix.lower() == ".7z"
-        and "nested_7z" not in path.relative_to(STAGE).parts
+        # Exclude only our own extraction output; source archives may legitimately
+        # live under maps/nested_7z or another source folder with the same name.
+        and not path.is_relative_to(STAGE / "audio" / "nested_7z")
     )
     report = {
         "archives_found": len(archives),
