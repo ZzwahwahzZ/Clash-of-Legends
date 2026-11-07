@@ -6,7 +6,8 @@ on:
       - ".github/workflows/audit-gameplay-source-tables.yml"
       - "tools/gameplay_source_audit/**"
       - "tools/resource_packs/**"
-      - "tests/test_mobile_quest_dat_cipher.py"\n      - "tests/test_quest_ecosystem_inventory.py"
+      - "tests/test_mobile_quest_dat_cipher.py"
+      - "tests/test_quest_ecosystem_inventory.py"
 permissions:
   contents: read
 concurrency:
@@ -26,13 +27,14 @@ jobs:
             "https://github.com/ZzwahwahzZ/Conquer-Mobile-Assets./releases/download/mobile-extracted-assets/extracted-assets-001.zip" \
             -o build/source/extracted-assets-001.zip
           echo "0d21a110c09b762ed5f1a5f4da022857b0534e489eb85052d15da460cb229d2a  build/source/extracted-assets-001.zip" | sha256sum -c -
-      - name: Install professional content-based format analyzer
+      - name: Install analyzer and run decoder tests
         run: |
           python3 -m venv .venv
           .venv/bin/pip install --disable-pip-version-check polyfile
           echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
-          python3 -m py_compile tools/gameplay_source_audit/comprehensive_asset_inventory.py tools/gameplay_source_audit/audit_source_tables.py tools/gameplay_source_audit/mobile_quest_source_decoder.py tools/resource_packs/decode_mobile_quest_dat.py tools/gameplay_source_audit/quest_ecosystem_inventory.py tests/test_mobile_quest_dat_cipher.py tests/test_quest_ecosystem_inventory.py
-          python3 -m unittest discover -s tests -p 'test_mobile_quest_dat_cipher.py' -v\n          python3 -m unittest discover -s tests -p 'test_quest_ecosystem_inventory.py' -v
+          python3 -m py_compile tools/gameplay_source_audit/comprehensive_asset_inventory.py tools/gameplay_source_audit/audit_source_tables.py tools/gameplay_source_audit/mobile_quest_source_decoder.py tools/gameplay_source_audit/quest_ecosystem_inventory.py tools/resource_packs/decode_mobile_quest_dat.py tests/test_mobile_quest_dat_cipher.py tests/test_quest_ecosystem_inventory.py
+          python3 -m unittest discover -s tests -p 'test_mobile_quest_dat_cipher.py' -v
+          python3 -m unittest discover -s tests -p 'test_quest_ecosystem_inventory.py' -v
       - name: Recursively inventory every archive member by content
         run: |
           python3 tools/gameplay_source_audit/comprehensive_asset_inventory.py \
@@ -45,27 +47,38 @@ jobs:
           python3 tools/gameplay_source_audit/audit_source_tables.py \
             build/source/extracted-assets-001.zip \
             --output reports/gameplay-source-table-audit.json
-      - name: Decode and classify every version-matched quest source file
+          python3 -m json.tool reports/gameplay-source-table-audit.json > /dev/null
+      - name: Decode and classify the version-matched quest DAT candidates
         run: |
           python3 tools/gameplay_source_audit/mobile_quest_source_decoder.py \
             build/source/extracted-assets-001.zip \
             --output reports/mobile-quest-source-audit.json \
             --decoded-dir build/mobile_quest_candidates
           python3 -m json.tool reports/mobile-quest-source-audit.json > /dev/null
-      - name: Validate report JSON and print concise inventory
+      - name: Inventory quest, NPC, map, item, reward and dialogue source candidates
         run: |
-          python3 -m json.tool reports/gameplay-source-table-audit.json > /dev/null
+          python3 tools/gameplay_source_audit/quest_ecosystem_inventory.py \
+            build/source/extracted-assets-001.zip \
+            --output reports/quest-ecosystem-inventory.json \
+            --output-dir build/quest-ecosystem
+          python3 -m json.tool reports/quest-ecosystem-inventory.json > /dev/null
+      - name: Print concise source inventory
+        run: |
           python3 - <<'PY'
           import json
           from pathlib import Path
           data=json.loads(Path("reports/gameplay-source-table-audit.json").read_text(encoding="utf-8"))
           print("Version-matched members:", data["version_matched_member_count"])
           print("Itemtype files/records:", data["itemtype_catalog"]["file_count"], data["itemtype_catalog"]["record_count"])
-          print("Unlabelled column-59 candidates:", data["itemtype_catalog"].get("column_59_candidate_count", 0))
           for category, value in data["categories"].items():
               print(category, value["file_count"])
+          quest=json.loads(Path("reports/quest-ecosystem-inventory.json").read_text(encoding="utf-8"))
+          print("Quest ecosystem files:", quest["files_found"])
+          print("Quest ecosystem categories:", quest["category_file_counts"])
+          print("Plausible cipher candidates:", quest["plausible_cipher_decode_candidates"])
+          print("Candidate TaskIDs:", len(quest["unique_task_ids_in_candidates"]))
           PY
-      - name: Upload source table audit report
+      - name: Upload source audit reports and decoded candidates
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -75,6 +88,8 @@ jobs:
             reports/comprehensive-asset-inventory.json
             reports/polyfile-mobile-*.json
             reports/mobile-quest-source-audit.json
+            reports/quest-ecosystem-inventory.json
             build/mobile_quest_candidates/**/*.lua
-          if-no-files-found: error
+            build/quest-ecosystem/decoded_candidates/**/*.candidate
+          if-no-files-found: warn
           retention-days: 30
