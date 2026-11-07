@@ -96,6 +96,9 @@ func is_skill_compatible(skill_definition: Dictionary) -> bool:
 	var required_style := _normalize_style_id(str(skill_definition.get("weapon_style", "")))
 	if not required_style.is_empty() and required_style != selected_weapon_style:
 		return false
+	var required_style_unlock := _normalize_style_id(str(skill_definition.get("required_weapon_style_unlock", "")))
+	if not required_style_unlock.is_empty() and not unlocked_weapon_styles.has(required_style_unlock):
+		return false
 	var required_branch := str(skill_definition.get("required_branch", ""))
 	if not required_branch.is_empty() and required_branch != selected_branch:
 		return false
