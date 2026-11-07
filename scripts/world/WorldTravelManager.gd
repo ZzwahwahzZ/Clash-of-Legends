@@ -102,6 +102,7 @@ func get_source_map_for_quest(mission_id: int, for_finish: bool = false) -> Dict
 		"map_id": map_id,
 		"map": map_data,
 		"npc_target": npc_target,
-		"source_map_available": not map_data.is_empty(),
+		"source_map_available": not map_data.is_empty() and not bool(map_data.get("metadata_only", false)),
+		"map_metadata_available": not map_data.is_empty(),
 		"world_transform_status": "NOT_VALIDATED"
 	}
