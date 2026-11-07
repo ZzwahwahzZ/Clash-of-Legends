@@ -12,11 +12,15 @@ import tempfile
 VERSION = "ConquerOnline-1.1.2.3"
 ROOT = "assets/ConquerRes/"
 EXACT = {
-    "ini/gamemap.dat", "ini/gamemapex.ini", "ini/gamemaplayer.ini", "ini/npc.ini", "ini/npcex.ini", "ini/npcx.ini",
-    "ini/slotnpc.ini", "ini/terrainnpc.ini", "ini/questinfo.dat",
-    "ini/taskitem_info.dat", "ini/monster.dat", "ini/itemcfg.dat",
-    "ini/copydrop.dat", "script/dialogtext/scriptdialoguetext_ar.dat",
-    "script/dialogtext/scriptdialoguetext_en.dat",
+    "ini/gamemap.dat", "ini/gamemapex.ini", "ini/gamemaplayer.ini",
+    "ini/npc.ini", "ini/npcex.ini", "ini/npcx.ini", "ini/slotnpc.ini", "ini/terrainnpc.ini",
+    "ini/questinfo.ini", "ini/questinfopassionserver.ini",
+    "ini/luacfg/questinfo.dat", "ini/luacfg/taskitem_info.dat",
+    "ini_ar/luacfg/questinfo.dat", "ini_ar/luacfg/taskitem_info.dat",
+    "ini_ar/questinfo.ini", "ini_ar/npc.ini", "ini_ar/npcx.ini", "ini_ar/terrainnpc.ini",
+    "ini_sp/questinfo.ini", "ini_sp/npc.ini", "ini_sp/npcx.ini", "ini_sp/terrainnpc.ini",
+    "ini/monster.dat", "ini/itemcfg.dat", "ini/copydrop.dat",
+    "script/dialogtext/scriptdialoguetext_ar.dat", "script/dialogtext/scriptdialoguetext_en.dat",
     "ini/luaui/publicfiles/otherconf/npcdialogueinfo.dat",
     "ini/luaui/publicfiles/wordfiles/npcdialoguetext.dat",
     "ini/luaui/publicfiles/wordfiles/npcdialoguetext_ar.dat",
@@ -26,7 +30,7 @@ EXACT = {
     "ini/luaui/dialog/dlgnpcdialogue/dlgmaintaskbook.dat",
     "ini/luaui/dialog/dlgnpcdialogue/dlgmaintaskletter.dat",
 }
-PATTERN = re.compile(r"(^|/)(client_realm_task/|clienttask[^/]*|[^/]*(quest|task|dialog|npc|juqing)[^/]*\.dat$)", re.I)
+PATTERN = re.compile(r"(^|/)(client_realm_task/|clienttask[^/]*|[^/]*(quest|task|dialog|npc|juqing|gamemap)[^/]*\\.(dat|ini)$)", re.I)
 TEXT_EXTS = {".ini", ".txt", ".lua", ".json", ".xml", ".csv", ".dat"}
 
 def digest(data: bytes) -> str:
