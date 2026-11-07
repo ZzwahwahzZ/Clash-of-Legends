@@ -95,14 +95,14 @@ def register_additional_file(category: str, source: Path, destination: Path, sou
 # import/visual checks. Stage their model bases and all position/normal textures
 # together so the runtime controller can switch idle/walk/run without downloads.
 character_vat_clips = {}
-for model_id, look, gender in ((7130000, 7, "male"), (8133010, 8, "female")):
+for model_id, look in ((7101020, 7), (7102000, 7), (7103000, 7), (7130000, 7), (7131020, 7), (7132000, 7), (7133010, 7), (7134010, 7), (7135000, 7), (8133010, 8), (8134010, 8), (8135000, 8)):
     base_clip_id = f"look{look}_model{model_id}_weapon500_action100"
     base_source = source_root / "motion-poc" / f"{base_clip_id}.glb"
     base_destination = stage_root / "animations" / "c3_character_vat_models" / f"{model_id}.glb"
     base_entry = register_additional_file(
         "animations", base_source, base_destination,
         f"Validated C3 full-character VAT base: {base_clip_id}",
-        "c3_vat_character_base", "godot_validated_six_clip_runtime_candidate"
+        "c3_vat_character_base", "godot_validated_c3_vat_candidate_class_gender_unresolved"
     )
     state_rows = {}
     for action, state in ((100, "idle"), (110, "walk"), (120, "run")):
@@ -130,17 +130,17 @@ for model_id, look, gender in ((7130000, 7, "male"), (8133010, 8, "female")):
             register_additional_file(
                 "animations", metadata_source, metadata_destination,
                 f"C3 VAT metadata: {clip_id}/{metadata_source.name}",
-                "c3_vat_metadata", "godot_validated_six_clip_runtime_candidate"
+                "c3_vat_metadata", "godot_validated_c3_vat_candidate_class_gender_unresolved"
             )
             register_additional_file(
                 "animations", data_source, data_destination,
                 f"C3 VAT positions: {clip_id}/{data_name}",
-                "c3_vat_position_texture", "godot_validated_six_clip_runtime_candidate"
+                "c3_vat_position_texture", "godot_validated_c3_vat_candidate_class_gender_unresolved"
             )
             register_additional_file(
                 "animations", normal_source, normal_destination,
                 f"C3 VAT animated normals: {clip_id}/{normal_name}",
-                "c3_vat_normal_texture", "godot_validated_six_clip_runtime_candidate"
+                "c3_vat_normal_texture", "godot_validated_c3_vat_candidate_class_gender_unresolved"
             )
             metadata_paths.append(metadata_destination.relative_to(root).as_posix())
             mesh_names.append(str(metadata.get("mesh_name", "")))
@@ -149,12 +149,12 @@ for model_id, look, gender in ((7130000, 7, "male"), (8133010, 8, "female")):
             "metadata_paths": metadata_paths,
             "mesh_names": mesh_names,
             "fps": 30,
-            "status": "godot_validated_six_clip_runtime_candidate",
+            "status": "godot_validated_c3_vat_candidate_class_gender_unresolved",
         }
     character_vat_clips[str(model_id)] = {
         "model_id": model_id,
         "look": look,
-        "gender": gender,
+        "identity_status": "C3_RIG_AND_VAT_VALIDATED_CLASS_AND_GENDER_MAPPING_PENDING",
         "base_model_path": base_entry["path"],
         "states": state_rows,
     }
