@@ -224,6 +224,7 @@ def main() -> None:
         column_59_candidate_count = 0
         quest_promotion_candidates = []
         promotion_text_hits = []
+        apk_code_sources = []
         with tempfile.TemporaryDirectory(prefix="co-source-audit-") as temp_dir:
             # The supplied bundle stores the Android client as a nested APK.
             # Index both direct archive members and files inside the exact-version APK.
@@ -243,6 +244,8 @@ def main() -> None:
                         if inner_name.startswith(ROOT_MARKER):
                             rel = inner_name.split(ROOT_MARKER, 1)[1].replace("\\\\", "/")
                             sources.setdefault(rel, []).append((nested, inner_name, outer_name + "!" + inner_name))
+                        elif Path(inner_name).suffix.lower() in {".so", ".dex", ".jar"}:
+                            apk_code_sources.append((nested, inner_name, outer_name + "!" + inner_name))
             for category, targets in TARGETS.items():
                 entries = []
                 for rel in targets:
@@ -277,6 +280,36 @@ def main() -> None:
                                           "sha256": hashlib.sha256(data).hexdigest(), **compact_itemtype}
                                 entries.append(record)
                 results[category] = entries
+            # Inventory Android executable/code containers separately from game resource files.
+            # Raw strings are source-location clues only, never proof of a parser or field schema.
+            android_reader_candidates = []
+            android_reader_string_hits = []
+            reader_terms = ("questinfo", "taskitem_info", "quest", "task", "promot", "archer",
+                            "oriental", "throwingknife", "npc", "decrypt", "decode", "lua")
+            for source_zip, member, display in apk_code_sources:
+                info = source_zip.getinfo(member)
+                entry = {
+                    "source_member": display, "size_bytes": info.file_size,
+                    "sha256": hashlib.sha256(source_zip.read(member)).hexdigest(),
+                    "extension": Path(member).suffix.lower()
+                }
+                android_reader_candidates.append(entry)
+                if info.file_size <= 48 * 1024 * 1024:
+                    data = source_zip.read(member)
+                    per_file_hits = 0
+                    for match in re.finditer(rb"[\\x20-\\x7e]{4,}", data):
+                        value = match.group().decode("ascii", errors="ignore")
+                        lower = value.casefold()
+                        found = [term for term in reader_terms if term in lower]
+                        if found:
+                            android_reader_string_hits.append({
+                                "source_member": display, "byte_offset": match.start(),
+                                "string": value[:240], "matched_terms": found
+                            })
+                            per_file_hits += 1
+                            if per_file_hits >= 250:
+                                break
+
             # Discover quest/promotion/NPC source members by exact APK path and safe raw-text hits.
             # This is a candidate inventory only; it does not decode binary records or infer schema.
             candidate_path_pattern = re.compile(r"(quest|task|promot|mission|npc|job|profession|class|role)", re.I)
@@ -455,6 +488,12 @@ def main() -> None:
                     "c3_mount_related_paths": [x for x in c3_model_paths if path_patterns["mount_related"].search(x["relative_path"])],
                     "ini_asset_mapping_inventory": ini_asset_mapping_inventory,
                     "policy": "Path discovery only. File names and opaque table sections do not prove undocumented model joins."
+                },
+                "android_reader_candidate_inventory": {
+                    "file_count": len(android_reader_candidates),
+                    "files": android_reader_candidates,
+                    "raw_string_hits": android_reader_string_hits,
+                    "policy": "DEX/SO/JAR byte-string discovery only; no code decompilation or parser semantics inferred."
                 },
                 "quest_promotion_candidate_inventory": {
                     "file_count": len(quest_promotion_candidates),
