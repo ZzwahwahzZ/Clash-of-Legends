@@ -12,6 +12,7 @@ var _quests_by_section: Dictionary = {}
 var _quests_by_mission_id: Dictionary = {}
 var _quests_by_npc_id: Dictionary = {}
 var _quests_by_map_id: Dictionary = {}
+var _npc_model_templates_by_id: Dictionary = {}
 var _npc_dialogues_by_id: Dictionary = {}
 var _npc_dialogues_by_model_id: Dictionary = {}
 
@@ -27,6 +28,7 @@ func load_index() -> bool:
 	_quests_by_mission_id.clear()
 	_quests_by_npc_id.clear()
 	_quests_by_map_id.clear()
+	_npc_model_templates_by_id.clear()
 	_npc_dialogues_by_id.clear()
 	_npc_dialogues_by_model_id.clear()
 	if not FileAccess.file_exists(INDEX_PATH):
@@ -94,6 +96,12 @@ func load_index() -> bool:
 			_index_quest_map(quest, source_map_id)
 		_index_quest_npc(quest, quest.get("begin_npc", null), "begin")
 		_index_quest_npc(quest, quest.get("finish_npc", null), "finish")
+	for model_template in _index.get("npc_model_templates", []):
+		if not model_template is Dictionary:
+			continue
+		var source_model_id := int(model_template.get("model_id", -1))
+		if source_model_id > 0:
+			_npc_model_templates_by_id[source_model_id] = model_template
 	for dialogue in _index.get("npc_dialogues", []):
 		if not dialogue is Dictionary:
 			continue
@@ -162,6 +170,9 @@ func get_npc_template_by_source_section(section_id: String) -> Dictionary:
 		if str(entry.get("source_section", "")) == section_id:
 			return entry.duplicate(true)
 	return {}
+
+func get_npc_model_template(model_id: int) -> Dictionary:
+	return _npc_model_templates_by_id.get(model_id, {}).duplicate(true)
 
 func get_quests() -> Array:
 	return _index.get("quests", []).duplicate(true)
