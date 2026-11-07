@@ -31,6 +31,7 @@ var input_direction: Vector2 = Vector2.ZERO
 var target_nav_position: Vector3 = Vector3.ZERO
 var is_moving_to_target: bool = false
 var _navigation_target_submitted: bool = false
+var _navigation_target_wait_frames: int = 0
 var imported_model_animation: AnimationPlayer = null
 var imported_animation_name: String = ""
 var _c3_vat_active: bool = false
@@ -326,20 +327,25 @@ func _physics_process(delta: float) -> void:
 		move_vec = dir * current_speed
 		is_moving_to_target = false
 		_navigation_target_submitted = false
+		_navigation_target_wait_frames = 0
 	elif is_moving_to_target:
 		if _has_active_navigation_map():
 			if not _navigation_target_submitted:
 				navigation_agent.target_position = target_nav_position
 				_navigation_target_submitted = true
-			else:
-				if navigation_agent.is_navigation_finished():
+				_navigation_target_wait_frames = 0
+			elif navigation_agent.is_navigation_finished():
+				if global_position.distance_to(target_nav_position) <= navigation_agent.target_desired_distance or _navigation_target_wait_frames >= 2:
 					is_moving_to_target = false
 				else:
-					var next_path_position := navigation_agent.get_next_path_position()
-					var diff := next_path_position - global_position
-					diff.y = 0.0
-					if diff.length() > 0.12:
-						move_vec = diff.normalized() * current_speed
+					_navigation_target_wait_frames += 1
+			else:
+				_navigation_target_wait_frames = 0
+				var next_path_position := navigation_agent.get_next_path_position()
+				var diff := next_path_position - global_position
+				diff.y = 0.0
+				if diff.length() > 0.12:
+					move_vec = diff.normalized() * current_speed
 		else:
 			var direct_diff := target_nav_position - global_position
 			direct_diff.y = 0.0
@@ -413,11 +419,13 @@ func move_towards_target_position(pos: Vector3, _delta: float) -> void:
 	target_nav_position = pos
 	is_moving_to_target = true
 	_navigation_target_submitted = false
+	_navigation_target_wait_frames = 0
 
 func clear_movement_target() -> void:
 	is_moving_to_target = false
 	target_nav_position = global_position
 	_navigation_target_submitted = false
+	_navigation_target_wait_frames = 0
 	input_direction = Vector2.ZERO
 
 func perform_jump() -> void:
