@@ -3,9 +3,9 @@ extends SceneTree
 const CITY_PATH := "res://assets/environment/phase1/jianghai/full_city_preview.glb"
 const REPORT_PATH := "reports/phase1_anchor_surface_candidates.json"
 const TARGETS := {
-	"jianghai.hotel_frontage": Vector3(-11.6, 0.0, -34.5),
-	"jianghai.medicine_frontage": Vector3(11.6, 0.0, -48.0),
-	"jianghai.tea_frontage": Vector3(11.6, 0.0, -8.0)
+	"jianghai.hotel_frontage": Vector3(-9.5, -0.14, -34.5),
+	"jianghai.medicine_frontage": Vector3(11.6, -0.045, -48.0),
+	"jianghai.tea_frontage": Vector3(9.5, -0.14, -8.0)
 }
 
 var _floor_meshes: Array[Dictionary] = []
