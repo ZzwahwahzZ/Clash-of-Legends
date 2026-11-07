@@ -8,6 +8,7 @@ on:
       - "tools/resource_packs/**"
       - "tests/test_mobile_quest_dat_cipher.py"
       - "tests/test_quest_ecosystem_inventory.py"
+      - "tests/test_mobile_apk_reader_probe.py"
 permissions:
   contents: read
 concurrency:
