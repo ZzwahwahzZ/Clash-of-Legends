@@ -5,7 +5,7 @@ signal travel_started(destination_id: String)
 signal travel_completed(destination_id: String, world_position: Vector3)
 
 const DESTINATIONS := {
-	"twin_city": {"name_ar":"مدينة التوأم","name_en":"Twin City","position":Vector3(0.0,0.15,0.0),"description_ar":"المدينة الرئيسية ومركز التجار والخدمات","description_en":"Main city, merchants and services"},
+	"twin_city": {"name_ar":"مدينة التوأم","name_en":"Twin City","source_map_id":"1002","position":Vector3(0.0,0.15,0.0),"description_ar":"المدينة الرئيسية ومركز التجار والخدمات","description_en":"Main city, merchants and services"},
 	"twin_plains": {"name_ar":"سهول التوأم","name_en":"Twin Plains","position":Vector3(20.0,0.15,16.0),"description_ar":"موطن الذئاب البرية ومهام التدريب","description_en":"Wild wolf grounds and training quests"},
 	"desert_ruins": {"name_ar":"أطلال الصحراء","name_en":"Desert Ruins","position":Vector3(-35.0,0.15,30.0),"description_ar":"أطلال قديمة ومناطق استكشاف","description_en":"Ancient ruins and exploration"},
 	"mountain_summit": {"name_ar":"قمة الجبل","name_en":"Mountain Summit","position":Vector3(38.0,0.15,-35.0),"description_ar":"ساحة تنين اللهب وزعماء الجبال","description_en":"Flame Dragon and mountain bosses"},
@@ -19,6 +19,7 @@ var current_source_map_id := "1002"
 var travel_in_progress := false
 var travel_serial := 0
 var source_quest_graph := QuestRuntimeGraph.new()
+var current_source_map_id := "1002"
 
 func _ready() -> void:
 	add_to_group("world_travel_manager")
@@ -117,6 +118,9 @@ func navigate_to_source_route(route: Dictionary) -> bool:
 func get_current_destination_id() -> String:
 	return current_destination_id
 
+func get_current_source_map_id() -> String:
+	return current_source_map_id
+
 func travel_to(destination_id: String, reason: String = "manual") -> bool:
 	if destination_id.begins_with("city_"):
 		var source_map_id := destination_id.trim_prefix("city_")
@@ -150,6 +154,7 @@ func travel_to(destination_id: String, reason: String = "manual") -> bool:
 	var player: Node3D = game_manager.get("player_reference") as Node3D
 	var destination: Dictionary = DESTINATIONS[destination_id]
 	var target: Vector3 = destination.position
+	current_source_map_id = str(destination.get("source_map_id", ""))
 	if player is CharacterBody3D:
 		player.velocity = Vector3.ZERO
 	if player.has_method("set_joystick_input"):
