@@ -28,17 +28,14 @@ jobs:
             -o build/source/extracted-assets-001.zip
           echo "0d21a110c09b762ed5f1a5f4da022857b0534e489eb85052d15da460cb229d2a  build/source/extracted-assets-001.zip" | sha256sum -c -
       - name: Download and verify the complete arm64 split APK bundle
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          mkdir -p build/source
+          mkdir -p build/source reports
           curl --fail --location --retry 5 --retry-all-errors \
-            -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/octet-stream" \
-            "https://api.github.com/repos/${{ github.repository }}/releases/assets/716478589" \
+            "https://github.com/ZzwahwahzZ/Clash-of-Legends/releases/download/untagged-4406b3bcf98aaafd485f/ConquerOnline.zip" \
             -o build/source/ConquerOnline.zip
           echo "b1c6958109a07c237631943fc0442d3161563d89e1020b143d95437ba9a6fdb0  build/source/ConquerOnline.zip" | sha256sum -c -
-          unzip -l build/source/ConquerOnline.zip | tee reports-full-split-list.txt
+          unzip -l build/source/ConquerOnline.zip | tee reports/split-bundle-list.txt
       - name: Extract the exact 1.1.2.3 APK and quest-world source files
         run: |
           set -euo pipefail
@@ -253,6 +250,26 @@ jobs:
                               row.setdefault("decompression_candidates",[]).append({"method":label,"path":str(dp),"bytes":len(dec),"magic_hex":dec[:8].hex()})
                       except Exception:
                           pass
+              # The game ships one DEX-like asset with a repeating 4-byte XOR wrapper.
+              # Derive the key from the public DEX magic, then accept it only if every header
+              # and integrity check validates against the recovered DEX bytes.
+              if not raw.startswith(b"dex\\n") and len(raw)>=0x70:
+                  for version in (b"035",b"037",b"038",b"039",b"040",b"041"):
+                      expected=b"dex\\n"+version+b"\\0"
+                      key=bytes(raw[i]^expected[i] for i in range(4))
+                      if bytes(raw[i]^key[i%4] for i in range(8)) != expected:
+                          continue
+                      decoded=bytes(value^key[i%4] for i,value in enumerate(raw))
+                      declared=struct.unpack_from("<I",decoded,0x20)[0]
+                      header=struct.unpack_from("<I",decoded,0x24)[0]
+                      signature_ok=decoded[12:32]==hashlib.sha1(decoded[32:]).digest()
+                      checksum_ok=struct.unpack_from("<I",decoded,8)[0]==(zlib.adler32(decoded[12:]) & 0xffffffff)
+                      if declared==len(decoded) and header==0x70 and signature_ok and checksum_ok:
+                          decoded_path=out/(target.stem+".decoded.dex")
+                          decoded_path.write_bytes(decoded)
+                          row["classification"]="verified_dex_after_repeating_xor"
+                          row["xor_recovery"]={"key_hex":key.hex(),"key_length":len(key),"dex_version":version.decode(),"declared_file_size":declared,"header_size":header,"sha1_signature_valid":signature_ok,"adler32_checksum_valid":checksum_ok,"decoded_path":str(decoded_path),"decoded_sha256":hashlib.sha256(decoded).hexdigest()}
+                          break
               report.append(row)
           Path("reports/embedded-dex-payload-triage.json").write_text(json.dumps(report,indent=2)+"\n")
           print(json.dumps(report,indent=2))
@@ -427,6 +444,17 @@ jobs:
             build/apk-reader/dex/
             build/apk-reader/native/
             build/apk-reader/embedded-payloads/
+            build/apk-reader/split-apks/
+            build/apk-reader/split-assets/
+            build/apk-reader/unblob-39285EFA/
+            reports/split-apk-inventory.json
+            reports/split-bundle-list.txt
+            reports/native-library-inventory.json
+            reports/apkid-*.txt
+            reports/apkid*.json
+            reports/apkid.log
+            reports/unblob-39285EFA*
+            reports/unblob-39285EFA.json
             build/apk-reader/baksmali/
             reports/embedded-dex-payload-triage.json
             reports/baksmali-*.log
