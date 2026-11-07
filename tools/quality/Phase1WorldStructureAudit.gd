@@ -13,6 +13,7 @@ var counts := {
 var pawnshop_nodes: Array = []
 var navigation_nodes: Array = []
 var street_nodes: Array = []
+var semantic_anchor_nodes: Array = []
 
 func _initialize() -> void:
 	call_deferred("_run")
@@ -35,6 +36,24 @@ func _run() -> void:
 	if pawnshop != null:
 		pawnshop_transform = pawnshop.global_transform
 		candidate = pawnshop.global_transform * Vector3(0.0, 0.0, 4.0)
+	var anchor_file := FileAccess.open("res://assets/environment/phase1/jianghai/interaction_anchors.json", FileAccess.READ)
+	if anchor_file != null:
+		var anchor_data: Variant = JSON.parse_string(anchor_file.get_as_text())
+		anchor_file.close()
+		if anchor_data is Dictionary:
+			for definition in anchor_data.get("anchors", []):
+				if not (definition is Dictionary):
+					continue
+				var anchor_path := str(definition.get("node_path", ""))
+				var anchor_node := city.get_node_or_null(NodePath(anchor_path))
+				var anchor_row := {"id": str(definition.get("id", "")), "node_path": anchor_path, "resolved": anchor_node != null}
+				if anchor_node is Node3D:
+					anchor_row["type"] = anchor_node.get_class()
+					anchor_row["position_global"] = _vector_to_array((anchor_node as Node3D).global_position)
+					anchor_row["global_transform"] = _transform_to_array((anchor_node as Node3D).global_transform)
+				if anchor_node is MeshInstance3D and (anchor_node as MeshInstance3D).mesh != null:
+					anchor_row["mesh_aabb_local"] = _aabb_to_array((anchor_node as MeshInstance3D).get_aabb())
+				semantic_anchor_nodes.append(anchor_row)
 	var report := {
 		"city_scene": CITY_PATH,
 		"counts": counts,
@@ -45,6 +64,7 @@ func _run() -> void:
 		"pawnshop_hierarchy": pawnshop_nodes,
 		"navigation_nodes": navigation_nodes,
 		"street_network_nodes": street_nodes,
+		"semantic_anchor_nodes": semantic_anchor_nodes,
 		"interpretation": "A NavigationRegion3D count of zero means no authored runtime navigation surface was found in the city GLB. A positive count still requires runtime map synchronization and route connectivity tests."
 	}
 	var file := FileAccess.open(REPORT_PATH, FileAccess.WRITE)
@@ -90,7 +110,13 @@ func _walk(node: Node, relative_path: String) -> void:
 		else:
 			pawnshop_nodes.append({"path": path, "type": node.get_class()})
 	if path.contains("AuthoredStreetNetwork"):
-		street_nodes.append({"path": path, "type": node.get_class()})
+		var street_row := {"path": path, "type": node.get_class()}
+		if node is Node3D:
+			street_row["position_global"] = _vector_to_array((node as Node3D).global_position)
+			street_row["global_transform"] = _transform_to_array((node as Node3D).global_transform)
+		if node is MeshInstance3D and (node as MeshInstance3D).mesh != null:
+			street_row["mesh_aabb_local"] = _aabb_to_array((node as MeshInstance3D).get_aabb())
+		street_nodes.append(street_row)
 	for child in node.get_children():
 		_walk(child, path)
 
