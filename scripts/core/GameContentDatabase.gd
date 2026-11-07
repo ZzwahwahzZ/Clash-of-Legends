@@ -103,6 +103,7 @@ const CLASSES := {
 }
 
 const SKILLS := {
+ "archer_path_of_shadow":{"name_ar":"طريق الظل","name_en":"Path of Shadow","class_req":"Archer","required_weapon_style_unlock":"throwing_knives","cooldown":0.0,"mp_cost":0,"damage_multiplier":0.0,"range":0.0,"effect":"form_toggle","source_reference":"Conquer Online Mobile Archer skill guide 2023-02-02"},
  "archer_shadow_dagger":{"name_ar":"خنجر الظل","name_en":"Shadow Dagger","class_req":"Archer","weapon_style":"throwing_knives","cooldown":2.5,"mp_cost":18,"damage_multiplier":1.8,"range":4.0,"is_aoe":false,"effect":"damage"},
  "archer_eastern_tempest":{"name_ar":"عاصفة الشرق","name_en":"Eastern Tempest","class_req":"Archer","weapon_style":"throwing_knives","cooldown":7.0,"mp_cost":38,"damage_multiplier":2.0,"range":5.0,"is_aoe":true,"aoe_radius":5.5,"effect":"damage"},
  "dragon_warrior_dragon_surge":{"name_ar":"اندفاع التنين","name_en":"Dragon Surge","class_req":"DragonWarrior","cooldown":5.0,"mp_cost":32,"damage_multiplier":2.25,"range":5.0,"is_aoe":true,"aoe_radius":4.5,"effect":"damage"},
