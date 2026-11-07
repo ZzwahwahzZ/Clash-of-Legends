@@ -250,15 +250,6 @@ role = "blacksmith"
 source_npc_id = "0005"
 source_map_id = "1002"
 
-[node name="NPC_Armorer" parent="." instance=ExtResource("2_npc")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0.1, 4)
-npc_name_ar = "تاجر الملابس الحربية"
-npc_name_en = "Armorer"
-npc_id = "npc_armorer"
-role = "armorer"
-source_npc_id = "0004"
-source_map_id = "1002"
-
 [node name="NPC_Merchant" parent="." instance=ExtResource("2_npc")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0.1, -4)
 npc_name_ar = "تاجر القوافل"
