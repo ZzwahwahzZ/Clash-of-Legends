@@ -93,7 +93,7 @@ func instantiate_fitted_model(category: String, index: int, parent: Node3D, targ
 	for mesh_node in instance.find_children("*", "MeshInstance3D", true, false):
 		var mesh_instance := mesh_node as MeshInstance3D
 		if mesh_instance and mesh_instance.mesh:
-			var relative_transform := root.global_transform.affine_inverse() * mesh_instance.global_transform
+			var relative_transform := _relative_transform_to_root(root, mesh_instance)
 			var mesh_bounds: AABB = _transform_aabb(mesh_instance.get_aabb(), relative_transform)
 			combined_bounds = mesh_bounds if not has_bounds else combined_bounds.merge(mesh_bounds)
 			has_bounds = true
@@ -106,6 +106,17 @@ func instantiate_fitted_model(category: String, index: int, parent: Node3D, targ
 			-(combined_bounds.position.z + combined_bounds.size.z * 0.5) * fit_scale
 		)
 	return root
+
+func _relative_transform_to_root(root: Node3D, node: Node3D) -> Transform3D:
+	var relative := Transform3D.IDENTITY
+	var cursor: Node = node
+	while cursor != null and cursor != root:
+		if cursor is Node3D:
+			relative = (cursor as Node3D).transform * relative
+		cursor = cursor.get_parent()
+	if cursor != root:
+		return Transform3D.IDENTITY
+	return relative
 
 func _transform_aabb(bounds: AABB, transform: Transform3D) -> AABB:
 	var corners := [
