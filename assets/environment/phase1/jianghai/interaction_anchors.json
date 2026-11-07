@@ -74,9 +74,8 @@
       "node_path": "JianghaiOldCityAuthoredScene/OldCityMarketBridge",
       "kind": "landmark",
       "task_tags": [
-        "visit",
         "cross",
-        "escort"
+        "transition"
       ],
       "requires_navmesh_projection": true,
       "requires_runtime_trigger": true,
@@ -84,10 +83,10 @@
       "npc_spawn_anchor": false,
       "target_offset_local": [
         0,
-        4.18,
-        -126
+        0,
+        -150
       ],
-      "surface_validation_status": "authored_bridge_deck_bounds_verified_pending_navigation_bake"
+      "surface_validation_status": "landmark_only_no_walkable_ramp; destination must be projected to the verified west-market walkable route after bridge crossing"
     },
     {
       "id": "jianghai.factory_approach",
