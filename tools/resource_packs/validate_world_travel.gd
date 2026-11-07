@@ -122,11 +122,11 @@ func _run_travel_test() -> void:
 	var manager: Node = (load("res://scripts/world/WorldTravelManager.gd") as Script).new()
 	get_root().add_child(manager)
 	await process_frame
-	var world_city_hubs := manager.get_source_city_hubs()
+	var world_city_hubs: Array[Dictionary] = manager.get_source_city_hubs()
 	if world_city_hubs.size() != 6:
 		_fail("WorldTravelManager did not expose the six source city hubs.")
 		return
-	var desert_map := manager.get_source_map_directory_entry("1000")
+	var desert_map: Dictionary = manager.get_source_map_directory_entry("1000")
 	if str(desert_map.get("resource_path", "")) != "map/map/desert.7z":
 		_fail("WorldTravelManager did not expose Desert City source map metadata.")
 		return
