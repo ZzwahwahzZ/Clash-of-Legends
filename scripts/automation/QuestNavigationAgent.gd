@@ -334,3 +334,27 @@ func deserialize(data: Dictionary) -> void:
 	if completed_quest_ids.has(active_quest_id):
 		is_quest_completed = true
 	_notify_game_manager()
+
+
+## Exact-version source quest access. These APIs preserve source IDs and NPC/map
+## coordinates; a map transform must be validated before converting source tiles
+## into Godot world positions.
+func get_source_quest_catalog() -> Array:
+	if not WorldContentIndex or not WorldContentIndex.index_ready:
+		return []
+	return WorldContentIndex.get_quests()
+
+func get_source_quests_for_npc(npc_id: int) -> Array:
+	if not WorldContentIndex or not WorldContentIndex.index_ready:
+		return []
+	return WorldContentIndex.get_quests_for_npc(npc_id)
+
+func get_source_quests_for_map(map_id: int) -> Array:
+	if not WorldContentIndex or not WorldContentIndex.index_ready:
+		return []
+	return WorldContentIndex.get_quests_for_map(map_id)
+
+func get_source_quest_navigation_target(mission_id: int, for_finish: bool = false) -> Dictionary:
+	if not WorldContentIndex or not WorldContentIndex.index_ready:
+		return {}
+	return WorldContentIndex.get_quest_npc_target(mission_id, for_finish)
