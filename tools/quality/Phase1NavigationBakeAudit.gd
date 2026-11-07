@@ -41,6 +41,7 @@ var _region: NavigationRegion3D
 var _navigation_mesh: NavigationMesh
 var _source_geometry: NavigationMeshSourceGeometryData3D
 var _selected_sources: Array[String] = []
+var _walkable_collision_count := 0
 
 func _initialize() -> void:
 	call_deferred("_run")
@@ -132,6 +133,28 @@ func _save_world_scene() -> int:
 	city_instance.name = "AuthoredCity"
 	root.add_child(city_instance)
 	city_instance.owner = root
+	_walkable_collision_count = 0
+	for index in range(WALKABLE_PATHS.size()):
+		var mesh_node := city_instance.get_node_or_null(NodePath(WALKABLE_PATHS[index])) as MeshInstance3D
+		if mesh_node == null or mesh_node.mesh == null:
+			root.free()
+			return ERR_INVALID_DATA
+		var collision_mesh := mesh_node.mesh.create_trimesh_shape()
+		if collision_mesh == null:
+			root.free()
+			return ERR_CANT_CREATE
+		var static_body := StaticBody3D.new()
+		static_body.name = "WalkableCollision_%02d" % index
+		static_body.collision_layer = 1
+		static_body.collision_mask = 0
+		static_body.transform = mesh_node.global_transform
+		var collision_shape := CollisionShape3D.new()
+		collision_shape.shape = collision_mesh
+		static_body.add_child(collision_shape)
+		root.add_child(static_body)
+		static_body.owner = root
+		collision_shape.owner = root
+		_walkable_collision_count += 1
 	var navigation_region := NavigationRegion3D.new()
 	navigation_region.name = "CuratedNavigationRegion"
 	navigation_region.navigation_mesh = _navigation_mesh
@@ -247,7 +270,9 @@ func _validate_navigation_after_sync() -> void:
 		"projection_pass_count": valid_projections,
 		"route_connectivity_pass_count": connected_routes,
 		"npc_spawning_enabled": false,
-		"collision_bake_included": false,
+		"collision_bake_included": true,
+		"walkable_floor_collision_shape_count": _walkable_collision_count,
+		"building_obstacle_collisions_included": false,
 		"runtime_android_performance_validated": false
 	}
 	var file := FileAccess.open(REPORT_PATH, FileAccess.WRITE)
